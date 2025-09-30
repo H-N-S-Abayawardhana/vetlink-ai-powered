@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -66,6 +68,15 @@ const navigationItems = [
     ),
   },
   {
+    name: 'Profile',
+    href: '/dashboard/profile',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+  },
+  {
     name: 'Settings',
     href: '/dashboard/settings',
     icon: (
@@ -79,6 +90,7 @@ const navigationItems = [
 
 export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   return (
     <>
@@ -99,12 +111,14 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">V</span>
-              </div>
-            </div>
-            <div className="ml-3">
-              <h1 className="text-lg font-semibold text-gray-900">VetLink</h1>
+              <Image
+                src="/vetlink_logo.png"
+                alt="VetLink Logo"
+                width={100}
+                height={32}
+                className="h-8 w-auto"
+                priority
+              />
             </div>
           </div>
           <button
@@ -149,13 +163,18 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-700">JD</span>
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-blue-600">
+                  {(session?.user as any)?.username?.charAt(0).toUpperCase() || 
+                   session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
               </div>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">John Doe</p>
-              <p className="text-xs text-gray-500">Veterinarian</p>
+              <p className="text-sm font-medium text-gray-900">
+                {(session?.user as any)?.username || session?.user?.name || 'User'}
+              </p>
+              <p className="text-xs text-gray-500">VetLink User</p>
             </div>
           </div>
         </div>
