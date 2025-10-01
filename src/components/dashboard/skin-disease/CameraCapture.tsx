@@ -13,10 +13,16 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [hasCaptured, setHasCaptured] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   const startCamera = async () => {
     try {
       setError(null);
+      setHasCaptured(false);
+      setIsVideoReady(false);
+      console.log('🔄 Starting camera...');
       
       // Check if we're in the browser and navigator is available
       if (typeof window === 'undefined') {
@@ -36,7 +42,12 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         return;
       }
       
-      console.log('Requesting camera access...');
+      console.log('📹 Requesting camera access with constraints:', {
+        facingMode,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      });
+      
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
@@ -45,15 +56,71 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         }
       });
       
-      console.log('Camera access granted:', mediaStream);
+      console.log('✅ Camera access granted:', mediaStream);
+      console.log('📊 Stream tracks:', mediaStream.getTracks().map(track => ({
+        kind: track.kind,
+        label: track.label,
+        enabled: track.enabled,
+        readyState: track.readyState
+      })));
+      
       setStream(mediaStream);
       setIsCameraOn(true);
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
+      // Use a small delay to ensure the video element is rendered
+      setTimeout(() => {
+        if (videoRef.current) {
+          console.log('🎥 Setting video srcObject...');
+          videoRef.current.srcObject = mediaStream;
+          
+          // Wait for video to be ready
+          videoRef.current.onloadedmetadata = () => {
+            console.log('🎥 Video metadata loaded, starting playback...');
+            if (videoRef.current) {
+              videoRef.current.play()
+                .then(() => {
+                  console.log('✅ Video playback started successfully');
+                })
+                .catch((error) => {
+                  console.error('❌ Video playback failed:', error);
+                });
+            }
+          };
+
+          // Additional event listeners for debugging
+          videoRef.current.oncanplay = () => {
+            console.log('🎥 Video can start playing');
+            setIsVideoReady(true);
+          };
+
+          videoRef.current.onplay = () => {
+            console.log('🎥 Video started playing');
+            setIsVideoReady(true);
+          };
+
+          videoRef.current.onerror = (error) => {
+            console.error('❌ Video error:', error);
+          };
+
+          // Force play after a short delay as fallback
+          setTimeout(() => {
+            if (videoRef.current && videoRef.current.paused) {
+              console.log('🔄 Attempting to force video playback...');
+              videoRef.current.play()
+                .then(() => {
+                  console.log('✅ Forced video playback successful');
+                })
+                .catch((error) => {
+                  console.error('❌ Forced video playback failed:', error);
+                });
+            }
+          }, 500);
+        } else {
+          console.error('❌ Video element not found!');
+        }
+      }, 100);
     } catch (err: any) {
-      console.error('Error accessing camera:', err);
+      console.error('❌ Error accessing camera:', err);
       
       // Provide specific error messages based on the error type
       let errorMessage = 'Unable to access camera. ';
@@ -85,7 +152,10 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
   };
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && !isCapturing && !hasCaptured) {
+      setIsCapturing(true);
+      console.log('📸 Capturing photo...');
+      
       const video = videoRef.current;
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
@@ -97,11 +167,23 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
 
         canvas.toBlob((blob) => {
           if (blob) {
+            console.log('✅ Photo captured successfully');
             const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
             onImageCapture(file);
-            stopCamera();
+            setHasCaptured(true);
+            setIsCapturing(false);
+            // Automatically stop camera after capture
+            setTimeout(() => {
+              stopCamera();
+            }, 1000); // Small delay to show the capture was successful
+          } else {
+            console.error('❌ Failed to create blob from canvas');
+            setIsCapturing(false);
           }
         }, 'image/jpeg', 0.8);
+      } else {
+        console.error('❌ Failed to get canvas context');
+        setIsCapturing(false);
       }
     }
   };
@@ -122,6 +204,54 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
     };
   }, []);
 
+  // Effect to handle video element when stream changes
+  useEffect(() => {
+    if (stream && videoRef.current && isCameraOn) {
+      console.log('🎥 useEffect: Setting up video element with stream');
+      videoRef.current.srcObject = stream;
+      
+      const video = videoRef.current;
+      
+      const handleLoadedMetadata = () => {
+        console.log('🎥 useEffect: Video metadata loaded');
+        video.play()
+          .then(() => {
+            console.log('✅ useEffect: Video playback started');
+            setIsVideoReady(true);
+          })
+          .catch((error) => {
+            console.error('❌ useEffect: Video playback failed:', error);
+          });
+      };
+
+      const handleCanPlay = () => {
+        console.log('🎥 useEffect: Video can play');
+        setIsVideoReady(true);
+      };
+
+      const handlePlay = () => {
+        console.log('🎥 useEffect: Video is playing');
+        setIsVideoReady(true);
+      };
+
+      const handleError = (error: any) => {
+        console.error('❌ useEffect: Video error:', error);
+      };
+
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('canplay', handleCanPlay);
+      video.addEventListener('play', handlePlay);
+      video.addEventListener('error', handleError);
+
+      return () => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('canplay', handleCanPlay);
+        video.removeEventListener('play', handlePlay);
+        video.removeEventListener('error', handleError);
+      };
+    }
+  }, [stream, isCameraOn]);
+
   return (
     <div className="space-y-4">
       {/* Camera Preview */}
@@ -133,14 +263,49 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
               autoPlay
               playsInline
               muted
-              className="w-full h-64 sm:h-80 object-cover"
+              controls={false}
+              className="w-full h-64 sm:h-80 object-cover bg-gray-800"
+              style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
             />
+            
+            {/* Loading indicator overlay */}
+            {!isVideoReady ? (
+              <div className="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <svg className="animate-spin w-8 h-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p className="text-sm mb-2">Loading camera...</p>
+                  <button
+                    onClick={() => {
+                      if (videoRef.current && stream) {
+                        console.log('🔄 Manual video setup triggered');
+                        videoRef.current.srcObject = stream;
+                        videoRef.current.play()
+                          .then(() => {
+                            console.log('✅ Manual video playback successful');
+                            setIsVideoReady(true);
+                          })
+                          .catch((error) => {
+                            console.error('❌ Manual video playback failed:', error);
+                          });
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                  >
+                    Force Start Video
+                  </button>
+                </div>
+              </div>
+            ) : null}
             
             {/* Camera Controls Overlay */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
               <button
                 onClick={switchCamera}
-                className="p-3 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all"
+                disabled={isCapturing || hasCaptured}
+                className="p-3 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Switch Camera"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,15 +315,29 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
               
               <button
                 onClick={capturePhoto}
-                className="p-4 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg"
-                title="Capture Photo"
+                disabled={isCapturing || hasCaptured}
+                className={`p-4 rounded-full transition-all shadow-lg ${
+                  isCapturing 
+                    ? 'bg-yellow-500 animate-pulse' 
+                    : hasCaptured 
+                      ? 'bg-green-500' 
+                      : 'bg-white hover:bg-gray-100'
+                }`}
+                title={hasCaptured ? "Photo Captured!" : isCapturing ? "Capturing..." : "Capture Photo"}
               >
-                <div className="w-8 h-8 bg-red-500 rounded-full"></div>
+                <div className={`w-8 h-8 rounded-full ${
+                  isCapturing 
+                    ? 'bg-yellow-600' 
+                    : hasCaptured 
+                      ? 'bg-green-600' 
+                      : 'bg-red-500'
+                }`}></div>
               </button>
               
               <button
                 onClick={stopCamera}
-                className="p-3 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all"
+                disabled={isCapturing}
+                className="p-3 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white hover:bg-opacity-30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Stop Camera"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +380,8 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         ) : (
           <button
             onClick={stopCamera}
-            className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+            disabled={isCapturing}
+            className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -213,7 +393,8 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         
         <button
           onClick={switchCamera}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+          disabled={isCameraOn && (isCapturing || hasCaptured)}
+          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -221,6 +402,30 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
           Switch Camera
         </button>
       </div>
+
+      {/* Status Messages */}
+      {isCapturing && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <svg className="animate-spin w-5 h-5 text-yellow-600 mr-2" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="text-yellow-800 font-medium">Capturing photo...</p>
+          </div>
+        </div>
+      )}
+
+      {hasCaptured && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p className="text-green-800 font-medium">Photo captured successfully! Camera will close automatically.</p>
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -248,18 +453,6 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
           </div>
         </div>
       )}
-
-      {/* Debug Information */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-xs text-gray-600">
-        <h4 className="font-medium mb-2">Debug Information:</h4>
-        <div className="space-y-1">
-          <p>Protocol: {typeof window !== 'undefined' ? window.location.protocol : 'N/A'}</p>
-          <p>Hostname: {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
-          <p>Secure Context: {typeof window !== 'undefined' ? window.isSecureContext ? 'Yes' : 'No' : 'N/A'}</p>
-          <p>MediaDevices Support: {typeof navigator !== 'undefined' && navigator.mediaDevices ? 'Yes' : 'No'}</p>
-          <p>getUserMedia Support: {typeof navigator !== 'undefined' && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function' ? 'Yes' : 'No'}</p>
-        </div>
-      </div>
 
       {/* Camera Tips */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

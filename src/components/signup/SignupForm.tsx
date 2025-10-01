@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Alert from "@/components/ui/Alert";
+import Link from "next/link";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -138,14 +139,16 @@ export default function SignupForm() {
           <div>
             <div className="flex items-center justify-center sm:justify-start">
               <div className="flex-shrink-0">
+              <Link href="/" passHref>
                 <Image
                   src="/vetlink_logo.png"
                   alt="VetLink Logo"
                   width={120}
                   height={40}
-                  className="h-8 w-auto"
+                  className="h-8 w-auto cursor-pointer"
                   priority
                 />
+              </Link>
               </div>
             </div>
             <h2 className="mt-6 sm:mt-8 text-xl sm:text-2xl/9 font-bold tracking-tight text-gray-900 text-center sm:text-left">

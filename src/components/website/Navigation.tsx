@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -63,14 +64,16 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16 sm:h-18">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Image
-                src="/vetlink_logo.png"
-                alt="VetLink Logo"
-                width={120}
-                height={40}
-                className="h-7 w-auto sm:h-8"
-                priority
-              />
+            <Link href="/" passHref>
+                <Image
+                  src="/vetlink_logo.png"
+                  alt="VetLink Logo"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto cursor-pointer"
+                  priority
+                />
+              </Link>
             </div>
           </div>
           
