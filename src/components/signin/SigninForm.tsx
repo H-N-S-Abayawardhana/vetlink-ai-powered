@@ -72,11 +72,11 @@ export default function SigninForm() {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="flex w-full lg:w-1/2 flex-col justify-center px-4 py-12 sm:px-6 lg:px-16 xl:px-20">
+    <div className="flex min-h-screen bg-white">
+      <div className="flex w-full lg:w-1/2 flex-col justify-center px-4 py-8 sm:py-12 sm:px-6 lg:px-16 xl:px-20 bg-white">
         <div className="mx-auto w-full max-w-md lg:w-full lg:max-w-lg">
           <div>
-            <div className="flex items-center">
+            <div className="flex items-center justify-center sm:justify-start">
               <div className="flex-shrink-0">
                 <Image
                   src="/vetlink_logo.png"
@@ -88,18 +88,18 @@ export default function SigninForm() {
                 />
               </div>
             </div>
-            <h2 className="mt-8 text-2xl/9 font-bold tracking-tight text-gray-900">
+            <h2 className="mt-6 sm:mt-8 text-xl sm:text-2xl/9 font-bold tracking-tight text-gray-900 text-center sm:text-left">
               Sign in to your account
             </h2>
-            <p className="mt-2 text-sm/6 text-gray-500">
-              Not a member?
-              <a href="/signup" className="font-semibold text-blue-600 hover:text-blue-500 ml-1">
+            <p className="mt-2 text-sm/6 text-gray-500 text-center sm:text-left">
+              Not a member?{" "}
+              <a href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
                 Sign up for free
               </a>
             </p>
           </div>
 
-          <div className="mt-10">
+          <div className="mt-8 sm:mt-10">
             {successMessage && (
               <div className="mb-4">
                 <Alert
@@ -121,12 +121,12 @@ export default function SigninForm() {
               </div>
             )}
             <div>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div>
-                  <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
                     Email address
                   </label>
-                  <div className="mt-2">
+                  <div>
                     <input
                       id="email"
                       name="email"
@@ -135,17 +135,17 @@ export default function SigninForm() {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="block w-full rounded-md bg-white px-3 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
+                      className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="Enter your email"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
                     Password
                   </label>
-                  <div className="mt-2">
+                  <div>
                     <input
                       id="password"
                       name="password"
@@ -154,14 +154,14 @@ export default function SigninForm() {
                       required
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="block w-full rounded-md bg-white px-3 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
+                      className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="Enter your password"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                  <div className="flex gap-3">
+                <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                  <div className="flex items-center gap-3">
                     <div className="flex h-6 shrink-0 items-center">
                       <div className="group grid size-4 grid-cols-1">
                         <input
@@ -210,7 +210,7 @@ export default function SigninForm() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm/6 font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex w-full justify-center rounded-lg bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isLoading ? 'Signing in...' : 'Sign in'}
                   </button>
@@ -218,7 +218,7 @@ export default function SigninForm() {
               </form>
             </div>
 
-            <div className="mt-10">
+            <div className="mt-8 sm:mt-10">
               <div className="relative">
                 <div aria-hidden="true" className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
@@ -228,11 +228,11 @@ export default function SigninForm() {
                 </div>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent transition-colors"
+                  className="flex w-full items-center justify-center gap-3 rounded-lg bg-white px-4 py-3 text-base font-semibold text-gray-900 border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
                     <path
@@ -260,7 +260,7 @@ export default function SigninForm() {
         </div>
       </div>
       
-      <div className="relative hidden lg:block lg:w-1/2 h-screen">
+      <div className="relative hidden lg:block lg:w-1/2 lg:h-screen">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-white h-full">
         </div>
       </div>

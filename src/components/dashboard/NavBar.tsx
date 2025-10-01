@@ -53,6 +53,13 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
             </svg>
           </button>
 
+          {/* Mobile search button */}
+          <button className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 md:hidden">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+
           <div className="hidden md:block">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -63,7 +70,7 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
               <input
                 type="text"
                 placeholder="Search pets, records, appointments..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base md:w-80 lg:w-96"
               />
             </div>
           </div>
@@ -75,13 +82,13 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md relative"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md relative transition-colors duration-200"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium animate-pulse">
                   {unreadCount}
                 </span>
               )}
@@ -89,7 +96,7 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
 
             {/* Notifications dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                 <div className="py-1">
                   <div className="px-4 py-2 border-b border-gray-200">
                     <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
