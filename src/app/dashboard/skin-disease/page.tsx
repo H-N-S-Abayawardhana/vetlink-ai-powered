@@ -6,6 +6,9 @@ import CameraCapture from '@/components/dashboard/skin-disease/CameraCapture';
 import SkinAnalysis from '@/components/dashboard/skin-disease/SkinAnalysis';
 import Instructions from '@/components/dashboard/skin-disease/Instructions';
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic';
+
 export default function SkinDiseaseDetectionPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);

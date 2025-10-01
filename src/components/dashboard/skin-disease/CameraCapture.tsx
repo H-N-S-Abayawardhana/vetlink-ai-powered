@@ -17,6 +17,13 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
   const startCamera = async () => {
     try {
       setError(null);
+      
+      // Check if we're in the browser and navigator is available
+      if (typeof window === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
+        setError('Camera access is not available in this environment.');
+        return;
+      }
+      
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,

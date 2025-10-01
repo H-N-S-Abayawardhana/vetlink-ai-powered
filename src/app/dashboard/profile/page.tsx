@@ -5,6 +5,9 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/ui/Alert';
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic';
+
 interface ProfileData {
   username: string;
   email: string;
@@ -22,6 +25,11 @@ export default function ProfilePage() {
     email: '',
     contactNumber: ''
   });
+
+  // Prevent SSR issues by checking if we're in the browser
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
   useEffect(() => {
     if (session?.user) {
