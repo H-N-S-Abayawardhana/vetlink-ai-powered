@@ -4,6 +4,9 @@ import { useState } from 'react';
 import Sidebar from '../../components/dashboard/Sidebar';
 import NavBar from '../../components/dashboard/NavBar';
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic';
+
 export default function DashboardLayout({
   children,
 }: {

@@ -9,6 +9,9 @@ export default function Navigation() {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
@@ -31,6 +34,9 @@ export default function Navigation() {
 
   // Close mobile menu when clicking outside
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const handleClickOutside = (event: MouseEvent) => {
       if (isMenuOpen) {
         const target = event.target as Element;

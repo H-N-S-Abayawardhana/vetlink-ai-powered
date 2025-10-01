@@ -6,6 +6,9 @@ export default function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const handleScroll = () => {
       // Show button when user scrolls down more than 300px
       if (window.scrollY > 300) {
@@ -21,6 +24,9 @@ export default function BackToTop() {
   }, []);
 
   const scrollToTop = () => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
