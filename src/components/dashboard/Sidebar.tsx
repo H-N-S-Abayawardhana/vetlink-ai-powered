@@ -120,6 +120,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 <Link
                   key={item.name}
                   href={item.href}
+                  onClick={onToggle}
                   className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                     isActive
                       ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'

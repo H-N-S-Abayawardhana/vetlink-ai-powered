@@ -19,11 +19,24 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
       setError(null);
       
       // Check if we're in the browser and navigator is available
-      if (typeof window === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
+      if (typeof window === 'undefined') {
         setError('Camera access is not available in this environment.');
         return;
       }
+
+      if (!navigator?.mediaDevices?.getUserMedia) {
+        setError('Camera access is not supported in this browser. Please use a modern browser like Chrome, Firefox, or Safari.');
+        return;
+      }
+
+      // Check if we're on HTTPS or localhost
+      const isSecureContext = window.isSecureContext || window.location.hostname === 'localhost';
+      if (!isSecureContext) {
+        setError('Camera access requires HTTPS. Please access this page via HTTPS or localhost.');
+        return;
+      }
       
+      console.log('Requesting camera access...');
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
@@ -32,15 +45,34 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         }
       });
       
+      console.log('Camera access granted:', mediaStream);
       setStream(mediaStream);
       setIsCameraOn(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error accessing camera:', err);
-      setError('Unable to access camera. Please check permissions and try again.');
+      
+      // Provide specific error messages based on the error type
+      let errorMessage = 'Unable to access camera. ';
+      
+      if (err.name === 'NotAllowedError') {
+        errorMessage += 'Camera permission was denied. Please allow camera access and try again.';
+      } else if (err.name === 'NotFoundError') {
+        errorMessage += 'No camera found. Please connect a camera and try again.';
+      } else if (err.name === 'NotReadableError') {
+        errorMessage += 'Camera is already in use by another application.';
+      } else if (err.name === 'OverconstrainedError') {
+        errorMessage += 'Camera constraints cannot be satisfied.';
+      } else if (err.name === 'SecurityError') {
+        errorMessage += 'Camera access blocked due to security restrictions.';
+      } else {
+        errorMessage += `Error: ${err.message || 'Unknown error occurred'}.`;
+      }
+      
+      setError(errorMessage);
     }
   };
 
@@ -197,13 +229,37 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
             <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <div>
+            <div className="flex-1">
               <h4 className="text-sm font-medium text-red-800">Camera Error</h4>
               <p className="text-sm text-red-700 mt-1">{error}</p>
+              
+              {/* Troubleshooting Steps */}
+              <div className="mt-3 text-sm text-red-600">
+                <p className="font-medium mb-2">Troubleshooting steps:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Make sure you're using HTTPS or localhost</li>
+                  <li>Check if camera permissions are allowed in your browser</li>
+                  <li>Ensure no other application is using the camera</li>
+                  <li>Try refreshing the page and allowing camera access</li>
+                  <li>Check if your browser supports camera access</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Debug Information */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-xs text-gray-600">
+        <h4 className="font-medium mb-2">Debug Information:</h4>
+        <div className="space-y-1">
+          <p>Protocol: {typeof window !== 'undefined' ? window.location.protocol : 'N/A'}</p>
+          <p>Hostname: {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
+          <p>Secure Context: {typeof window !== 'undefined' ? window.isSecureContext ? 'Yes' : 'No' : 'N/A'}</p>
+          <p>MediaDevices Support: {typeof navigator !== 'undefined' && navigator.mediaDevices ? 'Yes' : 'No'}</p>
+          <p>getUserMedia Support: {typeof navigator !== 'undefined' && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function' ? 'Yes' : 'No'}</p>
+        </div>
+      </div>
 
       {/* Camera Tips */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
