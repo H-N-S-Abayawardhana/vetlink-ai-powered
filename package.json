@@ -9,9 +9,11 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@types/nodemailer": "^7.0.2",
     "bcryptjs": "^3.0.2",
     "next": "15.5.4",
     "next-auth": "^4.24.11",
+    "nodemailer": "^7.0.9",
     "pg": "^8.16.3",
     "react": "19.1.0",
     "react-dom": "19.1.0"

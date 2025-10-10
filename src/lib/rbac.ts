@@ -12,16 +12,18 @@ export const rolePermissions = {
       '/',
       '/dashboard',
       '/dashboard/profile',
-      '/dashboard/skin-disease'
+      '/dashboard/skin-disease',
+      '/dashboard/veterinarian-appointments'
     ],
-    description: 'Veterinarian access to core features'
+    description: 'Veterinarian access to core features and appointment management'
   },
   USER: {
     allowedPaths: [
       '/',
-      '/dashboard'
+      '/dashboard',
+      '/dashboard/appointment-schedule'
     ],
-    description: 'Basic user access'
+    description: 'Basic user access with appointment scheduling'
   }
 };
 
@@ -78,6 +80,18 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       roles: ['SUPER_ADMIN']
     },
     {
+      name: 'Schedule Appointment',
+      href: '/dashboard/appointment-schedule',
+      icon: 'CalendarIcon',
+      roles: ['USER']
+    },
+    {
+      name: 'Manage Appointments',
+      href: '/dashboard/veterinarian-appointments',
+      icon: 'CalendarIcon',
+      roles: ['VETERINARIAN']
+    },
+    {
       name: 'Medications',
       href: '/dashboard/medications',
       icon: 'BeakerIcon',
@@ -99,7 +113,7 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       name: 'Profile',
       href: '/dashboard/profile',
       icon: 'UserIcon',
-      roles: ['SUPER_ADMIN', 'VETERINARIAN']
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
       name: 'Settings',
