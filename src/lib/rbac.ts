@@ -12,14 +12,16 @@ export const rolePermissions = {
       '/',
       '/dashboard',
       '/dashboard/profile',
-      '/dashboard/skin-disease'
+      '/dashboard/skin-disease',
+      '/dashboard/pets'
     ],
     description: 'Veterinarian access to core features'
   },
   USER: {
     allowedPaths: [
       '/',
-      '/dashboard'
+      '/dashboard',
+      '/dashboard/pets'
     ],
     description: 'Basic user access'
   }
@@ -63,7 +65,7 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       name: 'Pets',
       href: '/dashboard/pets',
       icon: 'HeartIcon',
-      roles: ['SUPER_ADMIN']
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
       name: 'Health Records',
