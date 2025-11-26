@@ -52,9 +52,81 @@ export default function PetForm({ petId }: PetFormProps) {
 
   const validate = () => {
     const e: Record<string, string> = {};
+    // Basic required checks
     if (!form.name || form.name.trim() === '') e.name = 'Name is required';
-    if (form.weightKg !== null && form.weightKg !== undefined && Number(form.weightKg) <= 0) e.weightKg = 'Weight must be positive';
-    if (form.ageYears !== null && form.ageYears !== undefined && Number(form.ageYears) < 0) e.ageYears = 'Age must be 0 or greater';
+    if (!form.activityLevel) e.activityLevel = 'Activity level is required';
+    if (!form.gender) e.gender = 'Gender is required';
+    if (!form.vaccinationStatus || (typeof form.vaccinationStatus === 'string' && form.vaccinationStatus.trim() === '')) e.vaccinationStatus = 'Vaccination status is required';
+    if (form.preferredDiet && typeof form.preferredDiet === 'string' && form.preferredDiet.length > 200) e.preferredDiet = 'Preferred diet must be 200 characters or fewer';
+
+    // Text-field patterns (allow letters, some punctuation where appropriate)
+    const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/u; // letters and spaces only
+    const breedPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/u;
+    const vaccinationPattern = /^[A-Za-z0-9 ,.-]+$/;
+    const dietPattern = /^[A-Za-z0-9 ,\-\/()]+$/;
+    const allergyPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/u; // tokens: letters and spaces only; commas separate tokens in the input
+
+    // Name format
+    if (form.name && !namePattern.test(form.name)) e.name = 'Name may only contain letters and spaces';
+
+    // Breed format
+    if (!form.breed || (typeof form.breed === 'string' && form.breed.trim() === '')) e.breed = 'Breed is required';
+    else if (!breedPattern.test(String(form.breed))) e.breed = 'Breed may only contain letters, spaces and hyphens';
+
+    // Age required and range
+    if (form.ageYears === null || form.ageYears === undefined) {
+      e.ageYears = 'Age is required';
+    } else if (Number(form.ageYears) < 0) {
+      e.ageYears = 'Age must be 0 or greater';
+    } else if (Number(form.ageYears) > 30) {
+      e.ageYears = 'Age must be 30 years or less';
+    }
+
+    // Weight required and range
+    if (form.weightKg === null || form.weightKg === undefined) {
+      e.weightKg = 'Weight is required';
+    } else if (Number(form.weightKg) <= 0) {
+      e.weightKg = 'Weight must be positive';
+    } else if (Number(form.weightKg) > 200) {
+      e.weightKg = 'Weight must be 200 kg or less';
+    }
+
+    // Photo required
+    if (!form.avatarDataUrl) {
+      e.avatarDataUrl = 'Photo is required';
+    }
+
+    // Vaccination status format
+    if (form.vaccinationStatus && typeof form.vaccinationStatus === 'string' && !vaccinationPattern.test(form.vaccinationStatus)) {
+      e.vaccinationStatus = 'Vaccination status contains invalid characters';
+    }
+
+    // Preferred diet format
+    if (form.preferredDiet && typeof form.preferredDiet === 'string' && !dietPattern.test(form.preferredDiet)) {
+      e.preferredDiet = 'Preferred diet contains invalid characters';
+    }
+
+    // Allergies (comma separated) - validate each token
+    if (form.allergies && Array.isArray(form.allergies)) {
+      for (const a of form.allergies) {
+        if (!a) continue;
+        if (!allergyPattern.test(a)) {
+          e.allergies = 'Allergies may only contain letters, spaces and commas';
+          break;
+        }
+      }
+    }
+
+    // Health notes: allow letters, spaces, commas, hyphens and apostrophes; enforce max length
+    const healthNotesPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ,'-]+$/u;
+    if (form.healthNotes && typeof form.healthNotes === 'string') {
+      if (form.healthNotes.length > 1000) {
+        e.healthNotes = 'Health Notes must be 1000 characters or fewer';
+      } else if (!healthNotesPattern.test(form.healthNotes)) {
+        e.healthNotes = "Health Notes may only contain letters, spaces, commas, hyphens or apostrophes";
+      }
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -97,6 +169,7 @@ export default function PetForm({ petId }: PetFormProps) {
         <div className="sm:col-span-1">
           <label className="block text-sm font-medium text-gray-900 mb-2">Photo</label>
           <ImageUpload value={form.avatarDataUrl || null} onChange={(v) => handleChange('avatarDataUrl', v)} />
+          {errors.avatarDataUrl && <p className="mt-1 text-sm text-red-600">{errors.avatarDataUrl}</p>}
         </div>
 
         <div className="sm:col-span-2 space-y-4">
@@ -109,7 +182,8 @@ export default function PetForm({ petId }: PetFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Breed</label>
-              <input value={form.breed || ''} onChange={(e) => handleChange('breed', e.target.value)} className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              <input value={form.breed || ''} onChange={(e) => handleChange('breed', e.target.value)} className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.breed ? 'border-red-500' : ''}`} />
+              {errors.breed && <p className="mt-1 text-sm text-red-600">{errors.breed}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Weight (kg)</label>
@@ -118,12 +192,13 @@ export default function PetForm({ petId }: PetFormProps) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Activity Level</label>
-              <select value={form.activityLevel || ''} onChange={(e) => handleChange('activityLevel', e.target.value)} className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <select value={form.activityLevel || ''} onChange={(e) => handleChange('activityLevel', e.target.value)} className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.activityLevel ? 'border-red-500' : ''}`}>
                 <option value="">Select activity level</option>
                 <option>Low</option>
                 <option>Medium</option>
                 <option>High</option>
               </select>
+              {errors.activityLevel && <p className="mt-1 text-sm text-red-600">{errors.activityLevel}</p>}
             </div>
           </div>
 
@@ -136,33 +211,38 @@ export default function PetForm({ petId }: PetFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Gender</label>
-              <select value={form.gender || ''} onChange={(e) => handleChange('gender', e.target.value)} className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <select value={form.gender || ''} onChange={(e) => handleChange('gender', e.target.value)} className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.gender ? 'border-red-500' : ''}`}>
                 <option value="">Select gender</option>
                 <option>Male</option>
                 <option>Female</option>
                 <option>Other</option>
               </select>
+              {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Vaccination Status</label>
-              <input value={form.vaccinationStatus || ''} onChange={(e) => handleChange('vaccinationStatus', e.target.value)} className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              <input value={form.vaccinationStatus || ''} onChange={(e) => handleChange('vaccinationStatus', e.target.value)} className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.vaccinationStatus ? 'border-red-500' : ''}`} />
+              {errors.vaccinationStatus && <p className="mt-1 text-sm text-red-600">{errors.vaccinationStatus}</p>}
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">Allergies (comma separated)</label>
-            <input value={(form.allergies || []).join(', ')} onChange={(e) => handleChange('allergies', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <input value={(form.allergies || []).join(', ')} onChange={(e) => handleChange('allergies', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.allergies ? 'border-red-500' : ''}`} />
+            {errors.allergies && <p className="mt-1 text-sm text-red-600">{errors.allergies}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">Preferred Diet</label>
-            <input value={form.preferredDiet || ''} onChange={(e) => handleChange('preferredDiet', e.target.value)} className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <input value={form.preferredDiet || ''} onChange={(e) => handleChange('preferredDiet', e.target.value)} className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.preferredDiet ? 'border-red-500' : ''}`} />
+            {errors.preferredDiet && <p className="mt-1 text-sm text-red-600">{errors.preferredDiet}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">Health Notes</label>
-            <textarea value={form.healthNotes || ''} onChange={(e) => handleChange('healthNotes', e.target.value)} rows={4} className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <textarea value={form.healthNotes || ''} onChange={(e) => handleChange('healthNotes', e.target.value)} rows={4} className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.healthNotes ? 'border-red-500' : ''}`} />
+            {errors.healthNotes && <p className="mt-1 text-sm text-red-600">{errors.healthNotes}</p>}
           </div>
 
           <div className="flex items-center gap-3">
