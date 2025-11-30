@@ -1,0 +1,284 @@
+'use client';
+
+import { useState } from 'react';
+import Alert from '@/components/ui/Alert';
+import PaymentModal from './PaymentModal';
+
+interface Appointment {
+  id: number;
+  user_id: number;
+  veterinarian_id: number;
+  appointment_date: string;
+  appointment_time: string;
+  reason: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'rescheduled' | 'completed';
+  reschedule_reason?: string;
+  rescheduled_from?: string;
+  payment_status: 'unpaid' | 'paid';
+  created_at: string;
+  updated_at: string;
+  confirmed_at?: string;
+  completed_at?: string;
+  user_name: string;
+  user_email: string;
+  user_contact?: string;
+  veterinarian_name: string;
+  veterinarian_email: string;
+  veterinarian_contact?: string;
+}
+
+interface AppointmentListProps {
+  appointments: Appointment[];
+  onAppointmentUpdated: (appointment: Appointment) => void;
+  onAppointmentCancelled: (appointmentId: number) => void;
+  onRefresh: () => void;
+}
+
+export default function AppointmentList({ 
+  appointments, 
+  onAppointmentUpdated, 
+  onAppointmentCancelled,
+  onRefresh 
+}: AppointmentListProps) {
+  const [loading, setLoading] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'accepted':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800';
+      case 'rescheduled':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'unpaid':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatDateTime = (date: string, time: string) => {
+    const appointmentDate = new Date(`${date}T${time}`);
+    return appointmentDate.toLocaleString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const canCancel = (appointment: Appointment) => {
+    return appointment.status === 'pending' || appointment.status === 'accepted';
+  };
+
+  const handleCancel = async (appointmentId: number) => {
+    if (!confirm('Are you sure you want to cancel this appointment?')) {
+      return;
+    }
+
+    try {
+      setLoading(appointmentId);
+      setError(null);
+
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess('Appointment cancelled successfully');
+        onAppointmentCancelled(appointmentId);
+      } else {
+        setError(data.error || 'Failed to cancel appointment');
+      }
+    } catch (err) {
+      setError('Failed to cancel appointment');
+      console.error('Error cancelling appointment:', err);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleRefresh = () => {
+    onRefresh();
+  };
+
+  if (appointments.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="text-center py-12">
+          <div className="mx-auto h-12 w-12 text-gray-400">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No appointments</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            You haven't scheduled any appointments yet.
+          </p>
+          <div className="mt-6">
+            <button
+              onClick={handleRefresh}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-md">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium text-gray-900">
+            My Appointments ({appointments.length})
+          </h2>
+          <button
+            onClick={handleRefresh}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="px-6 py-4">
+          <Alert type="error">
+            {error}
+          </Alert>
+        </div>
+      )}
+
+      {success && (
+        <div className="px-6 py-4">
+          <Alert type="success">
+            {success}
+          </Alert>
+        </div>
+      )}
+
+      <div className="divide-y divide-gray-200">
+        {appointments.map((appointment) => (
+          <div key={appointment.id} className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-3">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Appointment #{appointment.id}
+                  </h3>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                    {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                  </span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(appointment.payment_status)}`}>
+                    {appointment.payment_status === 'paid' ? '✅ Paid' : '❌ Unpaid'}
+                  </span>
+                </div>
+                
+                <div className="mt-2 space-y-1">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Veterinarian:</span> Dr. {appointment.veterinarian_name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Date & Time:</span> {formatDateTime(appointment.appointment_date, appointment.appointment_time)}
+                  </p>
+                  {appointment.reason && (
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Reason:</span> {appointment.reason}
+                    </p>
+                  )}
+                  {appointment.reschedule_reason && (
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Reschedule Reason:</span> {appointment.reschedule_reason}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-500">
+                    <span className="font-medium">Created:</span> {new Date(appointment.created_at).toLocaleString()}
+                  </p>
+                  {appointment.confirmed_at && (
+                    <p className="text-sm text-gray-500">
+                      <span className="font-medium">Confirmed:</span> {new Date(appointment.confirmed_at).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                {appointment.status === 'accepted' && appointment.payment_status === 'unpaid' && (
+                  <button
+                    onClick={() => {
+                      setSelectedAppointment(appointment);
+                      setPaymentModalOpen(true);
+                    }}
+                    className="inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    💳 Pay Now
+                  </button>
+                )}
+                {canCancel(appointment) && (
+                  <button
+                    onClick={() => handleCancel(appointment.id)}
+                    disabled={loading === appointment.id}
+                    className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading === appointment.id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
+                        Cancelling...
+                      </>
+                    ) : (
+                      'Cancel'
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selectedAppointment && (
+        <PaymentModal
+          appointment={selectedAppointment}
+          isOpen={paymentModalOpen}
+          onClose={() => {
+            setPaymentModalOpen(false);
+            setSelectedAppointment(null);
+          }}
+          onPaymentSuccess={() => {
+            setSuccess('Payment processed successfully!');
+            onRefresh();
+          }}
+        />
+      )}
+    </div>
+  );
+}
