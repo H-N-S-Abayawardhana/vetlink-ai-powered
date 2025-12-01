@@ -3,12 +3,13 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { listPets, updatePet, type Pet } from "@/lib/pets";
 import PetCardBCS from "./PetCardBCS";
-import PetDetailsPanel from "./PetDetailsPanel";
+import PetDetailsModal from "./PetDetailsModal";
 import ResultsPanel from "./ResultsPanel";
 
 export default function BCSCalculator() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [selected, setSelected] = useState<Pet | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [updates, setUpdates] = useState<{ ageYears?: number | null; weightKg?: number | null }>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<number | null>(null);
@@ -25,6 +26,7 @@ export default function BCSCalculator() {
     setSelected(p);
     setUpdates({ ageYears: p.ageYears ?? null, weightKg: p.weightKg ?? null });
     setResult(null);
+    setModalOpen(true);
   }
 
   const onDetailsChange = useCallback((values: { ageYears?: number | null; weightKg?: number | null }) => {
@@ -101,8 +103,22 @@ export default function BCSCalculator() {
             )}
           </div>
 
-          {/* Pet Details Panel */}
-          <PetDetailsPanel pet={selected} onChange={onDetailsChange} />
+          {/* Pet Details are edited in a modal */}
+          {modalOpen && (
+            <PetDetailsModal
+              pet={selected}
+              updates={updates}
+              onChange={onDetailsChange}
+              onClose={() => {
+                setModalOpen(false);
+                // keep selection but clear result when closing modal
+                setResult(null);
+              }}
+              onCalculate={handleCalculate}
+              loading={loading}
+              result={result}
+            />
+          )}
 
           {/* Calculate Button */}
           <div className="flex items-center gap-3">
@@ -118,11 +134,6 @@ export default function BCSCalculator() {
               {loading ? "Calculating…" : "Calculate BCS"}
             </button>
           </div>
-        </div>
-
-        {/* Right Column / Results */}
-        <div className="space-y-4">
-          <ResultsPanel score={result} petName={selected?.name ?? null} />
         </div>
       </div>
     </div>
