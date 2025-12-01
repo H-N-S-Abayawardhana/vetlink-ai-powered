@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ChevronRight } from "lucide-react";
 import type { Pet } from "@/lib/pets";
 
 interface Props {
@@ -15,13 +16,28 @@ export default function PetCardBCS({ pet, selected, onSelect }: Props) {
   return (
     <button
       onClick={() => onSelect(pet)}
-      className={`border rounded-md p-2 text-left hover:shadow-sm transition-shadow flex gap-3 items-center ${selected ? "ring-2 ring-indigo-500 bg-indigo-50" : ""}`}
+      className="group relative bg-gradient-to-br from-gray-50 to-gray-100 hover:from-indigo-50 hover:to-purple-50 border-2 border-gray-200 hover:border-indigo-400 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 text-left"
     >
-      <img src={avatar as string} alt={pet.name} className="w-16 h-16 object-cover rounded-md" />
-      <div>
-        <div className="font-medium text-gray-900">{pet.name}</div>
-        <div className="text-sm text-gray-700">{pet.breed || "Unknown breed"}</div>
-        <div className="text-sm text-gray-700">{pet.ageYears ? `${pet.ageYears} yrs` : "Age unknown"}</div>
+      <div className="flex items-center gap-4">
+        {pet.avatarDataUrl ? (
+          <img 
+            src={avatar as string} 
+            alt={pet.name} 
+            className="w-20 h-20 object-cover rounded-xl shadow-md"
+          />
+        ) : (
+          <div className="w-20 h-20 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+            {pet.name.charAt(0)}
+          </div>
+        )}
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-gray-900 mb-1">{pet.name}</h3>
+          <p className="text-sm text-gray-600">{pet.breed || "Mixed breed"}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {pet.type === "dog" ? "🐕 Dog" : "🐈 Cat"} • {pet.ageYears ? `${pet.ageYears} years` : "Age unknown"}
+          </p>
+        </div>
+        <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-indigo-600 transition-colors" />
       </div>
     </button>
   );
