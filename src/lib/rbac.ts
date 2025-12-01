@@ -70,6 +70,12 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
+      name: 'BCS Calculator',
+      href: '/dashboard/pets/bcs',
+      icon: 'LightBulbIcon',
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
+    },
+    {
       name: 'Health Records',
       href: '/dashboard/health-records',
       icon: 'DocumentTextIcon',
