@@ -13,6 +13,7 @@ export const rolePermissions = {
       '/dashboard',
       '/dashboard/profile',
       '/dashboard/skin-disease',
+      '/dashboard/pets',
       '/dashboard/veterinarian-appointments'
     ],
     description: 'Veterinarian access to core features and appointment management'
@@ -21,6 +22,7 @@ export const rolePermissions = {
     allowedPaths: [
       '/',
       '/dashboard',
+      '/dashboard/pets',
       '/dashboard/appointment-schedule'
     ],
     description: 'Basic user access with appointment scheduling'
@@ -65,7 +67,7 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       name: 'Pets',
       href: '/dashboard/pets',
       icon: 'HeartIcon',
-      roles: ['SUPER_ADMIN']
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
       name: 'Health Records',

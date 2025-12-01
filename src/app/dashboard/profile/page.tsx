@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Alert from '@/components/ui/Alert';
 import { AuthGuard } from '@/lib/auth-guard';
 import { UserRole } from '@/types/next-auth';
+import { listPets, Pet } from '@/lib/pets';
 
 // Force dynamic rendering to prevent SSR issues
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,7 @@ export default function ProfilePage() {
     email: '',
     contactNumber: ''
   });
+  const [pets, setPets] = useState<Pet[]>([]);
 
   // Prevent SSR issues by checking if we're in the browser
   if (typeof window === 'undefined') {
@@ -41,6 +43,14 @@ export default function ProfilePage() {
         contactNumber: (session.user as any).contactNumber || ''
       });
     }
+    (async () => {
+      try {
+        const data = await listPets();
+        setPets(data || []);
+      } catch (e) {
+        console.error('Failed to load user pets for profile', e);
+      }
+    })();
   }, [session]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,17 +235,27 @@ export default function ProfilePage() {
             </form>
           ) : (
             <div className="space-y-6">
-              {/* Profile Avatar */}
+              {/* Pet Pictures (replaces user avatar) */}
               <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-semibold text-blue-600">
-                    {(session.user as any).username?.charAt(0).toUpperCase() || session.user.name?.charAt(0).toUpperCase() || 'U'}
-                  </span>
+                <div className="flex items-center gap-3">
+                  {pets && pets.length > 0 ? (
+                    pets.slice(0, 3).map((pet) => (
+                      <div key={pet.id} className="w-20 h-20 rounded-full overflow-hidden bg-gray-100">
+                        <img
+                          src={(pet as any).avatarUrl || (pet as any).avatarDataUrl || undefined}
+                          alt={pet.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-2xl font-semibold text-blue-600">{(session.user as any).username?.charAt(0).toUpperCase() || session.user.name?.charAt(0).toUpperCase() || 'U'}</span>
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {(session.user as any).username || session.user.name}
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-900">{(session.user as any).username || session.user.name}</h2>
                   <p className="text-sm text-gray-600">{session.user.email}</p>
                 </div>
               </div>
