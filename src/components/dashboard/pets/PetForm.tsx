@@ -154,7 +154,7 @@ export default function PetForm({ petId }: PetFormProps) {
             await updatePet(created.id, { avatarDataUrl: uploaded as any });
           }
         }
-        router.push(`/dashboard/pets/${created.id}`);
+        router.push('/dashboard/pets');
       }
     } catch (err) {
       console.error(err);
