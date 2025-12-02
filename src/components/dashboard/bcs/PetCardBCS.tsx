@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { formatBCSTimestamp } from '@/lib/format-date';
 import { ChevronRight } from "lucide-react";
 import type { Pet } from "@/lib/pets";
 
@@ -33,6 +34,9 @@ export default function PetCardBCS({ pet, selected, onSelect }: Props) {
         <div className="flex-1">
           <h3 className="text-xl font-bold text-gray-900 mb-1">{pet.name}</h3>
           <p className="text-sm text-gray-600">{pet.breed || "Mixed breed"}</p>
+          {pet.bcsCalculatedAt && (
+            <p className="text-xs text-gray-500 mt-1">BCS last: {formatBCSTimestamp(pet.bcsCalculatedAt)}</p>
+          )}
           <p className="text-xs text-gray-500 mt-1">
             {pet.type === "dog" ? "🐕 Dog" : "🐈 Cat"} • {pet.ageYears ? `${pet.ageYears} years` : "Age unknown"}
           </p>

@@ -61,6 +61,8 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
       name,
       breed,
       weightKg,
+      bcs,
+      bcsCalculatedAt,
       activityLevel,
       ageYears,
       gender,
@@ -70,14 +72,15 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
       vaccinationStatus,
       avatarDataUrl
     } = body;
-
     const updateResult = await pool.query(
-      `UPDATE pets SET type=$1, name=$2, breed=$3, weight_kg=$4, activity_level=$5, age_years=$6, gender=$7, allergies=$8, preferred_diet=$9, health_notes=$10, vaccination_status=$11, avatar_url=$12, updated_at=CURRENT_TIMESTAMP WHERE id=$13 RETURNING *`,
+      `UPDATE pets SET type=$1, name=$2, breed=$3, weight_kg=$4, bcs=$5, bcs_calculated_at=$6, activity_level=$7, age_years=$8, gender=$9, allergies=$10, preferred_diet=$11, health_notes=$12, vaccination_status=$13, avatar_url=$14, updated_at=CURRENT_TIMESTAMP WHERE id=$15 RETURNING *`,
       [
         type || petRow.type,
         name || petRow.name,
         breed || petRow.breed,
         weightKg ?? petRow.weight_kg,
+        (bcs ?? petRow.bcs),
+        (bcsCalculatedAt ?? petRow.bcs_calculated_at),
         activityLevel || petRow.activity_level,
         ageYears ?? petRow.age_years,
         gender || petRow.gender,
@@ -153,6 +156,8 @@ export async function PATCH(request: NextRequest, { params }: { params: any }) {
       name: 'name',
       breed: 'breed',
       weightKg: 'weight_kg',
+      bcs: 'bcs',
+      bcsCalculatedAt: 'bcs_calculated_at',
       activityLevel: 'activity_level',
       ageYears: 'age_years',
       gender: 'gender',

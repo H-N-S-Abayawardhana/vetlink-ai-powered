@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import { formatBCSTimestamp } from '@/lib/format-date';
 
 interface Props {
   score: number | null;
   petName?: string | null;
+  lastCalculated?: string | null;
 }
 
 function scoreCategory(score: number) {
@@ -14,7 +16,7 @@ function scoreCategory(score: number) {
   return "Obese";
 }
 
-export default function ResultsPanel({ score, petName }: Props) {
+export default function ResultsPanel({ score, petName, lastCalculated }: Props) {
   if (score == null) {
     return (
       <div className="border rounded-md p-4 bg-white shadow-sm">
@@ -34,6 +36,11 @@ export default function ResultsPanel({ score, petName }: Props) {
       {petName && (
         <div className="text-sm text-gray-900 font-medium">Pet: {petName}</div>
       )}
+
+      {/** show last calculated timestamp when provided */}
+      {lastCalculated && (
+            <div className="text-xs text-gray-500">Last calculated: {formatBCSTimestamp(lastCalculated)}</div>
+          )}
 
       <div className="flex items-baseline gap-4">
         <div className="text-5xl font-extrabold text-gray-900">{score}</div>

@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS pets (
   name TEXT NOT NULL,
   breed TEXT,
   weight_kg NUMERIC,
+  bcs NUMERIC,
+  bcs_calculated_at TIMESTAMP WITH TIME ZONE,
   activity_level TEXT,
   age_years INTEGER,
   gender TEXT,

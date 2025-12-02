@@ -9,6 +9,8 @@ export interface DbPetRow {
   weight_kg?: number | null;
   activity_level?: string | null;
   age_years?: number | null;
+  bcs?: number | null;
+  bcs_calculated_at?: string | null;
   gender?: string | null;
   allergies?: string[] | null;
   preferred_diet?: string | null;
@@ -27,6 +29,8 @@ export function mapRowToPet(row: DbPetRow) {
     name: row.name,
     breed: row.breed || null,
     weightKg: row.weight_kg ?? null,
+    bcs: row.bcs ?? null,
+    bcsCalculatedAt: row.bcs_calculated_at || null,
     activityLevel: row.activity_level || null,
     ageYears: row.age_years ?? null,
     gender: row.gender || null,
