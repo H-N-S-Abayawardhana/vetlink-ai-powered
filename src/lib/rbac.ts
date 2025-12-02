@@ -76,6 +76,12 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
+      name: 'Diet Recommendations',
+      href: '/dashboard/pets/diet',
+      icon: 'DocumentTextIcon',
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
+    },
+    {
       name: 'Health Records',
       href: '/dashboard/health-records',
       icon: 'DocumentTextIcon',
