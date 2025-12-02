@@ -86,7 +86,7 @@ export default function PetDetailsModal({ pet, updates, onChange, onClose, onCal
 
           {result != null && (
             <div className="mt-5">
-              <ResultsPanel score={result} petName={pet.name} />
+              <ResultsPanel score={result} petName={pet.name} lastCalculated={pet.bcsCalculatedAt ?? null} />
             </div>
           )}
         </div>

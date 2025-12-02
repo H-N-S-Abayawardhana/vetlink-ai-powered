@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { listPets, updatePet, type Pet } from "@/lib/pets";
+import { formatBCSTimestamp } from '@/lib/format-date';
 import PetCardBCS from "./PetCardBCS";
 import { Scale, PawPrint, ChevronRight, Check, AlertCircle } from "lucide-react";
 
@@ -82,6 +83,19 @@ export default function BCSCalculator() {
     });
 
     setResult(score);
+    // Persist calculated BCS and timestamp
+    try {
+      const when = new Date().toISOString();
+      const updated = await updatePet(selected.id, { bcs: score, bcsCalculatedAt: when });
+      // update local selected and pets list with returned pet when available
+      if (updated) {
+        setSelected(updated as any);
+        setPets((prev) => prev.map((p) => (p.id === updated.id ? (updated as any) : p)));
+      }
+    } catch (e) {
+      console.warn('Failed to persist BCS', e);
+    }
+
     setStep("result");
     setLoading(false);
   }
@@ -281,6 +295,9 @@ export default function BCSCalculator() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
                   {selected.name}'s Body Condition Score
                 </h2>
+                {selected.bcsCalculatedAt && (
+                  <div className="text-xs text-gray-500 mb-2">Last calculated: {formatBCSTimestamp(selected.bcsCalculatedAt)}</div>
+                )}
                 
                 <div className={`inline-block px-6 py-3 rounded-full ${getBCSDescription(result).bg} ${getBCSDescription(result).border} border-2 mb-4`}>
                   <span className={`text-lg font-bold ${getBCSDescription(result).color}`}>

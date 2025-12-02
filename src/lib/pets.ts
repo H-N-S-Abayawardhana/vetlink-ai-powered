@@ -13,6 +13,8 @@ export interface Pet {
   name: string;
   breed?: string;
   weightKg?: number | null;
+  bcs?: number | null;
+  bcsCalculatedAt?: string | null;
   activityLevel?: ActivityLevel;
   ageYears?: number | null;
   gender?: string | null;
