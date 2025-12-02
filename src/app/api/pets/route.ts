@@ -12,16 +12,30 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     const userRole = (session.user as any)?.userRole as UserRole || 'USER';
 
+    // Support optional filtering by type via query param (e.g. ?type=dog)
+    const url = new URL(request.url);
+    const typeFilter = url.searchParams.get('type');
+
     if (userRole === 'SUPER_ADMIN' || userRole === 'VETERINARIAN') {
+      if (typeFilter) {
+        const result = await pool.query('SELECT * FROM pets WHERE type = $1 ORDER BY created_at DESC', [typeFilter]);
+        const pets = result.rows.map(mapRowToPet);
+        return NextResponse.json({ pets });
+      }
       const result = await pool.query('SELECT * FROM pets ORDER BY created_at DESC');
       const pets = result.rows.map(mapRowToPet);
       return NextResponse.json({ pets });
     }
 
-    // Regular users: only their pets
+    // Regular users: only their pets (optionally filter by type)
+    if (typeFilter) {
+      const result = await pool.query('SELECT * FROM pets WHERE owner_id = $1 AND type = $2 ORDER BY created_at DESC', [session.user.id, typeFilter]);
+      const pets = result.rows.map(mapRowToPet);
+      return NextResponse.json({ pets });
+    }
+
     const result = await pool.query('SELECT * FROM pets WHERE owner_id = $1 ORDER BY created_at DESC', [session.user.id]);
     const pets = result.rows.map(mapRowToPet);
     return NextResponse.json({ pets });
