@@ -124,12 +124,6 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       roles: ['SUPER_ADMIN', 'VETERINARIAN']
     },
     {
-      name: 'Profile',
-      href: '/dashboard/profile',
-      icon: 'UserIcon',
-      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
-    },
-    {
       name: 'Settings',
       href: '/dashboard/settings',
       icon: 'CogIcon',
