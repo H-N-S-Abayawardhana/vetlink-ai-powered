@@ -3,10 +3,10 @@
 import { useRef, useState, useEffect } from 'react';
 
 interface CameraCaptureProps {
-  onImageCapture: (file: File) => void;
+  onCapture: (file: File) => void;
 }
 
-export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
+export default function CameraCapture({ onCapture }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -22,9 +22,7 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
       setError(null);
       setHasCaptured(false);
       setIsVideoReady(false);
-      console.log('🔄 Starting camera...');
       
-      // Check if we're in the browser and navigator is available
       if (typeof window === 'undefined') {
         setError('Camera access is not available in this environment.');
         return;
@@ -35,18 +33,11 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         return;
       }
 
-      // Check if we're on HTTPS or localhost
       const isSecureContext = window.isSecureContext || window.location.hostname === 'localhost';
       if (!isSecureContext) {
         setError('Camera access requires HTTPS. Please access this page via HTTPS or localhost.');
         return;
       }
-      
-      console.log('📹 Requesting camera access with constraints:', {
-        facingMode,
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      });
       
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -56,73 +47,43 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         }
       });
       
-      console.log('✅ Camera access granted:', mediaStream);
-      console.log('📊 Stream tracks:', mediaStream.getTracks().map(track => ({
-        kind: track.kind,
-        label: track.label,
-        enabled: track.enabled,
-        readyState: track.readyState
-      })));
-      
       setStream(mediaStream);
       setIsCameraOn(true);
       
-      // Use a small delay to ensure the video element is rendered
       setTimeout(() => {
         if (videoRef.current) {
-          console.log('🎥 Setting video srcObject...');
           videoRef.current.srcObject = mediaStream;
           
-          // Wait for video to be ready
           videoRef.current.onloadedmetadata = () => {
-            console.log('🎥 Video metadata loaded, starting playback...');
             if (videoRef.current) {
               videoRef.current.play()
-                .then(() => {
-                  console.log('✅ Video playback started successfully');
-                })
                 .catch((error) => {
-                  console.error('❌ Video playback failed:', error);
+                  console.error('Video playback failed:', error);
                 });
             }
           };
 
-          // Additional event listeners for debugging
           videoRef.current.oncanplay = () => {
-            console.log('🎥 Video can start playing');
             setIsVideoReady(true);
           };
 
           videoRef.current.onplay = () => {
-            console.log('🎥 Video started playing');
             setIsVideoReady(true);
           };
 
-          videoRef.current.onerror = (error) => {
-            console.error('❌ Video error:', error);
-          };
-
-          // Force play after a short delay as fallback
           setTimeout(() => {
             if (videoRef.current && videoRef.current.paused) {
-              console.log('🔄 Attempting to force video playback...');
               videoRef.current.play()
-                .then(() => {
-                  console.log('✅ Forced video playback successful');
-                })
                 .catch((error) => {
-                  console.error('❌ Forced video playback failed:', error);
+                  console.error('Forced video playback failed:', error);
                 });
             }
           }, 500);
-        } else {
-          console.error('❌ Video element not found!');
         }
       }, 100);
     } catch (err: any) {
-      console.error('❌ Error accessing camera:', err);
+      console.error('Error accessing camera:', err);
       
-      // Provide specific error messages based on the error type
       let errorMessage = 'Unable to access camera. ';
       
       if (err.name === 'NotAllowedError') {
@@ -154,7 +115,6 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current && !isCapturing && !hasCaptured) {
       setIsCapturing(true);
-      console.log('📸 Capturing photo...');
       
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -167,22 +127,20 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
 
         canvas.toBlob((blob) => {
           if (blob) {
-            console.log('✅ Photo captured successfully');
             const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-            onImageCapture(file);
+            onCapture(file);
             setHasCaptured(true);
             setIsCapturing(false);
-            // Automatically stop camera after capture
             setTimeout(() => {
               stopCamera();
-            }, 1000); // Small delay to show the capture was successful
+            }, 1000);
           } else {
-            console.error('❌ Failed to create blob from canvas');
+            console.error('Failed to create blob from canvas');
             setIsCapturing(false);
           }
         }, 'image/jpeg', 0.8);
       } else {
-        console.error('❌ Failed to get canvas context');
+        console.error('Failed to get canvas context');
         setIsCapturing(false);
       }
     }
@@ -204,57 +162,44 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
     };
   }, []);
 
-  // Effect to handle video element when stream changes
   useEffect(() => {
     if (stream && videoRef.current && isCameraOn) {
-      console.log('🎥 useEffect: Setting up video element with stream');
       videoRef.current.srcObject = stream;
       
       const video = videoRef.current;
       
       const handleLoadedMetadata = () => {
-        console.log('🎥 useEffect: Video metadata loaded');
         video.play()
           .then(() => {
-            console.log('✅ useEffect: Video playback started');
             setIsVideoReady(true);
           })
           .catch((error) => {
-            console.error('❌ useEffect: Video playback failed:', error);
+            console.error('Video playback failed:', error);
           });
       };
 
       const handleCanPlay = () => {
-        console.log('🎥 useEffect: Video can play');
         setIsVideoReady(true);
       };
 
       const handlePlay = () => {
-        console.log('🎥 useEffect: Video is playing');
         setIsVideoReady(true);
-      };
-
-      const handleError = (error: any) => {
-        console.error('❌ useEffect: Video error:', error);
       };
 
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
       video.addEventListener('canplay', handleCanPlay);
       video.addEventListener('play', handlePlay);
-      video.addEventListener('error', handleError);
 
       return () => {
         video.removeEventListener('loadedmetadata', handleLoadedMetadata);
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('play', handlePlay);
-        video.removeEventListener('error', handleError);
       };
     }
   }, [stream, isCameraOn]);
 
   return (
     <div className="space-y-4">
-      {/* Camera Preview */}
       <div className="relative bg-gray-900 rounded-lg overflow-hidden">
         {isCameraOn ? (
           <div className="relative">
@@ -265,10 +210,9 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
               muted
               controls={false}
               className="w-full h-64 sm:h-80 object-cover bg-gray-800"
-              style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
+              style={{ transform: 'scaleX(-1)' }}
             />
             
-            {/* Loading indicator overlay */}
             {!isVideoReady ? (
               <div className="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
                 <div className="text-center text-white">
@@ -276,31 +220,11 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <p className="text-sm mb-2">Loading camera...</p>
-                  <button
-                    onClick={() => {
-                      if (videoRef.current && stream) {
-                        console.log('🔄 Manual video setup triggered');
-                        videoRef.current.srcObject = stream;
-                        videoRef.current.play()
-                          .then(() => {
-                            console.log('✅ Manual video playback successful');
-                            setIsVideoReady(true);
-                          })
-                          .catch((error) => {
-                            console.error('❌ Manual video playback failed:', error);
-                          });
-                      }
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors cursor-pointer"
-                  >
-                    Force Start Video
-                  </button>
+                  <p className="text-sm">Loading camera...</p>
                 </div>
               </div>
             ) : null}
             
-            {/* Camera Controls Overlay */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
               <button
                 onClick={switchCamera}
@@ -316,7 +240,7 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
               <button
                 onClick={capturePhoto}
                 disabled={isCapturing || hasCaptured}
-                className={`p-4 rounded-full transition-all shadow-lg ${
+                className={`p-4 rounded-full transition-all shadow-lg cursor-pointer ${
                   isCapturing 
                     ? 'bg-yellow-500 animate-pulse' 
                     : hasCaptured 
@@ -361,10 +285,8 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         )}
       </div>
 
-      {/* Hidden canvas for photo capture */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Camera Controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         {!isCameraOn ? (
           <button
@@ -403,7 +325,6 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
         </button>
       </div>
 
-      {/* Status Messages */}
       {isCapturing && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-center">
@@ -422,39 +343,22 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
             <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="text-green-800 font-medium">Photo captured successfully! Camera will close automatically.</p>
+            <p className="text-green-800 font-medium">Photo captured successfully!</p>
           </div>
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex">
             <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <div className="flex-1">
-              <h4 className="text-sm font-medium text-red-800">Camera Error</h4>
-              <p className="text-sm text-red-700 mt-1">{error}</p>
-              
-              {/* Troubleshooting Steps */}
-              <div className="mt-3 text-sm text-red-600">
-                <p className="font-medium mb-2">Troubleshooting steps:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Make sure you're using HTTPS or localhost</li>
-                  <li>Check if camera permissions are allowed in your browser</li>
-                  <li>Ensure no other application is using the camera</li>
-                  <li>Try refreshing the page and allowing camera access</li>
-                  <li>Check if your browser supports camera access</li>
-                </ul>
-              </div>
-            </div>
+            <p className="text-sm text-red-700">{error}</p>
           </div>
         </div>
       )}
 
-      {/* Camera Tips */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="text-sm font-medium text-blue-900 mb-2">Camera Tips:</h4>
         <ul className="text-sm text-blue-800 space-y-1">
@@ -463,12 +367,6 @@ export default function CameraCapture({ onImageCapture }: CameraCaptureProps) {
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
             Ensure good lighting for clear images
-          </li>
-          <li className="flex items-center">
-            <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            Hold the camera steady when capturing
           </li>
           <li className="flex items-center">
             <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
