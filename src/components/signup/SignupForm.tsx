@@ -58,10 +58,11 @@ export default function SignupForm() {
       newErrors.email = "Please enter a valid email address";
     }
 
-    // Contact number validation (basic)
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    if (formData.contactNumber && !phoneRegex.test(formData.contactNumber.replace(/\s/g, ''))) {
-      newErrors.contactNumber = "Please enter a valid contact number";
+    // Contact number validation - allows 10-digit SL numbers (0XXXXXXXXX) or international format (+94XXXXXXXXX)
+    const cleanedNumber = formData.contactNumber.replace(/\s/g, '');
+    const phoneRegex = /^(0\d{9}|\+94\d{9})$/;
+    if (formData.contactNumber && !phoneRegex.test(cleanedNumber)) {
+      newErrors.contactNumber = "Please enter a valid 10-digit contact number (e.g., 0712345678) or international format (+94712345678)";
     }
 
     // Password validation

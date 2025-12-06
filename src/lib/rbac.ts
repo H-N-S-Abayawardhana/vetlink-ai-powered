@@ -82,14 +82,8 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
-      name: 'Health Records',
-      href: '/dashboard/health-records',
-      icon: 'DocumentTextIcon',
-      roles: ['SUPER_ADMIN']
-    },
-    {
       name: 'Appointments',
-      href: '/dashboard/appointments',
+      href: '/dashboard/appointment-schedule',
       icon: 'CalendarIcon',
       roles: ['SUPER_ADMIN']
     },
@@ -106,34 +100,10 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       roles: ['VETERINARIAN']
     },
     {
-      name: 'Medications',
-      href: '/dashboard/medications',
-      icon: 'BeakerIcon',
-      roles: ['SUPER_ADMIN']
-    },
-    {
-      name: 'AI Analysis',
-      href: '/dashboard/ai-analysis',
-      icon: 'LightBulbIcon',
-      roles: ['SUPER_ADMIN']
-    },
-    {
       name: 'Skin Disease Detection',
       href: '/dashboard/skin-disease',
       icon: 'EyeIcon',
       roles: ['SUPER_ADMIN', 'VETERINARIAN']
-    },
-    {
-      name: 'Profile',
-      href: '/dashboard/profile',
-      icon: 'UserIcon',
-      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
-    },
-    {
-      name: 'Settings',
-      href: '/dashboard/settings',
-      icon: 'CogIcon',
-      roles: ['SUPER_ADMIN']
     }
   ];
 
