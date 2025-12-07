@@ -210,7 +210,6 @@ export default function CameraCapture({ onCapture }: CameraCaptureProps) {
               muted
               controls={false}
               className="w-full h-full object-cover bg-gray-800"
-              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             
             {!isVideoReady ? (
