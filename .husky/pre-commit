@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Protected branch - no direct commits allowed
+protected_branch='main'
+
+# Get the current branch name
+current_branch=$(git symbolic-ref HEAD | sed -e 's,^refs/heads/,,')
+
+# Check if we're trying to commit on the protected branch
+if [ "$current_branch" = "$protected_branch" ]; then
+  echo "❌ ERROR: You are trying to commit directly to the '$protected_branch' branch!"
+  echo ""
+  echo "This is not allowed. Please:"
+  echo "  1. Create a feature branch: git checkout -b feature/your-feature-name"
+  echo "  2. Make your commits on that branch"
+  echo "  3. Push your changes: git push origin feature/your-feature-name"
+  echo "  4. Create a Pull Request to merge into '$protected_branch'"
+  echo ""
+  echo "If you really need to commit to main (not recommended), use: git commit --no-verify"
+  exit 1
+fi
+
+exit 0
+

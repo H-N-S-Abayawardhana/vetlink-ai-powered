@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Protected branch
+protected_branch='main'
+
+# Get the branch being pushed to
+while read local_ref local_sha remote_ref remote_sha
+do
+  if [ "$remote_ref" = "refs/heads/$protected_branch" ]; then
+    echo "❌ ERROR: You are trying to push directly to the '$protected_branch' branch!"
+    echo ""
+    echo "This is not allowed. Please:"
+    echo "  1. Create a feature branch: git checkout -b feature/your-feature-name"
+    echo "  2. Push your changes to that branch: git push origin feature/your-feature-name"
+    echo "  3. Create a Pull Request to merge into '$protected_branch'"
+    echo ""
+    echo "If you really need to push to main (not recommended), use: git push --no-verify"
+    exit 1
+  fi
+done
+
+exit 0

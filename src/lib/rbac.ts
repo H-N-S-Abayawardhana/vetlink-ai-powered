@@ -13,16 +13,20 @@ export const rolePermissions = {
       '/dashboard',
       '/dashboard/profile',
       '/dashboard/skin-disease',
-      '/dashboard/Limping/'
+      '/dashboard/Limping/',
+      '/dashboard/pets',
+      '/dashboard/veterinarian-appointments'
     ],
-    description: 'Veterinarian access to core features'
+    description: 'Veterinarian access to core features and appointment management'
   },
   USER: {
     allowedPaths: [
       '/',
-      '/dashboard'
+      '/dashboard',
+      '/dashboard/pets',
+      '/dashboard/appointment-schedule'
     ],
-    description: 'Basic user access'
+    description: 'Basic user access with appointment scheduling'
   }
 };
 
@@ -64,31 +68,37 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       name: 'Pets',
       href: '/dashboard/pets',
       icon: 'HeartIcon',
-      roles: ['SUPER_ADMIN']
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
-      name: 'Health Records',
-      href: '/dashboard/health-records',
+      name: 'BCS Calculator',
+      href: '/dashboard/pets/bcs',
+      icon: 'LightBulbIcon',
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
+    },
+    {
+      name: 'Diet Recommendations',
+      href: '/dashboard/pets/diet',
       icon: 'DocumentTextIcon',
-      roles: ['SUPER_ADMIN']
+      roles: ['SUPER_ADMIN', 'VETERINARIAN', 'USER']
     },
     {
       name: 'Appointments',
-      href: '/dashboard/appointments',
+      href: '/dashboard/appointment-schedule',
       icon: 'CalendarIcon',
       roles: ['SUPER_ADMIN']
     },
     {
-      name: 'Medications',
-      href: '/dashboard/medications',
-      icon: 'BeakerIcon',
-      roles: ['SUPER_ADMIN']
+      name: 'Schedule Appointment',
+      href: '/dashboard/appointment-schedule',
+      icon: 'CalendarIcon',
+      roles: ['USER']
     },
     {
-      name: 'AI Analysis',
-      href: '/dashboard/ai-analysis',
-      icon: 'LightBulbIcon',
-      roles: ['SUPER_ADMIN']
+      name: 'Manage Appointments',
+      href: '/dashboard/veterinarian-appointments',
+      icon: 'CalendarIcon',
+      roles: ['VETERINARIAN']
     },
     {
       name: 'Skin Disease Detection',

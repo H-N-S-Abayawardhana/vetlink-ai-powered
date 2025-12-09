@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -10,10 +9,8 @@ import {
   HeartIcon,
   DocumentTextIcon,
   CalendarIcon,
-  BeakerIcon,
   LightBulbIcon,
   EyeIcon,
-  UserIcon,
   CogIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -31,10 +28,8 @@ const iconMap = {
   HeartIcon: HeartIcon,
   DocumentTextIcon: DocumentTextIcon,
   CalendarIcon: CalendarIcon,
-  BeakerIcon: BeakerIcon,
   LightBulbIcon: LightBulbIcon,
   EyeIcon: EyeIcon,
-  UserIcon: UserIcon,
   CogIcon: CogIcon,
 };
 
@@ -60,11 +55,11 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Image
@@ -85,7 +80,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </button>
         </div>
 
-        <nav className="mt-6 px-3">
+        <nav className="mt-6 px-3 flex flex-col flex-1 overflow-y-auto">
           <div className="space-y-3">
             {allowedNavigationItems.map((item) => {
               const isActive = pathname === item.href;
@@ -113,30 +108,31 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
               );
             })}
           </div>
-        </nav>
 
-        {/* User info at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-blue-600">
-                  {(session?.user as any)?.username?.charAt(0).toUpperCase() || 
-                   session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+          {/* Settings at bottom - only for SUPER_ADMIN */}
+          {userRole === 'SUPER_ADMIN' && (
+            <div className="mt-auto pt-4 pb-4 border-t border-gray-200">
+              <Link
+                href="/dashboard/settings"
+                onClick={onToggle}
+                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                  pathname === '/dashboard/settings'
+                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <span
+                  className={`mr-3 flex-shrink-0 ${
+                    pathname === '/dashboard/settings' ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-500'
+                  }`}
+                >
+                  <CogIcon className="w-5 h-5" />
                 </span>
-              </div>
+                Settings
+              </Link>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">
-                {(session?.user as any)?.username || session?.user?.name || 'User'}
-              </p>
-              <p className="text-xs text-gray-500">
-                {userRole === 'SUPER_ADMIN' ? 'Super Admin' : 
-                 userRole === 'VETERINARIAN' ? 'Veterinarian' : 'User'}
-              </p>
-            </div>
-          </div>
-        </div>
+          )}
+        </nav>
       </div>
     </>
   );

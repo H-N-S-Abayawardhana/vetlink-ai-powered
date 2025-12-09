@@ -4,12 +4,14 @@ import { ReactNode } from "react";
 
 interface AlertProps {
   type: "success" | "error";
-  title: string;
-  message: string;
+  title?: string;
+  message?: string;
+  children?: ReactNode;
+  className?: string;
   onDismiss?: () => void;
 }
 
-export default function Alert({ type, title, message, onDismiss }: AlertProps) {
+export default function Alert({ type, title, message, children, className, onDismiss }: AlertProps) {
   const isSuccess = type === "success";
   
   const bgColor = isSuccess ? "bg-green-50" : "bg-red-50";
@@ -34,17 +36,19 @@ export default function Alert({ type, title, message, onDismiss }: AlertProps) {
   );
 
   return (
-    <div className={`rounded-md ${bgColor} p-4 border ${borderColor}`}>
+    <div className={`rounded-md ${bgColor} p-4 border ${borderColor} ${className || ''}`}>
       <div className="flex">
         <div className="shrink-0">
           {isSuccess ? <SuccessIcon /> : <ErrorIcon />}
         </div>
         <div className="ml-3">
-          <h3 className={`text-sm font-medium ${titleColor}`}>
-            {title}
-          </h3>
-          <div className={`mt-2 text-sm ${messageColor}`}>
-            <p>{message}</p>
+          {title && (
+            <h3 className={`text-sm font-medium ${titleColor}`}>
+              {title}
+            </h3>
+          )}
+          <div className={`${title ? 'mt-2' : ''} text-sm ${messageColor}`}>
+            {children || <p>{message}</p>}
           </div>
           {onDismiss && (
             <div className="mt-4">

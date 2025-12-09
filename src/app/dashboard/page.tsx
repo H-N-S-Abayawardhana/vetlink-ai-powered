@@ -2,11 +2,26 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+interface DashboardStats {
+  totalPets: number;
+  activeAppointments: number;
+  registeredPetOwners: number;
+  aiAnalyses: number;
+}
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalPets: 0,
+    activeAppointments: 0,
+    registeredPetOwners: 0,
+    aiAnalyses: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -14,7 +29,83 @@ export default function DashboardPage() {
     }
   }, [status, router]);
 
-  if (status === "loading") {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch stats
+        const statsResponse = await fetch("/api/dashboard/stats");
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData.stats);
+        }
+
+        // Fetch upcoming appointments for all roles
+        const userRole = (session?.user as any)?.userRole || 'USER';
+        if (session) {
+          const appointmentsResponse = await fetch("/api/appointments");
+          if (appointmentsResponse.ok) {
+            const appointmentsData = await appointmentsResponse.json();
+            if (appointmentsData.success) {
+              // Filter and sort upcoming appointments (only future dates, pending or accepted status)
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              
+              const upcoming = appointmentsData.appointments
+                .filter((apt: any) => {
+                  // Parse date string directly to avoid timezone issues
+                  const dateStr = apt.appointment_date instanceof Date 
+                    ? apt.appointment_date.toISOString().split('T')[0]
+                    : typeof apt.appointment_date === 'string' && apt.appointment_date.includes('T')
+                    ? apt.appointment_date.split('T')[0]
+                    : apt.appointment_date;
+                  
+                  const dateParts = dateStr.split('-');
+                  if (dateParts.length !== 3) return false;
+                  
+                  const year = parseInt(dateParts[0], 10);
+                  const month = parseInt(dateParts[1], 10) - 1;
+                  const day = parseInt(dateParts[2], 10);
+                  const aptDate = new Date(year, month, day);
+                  aptDate.setHours(0, 0, 0, 0);
+                  
+                  return aptDate >= today && (apt.status === 'pending' || apt.status === 'accepted');
+                })
+                .sort((a: any, b: any) => {
+                  // Sort by date and time
+                  const dateStrA = a.appointment_date instanceof Date 
+                    ? a.appointment_date.toISOString().split('T')[0]
+                    : typeof a.appointment_date === 'string' && a.appointment_date.includes('T')
+                    ? a.appointment_date.split('T')[0]
+                    : a.appointment_date;
+                  const dateStrB = b.appointment_date instanceof Date 
+                    ? b.appointment_date.toISOString().split('T')[0]
+                    : typeof b.appointment_date === 'string' && b.appointment_date.includes('T')
+                    ? b.appointment_date.split('T')[0]
+                    : b.appointment_date;
+                  
+                  const dateA = new Date(`${dateStrA}T${a.appointment_time}`);
+                  const dateB = new Date(`${dateStrB}T${b.appointment_time}`);
+                  return dateA.getTime() - dateB.getTime();
+                })
+                .slice(0, 5); // Show only top 5 upcoming
+              
+              setUpcomingAppointments(upcoming);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (status === "authenticated" && session) {
+      fetchData();
+    }
+  }, [status, session]);
+
+  if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -25,13 +116,17 @@ export default function DashboardPage() {
   if (!session) {
     return null;
   }
-  // Mock data for dashboard
-  const stats = [
+
+  const userRole = (session.user as any)?.userRole || 'USER';
+  const showRegisteredPetOwners = userRole === 'SUPER_ADMIN' || userRole === 'VETERINARIAN';
+
+  // Stats configuration
+  const statsConfig = [
     {
       title: 'Total Pets',
-      value: '24',
-      change: '+12%',
-      changeType: 'positive',
+      value: stats.totalPets.toString(),
+      change: '',
+      changeType: 'positive' as const,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -40,31 +135,31 @@ export default function DashboardPage() {
     },
     {
       title: 'Active Appointments',
-      value: '8',
-      change: '+3',
-      changeType: 'positive',
+      value: stats.activeAppointments.toString(),
+      change: '',
+      changeType: 'positive' as const,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       ),
     },
-    {
-      title: 'Health Alerts',
-      value: '3',
-      change: '-1',
-      changeType: 'negative',
+    ...(showRegisteredPetOwners ? [{
+      title: 'Registered Pet Owners',
+      value: stats.registeredPetOwners.toString(),
+      change: '',
+      changeType: 'positive' as const,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       ),
-    },
+    }] : []),
     {
       title: 'AI Analyses',
-      value: '15',
-      change: '+5',
-      changeType: 'positive',
+      value: stats.aiAnalyses.toString(),
+      change: '',
+      changeType: 'positive' as const,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -112,35 +207,75 @@ export default function DashboardPage() {
     },
   ];
 
-  const upcomingAppointments = [
-    {
-      id: 1,
-      petName: 'Buddy',
-      ownerName: 'Sarah Johnson',
-      time: '10:00 AM',
-      date: 'Today',
-      type: 'Regular Checkup',
-      status: 'confirmed',
-    },
-    {
-      id: 2,
-      petName: 'Luna',
-      ownerName: 'Mike Chen',
-      time: '2:00 PM',
-      date: 'Today',
-      type: 'Skin Analysis',
-      status: 'confirmed',
-    },
-    {
-      id: 3,
-      petName: 'Charlie',
-      ownerName: 'Emily Davis',
-      time: '4:30 PM',
-      date: 'Tomorrow',
-      type: 'Vaccination',
-      status: 'pending',
-    },
-  ];
+  // Format appointment date for display
+  const formatAppointmentDate = (dateString: string | Date) => {
+    try {
+      // Handle different date formats
+      let dateStr = '';
+      if (dateString instanceof Date) {
+        const year = dateString.getUTCFullYear();
+        const month = String(dateString.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(dateString.getUTCDate()).padStart(2, '0');
+        dateStr = `${year}-${month}-${day}`;
+      } else if (typeof dateString === 'string') {
+        if (dateString.includes('T')) {
+          dateStr = dateString.split('T')[0];
+        } else {
+          dateStr = dateString;
+        }
+      } else {
+        return '';
+      }
+      
+      // Parse date components directly
+      const dateParts = dateStr.split('-');
+      if (dateParts.length !== 3) {
+        return dateStr;
+      }
+      
+      const year = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10) - 1;
+      const day = parseInt(dateParts[2], 10);
+      
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return dateStr;
+      }
+      
+      // Create date objects for comparison (using local time constructor)
+      const appointmentDate = new Date(year, month, day);
+      appointmentDate.setHours(0, 0, 0, 0);
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      if (appointmentDate.getTime() === today.getTime()) {
+        return 'Today';
+      } else if (appointmentDate.getTime() === tomorrow.getTime()) {
+        return 'Tomorrow';
+      } else {
+        return appointmentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+    } catch (error) {
+      if (typeof dateString === 'string') {
+        return dateString;
+      }
+      if (dateString instanceof Date) {
+        return dateString.toISOString().split('T')[0];
+      }
+      return '';
+    }
+  };
+
+  // Format time for display
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -154,7 +289,7 @@ export default function DashboardPage() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+        {statsConfig.map((stat) => (
           <div
             key={stat.title}
             className="bg-white overflow-hidden shadow rounded-lg"
@@ -175,15 +310,17 @@ export default function DashboardPage() {
                       <div className="text-2xl font-semibold text-gray-900">
                         {stat.value}
                       </div>
-                      <div
-                        className={`ml-2 flex items-baseline text-sm font-semibold ${
-                          stat.changeType === 'positive'
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                        }`}
-                      >
-                        {stat.change}
-                      </div>
+                      {stat.change && (
+                        <div
+                          className={`ml-2 flex items-baseline text-sm font-semibold ${
+                            stat.changeType === 'positive'
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }`}
+                        >
+                          {stat.change}
+                        </div>
+                      )}
                     </dd>
                   </dl>
                 </div>
@@ -250,46 +387,67 @@ export default function DashboardPage() {
               Upcoming Appointments
             </h3>
             <div className="space-y-4">
-              {upcomingAppointments.map((appointment) => (
-                <div key={appointment.id} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+              {upcomingAppointments.length > 0 ? (
+                upcomingAppointments.map((appointment) => (
+                  <div key={appointment.id} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {appointment.appointment_title || appointment.reason || 'Appointment'}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {userRole === 'USER' 
+                            ? `Dr. ${appointment.veterinarian_name || 'Veterinarian'}`
+                            : userRole === 'VETERINARIAN'
+                            ? `${appointment.user_name || 'Pet Owner'}`
+                            : `${appointment.user_name || 'Pet Owner'} - Dr. ${appointment.veterinarian_name || 'Veterinarian'}`
+                          }
+                        </p>
                       </div>
                     </div>
-                    <div>
+                    <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
-                        {appointment.petName}
+                        {formatTime(appointment.appointment_time)}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {appointment.ownerName} • {appointment.type}
+                        {formatAppointmentDate(appointment.appointment_date)}
                       </p>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                          appointment.status === 'accepted' || appointment.status === 'confirmed'
+                            ? 'bg-green-100 text-green-800'
+                            : appointment.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {appointment.status}
+                      </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      {appointment.time}
-                    </p>
-                    <p className="text-sm text-gray-500">{appointment.date}</p>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        appointment.status === 'confirmed'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {appointment.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-4">
+                  No upcoming appointments
+                </p>
+              )}
             </div>
             <div className="mt-4">
               <a
-                href="/dashboard/appointments"
+                href={
+                  userRole === 'USER' 
+                    ? "/dashboard/appointment-schedule"
+                    : userRole === 'VETERINARIAN'
+                    ? "/dashboard/veterinarian-appointments"
+                    : "/dashboard/appointments"
+                }
                 className="text-sm text-blue-600 hover:text-blue-800"
               >
                 View all appointments →

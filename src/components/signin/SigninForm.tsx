@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Alert from "@/components/ui/Alert";
@@ -10,6 +10,7 @@ import Link from "next/link";
 export default function SigninForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,6 +20,16 @@ export default function SigninForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Redirect to dashboard if user is already logged in
+  useEffect(() => {
+    if (status === 'loading') return; // Still loading
+    
+    if (session) {
+      // User is already logged in, redirect to dashboard
+      router.push('/dashboard');
+    }
+  }, [session, status, router]);
 
   // Check for success message from signup
   useEffect(() => {
@@ -82,6 +93,15 @@ export default function SigninForm() {
       setError('An error occurred during Google sign in');
     }
   };
+
+  // Show loading state while checking session or if user is already logged in
+  if (status === 'loading' || session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-white">
