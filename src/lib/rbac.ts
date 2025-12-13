@@ -13,6 +13,7 @@ export const rolePermissions = {
       '/dashboard',
       '/dashboard/profile',
       '/dashboard/skin-disease',
+      '/dashboard/Limping/',
       '/dashboard/pets',
       '/dashboard/veterinarian-appointments'
     ],
@@ -104,6 +105,24 @@ export function getAllowedNavigationItems(userRole: UserRole) {
       href: '/dashboard/skin-disease',
       icon: 'EyeIcon',
       roles: ['SUPER_ADMIN', 'VETERINARIAN']
+    },
+    {
+      name: 'Limping Detection',
+      href: '/dashboard/Limping',
+      icon: 'EyeIcon',
+      roles: ['SUPER_ADMIN', 'VETERINARIAN']
+    },
+    {
+      name: 'Profile',
+      href: '/dashboard/profile',
+      icon: 'UserIcon',
+      roles: ['SUPER_ADMIN', 'VETERINARIAN']
+    },
+    {
+      name: 'Settings',
+      href: '/dashboard/settings',
+      icon: 'CogIcon',
+      roles: ['SUPER_ADMIN']
     }
   ];
 
