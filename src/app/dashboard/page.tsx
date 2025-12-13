@@ -22,6 +22,7 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [recentPets, setRecentPets] = useState<any[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -92,6 +93,62 @@ export default function DashboardPage() {
               setUpcomingAppointments(upcoming);
             }
           }
+
+          // Fetch recent pets
+          const petsResponse = await fetch("/api/pets");
+          if (petsResponse.ok) {
+            const petsData = await petsResponse.json();
+            if (petsData.pets) {
+              // Get the most recent 4 pets
+              const recent = petsData.pets.slice(0, 4).map((pet: any) => {
+                // Format age
+                const ageText = pet.ageYears 
+                  ? `${pet.ageYears} ${pet.ageYears === 1 ? 'year' : 'years'}`
+                  : 'Unknown age';
+                
+                // Format last visit (using updated_at as proxy)
+                let lastVisitText = 'Never';
+                if (pet.updatedAt) {
+                  const updatedDate = new Date(pet.updatedAt);
+                  const now = new Date();
+                  const diffDays = Math.floor((now.getTime() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  if (diffDays === 0) {
+                    lastVisitText = 'Today';
+                  } else if (diffDays === 1) {
+                    lastVisitText = '1 day ago';
+                  } else if (diffDays < 7) {
+                    lastVisitText = `${diffDays} days ago`;
+                  } else if (diffDays < 30) {
+                    const weeks = Math.floor(diffDays / 7);
+                    lastVisitText = `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+                  } else {
+                    const months = Math.floor(diffDays / 30);
+                    lastVisitText = `${months} ${months === 1 ? 'month' : 'months'} ago`;
+                  }
+                }
+                
+                // Determine status based on health notes or vaccination status
+                const status = pet.healthNotes && pet.healthNotes.toLowerCase().includes('attention')
+                  ? 'needs_attention'
+                  : 'healthy';
+                
+                // Get avatar emoji based on type
+                const avatar = pet.type === 'dog' ? '🐕' : pet.type === 'cat' ? '🐱' : '🐾';
+                
+                return {
+                  id: pet.id,
+                  name: pet.name,
+                  breed: pet.breed || 'Unknown breed',
+                  age: ageText,
+                  lastVisit: lastVisitText,
+                  status: status,
+                  avatar: avatar,
+                };
+              });
+              setRecentPets(recent);
+            }
+          }
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -119,11 +176,12 @@ export default function DashboardPage() {
 
   const userRole = (session.user as any)?.userRole || 'USER';
   const showRegisteredPetOwners = userRole === 'SUPER_ADMIN' || userRole === 'VETERINARIAN';
+  const isUserRole = userRole === 'USER';
 
   // Stats configuration
   const statsConfig = [
     {
-      title: 'Total Pets',
+      title: isUserRole ? 'My Pets' : 'Total Pets',
       value: stats.totalPets.toString(),
       change: '',
       changeType: 'positive' as const,
@@ -168,44 +226,6 @@ export default function DashboardPage() {
     },
   ];
 
-  const recentPets = [
-    {
-      id: 1,
-      name: 'Buddy',
-      breed: 'Golden Retriever',
-      age: '3 years',
-      lastVisit: '2 days ago',
-      status: 'healthy',
-      avatar: '🐕',
-    },
-    {
-      id: 2,
-      name: 'Luna',
-      breed: 'Persian Cat',
-      age: '2 years',
-      lastVisit: '1 week ago',
-      status: 'needs_attention',
-      avatar: '🐱',
-    },
-    {
-      id: 3,
-      name: 'Charlie',
-      breed: 'Labrador',
-      age: '5 years',
-      lastVisit: '3 days ago',
-      status: 'healthy',
-      avatar: '🐕',
-    },
-    {
-      id: 4,
-      name: 'Mittens',
-      breed: 'Maine Coon',
-      age: '1 year',
-      lastVisit: '5 days ago',
-      status: 'healthy',
-      avatar: '🐱',
-    },
-  ];
 
   // Format appointment date for display
   const formatAppointmentDate = (dateString: string | Date) => {
@@ -339,35 +359,41 @@ export default function DashboardPage() {
               Recent Pets
             </h3>
             <div className="space-y-4">
-              {recentPets.map((pet) => (
-                <div key={pet.id} className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg">
-                      {pet.avatar}
+              {recentPets.length > 0 ? (
+                recentPets.map((pet) => (
+                  <div key={pet.id} className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg">
+                        {pet.avatar}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {pet.name}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {pet.breed} • {pet.age}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      <p className="text-sm text-gray-500">{pet.lastVisit}</p>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          pet.status === 'healthy'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {pet.status === 'healthy' ? 'Healthy' : 'Needs Attention'}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {pet.name}
-                    </p>
-                    <p className="text-sm text-gray-500 truncate">
-                      {pet.breed} • {pet.age}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 text-right">
-                    <p className="text-sm text-gray-500">{pet.lastVisit}</p>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        pet.status === 'healthy'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {pet.status === 'healthy' ? 'Healthy' : 'Needs Attention'}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-4">
+                  No pets found
+                </p>
+              )}
             </div>
             <div className="mt-4">
               <a
@@ -457,13 +483,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Quick Actions - Only visible for USER role */}
+      {isUserRole && (
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Quick Actions
+            </h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <a
               href="/dashboard/pets/new"
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300"
@@ -487,7 +514,7 @@ export default function DashboardPage() {
             </a>
 
             <a
-              href="/dashboard/appointments/new"
+              href="/dashboard/appointment-schedule"
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300"
             >
               <div>
@@ -554,6 +581,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

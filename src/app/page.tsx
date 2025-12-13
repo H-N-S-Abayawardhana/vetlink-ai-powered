@@ -11,7 +11,7 @@ import BackToTop from "../components/website/BackToTop";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0B1020] text-slate-50">
       <Navigation />
       <Hero />
       <PrimaryFeatures />
