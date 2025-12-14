@@ -1,8 +1,5 @@
-// src/services/mlApi.ts
-
-// Use Hugging Face Spaces URL instead of localhost
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_ML_API_URL ||
+  process.env.NEXT_PUBLIC_DOG_SKIN_DISEASE_ML_API_URL ||
   "https://niwarthana-skin-disease-detection-of-dogs.hf.space";
 
 export interface PredictionResult {
@@ -117,3 +114,5 @@ export class MLApiService {
 }
 
 export default MLApiService;
+
+

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import MLApiService, { PredictionResult } from "@/services/mlApi";
+import MLApiService, {
+  PredictionResult,
+} from "@/services/skin-disease-detection/mlApi";
 import type { Pet } from "@/lib/pets";
 import { createSkinDiseaseRecord } from "@/lib/skin-disease-records";
 import ImageUpload from "./ImageUpload";
