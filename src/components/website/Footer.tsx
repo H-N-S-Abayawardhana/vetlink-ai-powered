@@ -1,20 +1,20 @@
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#0B1020] text-slate-50 py-12">
+    <footer className="relative overflow-hidden bg-white text-gray-900 py-12 border-t border-gray-200">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 left-[-10rem] h-72 w-[40rem] rounded-full bg-[#7C7CFF]/10 blur-3xl" />
-        <div className="absolute -bottom-24 right-[-10rem] h-72 w-[40rem] rounded-full bg-[#00E5FF]/10 blur-3xl" />
+        <div className="absolute -top-24 left-[-10rem] h-72 w-[40rem] rounded-full bg-blue-50/40 blur-3xl" />
+        <div className="absolute -bottom-24 right-[-10rem] h-72 w-[40rem] rounded-full bg-blue-100/30 blur-3xl" />
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-t border-white/10 mb-10" />
+        <div className="border-t border-gray-200 mb-10" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-2xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#00E5FF] to-[#2DD4BF] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">
                 VetLink
               </span>
             </h3>
-            <p className="text-gray-300 mb-4">
+            <p className="text-gray-600 mb-4">
               Smart pet healthcare management system powered by AI technology.
             </p>
             <div className="flex space-x-4">
@@ -23,7 +23,7 @@ export default function Footer() {
                 href="https://instagram.com/vetlink"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-xl p-2 text-gray-300 hover:text-slate-50 hover:bg-white/5 transition-all cursor-pointer ring-1 ring-transparent hover:ring-white/10 hover:shadow-[0_0_0_1px_rgba(124,124,255,0.18),0_14px_30px_-18px_rgba(124,124,255,0.35)]"
+                className="rounded-xl p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-all cursor-pointer ring-1 ring-transparent hover:ring-blue-200 hover:shadow-sm"
               >
                 <svg
                   className="w-6 h-6"
@@ -71,7 +71,7 @@ export default function Footer() {
                 href="https://linkedin.com/company/vetlink"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-xl p-2 text-gray-300 hover:text-slate-50 hover:bg-white/5 transition-all cursor-pointer ring-1 ring-transparent hover:ring-white/10 hover:shadow-[0_0_0_1px_rgba(124,124,255,0.18),0_14px_30px_-18px_rgba(124,124,255,0.35)]"
+                className="rounded-xl p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-all cursor-pointer ring-1 ring-transparent hover:ring-blue-200 hover:shadow-sm"
               >
                 <svg
                   className="w-6 h-6"
@@ -85,11 +85,11 @@ export default function Footer() {
           </div>
           <div>
             <h4 className="text-lg font-semibold mb-4">Features</h4>
-            <ul className="space-y-2 text-gray-300">
+            <ul className="space-y-2 text-gray-600">
               <li>
                 <a
                   href="#features"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   Skin Care Detection
                 </a>
@@ -97,7 +97,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#features"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   Anomaly Detection
                 </a>
@@ -105,7 +105,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#features"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   AI Diet Plans
                 </a>
@@ -113,7 +113,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#features"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   Intelligent Pharmacy
                 </a>
@@ -122,11 +122,11 @@ export default function Footer() {
           </div>
           <div>
             <h4 className="text-lg font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-gray-300">
+            <ul className="space-y-2 text-gray-600">
               <li>
                 <a
                   href="#"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   Help Center
                 </a>
@@ -134,7 +134,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#contact"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   Contact Us
                 </a>
@@ -142,7 +142,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   Privacy Policy
                 </a>
@@ -150,7 +150,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-slate-50 transition-colors cursor-pointer"
+                  className="hover:text-blue-700 transition-colors cursor-pointer"
                 >
                   Terms of Service
                 </a>
@@ -159,14 +159,14 @@ export default function Footer() {
           </div>
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2 text-gray-300">
+            <ul className="space-y-2 text-gray-600">
               <li>Email: info@vetlink.com</li>
               <li>Phone: (555) 123-4567</li>
               <li>Address: 123 Pet Care Ave</li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-white/10 mt-8 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500">
           <p>&copy; 2026 VetLink. All rights reserved.</p>
         </div>
       </div>
