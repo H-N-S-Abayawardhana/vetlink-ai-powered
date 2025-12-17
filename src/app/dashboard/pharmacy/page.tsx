@@ -122,7 +122,7 @@ export default function PharmacyPage() {
                         <div className="text-xs text-emerald-100 mt-1">Find medications for your pet</div>
                       </button>
                       <button
-                        onClick={() => router.push('/pharmacies/inventory')}
+                        onClick={() => router.push('/dashboard/pharmacy/inventory')}
                         className="bg-white/20 backdrop-blur-sm hover:bg-white/30 px-4 py-3 rounded-xl font-medium transition-all text-left"
                       >
                         <div className="text-2xl mb-1">📦</div>

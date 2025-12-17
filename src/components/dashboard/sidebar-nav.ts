@@ -8,6 +8,8 @@ import {
   LightBulbIcon,
   EyeIcon,
   CogIcon,
+  BuildingStorefrontIcon,
+  CubeIcon,
 } from "@heroicons/react/24/outline";
 
 export type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
@@ -16,10 +18,11 @@ export type SidebarNavPlacement = "top" | "bottom";
 
 export interface SidebarNavItem {
   name: string;
-  href: string;
+  href?: string;
   icon: SidebarIcon;
   roles: UserRole[];
   placement?: SidebarNavPlacement;
+  children?: SidebarNavItem[];
 }
 
 const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
@@ -84,6 +87,37 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     roles: ["SUPER_ADMIN", "VETERINARIAN"],
   },
   {
+    name: "Pharmacy",
+    icon: BuildingStorefrontIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+    children: [
+      {
+        name: "Dashboard",
+        href: "/dashboard/pharmacy",
+        icon: BuildingStorefrontIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Register",
+        href: "/dashboard/pharmacy/register",
+        icon: BuildingStorefrontIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Inventory",
+        href: "/dashboard/pharmacy/inventory",
+        icon: CubeIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Owner Dashboard",
+        href: "/dashboard/pharmacy/owner",
+        icon: BuildingStorefrontIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN"],
+      },
+    ],
+  },
+  {
     name: "Settings",
     href: "/dashboard/settings",
     icon: CogIcon,
@@ -98,7 +132,18 @@ export function getSidebarNavItems(userRole: UserRole): {
 } {
   const allowed = SIDEBAR_NAV_ITEMS.filter((item) =>
     item.roles.includes(userRole),
-  );
+  ).map((item) => {
+    // Filter children based on user role
+    if (item.children) {
+      return {
+        ...item,
+        children: item.children.filter((child) =>
+          child.roles.includes(userRole),
+        ),
+      };
+    }
+    return item;
+  });
   return {
     top: allowed.filter((item) => (item.placement ?? "top") === "top"),
     bottom: allowed.filter((item) => item.placement === "bottom"),
