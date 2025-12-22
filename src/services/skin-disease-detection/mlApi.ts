@@ -114,5 +114,3 @@ export class MLApiService {
 }
 
 export default MLApiService;
-
-

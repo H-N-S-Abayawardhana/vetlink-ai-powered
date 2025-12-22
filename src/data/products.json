@@ -1,10 +1,58 @@
 {
   "products": [
-    { "id": 1, "name": "Grain-Free Adult Dog Food - 10kg", "price": 1000.00, "category": "Food", "stock": 42, "image": "/products/dog-food.jpg", "description": "High-quality grain-free food for adult dogs. Real meat first ingredient." },
-    { "id": 2, "name": "Multi-Vitamin for Dogs - 60 tablets", "price": 500.50, "category": "Supplements", "stock": 120, "image": "/products/dog-vitamin.jpg", "description": "Daily vitamins to keep your dog's coat shiny and energy high." },
-    { "id": 3, "name": "Flea & Tick Spot-on (Small) - 3 pack", "price": 850.50, "category": "Preventatives", "stock": 32, "image": "/products/flea-tick.jpg", "description": "Effective monthly protection against fleas and ticks." },
-    { "id": 4, "name": "Catnip Toy Bundle", "price": 450.50, "category": "Toys", "stock": 80, "image": "/products/cat-toy.jpg", "description": "Interactive catnip toys pack for kicking and batting fun." },
-    { "id": 5, "name": "Veterinary Bandage Rolls - 5cm x 4m", "price": 500.99, "category": "First Aid", "stock": 200, "image": "/products/bandage.jpg", "description": "Flexible, self-adhesive bandage for minor pet injuries." },
-    { "id": 6, "name": "Puppy Wet Food Variety Pack - 12 cans", "price": 2400.99, "category": "Food", "stock": 27, "image": "/products/puppy-food.jpg", "description": "Complete nutrition for growing puppies in a tasty variety pack." }
+    {
+      "id": 1,
+      "name": "Grain-Free Adult Dog Food - 10kg",
+      "price": 1000.0,
+      "category": "Food",
+      "stock": 42,
+      "image": "/products/dog-food.jpg",
+      "description": "High-quality grain-free food for adult dogs. Real meat first ingredient."
+    },
+    {
+      "id": 2,
+      "name": "Multi-Vitamin for Dogs - 60 tablets",
+      "price": 500.5,
+      "category": "Supplements",
+      "stock": 120,
+      "image": "/products/dog-vitamin.jpg",
+      "description": "Daily vitamins to keep your dog's coat shiny and energy high."
+    },
+    {
+      "id": 3,
+      "name": "Flea & Tick Spot-on (Small) - 3 pack",
+      "price": 850.5,
+      "category": "Preventatives",
+      "stock": 32,
+      "image": "/products/flea-tick.jpg",
+      "description": "Effective monthly protection against fleas and ticks."
+    },
+    {
+      "id": 4,
+      "name": "Catnip Toy Bundle",
+      "price": 450.5,
+      "category": "Toys",
+      "stock": 80,
+      "image": "/products/cat-toy.jpg",
+      "description": "Interactive catnip toys pack for kicking and batting fun."
+    },
+    {
+      "id": 5,
+      "name": "Veterinary Bandage Rolls - 5cm x 4m",
+      "price": 500.99,
+      "category": "First Aid",
+      "stock": 200,
+      "image": "/products/bandage.jpg",
+      "description": "Flexible, self-adhesive bandage for minor pet injuries."
+    },
+    {
+      "id": 6,
+      "name": "Puppy Wet Food Variety Pack - 12 cans",
+      "price": 2400.99,
+      "category": "Food",
+      "stock": 27,
+      "image": "/products/puppy-food.jpg",
+      "description": "Complete nutrition for growing puppies in a tasty variety pack."
+    }
   ]
 }

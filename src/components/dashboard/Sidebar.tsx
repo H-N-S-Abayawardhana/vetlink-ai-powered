@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { XMarkIcon, ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+  XMarkIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import { getSidebarNavItems, type SidebarNavItem } from "./sidebar-nav";
 import { UserRole } from "@/types/next-auth";
 
@@ -25,18 +29,19 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   // Memoize navigation items to prevent infinite loops
   const { top: navigationItems, bottom: bottomNavigationItems } = useMemo(
     () => getSidebarNavItems(userRole),
-    [userRole]
+    [userRole],
   );
 
   // Auto-open dropdown if current path matches a child
   useEffect(() => {
-    const { top: navItems, bottom: bottomNavItems } = getSidebarNavItems(userRole);
+    const { top: navItems, bottom: bottomNavItems } =
+      getSidebarNavItems(userRole);
     const newOpenDropdowns = new Set<string>();
-    
+
     navItems.forEach((item) => {
       if (item.children) {
         const hasActiveChild = item.children.some(
-          (child) => child.href && pathname === child.href
+          (child) => child.href && pathname === child.href,
         );
         if (hasActiveChild) {
           newOpenDropdowns.add(item.name);
@@ -46,14 +51,14 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     bottomNavItems.forEach((item) => {
       if (item.children) {
         const hasActiveChild = item.children.some(
-          (child) => child.href && pathname === child.href
+          (child) => child.href && pathname === child.href,
         );
         if (hasActiveChild) {
           newOpenDropdowns.add(item.name);
         }
       }
     });
-    
+
     setOpenDropdowns(newOpenDropdowns);
   }, [pathname, userRole]);
 
@@ -72,7 +77,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const isItemActive = (item: SidebarNavItem): boolean => {
     if (item.href && pathname === item.href) return true;
     if (item.children) {
-      return item.children.some((child) => child.href && pathname === child.href);
+      return item.children.some(
+        (child) => child.href && pathname === child.href,
+      );
     }
     return false;
   };

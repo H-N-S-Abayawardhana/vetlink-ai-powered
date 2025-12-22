@@ -1,35 +1,46 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
-import { formatLKR } from '@/lib/currency';
+import { formatLKR } from "@/lib/currency";
 
 export default function PrescriptionMatcher() {
-  const [items, setItems] = useState<string[]>(['']);
-  const [lat, setLat] = useState('');
-  const [lng, setLng] = useState('');
+  const [items, setItems] = useState<string[]>([""]);
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleItemChange = (index: number, value: string) => {
-    setItems(prev => prev.map((v, i) => i === index ? value : v));
+    setItems((prev) => prev.map((v, i) => (i === index ? value : v)));
   };
 
-  const addItem = () => setItems(prev => [...prev, '']);
-  const removeItem = (index: number) => setItems(prev => prev.filter((_, i) => i !== index));
+  const addItem = () => setItems((prev) => [...prev, ""]);
+  const removeItem = (index: number) =>
+    setItems((prev) => prev.filter((_, i) => i !== index));
 
   const search = async () => {
     setLoading(true);
-    const payload = { items: items.filter(Boolean).map(n => ({ name: n, qty: 1 })), lat: lat ? Number(lat) : undefined, lng: lng ? Number(lng) : undefined };
+    const payload = {
+      items: items.filter(Boolean).map((n) => ({ name: n, qty: 1 })),
+      lat: lat ? Number(lat) : undefined,
+      lng: lng ? Number(lng) : undefined,
+    };
     try {
-      const res = await fetch('/api/pharmacies/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = await fetch("/api/pharmacies/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       const data = await res.json();
       if (res.ok) setResults(data.matches || []);
       else setResults([]);
     } catch (err) {
       console.error(err);
       setResults([]);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,14 +73,28 @@ export default function PrescriptionMatcher() {
             <div key={idx} className="p-3 border rounded bg-gray-50">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">{r.name} {r.distanceKm ? `— ${r.distanceKm.toFixed(2)}km` : ''}</div>
-                  <div className="text-xs text-gray-500">{r.address} • delivery: {r.delivery?.delivery ? `Yes (fee ${formatLKR(r.delivery.delivery_fee)})` : 'Pickup only'}</div>
+                  <div className="font-medium">
+                    {r.name}{" "}
+                    {r.distanceKm ? `— ${r.distanceKm.toFixed(2)}km` : ""}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {r.address} • delivery:{" "}
+                    {r.delivery?.delivery
+                      ? `Yes (fee ${formatLKR(r.delivery.delivery_fee)})`
+                      : "Pickup only"}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-700">Total: {formatLKR(r.totalPrice)}</div>
+                <div className="text-sm text-gray-700">
+                  Total: {formatLKR(r.totalPrice)}
+                </div>
               </div>
 
-                <div className="mt-2 text-xs text-gray-700">
-                {r.items.map((it: any, i: number) => (<div key={i}>{it.medication} x {it.qty} — {formatLKR(it.total)}</div>))}
+              <div className="mt-2 text-xs text-gray-700">
+                {r.items.map((it: any, i: number) => (
+                  <div key={i}>
+                    {it.medication} x {it.qty} — {formatLKR(it.total)}
+                  </div>
+                ))}
               </div>
             </div>
           ))}

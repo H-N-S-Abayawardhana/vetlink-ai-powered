@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Alert from "@/components/ui/Alert";
-import { formatLKR } from '@/lib/currency';
+import { formatLKR } from "@/lib/currency";
 
 interface Appointment {
   id: number;
@@ -285,7 +285,9 @@ export default function PaymentModal({
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isProcessing}
             >
-              {isProcessing ? "Processing..." : `Pay ${formatLKR(consultationFee)}`}
+              {isProcessing
+                ? "Processing..."
+                : `Pay ${formatLKR(consultationFee)}`}
             </button>
           </div>
         </form>

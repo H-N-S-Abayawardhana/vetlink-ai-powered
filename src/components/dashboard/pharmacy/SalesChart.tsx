@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
 interface Props {
   values: number[];
@@ -26,8 +26,24 @@ export default function SalesChart({ values, labels = [] }: Props) {
             const y = height - padding - barHeight;
             return (
               <g key={i}>
-                <rect x={x} y={y} width={barWidth} height={barHeight} rx={4} fill="#60a5fa" opacity={0.9} />
-                <text x={x + barWidth / 2} y={height - padding + 14} fontSize={11} fill="#374151" textAnchor="middle">{labels[i] ?? ''}</text>
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barHeight}
+                  rx={4}
+                  fill="#60a5fa"
+                  opacity={0.9}
+                />
+                <text
+                  x={x + barWidth / 2}
+                  y={height - padding + 14}
+                  fontSize={11}
+                  fill="#374151"
+                  textAnchor="middle"
+                >
+                  {labels[i] ?? ""}
+                </text>
               </g>
             );
           })}

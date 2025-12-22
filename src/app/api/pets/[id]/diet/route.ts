@@ -6,7 +6,10 @@ import { mapRowToPet } from "@/lib/pet-utils";
 import { generateDietPlan } from "@/lib/diet";
 
 // GET /api/pets/:id/diet -> generate diet plan based on stored pet data
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id)

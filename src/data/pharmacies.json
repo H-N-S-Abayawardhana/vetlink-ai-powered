@@ -8,9 +8,33 @@
       "contact": { "phone": "+94-11-1234567", "email": "city@pharm.fake" },
       "delivery": { "pickup": true, "delivery": true, "delivery_fee": 5.0 },
       "inventory": [
-        { "id": 1, "name": "Amoxicillin", "form": "Capsule", "strength": "250 mg", "stock": 120, "expiry": "2026-11-01", "price": 9.00 },
-        { "id": 2, "name": "Prednisone", "form": "Tablet", "strength": "5 mg", "stock": 40, "expiry": "2027-02-15", "price": 13.0 },
-        { "id": 3, "name": "Ivermectin", "form": "Oral suspension", "strength": "1%", "stock": 4, "expiry": "2026-07-28", "price": 18.0 }
+        {
+          "id": 1,
+          "name": "Amoxicillin",
+          "form": "Capsule",
+          "strength": "250 mg",
+          "stock": 120,
+          "expiry": "2026-11-01",
+          "price": 9.0
+        },
+        {
+          "id": 2,
+          "name": "Prednisone",
+          "form": "Tablet",
+          "strength": "5 mg",
+          "stock": 40,
+          "expiry": "2027-02-15",
+          "price": 13.0
+        },
+        {
+          "id": 3,
+          "name": "Ivermectin",
+          "form": "Oral suspension",
+          "strength": "1%",
+          "stock": 4,
+          "expiry": "2026-07-28",
+          "price": 18.0
+        }
       ]
     },
     {
@@ -21,8 +45,24 @@
       "contact": { "phone": "+94-81-7654321", "email": "suburb@pharm.fake" },
       "delivery": { "pickup": true, "delivery": false, "delivery_fee": 0 },
       "inventory": [
-        { "id": 1, "name": "Amoxicillin", "form": "Capsule", "strength": "250 mg", "stock": 12, "expiry": "2026-06-01", "price": 10.0 },
-        { "id": 3, "name": "Ivermectin", "form": "Oral suspension", "strength": "1%", "stock": 40, "expiry": "2027-05-01", "price": 16.5 }
+        {
+          "id": 1,
+          "name": "Amoxicillin",
+          "form": "Capsule",
+          "strength": "250 mg",
+          "stock": 12,
+          "expiry": "2026-06-01",
+          "price": 10.0
+        },
+        {
+          "id": 3,
+          "name": "Ivermectin",
+          "form": "Oral suspension",
+          "strength": "1%",
+          "stock": 40,
+          "expiry": "2027-05-01",
+          "price": 16.5
+        }
       ]
     }
   ]

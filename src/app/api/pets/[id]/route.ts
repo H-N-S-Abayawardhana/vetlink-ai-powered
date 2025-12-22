@@ -5,7 +5,10 @@ import pool from "@/lib/db";
 import { mapRowToPet } from "@/lib/pet-utils";
 
 // GET /api/pets/:id
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -43,7 +46,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // PUT /api/pets/:id
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -163,7 +169,10 @@ export async function DELETE(
 }
 
 // PATCH /api/pets/:id - partial update
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

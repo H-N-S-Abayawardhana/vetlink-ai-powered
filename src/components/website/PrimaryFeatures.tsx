@@ -2,194 +2,159 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { CalendarDays, FileText, Headset, MessageCircle } from "lucide-react";
+import {
+  CalendarDays,
+  FileText,
+  Headset,
+  MessageCircle,
+  ArrowRight,
+} from "lucide-react";
 
 export default function PrimaryFeatures() {
-  const fadeUp = {
-    hidden: { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0 },
-  };
+  const features = [
+    {
+      icon: CalendarDays,
+      title: "Appointment Scheduling",
+      description:
+        "Book vet appointments instantly with smart scheduling and automated reminders.",
+      image:
+        "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "indigo",
+    },
+    {
+      icon: FileText,
+      title: "Digital Health Records",
+      description:
+        "Maintain comprehensive digital health records and track medical history securely.",
+      image:
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "teal",
+    },
+    {
+      icon: Headset,
+      title: "24/7 Emergency Support",
+      description:
+        "Get instant access to emergency veterinary support and first aid guidance.",
+      image:
+        "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "indigo",
+    },
+    {
+      icon: MessageCircle,
+      title: "Expert Vet Consultation",
+      description:
+        "Connect with certified veterinarians for professional advice and remote diagnosis.",
+      image:
+        "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "teal",
+    },
+  ];
 
   return (
     <section
       id="primary-features"
-      className="relative overflow-hidden py-12 md:py-16 bg-gray-50"
+      className="relative overflow-hidden py-24 sm:py-32 bg-gradient-to-b from-gray-50/50 to-white"
     >
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 left-[-10rem] h-72 w-[40rem] rounded-full bg-blue-100/30 blur-3xl" />
-        <div className="absolute -bottom-24 right-[-10rem] h-72 w-[40rem] rounded-full bg-blue-50/40 blur-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent" />
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute top-1/2 left-0 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-100/20 to-transparent blur-3xl"
+          animate={{
+            x: [0, 50, 0],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          variants={fadeUp}
-          className="text-center mb-10 md:mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-16 sm:mb-20"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
-            Primary Features
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+            Essential{" "}
+            <span className="bg-gradient-to-r from-indigo-600 to-teal-600 bg-clip-text text-transparent">
+              Care Services
+            </span>
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Essential pet care services that form the foundation of
             comprehensive veterinary healthcare
           </p>
         </motion.div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          variants={{
-            hidden: {},
-            show: { transition: { staggerChildren: 0.08 } },
-          }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
-        >
-          {/* Feature 1: Appointment Scheduling */}
-          <motion.div
-            variants={fadeUp}
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="group relative rounded-2xl border border-gray-200 bg-white shadow-sm p-5 md:p-6 transition-all hover:shadow-md"
-          >
-            <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent rounded-2xl" />
-            </div>
-            <div className="relative flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 ring-1 ring-blue-100 flex items-center justify-center flex-shrink-0">
-                <CalendarDays className="w-5 h-5 text-blue-700" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
-                  Appointment Scheduling
-                </h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Book vet appointments instantly with smart scheduling and
-                  automated reminders.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-xl overflow-hidden ring-1 ring-gray-200">
-                  <Image
-                    src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Appointment scheduling"
-                    fill
-                    className="object-cover opacity-90"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                delay: index * 0.1,
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              whileHover={{ y: -4, scale: 1.01 }}
+              className="group relative rounded-2xl border border-gray-200/60 bg-white/80 backdrop-blur-sm p-6 sm:p-8 transition-all hover:border-indigo-200/60 hover:shadow-xl hover:shadow-indigo-500/5"
+            >
+              <motion.div
+                className={`absolute inset-0 rounded-2xl bg-gradient-to-br to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                  feature.color === "indigo"
+                    ? "from-indigo-50/30"
+                    : "from-teal-50/30"
+                }`}
+                layoutId={`primary-feature-bg-${index}`}
+              />
 
-          {/* Feature 2: Health Records */}
-          <motion.div
-            variants={fadeUp}
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="group relative rounded-2xl border border-gray-200 bg-white shadow-sm p-5 md:p-6 transition-all hover:shadow-md"
-          >
-            <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent rounded-2xl" />
-            </div>
-            <div className="relative flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 ring-1 ring-blue-100 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-5 h-5 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
-                  Digital Health Records
-                </h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Maintain comprehensive digital health records and track
-                  medical history securely.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-xl overflow-hidden ring-1 ring-gray-200">
-                  <Image
-                    src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Digital health records"
-                    fill
-                    className="object-cover opacity-90"
-                    sizes="(max-width: 768px) 100vw, 50vw"
+              <div className="relative flex items-start gap-5 sm:gap-6">
+                <div
+                  className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center ring-1 ${
+                    feature.color === "indigo"
+                      ? "bg-gradient-to-br from-indigo-50 to-indigo-100/50 ring-indigo-200/30"
+                      : "bg-gradient-to-br from-teal-50 to-teal-100/50 ring-teal-200/30"
+                  }`}
+                >
+                  <feature.icon
+                    className={`w-6 h-6 sm:w-7 sm:h-7 ${
+                      feature.color === "indigo"
+                        ? "text-indigo-600"
+                        : "text-teal-600"
+                    }`}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4 leading-relaxed text-sm sm:text-base">
+                    {feature.description}
+                  </p>
+                  <div className="relative w-full h-32 sm:h-40 rounded-xl overflow-hidden ring-1 ring-gray-200/50">
+                    <Image
+                      src={feature.image}
+                      alt={feature.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-white/10 to-transparent" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-
-          {/* Feature 3: Emergency Support */}
-          <motion.div
-            variants={fadeUp}
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="group relative rounded-2xl border border-gray-200 bg-white shadow-sm p-5 md:p-6 transition-all hover:shadow-md"
-          >
-            <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent rounded-2xl" />
-            </div>
-            <div className="relative flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 ring-1 ring-blue-100 flex items-center justify-center flex-shrink-0">
-                <Headset className="w-5 h-5 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
-                  24/7 Emergency Support
-                </h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Get instant access to emergency veterinary support and first
-                  aid guidance.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-xl overflow-hidden ring-1 ring-gray-200">
-                  <Image
-                    src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Emergency support"
-                    fill
-                    className="object-cover opacity-90"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Feature 4: Vet Consultation */}
-          <motion.div
-            variants={fadeUp}
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="group relative rounded-2xl border border-gray-200 bg-white shadow-sm p-5 md:p-6 transition-all hover:shadow-md"
-          >
-            <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent rounded-2xl" />
-            </div>
-            <div className="relative flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 ring-1 ring-blue-100 flex items-center justify-center flex-shrink-0">
-                <MessageCircle className="w-5 h-5 text-blue-700" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
-                  Expert Vet Consultation
-                </h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Connect with certified veterinarians for professional advice
-                  and remote diagnosis.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-xl overflow-hidden ring-1 ring-gray-200">
-                  <Image
-                    src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Vet consultation"
-                    fill
-                    className="object-cover opacity-90"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

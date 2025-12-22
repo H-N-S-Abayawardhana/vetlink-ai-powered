@@ -25,7 +25,9 @@ export default function PharmacyInventoryShop() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [uploadedPrescription, setUploadedPrescription] = useState<File | null>(null);
+  const [uploadedPrescription, setUploadedPrescription] = useState<File | null>(
+    null,
+  );
   const [uploadedName, setUploadedName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -72,21 +74,28 @@ export default function PharmacyInventoryShop() {
     setCart((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const total = cart.reduce((acc, i) => acc + i.qty * (i.product.price || 0), 0);
+  const total = cart.reduce(
+    (acc, i) => acc + i.qty * (i.product.price || 0),
+    0,
+  );
 
   // derive categories from the loaded products so filter pills always match available data
-  const derivedCategories = ["all", ...Array.from(new Set(products.map((p: any) => p.category || 'Uncategorized')))] as string[];
+  const derivedCategories = [
+    "all",
+    ...Array.from(
+      new Set(products.map((p: any) => p.category || "Uncategorized")),
+    ),
+  ] as string[];
 
   const categoryIcons: Record<string, string> = {
-    all: '✨',
-    Food: '🍖',
-    Supplements: '💊',
-    Preventatives: '🛡️',
-    Toys: '🧸',
-    'First Aid': '🩺',
-    Uncategorized: '✨'
+    all: "✨",
+    Food: "🍖",
+    Supplements: "💊",
+    Preventatives: "🛡️",
+    Toys: "🧸",
+    "First Aid": "🩺",
+    Uncategorized: "✨",
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
@@ -99,12 +108,16 @@ export default function PharmacyInventoryShop() {
               <span>Premium Pet Healthcare</span>
             </div>
             <h1 className="text-5xl font-bold">🐾 Pet Pharmacy</h1>
-            <p className="text-xl text-emerald-100">Quality medicines & supplements for your beloved pets</p>
-            
+            <p className="text-xl text-emerald-100">
+              Quality medicines & supplements for your beloved pets
+            </p>
+
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto mt-8">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                  🔍
+                </span>
                 <input
                   type="text"
                   placeholder="Search for medicines, supplements, or health products..."
@@ -137,9 +150,16 @@ export default function PharmacyInventoryShop() {
 
                   <div className="text-xs text-white/90">
                     {uploadedName ? (
-                      <span className="font-medium">Uploaded: <span className="text-sm ml-1 font-normal">{uploadedName}</span></span>
+                      <span className="font-medium">
+                        Uploaded:{" "}
+                        <span className="text-sm ml-1 font-normal">
+                          {uploadedName}
+                        </span>
+                      </span>
                     ) : (
-                      <span className="opacity-80">Upload an image or PDF to find medicines easily</span>
+                      <span className="opacity-80">
+                        Upload an image or PDF to find medicines easily
+                      </span>
                     )}
                   </div>
                 </div>
@@ -155,7 +175,6 @@ export default function PharmacyInventoryShop() {
           <div className="lg:col-span-3 space-y-6">
             {/* Category Filter Pills */}
             <div className="flex gap-3 overflow-x-auto pb-2">
-              
               {derivedCategories.map((cat) => {
                 return (
                   <button
@@ -167,8 +186,12 @@ export default function PharmacyInventoryShop() {
                         : "bg-white text-gray-700 hover:bg-emerald-50 border border-gray-200"
                     }`}
                   >
-                    <span className="text-lg">{categoryIcons[cat] || '✨'}</span>
-                    <span className="font-medium">{cat === 'all' ? 'All Products' : cat}</span>
+                    <span className="text-lg">
+                      {categoryIcons[cat] || "✨"}
+                    </span>
+                    <span className="font-medium">
+                      {cat === "all" ? "All Products" : cat}
+                    </span>
                   </button>
                 );
               })}
@@ -180,18 +203,27 @@ export default function PharmacyInventoryShop() {
               {(() => {
                 const q = searchQuery.trim().toLowerCase();
                 const filtered = products.filter((p: any) => {
-                  const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
-                  const matchesQuery = !q || p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q);
+                  const matchesCategory =
+                    selectedCategory === "all" ||
+                    p.category === selectedCategory;
+                  const matchesQuery =
+                    !q ||
+                    p.name.toLowerCase().includes(q) ||
+                    (p.description || "").toLowerCase().includes(q);
                   return matchesCategory && matchesQuery;
                 });
 
                 if (filtered.length === 0) {
                   return (
-                    <div className="p-12 text-center text-gray-500 bg-white rounded-lg border border-gray-200">No products match your search.</div>
+                    <div className="p-12 text-center text-gray-500 bg-white rounded-lg border border-gray-200">
+                      No products match your search.
+                    </div>
                   );
                 }
 
-                return <ProductGrid products={filtered} onAddToCart={addToCart} />;
+                return (
+                  <ProductGrid products={filtered} onAddToCart={addToCart} />
+                );
               })()}
             </div>
           </div>
@@ -203,7 +235,7 @@ export default function PharmacyInventoryShop() {
               {/* Cart Header */}
               <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-5">
                 <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-lg flex items-center gap-2">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
                     <span className="text-xl">🛒</span>
                     Shopping Cart
                   </h3>
@@ -220,12 +252,17 @@ export default function PharmacyInventoryShop() {
                     <div className="text-center py-12 text-gray-400">
                       <div className="mx-auto mb-3 opacity-30 text-5xl">🛒</div>
                       <p className="text-sm">Your cart is empty</p>
-                      <p className="text-xs mt-1">Add products to get started</p>
+                      <p className="text-xs mt-1">
+                        Add products to get started
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-96 overflow-auto pr-2">
                       {cart.map((item) => (
-                        <div key={item.id} className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-200 shadow-sm">
+                        <div
+                          key={item.id}
+                          className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-200 shadow-sm"
+                        >
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex-1">
                               <h4 className="font-semibold text-emerald-900 text-sm leading-tight">
@@ -235,16 +272,31 @@ export default function PharmacyInventoryShop() {
                                 {formatLKR(item.product.price)} each
                               </p>
                             </div>
-                              <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition">🗑️</button>
+                            <button
+                              onClick={() => removeFromCart(item.id)}
+                              className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition"
+                            >
+                              🗑️
+                            </button>
                           </div>
 
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 bg-white rounded-lg border border-emerald-300 p-1">
-                                <button onClick={() => updateQuantity(item.id, -1)} className="hover:bg-emerald-100 p-1 rounded transition">➖</button>
+                              <button
+                                onClick={() => updateQuantity(item.id, -1)}
+                                className="hover:bg-emerald-100 p-1 rounded transition"
+                              >
+                                ➖
+                              </button>
                               <span className="text-sm font-semibold text-emerald-900 w-8 text-center">
                                 {item.qty}
                               </span>
-                                <button onClick={() => updateQuantity(item.id, 1)} className="hover:bg-emerald-100 p-1 rounded transition">➕</button>
+                              <button
+                                onClick={() => updateQuantity(item.id, 1)}
+                                className="hover:bg-emerald-100 p-1 rounded transition"
+                              >
+                                ➕
+                              </button>
                             </div>
                             <div className="font-bold text-emerald-700">
                               {formatLKR(item.product.price * item.qty)}
@@ -260,8 +312,12 @@ export default function PharmacyInventoryShop() {
                 {cart.length > 0 && (
                   <div className="mt-5 pt-5 border-t border-gray-200 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600 font-medium">Subtotal:</span>
-                      <span className="text-2xl font-bold text-emerald-700">{formatLKR(total)}</span>
+                      <span className="text-gray-600 font-medium">
+                        Subtotal:
+                      </span>
+                      <span className="text-2xl font-bold text-emerald-700">
+                        {formatLKR(total)}
+                      </span>
                     </div>
                     <button className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                       Proceed to Checkout
@@ -305,4 +361,3 @@ export default function PharmacyInventoryShop() {
     </div>
   );
 }
-
