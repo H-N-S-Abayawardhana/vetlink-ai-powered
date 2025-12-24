@@ -14,9 +14,11 @@ import {
   EyeIcon,
   UserIcon,
   CogIcon,
-  XMarkIcon
+  XMarkIcon,
+  ChevronDownIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
-import { getAllowedNavigationItems } from '@/lib/rbac';
+import { getSidebarNavItems, type SidebarNavItem } from '@/components/dashboard/sidebar-nav';
 import { UserRole } from '@/types/next-auth';
 
 interface SidebarProps {
@@ -56,20 +58,20 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       getSidebarNavItems(userRole);
     const newOpenDropdowns = new Set<string>();
 
-    navItems.forEach((item) => {
+    navItems.forEach((item: SidebarNavItem) => {
       if (item.children) {
         const hasActiveChild = item.children.some(
-          (child) => child.href && pathname === child.href,
+          (child: SidebarNavItem) => child.href && pathname === child.href,
         );
         if (hasActiveChild) {
           newOpenDropdowns.add(item.name);
         }
       }
     });
-    bottomNavItems.forEach((item) => {
+    bottomNavItems.forEach((item: SidebarNavItem) => {
       if (item.children) {
         const hasActiveChild = item.children.some(
-          (child) => child.href && pathname === child.href,
+          (child: SidebarNavItem) => child.href && pathname === child.href,
         );
         if (hasActiveChild) {
           newOpenDropdowns.add(item.name);
@@ -96,7 +98,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     if (item.href && pathname === item.href) return true;
     if (item.children) {
       return item.children.some(
-        (child) => child.href && pathname === child.href,
+        (child: SidebarNavItem) => child.href && pathname === child.href,
       );
     }
     return false;
@@ -139,7 +141,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </button>
           {isOpen && (
             <div className="ml-4 mt-1 space-y-1">
-              {item.children!.map((child) => {
+              {item.children!.map((child: SidebarNavItem) => {
                 const isChildActive = child.href && pathname === child.href;
                 const ChildIconComponent = child.icon;
                 return (
@@ -237,12 +239,12 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
         <nav className="mt-6 px-3 flex flex-col flex-1 overflow-y-auto">
           <div className="space-y-3">
-            {navigationItems.map((item) => renderNavItem(item))}
+            {navigationItems.map((item: SidebarNavItem) => renderNavItem(item))}
           </div>
 
           {bottomNavigationItems.length > 0 && (
             <div className="mt-auto pt-4 pb-4 border-t border-gray-200 space-y-3">
-              {bottomNavigationItems.map((item) => renderNavItem(item, true))}
+              {bottomNavigationItems.map((item: SidebarNavItem) => renderNavItem(item, true))}
             </div>
           )}
         </nav>

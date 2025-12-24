@@ -753,7 +753,7 @@ export default function MobilityDetectionPage() {
             🐕 Pet Mobility & Disease Detection
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Upload your pet's walking video and provide health information for AI-powered disease prediction
+            Upload your pet&apos;s walking video and provide health information for AI-powered disease prediction
           </p>
         </div>
 
