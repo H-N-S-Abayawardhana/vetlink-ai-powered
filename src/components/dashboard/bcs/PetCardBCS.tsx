@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { formatBCSTimestamp } from '@/lib/format-date';
+import { formatBCSTimestamp } from "@/lib/format-date";
 import { ChevronRight } from "lucide-react";
 import type { Pet } from "@/lib/pets";
+import Image from "next/image";
 
 interface Props {
   pet: Pet;
@@ -12,7 +13,11 @@ interface Props {
 }
 
 export default function PetCardBCS({ pet, selected, onSelect }: Props) {
-  const avatar = pet.avatarDataUrl || (pet.type === "dog" ? "/uploads/default-dog.png" : "/uploads/default-cat.png");
+  const avatar =
+    pet.avatarDataUrl ||
+    (pet.type === "dog"
+      ? "/uploads/default-dog.png"
+      : "/uploads/default-cat.png");
 
   return (
     <button
@@ -21,9 +26,12 @@ export default function PetCardBCS({ pet, selected, onSelect }: Props) {
     >
       <div className="flex items-center gap-4">
         {pet.avatarDataUrl ? (
-          <img 
-            src={avatar as string} 
-            alt={pet.name} 
+          <Image
+            src={avatar as string}
+            alt={pet.name}
+            width={80}
+            height={80}
+            unoptimized
             className="w-20 h-20 object-cover rounded-xl shadow-md"
           />
         ) : (
@@ -35,10 +43,13 @@ export default function PetCardBCS({ pet, selected, onSelect }: Props) {
           <h3 className="text-xl font-bold text-gray-900 mb-1">{pet.name}</h3>
           <p className="text-sm text-gray-600">{pet.breed || "Mixed breed"}</p>
           {pet.bcsCalculatedAt && (
-            <p className="text-xs text-gray-500 mt-1">BCS last: {formatBCSTimestamp(pet.bcsCalculatedAt)}</p>
+            <p className="text-xs text-gray-500 mt-1">
+              BCS last: {formatBCSTimestamp(pet.bcsCalculatedAt)}
+            </p>
           )}
           <p className="text-xs text-gray-500 mt-1">
-            {pet.type === "dog" ? "🐕 Dog" : "🐈 Cat"} • {pet.ageYears ? `${pet.ageYears} years` : "Age unknown"}
+            {pet.type === "dog" ? "🐕 Dog" : "🐈 Cat"} •{" "}
+            {pet.ageYears ? `${pet.ageYears} years` : "Age unknown"}
           </p>
         </div>
         <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-indigo-600 transition-colors" />

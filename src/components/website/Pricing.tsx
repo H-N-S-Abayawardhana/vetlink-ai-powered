@@ -1,219 +1,292 @@
-import Image from "next/image";
+"use client";
+
+import { motion } from "framer-motion";
+import { CheckCircle, Sparkles, Star } from "lucide-react";
 
 export default function Pricing() {
+  const plans = [
+    {
+      name: "Pet Owners",
+      subtitle: "B2C SAAS",
+      price: "Free",
+      priceSubtext: "Basic Plan",
+      premiumPrice: "LKR 2,400",
+      premiumSubtext: "Premium Monthly",
+      features: [
+        "AI skin disease detection",
+        "Behavioral tracking & alerts",
+        "Personalized diet plans",
+        "Nearby pharmacy finder",
+        "Health score dashboard",
+      ],
+      extra: {
+        title: "Tele-vet Consultations",
+        description: "LKR 4,500 - 7,500 per session",
+      },
+      cta: "Start Free Trial",
+      popular: false,
+      color: "indigo",
+    },
+    {
+      name: "Pet Pharmacies",
+      subtitle: "B2B COMMERCE",
+      price: "LKR 10K",
+      priceSubtext: "Monthly Subscription",
+      features: [
+        "Inventory management",
+        "Real-time clinic integration",
+        "AI demand forecasting",
+        "Automated reordering",
+        "Targeted promotions",
+      ],
+      extra: {
+        title: "Revenue Share",
+        description: "SaaS License + 3% transaction commission",
+      },
+      cta: "Contact Sales",
+      popular: true,
+      color: "indigo",
+    },
+    {
+      name: "Veterinary Clinics",
+      subtitle: "B2B PROFESSIONAL",
+      price: "Starting",
+      priceSubtext: "",
+      premiumPrice: "LKR 20K",
+      premiumSubtext: "Monthly Subscription",
+      features: [
+        "AI-assisted diagnostics",
+        "Patient health records",
+        "Analytics dashboard",
+        "Pharmacy integration",
+        "Multi-branch support",
+      ],
+      extra: {
+        title: "Tiered SaaS",
+        description: "Flexible pricing based on clinic size",
+      },
+      cta: "Get Custom Quote",
+      popular: false,
+      color: "teal",
+    },
+  ];
+
   return (
-    <section id="pricing" className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Plan
+    <section
+      id="pricing"
+      className="relative overflow-hidden py-24 sm:py-32 bg-gradient-to-b from-white via-gray-50/50 to-white"
+    >
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-100/30 to-transparent blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-16 sm:mb-20"
+        >
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+            Choose Your{" "}
+            <span className="bg-gradient-to-r from-indigo-600 to-teal-600 bg-clip-text text-transparent">
+              Plan
+            </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Flexible pricing options for pet owners, pharmacies, and veterinary clinics
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+            Flexible pricing options for pet owners, pharmacies, and veterinary
+            clinics
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Pet Owners Plan */}
-          <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
-            <div className="bg-blue-600 p-6 text-center">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Pet Owners</h3>
-              <p className="text-blue-100">B2C SAAS</p>
-            </div>
-            
-            <div className="p-8">
-              <div className="text-center mb-8">
-                <div className="text-4xl font-bold text-gray-900 mb-2">Free</div>
-                <div className="text-gray-600 mb-4">Basic Plan</div>
-                <div className="text-3xl font-bold text-blue-600 mb-2">LKR 2,400</div>
-                <div className="text-gray-600">Premium Monthly</div>
-              </div>
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          {plans.map((plan, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                delay: index * 0.1,
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              whileHover={{ y: -6, scale: 1.02 }}
+              className={`group relative rounded-3xl border ${
+                plan.popular
+                  ? "border-indigo-300/60 bg-white shadow-xl shadow-indigo-500/10"
+                  : "border-gray-200/60 bg-white/80 backdrop-blur-sm"
+              } overflow-hidden transition-all hover:shadow-xl hover:shadow-indigo-500/5`}
+            >
+              {/* Popular badge */}
+              {plan.popular && (
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
+                  <motion.div
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Star className="h-3 w-3 fill-white" />
+                    Most Popular
+                  </motion.div>
+                </div>
+              )}
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">AI skin disease detection</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Behavioral tracking & alerts</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Personalized diet plans</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Nearby pharmacy finder</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Health score dashboard</span>
-                </div>
-              </div>
+              {/* Hover gradient */}
+              <motion.div
+                className={`absolute inset-0 bg-gradient-to-br to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                  plan.color === "indigo"
+                    ? "from-indigo-50/30"
+                    : "from-teal-50/30"
+                }`}
+                layoutId={`pricing-bg-${index}`}
+              />
 
-              <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                <p className="text-sm text-blue-800 font-semibold mb-2">Tele-vet Consultations</p>
-                <p className="text-sm text-blue-700">LKR 4,500 - 7,500 per session</p>
-              </div>
+              <div className="relative p-8">
+                {/* Header */}
+                <div className="text-center mb-8 pt-4">
+                  <div
+                    className={`mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl ring-1 ${
+                      plan.color === "indigo"
+                        ? "bg-gradient-to-br from-indigo-50 to-indigo-100/50 ring-indigo-200/30"
+                        : "bg-gradient-to-br from-teal-50 to-teal-100/50 ring-teal-200/30"
+                    }`}
+                  >
+                    <Sparkles
+                      className={`h-7 w-7 ${
+                        plan.color === "indigo"
+                          ? "text-indigo-600"
+                          : "text-teal-600"
+                      }`}
+                    />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                    {plan.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">{plan.subtitle}</p>
+                </div>
 
-              <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors cursor-pointer">
-                Start Free Trial
-              </button>
-            </div>
-          </div>
+                {/* Pricing */}
+                <div className="text-center mb-8 pb-8 border-b border-gray-200/60">
+                  {plan.premiumPrice ? (
+                    <>
+                      <div className="text-4xl font-bold text-gray-900 mb-2">
+                        {plan.price}
+                      </div>
+                      <div className="text-gray-500 mb-3">
+                        {plan.priceSubtext}
+                      </div>
+                      <div
+                        className={`text-3xl font-bold mb-1 ${
+                          plan.color === "indigo"
+                            ? "text-indigo-600"
+                            : "text-teal-600"
+                        }`}
+                      >
+                        {plan.premiumPrice}
+                      </div>
+                      <div className="text-gray-500">{plan.premiumSubtext}</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-4xl font-bold text-gray-900 mb-2">
+                        {plan.price}
+                      </div>
+                      <div className="text-gray-500">{plan.priceSubtext}</div>
+                    </>
+                  )}
+                </div>
 
-          {/* Pet Pharmacies Plan */}
-          <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden transform scale-105">
-            <div className="bg-orange-600 p-6 text-center">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"/>
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Pet Pharmacies</h3>
-              <p className="text-orange-100">B2B COMMERCE</p>
-            </div>
-            
-            <div className="p-8">
-              <div className="text-center mb-8">
-                <div className="text-4xl font-bold text-gray-900 mb-2">LKR 10K</div>
-                <div className="text-gray-600">Monthly Subscription</div>
-              </div>
+                {/* Features */}
+                <div className="space-y-4 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <motion.div
+                      key={featureIndex}
+                      className="flex items-start gap-3"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.1 + featureIndex * 0.05 }}
+                    >
+                      <CheckCircle
+                        className={`mt-0.5 h-5 w-5 flex-shrink-0 ${
+                          plan.color === "indigo"
+                            ? "text-indigo-600"
+                            : "text-teal-600"
+                        }`}
+                      />
+                      <span className="text-gray-600 text-sm leading-relaxed">
+                        {feature}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Inventory management</span>
+                {/* Extra info */}
+                <div
+                  className={`rounded-xl border p-4 mb-6 ${
+                    plan.color === "indigo"
+                      ? "border-indigo-200/50 bg-indigo-50/30"
+                      : "border-teal-200/50 bg-teal-50/30"
+                  }`}
+                >
+                  <p className="text-sm text-gray-900 font-semibold mb-1">
+                    {plan.extra.title}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {plan.extra.description}
+                  </p>
                 </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Real-time clinic integration</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">AI demand forecasting</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Automated reordering</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Targeted promotions</span>
-                </div>
-              </div>
 
-              <div className="bg-orange-50 p-4 rounded-lg mb-6">
-                <p className="text-sm text-orange-800 font-semibold mb-2">Revenue Share</p>
-                <p className="text-sm text-orange-700">SaaS License + 3% transaction commission</p>
+                {/* CTA Button */}
+                <motion.button
+                  className={`w-full rounded-xl py-3.5 font-semibold transition-all duration-200 ${
+                    plan.popular
+                      ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
+                      : "bg-white text-gray-700 ring-1 ring-gray-200/60 hover:bg-gray-50 hover:ring-indigo-200/60"
+                  }`}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {plan.cta}
+                </motion.button>
               </div>
-
-              <button className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors cursor-pointer">
-                Contact Sales
-              </button>
-            </div>
-          </div>
-
-          {/* Veterinary Clinics Plan */}
-          <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
-            <div className="bg-purple-600 p-6 text-center">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Veterinary Clinics</h3>
-              <p className="text-purple-100">B2B PROFESSIONAL</p>
-            </div>
-            
-            <div className="p-8">
-              <div className="text-center mb-8">
-                <div className="text-4xl font-bold text-gray-900 mb-2">Starting</div>
-                <div className="text-3xl font-bold text-purple-600 mb-2">LKR 20K</div>
-                <div className="text-gray-600">Monthly Subscription</div>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">AI-assisted diagnostics</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Patient health records</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Analytics dashboard</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Pharmacy integration</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Multi-branch support</span>
-                </div>
-              </div>
-
-              <div className="bg-purple-50 p-4 rounded-lg mb-6">
-                <p className="text-sm text-purple-800 font-semibold mb-2">Tiered SaaS</p>
-                <p className="text-sm text-purple-700">Flexible pricing based on clinic size</p>
-              </div>
-
-              <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors cursor-pointer">
-                Get Custom Quote
-              </button>
-            </div>
-          </div>
+            </motion.div>
+          ))}
         </div>
 
         {/* Additional info */}
-        <div className="text-center mt-12">
-          <p className="text-gray-600 mb-4">All plans include 24/7 support and regular updates</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center"
+        >
+          <p className="text-gray-600 mb-4">
+            All plans include 24/7 support and regular updates
+          </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
             <span>✓ Free setup & onboarding</span>
             <span>✓ 30-day money-back guarantee</span>
             <span>✓ Enterprise-grade security</span>
             <span>✓ API access available</span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { formatBCSTimestamp } from '@/lib/format-date';
+import { formatBCSTimestamp } from "@/lib/format-date";
 
 interface Props {
   score: number | null;
@@ -16,12 +16,18 @@ function scoreCategory(score: number) {
   return "Obese";
 }
 
-export default function ResultsPanel({ score, petName, lastCalculated }: Props) {
+export default function ResultsPanel({
+  score,
+  petName,
+  lastCalculated,
+}: Props) {
   if (score == null) {
     return (
       <div className="border rounded-md p-4 bg-white shadow-sm">
         <h3 className="text-lg font-semibold text-gray-900">Results</h3>
-        <div className="text-sm text-gray-700 mt-2">No result yet. Calculate to see BCS.</div>
+        <div className="text-sm text-gray-700 mt-2">
+          No result yet. Calculate to see BCS.
+        </div>
       </div>
     );
   }
@@ -39,13 +45,16 @@ export default function ResultsPanel({ score, petName, lastCalculated }: Props) 
 
       {/** show last calculated timestamp when provided */}
       {lastCalculated && (
-            <div className="text-xs text-gray-500">Last calculated: {formatBCSTimestamp(lastCalculated)}</div>
-          )}
+        <div className="text-xs text-gray-500">
+          Last calculated: {formatBCSTimestamp(lastCalculated)}
+        </div>
+      )}
 
       <div className="flex items-baseline gap-4">
         <div className="text-5xl font-extrabold text-gray-900">{score}</div>
         <div className="text-sm text-gray-800">
-          Category: <span className="font-medium text-gray-900">{category}</span>
+          Category:{" "}
+          <span className="font-medium text-gray-900">{category}</span>
         </div>
       </div>
 
@@ -58,14 +67,16 @@ export default function ResultsPanel({ score, petName, lastCalculated }: Props) 
               pct < 40
                 ? "bg-blue-500"
                 : pct < 65
-                ? "bg-green-500"
-                : pct < 85
-                ? "bg-yellow-500"
-                : "bg-red-600"
+                  ? "bg-green-500"
+                  : pct < 85
+                    ? "bg-yellow-500"
+                    : "bg-red-600"
             } transition-all duration-300`}
           />
         </div>
-        <div className="text-sm text-gray-700 mt-1">Score shown on a 1–9 scale</div>
+        <div className="text-sm text-gray-700 mt-1">
+          Score shown on a 1–9 scale
+        </div>
       </div>
     </div>
   );

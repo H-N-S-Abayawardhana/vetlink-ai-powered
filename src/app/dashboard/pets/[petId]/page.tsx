@@ -1,25 +1,37 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import PetProfile from '@/components/dashboard/pets/PetProfile';
-import { getPet, Pet } from '@/lib/pets';
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import PetProfile from "@/components/dashboard/pets/PetProfile";
+import { getPet, Pet } from "@/lib/pets";
+import { UserRole } from "@/types/next-auth";
 
 export default function PetDetailPage() {
   const params = useParams() as { petId?: string };
   const petId = params?.petId || null;
-  
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const userRole = ((session?.user as any)?.userRole as UserRole) || "USER";
+  // Only block SUPER_ADMIN, allow VETERINARIAN to view pet details
+  const blockPetProfile = userRole === "SUPER_ADMIN";
+
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (blockPetProfile) {
+      router.replace("/dashboard/pets");
+      return;
+    }
     if (petId) {
       (async () => {
         try {
           const petData = await getPet(petId);
           setPet(petData);
         } catch (error) {
-          console.error('Error loading pet:', error);
+          console.error("Error loading pet:", error);
         } finally {
           setLoading(false);
         }
@@ -27,7 +39,7 @@ export default function PetDetailPage() {
     } else {
       setLoading(false);
     }
-  }, [petId]);
+  }, [petId, blockPetProfile, router, status]);
 
   if (loading) {
     return (
@@ -35,6 +47,10 @@ export default function PetDetailPage() {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     );
+  }
+
+  if (blockPetProfile) {
+    return null;
   }
 
   if (!pet) {

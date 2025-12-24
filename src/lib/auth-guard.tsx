@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { hasAccess } from './rbac';
-import { UserRole } from '@/types/next-auth';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { hasAccess } from "./rbac";
+import { UserRole } from "@/types/next-auth";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -13,27 +13,27 @@ interface AuthGuardProps {
   fallbackPath?: string;
 }
 
-export function AuthGuard({ 
-  children, 
-  requiredRole, 
-  allowedRoles, 
-  fallbackPath = '/dashboard' 
+export function AuthGuard({
+  children,
+  requiredRole,
+  allowedRoles,
+  fallbackPath = "/dashboard",
 }: AuthGuardProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'loading') return; // Still loading
+    if (status === "loading") return; // Still loading
 
     if (!session) {
-      router.push('/signin');
+      router.push("/signin");
       return;
     }
 
     const userRole = (session.user as any)?.userRole as UserRole;
-    
+
     if (!userRole) {
-      router.push('/signin');
+      router.push("/signin");
       return;
     }
 
@@ -50,7 +50,7 @@ export function AuthGuard({
     }
   }, [session, status, router, requiredRole, allowedRoles, fallbackPath]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -63,7 +63,7 @@ export function AuthGuard({
   }
 
   const userRole = (session.user as any)?.userRole as UserRole;
-  
+
   if (!userRole) {
     return null;
   }
@@ -83,10 +83,10 @@ export function AuthGuard({
 export function useAccessCheck(path: string) {
   const { data: session } = useSession();
   const userRole = (session?.user as any)?.userRole as UserRole;
-  
+
   return {
     hasAccess: userRole ? hasAccess(userRole, path) : false,
     userRole,
-    isLoading: !session
+    isLoading: !session,
   };
 }

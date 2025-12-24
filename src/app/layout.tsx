@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "VetLink - Smart Pet Healthcare Management System",
-  description: "Revolutionary AI-powered pet healthcare management system with skin care detection, anomaly detection, diet recommendations, and intelligent pharmacy matching.",
+  description:
+    "Revolutionary AI-powered pet healthcare management system with skin care detection, anomaly detection, diet recommendations, and intelligent pharmacy matching.",
 };
 
 export default function RootLayout({
@@ -28,9 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

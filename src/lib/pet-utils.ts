@@ -39,8 +39,8 @@ export function mapRowToPet(row: DbPetRow) {
     healthNotes: row.health_notes || null,
     vaccinationStatus: row.vaccination_status || null,
     avatarUrl: row.avatar_url || null,
-      // Provide avatarDataUrl as an alias for frontend components that expect it
-      avatarDataUrl: row.avatar_url || null,
+    // Provide avatarDataUrl as an alias for frontend components that expect it
+    avatarDataUrl: row.avatar_url || null,
     createdAt: row.created_at || null,
     updatedAt: row.updated_at || null,
   };

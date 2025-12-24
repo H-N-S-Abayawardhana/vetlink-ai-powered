@@ -1,16 +1,26 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
+import Image from "next/image";
 import { listPets, updatePet, type Pet } from "@/lib/pets";
-import { formatBCSTimestamp } from '@/lib/format-date';
+import { formatBCSTimestamp } from "@/lib/format-date";
 import PetCardBCS from "./PetCardBCS";
-import { Scale, PawPrint, ChevronRight, Check, AlertCircle } from "lucide-react";
+import {
+  Scale,
+  PawPrint,
+  ChevronRight,
+  Check,
+  AlertCircle,
+} from "lucide-react";
 
 export default function BCSCalculator() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [selected, setSelected] = useState<Pet | null>(null);
   const [step, setStep] = useState<"select" | "details" | "result">("select");
-  const [updates, setUpdates] = useState<{ ageYears?: number | null; weightKg?: number | null }>({});
+  const [updates, setUpdates] = useState<{
+    ageYears?: number | null;
+    weightKg?: number | null;
+  }>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<number | null>(null);
 
@@ -29,9 +39,12 @@ export default function BCSCalculator() {
     setStep("details");
   }
 
-  const onDetailsChange = useCallback((field: "ageYears" | "weightKg", value: number | null) => {
-    setUpdates((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  const onDetailsChange = useCallback(
+    (field: "ageYears" | "weightKg", value: number | null) => {
+      setUpdates((prev) => ({ ...prev, [field]: value }));
+    },
+    [],
+  );
 
   const ageValid = useMemo(() => {
     const a = updates.ageYears;
@@ -58,8 +71,18 @@ export default function BCSCalculator() {
     try {
       // Ensure stored values are numeric where appropriate
       const persistPayload: any = {
-        ageYears: updates.ageYears == null ? null : (typeof updates.ageYears === 'string' ? parseFloat(updates.ageYears as any) : updates.ageYears),
-        weightKg: updates.weightKg == null ? null : (typeof updates.weightKg === 'string' ? parseFloat(updates.weightKg as any) : updates.weightKg),
+        ageYears:
+          updates.ageYears == null
+            ? null
+            : typeof updates.ageYears === "string"
+              ? parseFloat(updates.ageYears as any)
+              : updates.ageYears,
+        weightKg:
+          updates.weightKg == null
+            ? null
+            : typeof updates.weightKg === "string"
+              ? parseFloat(updates.weightKg as any)
+              : updates.weightKg,
       };
       await updatePet(selected.id, persistPayload);
     } catch (e) {
@@ -71,11 +94,13 @@ export default function BCSCalculator() {
       setTimeout(() => {
         const wRaw = updates.weightKg ?? selected.weightKg ?? 0;
         const aRaw = updates.ageYears ?? selected.ageYears ?? 0;
-        const w = typeof wRaw === 'string' ? parseFloat(wRaw as any) : (wRaw as number);
-        const a = typeof aRaw === 'string' ? parseFloat(aRaw as any) : (aRaw as number);
+        const w =
+          typeof wRaw === "string" ? parseFloat(wRaw as any) : (wRaw as number);
+        const a =
+          typeof aRaw === "string" ? parseFloat(aRaw as any) : (aRaw as number);
         const safeW = Number.isNaN(w) ? 0 : w;
         const safeA = Number.isNaN(a) ? 0 : a;
-        const base = Math.round(Math.min(Math.max((safeW / 10) + 1, 1), 9));
+        const base = Math.round(Math.min(Math.max(safeW / 10 + 1, 1), 9));
         const ageAdj = safeA >= 8 ? 1 : 0;
         const final = Math.min(Math.max(base + ageAdj, 1), 9);
         res(final);
@@ -86,14 +111,19 @@ export default function BCSCalculator() {
     // Persist calculated BCS and timestamp
     try {
       const when = new Date().toISOString();
-      const updated = await updatePet(selected.id, { bcs: score, bcsCalculatedAt: when });
+      const updated = await updatePet(selected.id, {
+        bcs: score,
+        bcsCalculatedAt: when,
+      });
       // update local selected and pets list with returned pet when available
       if (updated) {
         setSelected(updated as any);
-        setPets((prev) => prev.map((p) => (p.id === updated.id ? (updated as any) : p)));
+        setPets((prev) =>
+          prev.map((p) => (p.id === updated.id ? (updated as any) : p)),
+        );
       }
     } catch (e) {
-      console.warn('Failed to persist BCS', e);
+      console.warn("Failed to persist BCS", e);
     }
 
     setStep("result");
@@ -108,10 +138,33 @@ export default function BCSCalculator() {
   }
 
   const getBCSDescription = (score: number) => {
-    if (score <= 3) return { text: "Underweight", color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200" };
-    if (score <= 5) return { text: "Ideal Weight", color: "text-green-600", bg: "bg-green-50", border: "border-green-200" };
-    if (score <= 7) return { text: "Overweight", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" };
-    return { text: "Obese", color: "text-red-600", bg: "bg-red-50", border: "border-red-200" };
+    if (score <= 3)
+      return {
+        text: "Underweight",
+        color: "text-orange-600",
+        bg: "bg-orange-50",
+        border: "border-orange-200",
+      };
+    if (score <= 5)
+      return {
+        text: "Ideal Weight",
+        color: "text-green-600",
+        bg: "bg-green-50",
+        border: "border-green-200",
+      };
+    if (score <= 7)
+      return {
+        text: "Overweight",
+        color: "text-amber-600",
+        bg: "bg-amber-50",
+        border: "border-amber-200",
+      };
+    return {
+      text: "Obese",
+      color: "text-red-600",
+      bg: "bg-red-50",
+      border: "border-red-200",
+    };
   };
 
   return (
@@ -122,8 +175,12 @@ export default function BCSCalculator() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-4 shadow-lg">
             <Scale className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Body Condition Score</h1>
-          <p className="text-gray-600">Calculate your pet's health score in 3 easy steps</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Body Condition Score
+          </h1>
+          <p className="text-gray-600">
+            Calculate your pet’s health score in 3 easy steps
+          </p>
         </div>
 
         {/* Progress Steps */}
@@ -137,11 +194,15 @@ export default function BCSCalculator() {
             return (
               <React.Fragment key={label}>
                 <div className="flex items-center gap-3">
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                    isActive ? "bg-indigo-600 text-white shadow-lg scale-105" :
-                    isCompleted ? "bg-green-500 text-white" :
-                    "bg-white text-gray-400 border border-gray-200"
-                  }`}>
+                  <div
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                      isActive
+                        ? "bg-indigo-600 text-white shadow-lg scale-105"
+                        : isCompleted
+                          ? "bg-green-500 text-white"
+                          : "bg-white text-gray-400 border border-gray-200"
+                    }`}
+                  >
                     {isCompleted ? (
                       <Check className="w-4 h-4" />
                     ) : (
@@ -149,11 +210,15 @@ export default function BCSCalculator() {
                         {idx + 1}
                       </span>
                     )}
-                    <span className="text-sm font-medium hidden sm:inline">{label}</span>
+                    <span className="text-sm font-medium hidden sm:inline">
+                      {label}
+                    </span>
                   </div>
                 </div>
                 {idx < 2 && (
-                  <ChevronRight className={`w-5 h-5 ${isCompleted ? "text-green-500" : "text-gray-300"}`} />
+                  <ChevronRight
+                    className={`w-5 h-5 ${isCompleted ? "text-green-500" : "text-gray-300"}`}
+                  />
                 )}
               </React.Fragment>
             );
@@ -169,7 +234,7 @@ export default function BCSCalculator() {
                 <PawPrint className="w-6 h-6 text-indigo-600" />
                 Select Your Pet
               </h2>
-              
+
               {pets.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -201,24 +266,39 @@ export default function BCSCalculator() {
               </button>
 
               <div className="flex items-center gap-4 mb-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl">
-                    {(() => {
-                      const avatar = (selected as any).avatarDataUrl || (selected as any).avatarUrl || (selected.type === "dog" ? "/uploads/default-dog.png" : "/uploads/default-cat.png");
-                      const hasAvatar = Boolean((selected as any).avatarDataUrl || (selected as any).avatarUrl);
-                      return hasAvatar ? (
-                        <img
-                          src={avatar as string}
-                          alt={selected.name}
-                          className="w-16 h-16 object-cover rounded-xl shadow-md"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
-                          {selected.name.charAt(0)}
-                        </div>
-                      );
-                    })()}
+                {(() => {
+                  const avatar =
+                    (selected as any).avatarDataUrl ||
+                    (selected as any).avatarUrl ||
+                    (selected.type === "dog"
+                      ? "/uploads/default-dog.png"
+                      : "/uploads/default-cat.png");
+                  const hasAvatar = Boolean(
+                    (selected as any).avatarDataUrl ||
+                    (selected as any).avatarUrl,
+                  );
+                  return hasAvatar ? (
+                    <Image
+                      src={avatar as string}
+                      alt={selected.name}
+                      width={64}
+                      height={64}
+                      unoptimized
+                      className="w-16 h-16 object-cover rounded-xl shadow-md"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+                      {selected.name.charAt(0)}
+                    </div>
+                  );
+                })()}
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{selected.name}</h2>
-                  <p className="text-gray-600">{selected.breed || "Mixed breed"}</p>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {selected.name}
+                  </h2>
+                  <p className="text-gray-600">
+                    {selected.breed || "Mixed breed"}
+                  </p>
                 </div>
               </div>
 
@@ -230,7 +310,12 @@ export default function BCSCalculator() {
                   <input
                     type="number"
                     value={updates.ageYears ?? ""}
-                    onChange={(e) => onDetailsChange("ageYears", e.target.value ? parseFloat(e.target.value) : null)}
+                    onChange={(e) =>
+                      onDetailsChange(
+                        "ageYears",
+                        e.target.value ? parseFloat(e.target.value) : null,
+                      )
+                    }
                     placeholder="Enter age in years"
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
                   />
@@ -250,7 +335,12 @@ export default function BCSCalculator() {
                     type="number"
                     step="0.1"
                     value={updates.weightKg ?? ""}
-                    onChange={(e) => onDetailsChange("weightKg", e.target.value ? parseFloat(e.target.value) : null)}
+                    onChange={(e) =>
+                      onDetailsChange(
+                        "weightKg",
+                        e.target.value ? parseFloat(e.target.value) : null,
+                      )
+                    }
                     placeholder="Enter weight in kilograms"
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
                   />
@@ -288,39 +378,75 @@ export default function BCSCalculator() {
           {step === "result" && result !== null && selected && (
             <div className="p-8">
               <div className="text-center mb-8">
-                <div className={`inline-flex items-center justify-center w-32 h-32 rounded-full mb-6 ${getBCSDescription(result).bg} ${getBCSDescription(result).border} border-4 shadow-2xl`}>
-                  <div className={`text-5xl font-bold ${getBCSDescription(result).color}`}>{result}</div>
+                <div
+                  className={`inline-flex items-center justify-center w-32 h-32 rounded-full mb-6 ${getBCSDescription(result).bg} ${getBCSDescription(result).border} border-4 shadow-2xl`}
+                >
+                  <div
+                    className={`text-5xl font-bold ${getBCSDescription(result).color}`}
+                  >
+                    {result}
+                  </div>
                 </div>
-                
+
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  {selected.name}'s Body Condition Score
+                  {selected.name}’s Body Condition Score
                 </h2>
                 {selected.bcsCalculatedAt && (
-                  <div className="text-xs text-gray-500 mb-2">Last calculated: {formatBCSTimestamp(selected.bcsCalculatedAt)}</div>
+                  <div className="text-xs text-gray-500 mb-2">
+                    Last calculated:{" "}
+                    {formatBCSTimestamp(selected.bcsCalculatedAt)}
+                  </div>
                 )}
-                
-                <div className={`inline-block px-6 py-3 rounded-full ${getBCSDescription(result).bg} ${getBCSDescription(result).border} border-2 mb-4`}>
-                  <span className={`text-lg font-bold ${getBCSDescription(result).color}`}>
+
+                <div
+                  className={`inline-block px-6 py-3 rounded-full ${getBCSDescription(result).bg} ${getBCSDescription(result).border} border-2 mb-4`}
+                >
+                  <span
+                    className={`text-lg font-bold ${getBCSDescription(result).color}`}
+                  >
                     {getBCSDescription(result).text}
                   </span>
                 </div>
 
                 <p className="text-gray-600 max-w-2xl mx-auto mt-4">
-                  Based on the weight of {updates.weightKg} kg and age of {updates.ageYears ?? "unknown"} years,
-                  {result <= 3 && " your pet may need additional nutrition. Consult your veterinarian."}
-                  {result > 3 && result <= 5 && " your pet is at an ideal weight! Keep up the great work."}
-                  {result > 5 && result <= 7 && " your pet could benefit from a diet and exercise plan."}
-                  {result > 7 && " your pet may be at health risk. Please consult your veterinarian soon."}
+                  Based on the weight of {updates.weightKg} kg and age of{" "}
+                  {updates.ageYears ?? "unknown"} years,
+                  {result <= 3 &&
+                    " your pet may need additional nutrition. Consult your veterinarian."}
+                  {result > 3 &&
+                    result <= 5 &&
+                    " your pet is at an ideal weight! Keep up the great work."}
+                  {result > 5 &&
+                    result <= 7 &&
+                    " your pet could benefit from a diet and exercise plan."}
+                  {result > 7 &&
+                    " your pet may be at health risk. Please consult your veterinarian soon."}
                 </p>
               </div>
 
               {/* BCS Scale Visual */}
               <div className="bg-gradient-to-r from-orange-100 via-green-100 to-red-100 rounded-2xl p-6 mb-8">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-orange-600">1-3<br/>Underweight</span>
-                  <span className="text-sm font-semibold text-green-600">4-5<br/>Ideal</span>
-                  <span className="text-sm font-semibold text-amber-600">6-7<br/>Overweight</span>
-                  <span className="text-sm font-semibold text-red-600">8-9<br/>Obese</span>
+                  <span className="text-sm font-semibold text-orange-600">
+                    1-3
+                    <br />
+                    Underweight
+                  </span>
+                  <span className="text-sm font-semibold text-green-600">
+                    4-5
+                    <br />
+                    Ideal
+                  </span>
+                  <span className="text-sm font-semibold text-amber-600">
+                    6-7
+                    <br />
+                    Overweight
+                  </span>
+                  <span className="text-sm font-semibold text-red-600">
+                    8-9
+                    <br />
+                    Obese
+                  </span>
                 </div>
                 <div className="relative h-3 bg-white rounded-full overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-green-400 via-amber-400 to-red-400"></div>
@@ -355,7 +481,10 @@ export default function BCSCalculator() {
 
         {/* Info Footer */}
         <div className="mt-8 text-center text-sm text-gray-600">
-          <p>💡 BCS is a valuable tool for monitoring your pet's health. Consult your veterinarian for personalized advice.</p>
+          <p>
+            💡 BCS is a valuable tool for monitoring your pet’s health. Consult
+            your veterinarian for personalized advice.
+          </p>
         </div>
       </div>
     </div>

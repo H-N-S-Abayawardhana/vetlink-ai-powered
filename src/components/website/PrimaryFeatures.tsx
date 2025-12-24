@@ -1,123 +1,159 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
+import {
+  CalendarDays,
+  FileText,
+  Headset,
+  MessageCircle,
+  ArrowRight,
+} from "lucide-react";
 
 export default function PrimaryFeatures() {
+  const features = [
+    {
+      icon: CalendarDays,
+      title: "Appointment Scheduling",
+      description:
+        "Book vet appointments instantly with smart scheduling and automated reminders.",
+      image:
+        "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "indigo",
+    },
+    {
+      icon: FileText,
+      title: "Digital Health Records",
+      description:
+        "Maintain comprehensive digital health records and track medical history securely.",
+      image:
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "teal",
+    },
+    {
+      icon: Headset,
+      title: "24/7 Emergency Support",
+      description:
+        "Get instant access to emergency veterinary support and first aid guidance.",
+      image:
+        "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "indigo",
+    },
+    {
+      icon: MessageCircle,
+      title: "Expert Vet Consultation",
+      description:
+        "Connect with certified veterinarians for professional advice and remote diagnosis.",
+      image:
+        "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      color: "teal",
+    },
+  ];
+
   return (
-    <section id="primary-features" className="py-12 md:py-16 bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10 md:mb-12">
+    <section
+      id="primary-features"
+      className="relative overflow-hidden py-24 sm:py-32 bg-gradient-to-b from-gray-50/50 to-white"
+    >
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute top-1/2 left-0 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-100/20 to-transparent blur-3xl"
+          animate={{
+            x: [0, 50, 0],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            Primary Features
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-16 sm:mb-20"
+        >
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+            Essential{" "}
+            <span className="bg-gradient-to-r from-indigo-600 to-teal-600 bg-clip-text text-transparent">
+              Care Services
+            </span>
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            Essential pet care services that form the foundation of comprehensive veterinary healthcare
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Essential pet care services that form the foundation of
+            comprehensive veterinary healthcare
           </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          {/* Feature 1: Appointment Scheduling */}
-          <div className="bg-white rounded-xl p-5 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Appointment Scheduling</h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Book vet appointments instantly with smart scheduling and automated reminders.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-lg overflow-hidden">
-                  <Image
-                    src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Appointment scheduling"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+        </motion.div>
 
-          {/* Feature 2: Health Records */}
-          <div className="bg-white rounded-xl p-5 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Digital Health Records</h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Maintain comprehensive digital health records and track medical history securely.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-lg overflow-hidden">
-                  <Image
-                    src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Digital health records"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                delay: index * 0.1,
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              whileHover={{ y: -4, scale: 1.01 }}
+              className="group relative rounded-2xl border border-gray-200/60 bg-white/80 backdrop-blur-sm p-6 sm:p-8 transition-all hover:border-indigo-200/60 hover:shadow-xl hover:shadow-indigo-500/5"
+            >
+              <motion.div
+                className={`absolute inset-0 rounded-2xl bg-gradient-to-br to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                  feature.color === "indigo"
+                    ? "from-indigo-50/30"
+                    : "from-teal-50/30"
+                }`}
+                layoutId={`primary-feature-bg-${index}`}
+              />
 
-          {/* Feature 3: Emergency Support */}
-          <div className="bg-white rounded-xl p-5 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">24/7 Emergency Support</h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Get instant access to emergency veterinary support and first aid guidance.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-lg overflow-hidden">
-                  <Image
-                    src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Emergency support"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
+              <div className="relative flex items-start gap-5 sm:gap-6">
+                <div
+                  className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center ring-1 ${
+                    feature.color === "indigo"
+                      ? "bg-gradient-to-br from-indigo-50 to-indigo-100/50 ring-indigo-200/30"
+                      : "bg-gradient-to-br from-teal-50 to-teal-100/50 ring-teal-200/30"
+                  }`}
+                >
+                  <feature.icon
+                    className={`w-6 h-6 sm:w-7 sm:h-7 ${
+                      feature.color === "indigo"
+                        ? "text-indigo-600"
+                        : "text-teal-600"
+                    }`}
                   />
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature 4: Vet Consultation */}
-          <div className="bg-white rounded-xl p-5 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">Expert Vet Consultation</h3>
-                <p className="text-gray-600 text-sm md:text-base mb-3">
-                  Connect with certified veterinarians for professional advice and remote diagnosis.
-                </p>
-                <div className="relative h-24 md:h-28 rounded-lg overflow-hidden">
-                  <Image
-                    src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                    alt="Vet consultation"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4 leading-relaxed text-sm sm:text-base">
+                    {feature.description}
+                  </p>
+                  <div className="relative w-full h-32 sm:h-40 rounded-xl overflow-hidden ring-1 ring-gray-200/50">
+                    <Image
+                      src={feature.image}
+                      alt={feature.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/70 via-white/10 to-transparent" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

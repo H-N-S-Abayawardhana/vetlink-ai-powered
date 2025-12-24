@@ -1,5 +1,5 @@
-import SkinAnalysis from '@/components/dashboard/skin-disease/SkinAnalysis';
+import SkinDiseaseFlow from "@/components/dashboard/skin-disease/SkinDiseaseFlow";
 
 export default function SkinDiseasePage() {
-  return <SkinAnalysis />;
+  return <SkinDiseaseFlow />;
 }
