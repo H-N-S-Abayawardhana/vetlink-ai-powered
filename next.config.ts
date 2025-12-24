@@ -15,6 +15,24 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: 'https',
+        hostname: 'ishara1234-dog-pose-detection.hf.space',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ishara1234-dog-limping-detection.hf.space',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ishara1234-dog-disease-risk-prediction.hf.space',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // Ensure proper handling of client-side only code

@@ -84,7 +84,7 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     name: "Limping Detection",
     href: "/dashboard/Limping",
     icon: EyeIcon,
-    roles: ["SUPER_ADMIN", "VETERINARIAN"],
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
   },
   {
     name: "Pharmacy",
