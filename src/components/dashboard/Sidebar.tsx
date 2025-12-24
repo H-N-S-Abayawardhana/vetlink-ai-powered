@@ -11,6 +11,7 @@ import {
   CalendarIcon,
   LightBulbIcon,
   EyeIcon,
+  UserIcon,
   CogIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -30,6 +31,7 @@ const iconMap = {
   CalendarIcon: CalendarIcon,
   LightBulbIcon: LightBulbIcon,
   EyeIcon: EyeIcon,
+  UserIcon: UserIcon,
   CogIcon: CogIcon,
 };
 
