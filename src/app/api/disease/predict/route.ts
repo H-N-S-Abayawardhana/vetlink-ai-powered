@@ -1,16 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import GaitApiService, { DiseasePredictionInput, DiseasePredictionResult } from '@/services/gaitApi';
-import pool from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import GaitApiService, {
+  DiseasePredictionInput,
+  DiseasePredictionResult,
+} from "@/services/gaitApi";
+import pool from "@/lib/db";
 
 // POST /api/disease/predict - Predict disease risk
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -37,8 +40,8 @@ export async function POST(request: NextRequest) {
       joint_swelling === undefined
     ) {
       return NextResponse.json(
-        { error: 'All required fields must be provided' },
-        { status: 400 }
+        { error: "All required fields must be provided" },
+        { status: 400 },
       );
     }
 
@@ -54,26 +57,33 @@ export async function POST(request: NextRequest) {
     };
 
     // Call Hugging Face disease prediction API
-    const result: DiseasePredictionResult = await GaitApiService.predictDisease(input);
+    const result: DiseasePredictionResult =
+      await GaitApiService.predictDisease(input);
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     // Calculate additional metadata
-    const symptom_score = 
+    const symptom_score =
       input.Pain_While_Walking +
       input.Difficulty_Standing +
       input.Reduced_Activity +
       input.Joint_Swelling;
 
-    const age_group = 
-      input.Age_Years <= 3 ? 'Puppy' :
-      input.Age_Years <= 7 ? 'Adult' :
-      input.Age_Years <= 11 ? 'Senior' : 'Geriatric';
+    const age_group =
+      input.Age_Years <= 3
+        ? "Puppy"
+        : input.Age_Years <= 7
+          ? "Adult"
+          : input.Age_Years <= 11
+            ? "Senior"
+            : "Geriatric";
 
-    const high_risk_profile = input.Age_Years > 10 && input.Weight_Category === 'Heavy';
-    const mobility_impaired = input.Limping_Detected === 1 && input.Difficulty_Standing === 1;
+    const high_risk_profile =
+      input.Age_Years > 10 && input.Weight_Category === "Heavy";
+    const mobility_impaired =
+      input.Limping_Detected === 1 && input.Difficulty_Standing === 1;
 
     // Save to database if pet_id is provided
     let analysisId = null;
@@ -114,7 +124,7 @@ export async function POST(request: NextRequest) {
             input.Difficulty_Standing,
             input.Reduced_Activity,
             input.Joint_Swelling,
-            limping_analysis_result?.class || 'Unknown',
+            limping_analysis_result?.class || "Unknown",
             limping_analysis_result?.confidence || null,
             limping_analysis_result?.SI_front || null,
             limping_analysis_result?.SI_back || null,
@@ -125,11 +135,11 @@ export async function POST(request: NextRequest) {
             symptom_score,
             result.pain_severity,
             JSON.stringify(result.recommendations),
-          ]
+          ],
         );
         analysisId = dbResult.rows[0].id;
       } catch (dbError) {
-        console.error('Error saving to database:', dbError);
+        console.error("Error saving to database:", dbError);
         // Continue even if DB save fails
       }
     }
@@ -144,20 +154,19 @@ export async function POST(request: NextRequest) {
         pain_severity: result.pain_severity,
         recommendations: result.recommendations,
         age_group: age_group,
-        risk_profile: high_risk_profile ? 'High' : 'Normal',
-        mobility_status: mobility_impaired ? 'Impaired' : 'Normal',
+        risk_profile: high_risk_profile ? "High" : "Normal",
+        mobility_status: mobility_impaired ? "Impaired" : "Normal",
       },
       analysis_id: analysisId,
     });
   } catch (error) {
-    console.error('Error predicting disease:', error);
+    console.error("Error predicting disease:", error);
     return NextResponse.json(
-      { 
-        error: 'Failed to predict disease',
-        message: error instanceof Error ? error.message : 'Unknown error'
+      {
+        error: "Failed to predict disease",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

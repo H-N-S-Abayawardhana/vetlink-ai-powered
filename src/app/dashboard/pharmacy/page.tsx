@@ -11,6 +11,7 @@ import RecentSales from "@/components/dashboard/pharmacy/RecentSales";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProductInventory from "@/components/dashboard/pharmacy/ProductInventory";
+import PharmacyDemandPredictor from "@/components/dashboard/pharmacy/PharmacyDemandPredictor";
 import { formatLKR } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
@@ -82,6 +83,7 @@ export default function PharmacyPage() {
                 { id: "overview", label: "📊 Overview", icon: "📊" },
                 { id: "prescriptions", label: "📋 Prescriptions", icon: "📋" },
                 { id: "inventory", label: "📦 Inventory", icon: "📦" },
+                { id: "demand", label: "🔮 Demand Prediction", icon: "🔮" },
                 { id: "analytics", label: "📈 Analytics", icon: "📈" },
               ].map((tab) => (
                 <button
@@ -139,6 +141,16 @@ export default function PharmacyPage() {
                         <div>Browse Inventory</div>
                         <div className="text-xs text-emerald-100 mt-1">
                           View available medications
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("demand")}
+                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30 px-4 py-3 rounded-xl font-medium transition-all text-left"
+                      >
+                        <div className="text-2xl mb-1">🔮</div>
+                        <div>Predict Demand</div>
+                        <div className="text-xs text-emerald-100 mt-1">
+                          AI-powered demand forecasting
                         </div>
                       </button>
                       <button
@@ -321,6 +333,13 @@ export default function PharmacyPage() {
                     </p>
                   </div>
                   <InventoryList />
+                </div>
+              )}
+
+              {/* Demand Prediction Tab */}
+              {activeTab === "demand" && (
+                <div className="space-y-6 animate-fadeIn">
+                  <PharmacyDemandPredictor />
                 </div>
               )}
 

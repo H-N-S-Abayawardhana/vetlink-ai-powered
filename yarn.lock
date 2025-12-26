@@ -542,6 +542,13 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
+"@gradio/client@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/@gradio/client/-/client-2.0.1.tgz#3a1100f9649951682251484f2db6219778f23214"
+  integrity sha512-NLaQNj5fn+Klgtf9ESL2NhlfBo9GHYjxBCbLMXamRev36nQ/fVmhKV2V2DLV91IVTbL/gAMzeTsCmZ1Cl2CLlQ==
+  dependencies:
+    fetch-event-stream "^0.1.5"
+
 "@heroicons/react@^2.2.0":
   version "2.2.0"
   resolved "https://registry.npmjs.org/@heroicons/react/-/react-2.2.0.tgz"
@@ -2456,6 +2463,11 @@ fdir@^6.5.0:
   version "6.5.0"
   resolved "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz#ed2ab967a331ade62f18d077dae192684d50d350"
   integrity sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==
+
+fetch-event-stream@^0.1.5:
+  version "0.1.6"
+  resolved "https://registry.npmjs.org/fetch-event-stream/-/fetch-event-stream-0.1.6.tgz#5013b504cfb96ea47532710b9bc555b6e991a4f3"
+  integrity sha512-GREtJ5HNikdU2AXtZ6E/5bk+aslMU6ie5mPG6H9nvsdDkkHQ6m5lHwmmmDTOBexok9hApQ7EprsXCdmz9ZC68w==
 
 fflate@^0.8.1:
   version "0.8.2"

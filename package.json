@@ -15,6 +15,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@gradio/client": "^2.0.1",
     "@heroicons/react": "^2.2.0",
     "@types/nodemailer": "^7.0.2",
     "bcryptjs": "^3.0.2",

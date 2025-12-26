@@ -1,37 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import GaitApiService, { PoseDetectionResult } from '@/services/gaitApi';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import GaitApiService, { PoseDetectionResult } from "@/services/gaitApi";
 
 // POST /api/pose/detect - Detect pose from image or video
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const type = formData.get('type') as string || 'image'; // 'image' or 'video'
+    const file = formData.get("file") as File;
+    const type = (formData.get("type") as string) || "image"; // 'image' or 'video'
 
     if (!file) {
-      return NextResponse.json({ error: 'File is required' }, { status: 400 });
+      return NextResponse.json({ error: "File is required" }, { status: 400 });
     }
 
     let result: PoseDetectionResult;
 
-    if (type === 'video') {
+    if (type === "video") {
       // Validate file type
-      if (!file.type.startsWith('video/')) {
-        return NextResponse.json({ error: 'File must be a video for video pose detection' }, { status: 400 });
+      if (!file.type.startsWith("video/")) {
+        return NextResponse.json(
+          { error: "File must be a video for video pose detection" },
+          { status: 400 },
+        );
       }
       result = await GaitApiService.detectPoseFromVideo(file);
     } else {
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        return NextResponse.json({ error: 'File must be an image for image pose detection' }, { status: 400 });
+      if (!file.type.startsWith("image/")) {
+        return NextResponse.json(
+          { error: "File must be an image for image pose detection" },
+          { status: 400 },
+        );
       }
       result = await GaitApiService.detectPoseFromImage(file);
     }
@@ -51,16 +57,13 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error detecting pose:', error);
+    console.error("Error detecting pose:", error);
     return NextResponse.json(
-      { 
-        error: 'Failed to detect pose',
-        message: error instanceof Error ? error.message : 'Unknown error'
+      {
+        error: "Failed to detect pose",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
-

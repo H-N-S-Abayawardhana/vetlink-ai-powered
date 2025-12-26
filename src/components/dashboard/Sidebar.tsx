@@ -16,10 +16,13 @@ import {
   CogIcon,
   XMarkIcon,
   ChevronDownIcon,
-  ChevronRightIcon
-} from '@heroicons/react/24/outline';
-import { getSidebarNavItems, type SidebarNavItem } from '@/components/dashboard/sidebar-nav';
-import { UserRole } from '@/types/next-auth';
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import {
+  getSidebarNavItems,
+  type SidebarNavItem,
+} from "@/components/dashboard/sidebar-nav";
+import { UserRole } from "@/types/next-auth";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -244,7 +247,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
           {bottomNavigationItems.length > 0 && (
             <div className="mt-auto pt-4 pb-4 border-t border-gray-200 space-y-3">
-              {bottomNavigationItems.map((item: SidebarNavItem) => renderNavItem(item, true))}
+              {bottomNavigationItems.map((item: SidebarNavItem) =>
+                renderNavItem(item, true),
+              )}
             </div>
           )}
         </nav>

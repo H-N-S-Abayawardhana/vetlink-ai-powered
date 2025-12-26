@@ -5,16 +5,22 @@
 // For FastAPI apps on Hugging Face Spaces, use the direct Space URL
 // Format: https://{username}-{space-name}.hf.space
 // Example: https://ishara1234-dog-limping-detection.hf.space
-const POSE_API_URL = process.env.NEXT_PUBLIC_POSE_API_URL || 'https://ishara1234-dog-pose-detection.hf.space';
-const LIMPING_API_URL = process.env.NEXT_PUBLIC_LIMPING_API_URL || 'https://ishara1234-dog-limping-detection.hf.space';
-const DISEASE_API_URL = process.env.NEXT_PUBLIC_DISEASE_API_URL || 'https://ishara1234-dog-disease-risk-prediction.hf.space';
+const POSE_API_URL =
+  process.env.NEXT_PUBLIC_POSE_API_URL ||
+  "https://ishara1234-dog-pose-detection.hf.space";
+const LIMPING_API_URL =
+  process.env.NEXT_PUBLIC_LIMPING_API_URL ||
+  "https://ishara1234-dog-limping-detection.hf.space";
+const DISEASE_API_URL =
+  process.env.NEXT_PUBLIC_DISEASE_API_URL ||
+  "https://ishara1234-dog-disease-risk-prediction.hf.space";
 
 // Timeout configuration (in milliseconds)
 const VIDEO_ANALYSIS_TIMEOUT = 600000; // 10 minutes for video processing
 const API_REQUEST_TIMEOUT = 60000; // 1 minute for regular API calls
 
 export interface LimpingDetectionResult {
-  class: 'Normal' | 'Limping';
+  class: "Normal" | "Limping";
   confidence: number;
   SI_front: number;
   SI_back: number;
@@ -25,7 +31,7 @@ export interface LimpingDetectionResult {
 export interface DiseasePredictionInput {
   Limping_Detected: number;
   Age_Years: number;
-  Weight_Category: 'Light' | 'Medium' | 'Heavy';
+  Weight_Category: "Light" | "Medium" | "Heavy";
   Pain_While_Walking: number;
   Difficulty_Standing: number;
   Reduced_Activity: number;
@@ -35,7 +41,7 @@ export interface DiseasePredictionInput {
 export interface DiseasePredictionResult {
   predicted_disease: string;
   confidence: number;
-  risk_level: 'High' | 'Medium' | 'Low';
+  risk_level: "High" | "Medium" | "Low";
   symptom_score: number;
   pain_severity: number;
   recommendations: string[];
@@ -65,9 +71,13 @@ export class GaitApiService {
    * Sends image to Hugging Face pose detection API
    * Note: Gradio apps use /api/predict/ endpoint
    */
-  static async detectPoseFromImage(imageFile: File): Promise<PoseDetectionResult> {
+  static async detectPoseFromImage(
+    imageFile: File,
+  ): Promise<PoseDetectionResult> {
     try {
-      console.log(`Calling pose detection API (image): ${POSE_API_URL}/api/predict/`);
+      console.log(
+        `Calling pose detection API (image): ${POSE_API_URL}/api/predict/`,
+      );
 
       // Convert file to base64 for Gradio API
       const base64 = await new Promise<string>((resolve, reject) => {
@@ -75,7 +85,9 @@ export class GaitApiService {
         reader.onload = () => {
           const result = reader.result as string;
           // Remove data URL prefix if present
-          const base64Data = result.includes(',') ? result.split(',')[1] : result;
+          const base64Data = result.includes(",")
+            ? result.split(",")[1]
+            : result;
           resolve(base64Data);
         };
         reader.onerror = reject;
@@ -84,13 +96,13 @@ export class GaitApiService {
 
       // Gradio API format for image input
       const response = await fetch(`${POSE_API_URL}/api/predict/`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           data: [
-            `data:image/${imageFile.type.split('/')[1]};base64,${base64}`, // Gradio expects data URL format
+            `data:image/${imageFile.type.split("/")[1]};base64,${base64}`, // Gradio expects data URL format
           ],
           fn_index: 0, // Image detection function index
         }),
@@ -99,11 +111,13 @@ export class GaitApiService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Pose detection API error - Status: ${response.status}`);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`);
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`,
+        );
       }
 
       const data = await response.json();
-      
+
       // Gradio returns { data: [output1, output2] }
       if (data.data && data.data.length >= 2) {
         return {
@@ -114,7 +128,7 @@ export class GaitApiService {
 
       return data;
     } catch (error) {
-      console.error('Error detecting pose from image:', error);
+      console.error("Error detecting pose from image:", error);
       throw error;
     }
   }
@@ -123,14 +137,18 @@ export class GaitApiService {
    * Detect pose from video (Gradio API)
    * Sends video to Hugging Face pose detection API
    */
-  static async detectPoseFromVideo(videoFile: File): Promise<PoseDetectionResult> {
+  static async detectPoseFromVideo(
+    videoFile: File,
+  ): Promise<PoseDetectionResult> {
     try {
-      console.log(`Calling pose detection API (video): ${POSE_API_URL}/api/predict/`);
+      console.log(
+        `Calling pose detection API (video): ${POSE_API_URL}/api/predict/`,
+      );
 
       // For Gradio video API, we need to upload the file first or use base64
       // Since Gradio handles file uploads, we'll use FormData approach
       const formData = new FormData();
-      formData.append('video', videoFile);
+      formData.append("video", videoFile);
 
       // For Gradio video API, we need to use the Gradio API format
       // First, convert video to base64 or use file upload endpoint
@@ -146,14 +164,17 @@ export class GaitApiService {
       });
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), VIDEO_ANALYSIS_TIMEOUT);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        VIDEO_ANALYSIS_TIMEOUT,
+      );
 
       try {
         // Gradio API format for video input (fn_index: 1 for video tab)
         const response = await fetch(`${POSE_API_URL}/api/predict/`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             data: [base64], // Gradio expects data URL format
@@ -166,31 +187,39 @@ export class GaitApiService {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`Pose detection API error - Status: ${response.status}`);
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`);
+          console.error(
+            `Pose detection API error - Status: ${response.status}`,
+          );
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`,
+          );
         }
 
         const data = await response.json();
-        
+
         // Gradio returns { data: [output_video, status_text] }
         if (data.data && data.data.length >= 2) {
           return {
             annotated_video: data.data[0], // Video URL or path
             status: data.data[1], // Status message
-            frame_count: data.data[1]?.match(/\d+/)?.[0] ? parseInt(data.data[1].match(/\d+/)?.[0] || '0') : undefined,
+            frame_count: data.data[1]?.match(/\d+/)?.[0]
+              ? parseInt(data.data[1].match(/\d+/)?.[0] || "0")
+              : undefined,
           };
         }
 
         return data;
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
-        if (fetchError.name === 'AbortError') {
-          throw new Error(`Request timeout after ${VIDEO_ANALYSIS_TIMEOUT / 1000} seconds. The video might be too large or the API is taking too long to process.`);
+        if (fetchError.name === "AbortError") {
+          throw new Error(
+            `Request timeout after ${VIDEO_ANALYSIS_TIMEOUT / 1000} seconds. The video might be too large or the API is taking too long to process.`,
+          );
         }
         throw fetchError;
       }
     } catch (error) {
-      console.error('Error detecting pose from video:', error);
+      console.error("Error detecting pose from video:", error);
       throw error;
     }
   }
@@ -202,17 +231,20 @@ export class GaitApiService {
   static async detectLimping(videoFile: File): Promise<LimpingDetectionResult> {
     try {
       const formData = new FormData();
-      formData.append('video', videoFile);
+      formData.append("video", videoFile);
 
       console.log(`Calling limping API: ${LIMPING_API_URL}/predict`);
 
       // Create AbortController for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), VIDEO_ANALYSIS_TIMEOUT);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        VIDEO_ANALYSIS_TIMEOUT,
+      );
 
       try {
         const response = await fetch(`${LIMPING_API_URL}/predict`, {
-          method: 'POST',
+          method: "POST",
           body: formData,
           signal: controller.signal,
           // Don't set Content-Type header - let browser set it with boundary for multipart/form-data
@@ -222,21 +254,27 @@ export class GaitApiService {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`Limping API error - Status: ${response.status}, URL: ${LIMPING_API_URL}/predict`);
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`);
+          console.error(
+            `Limping API error - Status: ${response.status}, URL: ${LIMPING_API_URL}/predict`,
+          );
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`,
+          );
         }
 
         const data = await response.json();
         return data;
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
-        if (fetchError.name === 'AbortError') {
-          throw new Error(`Request timeout after ${VIDEO_ANALYSIS_TIMEOUT / 1000} seconds. The video might be too large or the API is taking too long to process.`);
+        if (fetchError.name === "AbortError") {
+          throw new Error(
+            `Request timeout after ${VIDEO_ANALYSIS_TIMEOUT / 1000} seconds. The video might be too large or the API is taking too long to process.`,
+          );
         }
         throw fetchError;
       }
     } catch (error) {
-      console.error('Error detecting limping:', error);
+      console.error("Error detecting limping:", error);
       throw error;
     }
   }
@@ -245,19 +283,24 @@ export class GaitApiService {
    * Predict disease risk from health data
    * Sends health information to Hugging Face disease prediction API
    */
-  static async predictDisease(input: DiseasePredictionInput): Promise<DiseasePredictionResult> {
+  static async predictDisease(
+    input: DiseasePredictionInput,
+  ): Promise<DiseasePredictionResult> {
     try {
       console.log(`Calling disease API: ${DISEASE_API_URL}/predict`);
 
       // Create AbortController for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        API_REQUEST_TIMEOUT,
+      );
 
       try {
         const response = await fetch(`${DISEASE_API_URL}/predict`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(input),
           signal: controller.signal,
@@ -267,27 +310,35 @@ export class GaitApiService {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`Disease API error - Status: ${response.status}, URL: ${DISEASE_API_URL}/predict`);
-          
+          console.error(
+            `Disease API error - Status: ${response.status}, URL: ${DISEASE_API_URL}/predict`,
+          );
+
           // Provide helpful error message for 404
           if (response.status === 404) {
-            throw new Error(`API endpoint not found (404). Please verify the Hugging Face Space URL is correct: ${DISEASE_API_URL}/predict. Make sure the Space is running and the endpoint path is correct.`);
+            throw new Error(
+              `API endpoint not found (404). Please verify the Hugging Face Space URL is correct: ${DISEASE_API_URL}/predict. Make sure the Space is running and the endpoint path is correct.`,
+            );
           }
-          
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`);
+
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`,
+          );
         }
 
         const data = await response.json();
         return data;
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
-        if (fetchError.name === 'AbortError') {
-          throw new Error(`Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The API might be slow or unresponsive.`);
+        if (fetchError.name === "AbortError") {
+          throw new Error(
+            `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The API might be slow or unresponsive.`,
+          );
         }
         throw fetchError;
       }
     } catch (error) {
-      console.error('Error predicting disease:', error);
+      console.error("Error predicting disease:", error);
       throw error;
     }
   }
@@ -304,8 +355,8 @@ export class GaitApiService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Limping API health check failed:', error);
-      return { status: 'unhealthy' };
+      console.error("Limping API health check failed:", error);
+      return { status: "unhealthy" };
     }
   }
 
@@ -321,8 +372,8 @@ export class GaitApiService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Disease API health check failed:', error);
-      return { status: 'unhealthy' };
+      console.error("Disease API health check failed:", error);
+      return { status: "unhealthy" };
     }
   }
 
@@ -334,19 +385,18 @@ export class GaitApiService {
       // Gradio apps don't have a simple health endpoint
       // We can check if the Space is accessible
       const response = await fetch(`${POSE_API_URL}/`, {
-        method: 'GET',
+        method: "GET",
         signal: AbortSignal.timeout(5000), // 5 second timeout
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return { status: 'healthy' };
+      return { status: "healthy" };
     } catch (error) {
-      console.error('Pose detection API health check failed:', error);
-      return { status: 'unhealthy' };
+      console.error("Pose detection API health check failed:", error);
+      return { status: "unhealthy" };
     }
   }
 }
 
 export default GaitApiService;
-
