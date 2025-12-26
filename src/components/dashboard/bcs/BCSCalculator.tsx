@@ -612,7 +612,7 @@ export default function BCSCalculator() {
                 🔬 Analyzing Disease Risks...
               </h3>
               <p className="text-gray-600">
-                Our AI is processing your pet's health data across 6 different conditions.
+                Our AI is processing your pet&apos;s health data across 6 different conditions.
               </p>
             </div>
           </div>

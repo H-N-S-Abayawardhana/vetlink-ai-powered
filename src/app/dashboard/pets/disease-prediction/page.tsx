@@ -102,7 +102,7 @@ export default function DiseasePredictionPage() {
             🔬 Multi-Disease Risk Prediction
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            AI-powered analysis to assess your pet's risk for 6 different health conditions 
+            AI-powered analysis to assess your pet&apos;s risk for 6 different health conditions 
             based on health data, lifestyle, and clinical signs.
           </p>
         </div>
@@ -311,7 +311,7 @@ export default function DiseasePredictionPage() {
                 🔬 Analyzing Disease Risks...
               </h3>
               <p className="text-gray-600">
-                Our AI is processing your pet's health data across 6 different conditions.
+                Our AI is processing your pet&apos;s health data across 6 different conditions.
               </p>
             </div>
           </div>
