@@ -5,24 +5,38 @@ import Image from "next/image";
 import { listPets, updatePet, type Pet } from "@/lib/pets";
 import { formatBCSTimestamp } from "@/lib/format-date";
 import PetCardBCS from "./PetCardBCS";
+import DiseasePredictionForm from "./DiseasePredictionForm";
+import DiseasePredictionResults from "./DiseasePredictionResults";
+import type {
+  DiseasePredictionFormState,
+  DiseasePredictionResult,
+} from "@/types/disease-prediction";
+import { formStateToApiInput } from "@/types/disease-prediction";
 import {
   Scale,
   PawPrint,
   ChevronRight,
   Check,
   AlertCircle,
+  Stethoscope,
 } from "lucide-react";
 
 export default function BCSCalculator() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [selected, setSelected] = useState<Pet | null>(null);
-  const [step, setStep] = useState<"select" | "details" | "result">("select");
+  const [step, setStep] = useState<"select" | "details" | "result" | "disease-result">("select");
   const [updates, setUpdates] = useState<{
     ageYears?: number | null;
     weightKg?: number | null;
   }>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<number | null>(null);
+
+  // Disease prediction states
+  const [showDiseaseForm, setShowDiseaseForm] = useState(false);
+  const [diseaseLoading, setDiseaseLoading] = useState(false);
+  const [diseaseResult, setDiseaseResult] = useState<DiseasePredictionResult | null>(null);
+  const [diseaseError, setDiseaseError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -135,6 +149,59 @@ export default function BCSCalculator() {
     setStep("select");
     setResult(null);
     setUpdates({});
+    setDiseaseResult(null);
+    setDiseaseError(null);
+    setShowDiseaseForm(false);
+  }
+
+  // Handle disease prediction form submission
+  async function handleDiseasePrediction(formData: DiseasePredictionFormState) {
+    setShowDiseaseForm(false);
+    setDiseaseLoading(true);
+    setDiseaseError(null);
+
+    try {
+      const apiInput = formStateToApiInput(formData, selected?.id);
+
+      if (!apiInput) {
+        throw new Error("Please fill in all required fields");
+      }
+
+      const response = await fetch("/api/disease/multi-predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiInput),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to predict diseases");
+      }
+
+      const data = await response.json();
+      setDiseaseResult(data.result);
+      setStep("disease-result");
+    } catch (err) {
+      console.error("Disease prediction failed:", err);
+      setDiseaseError(err instanceof Error ? err.message : "Failed to predict diseases");
+      alert(`Analysis failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    } finally {
+      setDiseaseLoading(false);
+    }
+  }
+
+  // Start new disease analysis
+  function handleNewDiseaseAnalysis() {
+    setDiseaseResult(null);
+    setShowDiseaseForm(true);
+  }
+
+  // Go back to BCS results
+  function handleBackToBCS() {
+    setStep("result");
+    setDiseaseResult(null);
   }
 
   const getBCSDescription = (score: number) => {
@@ -475,9 +542,81 @@ export default function BCSCalculator() {
                   Adjust Details
                 </button>
               </div>
+
+              {/* Disease Prediction CTA */}
+              <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border-2 border-purple-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <Stethoscope className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        🔬 Multi-Disease Risk Assessment
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Continue to analyze your pet for 6 different health conditions
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowDiseaseForm(true)}
+                    disabled={diseaseLoading}
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    {diseaseLoading ? (
+                      <span className="flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        Analyzing...
+                      </span>
+                    ) : (
+                      "Start Assessment →"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Disease Prediction Results */}
+          {step === "disease-result" && diseaseResult && selected && (
+            <div className="p-4">
+              <DiseasePredictionResults
+                result={diseaseResult}
+                petName={selected.name}
+                onNewAnalysis={handleNewDiseaseAnalysis}
+                onClose={handleBackToBCS}
+              />
             </div>
           )}
         </div>
+
+        {/* Disease Prediction Form Modal */}
+        {showDiseaseForm && selected && (
+          <DiseasePredictionForm
+            onSubmit={handleDiseasePrediction}
+            onCancel={() => setShowDiseaseForm(false)}
+            initialBCS={result}
+            petName={selected.name}
+            petAge={updates.ageYears ?? selected.ageYears}
+            petGender={selected.gender}
+          />
+        )}
+
+        {/* Disease Loading Overlay */}
+        {diseaseLoading && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md mx-4">
+              <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-6"></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                🔬 Analyzing Disease Risks...
+              </h3>
+              <p className="text-gray-600">
+                Our AI is processing your pet&apos;s health data across 6 different conditions.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Info Footer */}
         <div className="mt-8 text-center text-sm text-gray-600">
