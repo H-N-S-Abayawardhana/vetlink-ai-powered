@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
           CREATE TABLE IF NOT EXISTS multi_disease_analyses (
             id SERIAL PRIMARY KEY,
             pet_id INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
+            user_id UUID NOT NULL,
             age_years INTEGER NOT NULL,
             breed_size VARCHAR(20) NOT NULL,
             sex VARCHAR(10) NOT NULL,
