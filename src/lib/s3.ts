@@ -6,6 +6,8 @@ import {
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || "";
 const FOLDER_PATH = process.env.SKIN_DISEASES_HISTORY_FOLDER_PATH || "";
+const LIMPING_FOLDER_PATH =
+  process.env.LIMPING_DETECTION_HISTORY_FOLDER_PATH || "";
 
 // Get S3 client with proper configuration
 function getS3Client() {
@@ -20,6 +22,95 @@ function getS3Client() {
     // Force path style can help with region redirects
     forcePathStyle: false,
   });
+}
+
+/**
+ * Upload a video buffer to S3
+ * @param buffer - The video file buffer
+ * @param filename - The filename to use in S3
+ * @param contentType - The MIME type of the video
+ * @returns The S3 URL of the uploaded video
+ */
+export async function uploadVideoToS3(
+  buffer: Buffer,
+  filename: string,
+  contentType: string,
+): Promise<string> {
+  if (!BUCKET_NAME) {
+    throw new Error("S3_BUCKET_NAME is not configured");
+  }
+
+  // Construct the S3 key (path) for the video using limping folder path
+  const s3Key = LIMPING_FOLDER_PATH
+    ? `${LIMPING_FOLDER_PATH.replace(/^\/+|\/+$/g, "")}/${filename}`
+    : filename;
+
+  const s3Client = getS3Client();
+  const region = process.env.NEXT_AWS_REGION || "ap-southeast-2";
+
+  try {
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      Body: buffer,
+      ContentType: contentType,
+    });
+
+    await s3Client.send(command);
+
+    // Construct and return the S3 URL
+    const s3Url = `https://${BUCKET_NAME}.s3.${region}.amazonaws.com/${s3Key}`;
+
+    return s3Url;
+  } catch (error: any) {
+    // Handle PermanentRedirect error - bucket is in a different region
+    if (
+      error?.Code === "PermanentRedirect" ||
+      error?.name === "PermanentRedirect"
+    ) {
+      const endpoint = error?.Endpoint || "";
+      const regionMatch = endpoint.match(/\.s3\.([^.]+)\.amazonaws\.com/);
+      const actualRegion = regionMatch ? regionMatch[1] : null;
+
+      if (actualRegion && actualRegion !== region) {
+        try {
+          const correctS3Client = new S3Client({
+            region: actualRegion,
+            credentials: {
+              accessKeyId: process.env.NEXT_AWS_ACCESS_KEY_ID || "",
+              secretAccessKey: process.env.NEXT_AWS_SECRET_ACCESS_KEY || "",
+            },
+            forcePathStyle: false,
+          });
+
+          const retryCommand = new PutObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: s3Key,
+            Body: buffer,
+            ContentType: contentType,
+          });
+
+          await correctS3Client.send(retryCommand);
+
+          const s3Url = `https://${BUCKET_NAME}.s3.${actualRegion}.amazonaws.com/${s3Key}`;
+          return s3Url;
+        } catch (retryError: any) {
+          console.error(
+            "Error uploading video to S3 after region retry:",
+            retryError,
+          );
+          throw new Error(
+            `Failed to upload video to S3: ${retryError?.message || retryError?.Code || "Unknown error"}`,
+          );
+        }
+      }
+    }
+
+    console.error("Error uploading video to S3:", error);
+    throw new Error(
+      `Failed to upload video to S3: ${error?.message || error?.Code || "Unknown error"}`,
+    );
+  }
 }
 
 /**

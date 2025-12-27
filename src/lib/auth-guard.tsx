@@ -23,7 +23,7 @@ export function AuthGuard({
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "loading") return; // Still loading
+    if (status === "loading") return;
 
     if (!session) {
       router.push("/signin");
