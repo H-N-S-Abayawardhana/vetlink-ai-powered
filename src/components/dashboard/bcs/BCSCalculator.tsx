@@ -24,7 +24,9 @@ import {
 export default function BCSCalculator() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [selected, setSelected] = useState<Pet | null>(null);
-  const [step, setStep] = useState<"select" | "details" | "result" | "disease-result">("select");
+  const [step, setStep] = useState<
+    "select" | "details" | "result" | "disease-result"
+  >("select");
   const [updates, setUpdates] = useState<{
     ageYears?: number | null;
     weightKg?: number | null;
@@ -35,7 +37,8 @@ export default function BCSCalculator() {
   // Disease prediction states
   const [showDiseaseForm, setShowDiseaseForm] = useState(false);
   const [diseaseLoading, setDiseaseLoading] = useState(false);
-  const [diseaseResult, setDiseaseResult] = useState<DiseasePredictionResult | null>(null);
+  const [diseaseResult, setDiseaseResult] =
+    useState<DiseasePredictionResult | null>(null);
   const [diseaseError, setDiseaseError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -185,8 +188,12 @@ export default function BCSCalculator() {
       setStep("disease-result");
     } catch (err) {
       console.error("Disease prediction failed:", err);
-      setDiseaseError(err instanceof Error ? err.message : "Failed to predict diseases");
-      alert(`Analysis failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+      setDiseaseError(
+        err instanceof Error ? err.message : "Failed to predict diseases",
+      );
+      alert(
+        `Analysis failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     } finally {
       setDiseaseLoading(false);
     }
@@ -425,7 +432,7 @@ export default function BCSCalculator() {
                 disabled={!canCalculate || loading}
                 className={`mt-8 w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 ${
                   canCalculate && !loading
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >
@@ -555,7 +562,8 @@ export default function BCSCalculator() {
                         🔬 Multi-Disease Risk Assessment
                       </h3>
                       <p className="text-sm text-gray-600">
-                        Continue to analyze your pet for 6 different health conditions
+                        Continue to analyze your pet for 6 different health
+                        conditions
                       </p>
                     </div>
                   </div>
@@ -612,7 +620,8 @@ export default function BCSCalculator() {
                 🔬 Analyzing Disease Risks...
               </h3>
               <p className="text-gray-600">
-                Our AI is processing your pet&apos;s health data across 6 different conditions.
+                Our AI is processing your pet&apos;s health data across 6
+                different conditions.
               </p>
             </div>
           </div>

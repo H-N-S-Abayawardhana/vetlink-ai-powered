@@ -14,15 +14,23 @@ export interface SkinDiseaseRecord {
 export async function listSkinDiseaseRecords(
   petId: string,
 ): Promise<SkinDiseaseRecord[]> {
+  if (!petId) {
+    return [];
+  }
+
   try {
     const res = await fetch(`/api/pets/${petId}/skin-disease`);
     if (!res.ok) {
-      console.error("listSkinDiseaseRecords: API responded with", res.status);
+      // Don't log 404 errors as they're expected when a pet is deleted
+      if (res.status !== 404) {
+        console.error("listSkinDiseaseRecords: API responded with", res.status);
+      }
       return [];
     }
     const data = await res.json();
     return data.records || [];
   } catch (e) {
+    // Don't log errors if it's likely due to navigation/redirect
     console.error("listSkinDiseaseRecords error", e);
     return [];
   }
@@ -60,4 +68,24 @@ export async function createSkinDiseaseRecord(
 
   const data = await res.json();
   return data.record || null;
+}
+
+export async function clearSkinDiseaseHistory(petId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/pets/${petId}/skin-disease`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      throw new Error(
+        `clearSkinDiseaseHistory failed: ${res.status} ${errText}`,
+      );
+    }
+
+    return true;
+  } catch (e) {
+    console.error("clearSkinDiseaseHistory error", e);
+    throw e;
+  }
 }

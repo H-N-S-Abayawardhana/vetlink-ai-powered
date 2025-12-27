@@ -33,6 +33,18 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.s3.ap-southeast-2.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.s3.*.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
   // Ensure proper handling of client-side only code

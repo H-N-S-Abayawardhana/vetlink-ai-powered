@@ -129,7 +129,7 @@ export default function SigninForm() {
               Not a member?{" "}
               <a
                 href="/signup"
-                className="font-semibold text-blue-700 hover:text-blue-600 transition-colors"
+                className="font-semibold text-blue-700 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 Sign up for free
               </a>
@@ -248,7 +248,7 @@ export default function SigninForm() {
                   <div className="text-sm/6">
                     <Link
                       href="/forgot-password"
-                      className="font-semibold text-blue-700 hover:text-blue-600 transition-colors"
+                      className="font-semibold text-blue-700 hover:text-blue-600 transition-colors cursor-pointer"
                     >
                       Forgot password?
                     </Link>

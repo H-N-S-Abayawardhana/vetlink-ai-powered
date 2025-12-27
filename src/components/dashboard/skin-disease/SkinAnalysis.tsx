@@ -711,7 +711,7 @@ export default function SkinAnalysis({
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button
               onClick={reset}
-              className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base"
+              className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base cursor-pointer"
             >
               <svg
                 className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
@@ -732,7 +732,7 @@ export default function SkinAnalysis({
             {prediction && (
               <button
                 onClick={() => window.print()}
-                className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base"
+                className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base cursor-pointer"
               >
                 <svg
                   className="w-4 h-4 sm:w-5 sm:h-5 mr-2"

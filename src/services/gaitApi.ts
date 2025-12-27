@@ -75,10 +75,6 @@ export class GaitApiService {
     imageFile: File,
   ): Promise<PoseDetectionResult> {
     try {
-      console.log(
-        `Calling pose detection API (image): ${POSE_API_URL}/api/predict/`,
-      );
-
       // Convert file to base64 for Gradio API
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -141,10 +137,6 @@ export class GaitApiService {
     videoFile: File,
   ): Promise<PoseDetectionResult> {
     try {
-      console.log(
-        `Calling pose detection API (video): ${POSE_API_URL}/api/predict/`,
-      );
-
       // For Gradio video API, we need to upload the file first or use base64
       // Since Gradio handles file uploads, we'll use FormData approach
       const formData = new FormData();
@@ -233,8 +225,6 @@ export class GaitApiService {
       const formData = new FormData();
       formData.append("video", videoFile);
 
-      console.log(`Calling limping API: ${LIMPING_API_URL}/predict`);
-
       // Create AbortController for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(
@@ -287,8 +277,6 @@ export class GaitApiService {
     input: DiseasePredictionInput,
   ): Promise<DiseasePredictionResult> {
     try {
-      console.log(`Calling disease API: ${DISEASE_API_URL}/predict`);
-
       // Create AbortController for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(

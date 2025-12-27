@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { X, FileText, Info, AlertTriangle, Stethoscope } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { X, FileText, Info, AlertTriangle, Stethoscope } from "lucide-react";
 import type {
   DiseasePredictionFormState,
   BreedSize,
@@ -10,8 +10,11 @@ import type {
   DietType,
   ExerciseLevel,
   Environment,
-} from '@/types/disease-prediction';
-import { initialFormState, formStateToApiInput } from '@/types/disease-prediction';
+} from "@/types/disease-prediction";
+import {
+  initialFormState,
+  formStateToApiInput,
+} from "@/types/disease-prediction";
 
 interface DiseasePredictionFormProps {
   onSubmit: (formData: DiseasePredictionFormState) => void;
@@ -35,7 +38,7 @@ export default function DiseasePredictionForm({
 
   const [formData, setFormData] = useState<DiseasePredictionFormState>(() => {
     const initial = { ...initialFormState };
-    
+
     // Pre-fill from pet data if available
     if (hasBCS) {
       initial.body_condition_score = initialBCS;
@@ -45,13 +48,13 @@ export default function DiseasePredictionForm({
     }
     if (petGender) {
       const normalizedGender = petGender.toLowerCase();
-      if (normalizedGender === 'male' || normalizedGender === 'm') {
-        initial.sex = 'Male';
-      } else if (normalizedGender === 'female' || normalizedGender === 'f') {
-        initial.sex = 'Female';
+      if (normalizedGender === "male" || normalizedGender === "m") {
+        initial.sex = "Male";
+      } else if (normalizedGender === "female" || normalizedGender === "f") {
+        initial.sex = "Female";
       }
     }
-    
+
     return initial;
   });
 
@@ -61,38 +64,42 @@ export default function DiseasePredictionForm({
   // Validation
   const isStep1Valid = () => {
     return (
-      formData.age_years !== '' &&
+      formData.age_years !== "" &&
       parseInt(formData.age_years) > 0 &&
-      formData.breed_size !== '' &&
-      formData.sex !== '' &&
-      formData.is_neutered !== ''
+      formData.breed_size !== "" &&
+      formData.sex !== "" &&
+      formData.is_neutered !== ""
     );
   };
 
   const isStep2Valid = () => {
     return (
-      formData.pale_gums !== '' &&
-      formData.skin_lesions !== '' &&
-      formData.polyuria !== ''
+      formData.pale_gums !== "" &&
+      formData.skin_lesions !== "" &&
+      formData.polyuria !== ""
     );
   };
 
   const isStep3Valid = () => {
     return (
-      formData.tick_prevention !== '' &&
-      formData.heartworm_prevention !== '' &&
-      formData.diet_type !== '' &&
-      formData.exercise_level !== '' &&
-      formData.environment !== ''
+      formData.tick_prevention !== "" &&
+      formData.heartworm_prevention !== "" &&
+      formData.diet_type !== "" &&
+      formData.exercise_level !== "" &&
+      formData.environment !== ""
     );
   };
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1: return isStep1Valid();
-      case 2: return isStep2Valid();
-      case 3: return isStep3Valid();
-      default: return false;
+      case 1:
+        return isStep1Valid();
+      case 2:
+        return isStep2Valid();
+      case 3:
+        return isStep3Valid();
+      default:
+        return false;
     }
   };
 
@@ -117,38 +124,38 @@ export default function DiseasePredictionForm({
 
   // BCS display helper
   const getBCSColor = (score: number) => {
-    if (score <= 3) return 'bg-orange-400';
-    if (score <= 5) return 'bg-green-500';
-    if (score <= 7) return 'bg-amber-400';
-    return 'bg-red-500';
+    if (score <= 3) return "bg-orange-400";
+    if (score <= 5) return "bg-green-500";
+    if (score <= 7) return "bg-amber-400";
+    return "bg-red-500";
   };
 
   const getBCSLabel = (score: number) => {
-    if (score <= 3) return 'Underweight';
-    if (score <= 5) return 'Ideal';
-    if (score <= 7) return 'Overweight';
-    return 'Obese';
+    if (score <= 3) return "Underweight";
+    if (score <= 5) return "Ideal";
+    if (score <= 7) return "Overweight";
+    return "Obese";
   };
 
   const getBCSBorderColor = (score: number) => {
-    if (score <= 3) return 'border-orange-300';
-    if (score <= 5) return 'border-green-300';
-    if (score <= 7) return 'border-amber-300';
-    return 'border-red-300';
+    if (score <= 3) return "border-orange-300";
+    if (score <= 5) return "border-green-300";
+    if (score <= 7) return "border-amber-300";
+    return "border-red-300";
   };
 
   const getBCSBgColor = (score: number) => {
-    if (score <= 3) return 'bg-orange-50';
-    if (score <= 5) return 'bg-green-50';
-    if (score <= 7) return 'bg-amber-50';
-    return 'bg-red-50';
+    if (score <= 3) return "bg-orange-50";
+    if (score <= 5) return "bg-green-50";
+    if (score <= 7) return "bg-amber-50";
+    return "bg-red-50";
   };
 
   const getBCSTextColor = (score: number) => {
-    if (score <= 3) return 'text-orange-700';
-    if (score <= 5) return 'text-green-700';
-    if (score <= 7) return 'text-amber-700';
-    return 'text-red-700';
+    if (score <= 3) return "text-orange-700";
+    if (score <= 5) return "text-green-700";
+    if (score <= 7) return "text-amber-700";
+    return "text-red-700";
   };
 
   // If no BCS, show error state
@@ -159,12 +166,11 @@ export default function DiseasePredictionForm({
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-8 h-8 text-amber-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            BCS Required
-          </h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">BCS Required</h3>
           <p className="text-gray-600 mb-6">
-            Please calculate the Body Condition Score (BCS) for {petName || 'your pet'} first 
-            before running the disease risk assessment.
+            Please calculate the Body Condition Score (BCS) for{" "}
+            {petName || "your pet"} first before running the disease risk
+            assessment.
           </p>
           <button
             onClick={onCancel}
@@ -192,7 +198,8 @@ export default function DiseasePredictionForm({
                   🔬 Multi-Disease Risk Assessment
                 </h2>
                 <p className="text-purple-100 text-sm">
-                  {petName ? `For ${petName} - ` : ''}Step {currentStep} of {totalSteps}
+                  {petName ? `For ${petName} - ` : ""}Step {currentStep} of{" "}
+                  {totalSteps}
                 </p>
               </div>
             </div>
@@ -210,7 +217,7 @@ export default function DiseasePredictionForm({
               <div
                 key={idx}
                 className={`h-2 flex-1 rounded-full transition-all ${
-                  idx < currentStep ? 'bg-white' : 'bg-white/30'
+                  idx < currentStep ? "bg-white" : "bg-white/30"
                 }`}
               />
             ))}
@@ -219,15 +226,21 @@ export default function DiseasePredictionForm({
 
         <form onSubmit={handleSubmit} className="p-8">
           {/* BCS Display Card - Read-only from database */}
-          <div className={`mb-6 p-4 rounded-xl border-2 ${getBCSBorderColor(initialBCS)} ${getBCSBgColor(initialBCS)}`}>
+          <div
+            className={`mb-6 p-4 rounded-xl border-2 ${getBCSBorderColor(initialBCS)} ${getBCSBgColor(initialBCS)}`}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 ${getBCSColor(initialBCS)} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
+                <div
+                  className={`w-14 h-14 ${getBCSColor(initialBCS)} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}
+                >
                   {initialBCS}
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Body Condition Score</p>
-                  <p className={`font-bold text-lg ${getBCSTextColor(initialBCS)}`}>
+                  <p
+                    className={`font-bold text-lg ${getBCSTextColor(initialBCS)}`}
+                  >
                     {getBCSLabel(initialBCS)} ({initialBCS}/9)
                   </p>
                 </div>
@@ -245,8 +258,10 @@ export default function DiseasePredictionForm({
             <div className="flex gap-3">
               <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-blue-800">
-                <strong>AI-Powered Analysis:</strong> This assessment uses machine learning to evaluate
-                the risk of 6 different conditions based on your pet&apos;s health data, lifestyle, and clinical signs.
+                <strong>AI-Powered Analysis:</strong> This assessment uses
+                machine learning to evaluate the risk of 6 different conditions
+                based on your pet&apos;s health data, lifestyle, and clinical
+                signs.
               </div>
             </div>
           </div>
@@ -270,11 +285,15 @@ export default function DiseasePredictionForm({
                     step="0.5"
                     required
                     value={formData.age_years}
-                    onChange={(e) => setFormData({ ...formData, age_years: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, age_years: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                     placeholder="e.g., 7"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Enter age in years (0-30)</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter age in years (0-30)
+                  </p>
                 </div>
 
                 <div>
@@ -284,7 +303,12 @@ export default function DiseasePredictionForm({
                   <select
                     required
                     value={formData.breed_size}
-                    onChange={(e) => setFormData({ ...formData, breed_size: e.target.value as BreedSize })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        breed_size: e.target.value as BreedSize,
+                      })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   >
                     <option value="">Select breed size</option>
@@ -301,22 +325,24 @@ export default function DiseasePredictionForm({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, sex: 'Male' })}
+                      onClick={() => setFormData({ ...formData, sex: "Male" })}
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.sex === 'Male'
-                          ? 'bg-blue-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.sex === "Male"
+                          ? "bg-blue-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ♂️ Male
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, sex: 'Female' })}
+                      onClick={() =>
+                        setFormData({ ...formData, sex: "Female" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.sex === 'Female'
-                          ? 'bg-pink-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.sex === "Female"
+                          ? "bg-pink-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ♀️ Female
@@ -331,22 +357,26 @@ export default function DiseasePredictionForm({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, is_neutered: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, is_neutered: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.is_neutered === 'yes'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.is_neutered === "yes"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, is_neutered: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, is_neutered: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.is_neutered === 'no'
-                          ? 'bg-gray-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.is_neutered === "no"
+                          ? "bg-gray-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ❌ No
@@ -368,8 +398,8 @@ export default function DiseasePredictionForm({
                 <div className="flex gap-3">
                   <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-amber-800">
-                    Please indicate any symptoms you have observed. These are important indicators
-                    for disease risk assessment.
+                    Please indicate any symptoms you have observed. These are
+                    important indicators for disease risk assessment.
                   </div>
                 </div>
               </div>
@@ -380,27 +410,32 @@ export default function DiseasePredictionForm({
                     Pale Gums <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    Indicator of anemia or poor circulation (tick disease, parasites)
+                    Indicator of anemia or poor circulation (tick disease,
+                    parasites)
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, pale_gums: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, pale_gums: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.pale_gums === 'yes'
-                          ? 'bg-red-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.pale_gums === "yes"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ⚠️ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, pale_gums: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, pale_gums: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.pale_gums === 'no'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.pale_gums === "no"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ No
@@ -418,22 +453,26 @@ export default function DiseasePredictionForm({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, skin_lesions: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, skin_lesions: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.skin_lesions === 'yes'
-                          ? 'bg-red-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.skin_lesions === "yes"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ⚠️ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, skin_lesions: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, skin_lesions: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.skin_lesions === 'no'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.skin_lesions === "no"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ No
@@ -443,7 +482,8 @@ export default function DiseasePredictionForm({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Polyuria (Excessive Urination) <span className="text-red-500">*</span>
+                    Polyuria (Excessive Urination){" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
                     Frequent or increased urination (diabetes, kidney issues)
@@ -451,22 +491,26 @@ export default function DiseasePredictionForm({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, polyuria: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, polyuria: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.polyuria === 'yes'
-                          ? 'bg-red-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.polyuria === "yes"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ⚠️ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, polyuria: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, polyuria: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.polyuria === 'no'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.polyuria === "no"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ No
@@ -492,7 +536,12 @@ export default function DiseasePredictionForm({
                   <select
                     required
                     value={formData.tick_prevention}
-                    onChange={(e) => setFormData({ ...formData, tick_prevention: e.target.value as TickPrevention })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        tick_prevention: e.target.value as TickPrevention,
+                      })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   >
                     <option value="">Select tick prevention</option>
@@ -509,22 +558,29 @@ export default function DiseasePredictionForm({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, heartworm_prevention: 'yes' })}
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          heartworm_prevention: "yes",
+                        })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.heartworm_prevention === 'yes'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.heartworm_prevention === "yes"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, heartworm_prevention: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, heartworm_prevention: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.heartworm_prevention === 'no'
-                          ? 'bg-red-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.heartworm_prevention === "no"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ❌ No
@@ -539,7 +595,12 @@ export default function DiseasePredictionForm({
                   <select
                     required
                     value={formData.diet_type}
-                    onChange={(e) => setFormData({ ...formData, diet_type: e.target.value as DietType })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        diet_type: e.target.value as DietType,
+                      })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   >
                     <option value="">Select diet type</option>
@@ -557,12 +618,19 @@ export default function DiseasePredictionForm({
                   <select
                     required
                     value={formData.exercise_level}
-                    onChange={(e) => setFormData({ ...formData, exercise_level: e.target.value as ExerciseLevel })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        exercise_level: e.target.value as ExerciseLevel,
+                      })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   >
                     <option value="">Select exercise level</option>
                     <option value="Low">🛋️ Low (Minimal activity)</option>
-                    <option value="Moderate">🚶 Moderate (Regular walks)</option>
+                    <option value="Moderate">
+                      🚶 Moderate (Regular walks)
+                    </option>
                     <option value="High">🏃 High (Very active)</option>
                   </select>
                 </div>
@@ -574,33 +642,39 @@ export default function DiseasePredictionForm({
                   <div className="grid grid-cols-3 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, environment: 'Indoor' })}
+                      onClick={() =>
+                        setFormData({ ...formData, environment: "Indoor" })
+                      }
                       className={`px-4 py-4 rounded-xl font-medium transition-all ${
-                        formData.environment === 'Indoor'
-                          ? 'bg-blue-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.environment === "Indoor"
+                          ? "bg-blue-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       🏠 Indoor
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, environment: 'Outdoor' })}
+                      onClick={() =>
+                        setFormData({ ...formData, environment: "Outdoor" })
+                      }
                       className={`px-4 py-4 rounded-xl font-medium transition-all ${
-                        formData.environment === 'Outdoor'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.environment === "Outdoor"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       🌳 Outdoor
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, environment: 'Mixed' })}
+                      onClick={() =>
+                        setFormData({ ...formData, environment: "Mixed" })
+                      }
                       className={`px-4 py-4 rounded-xl font-medium transition-all ${
-                        formData.environment === 'Mixed'
-                          ? 'bg-purple-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.environment === "Mixed"
+                          ? "bg-purple-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       🏡 Mixed
@@ -638,8 +712,8 @@ export default function DiseasePredictionForm({
                 disabled={!canProceed()}
                 className={`flex-1 px-6 py-4 rounded-xl font-semibold transition-all ${
                   canProceed()
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
                 Next →
@@ -650,8 +724,8 @@ export default function DiseasePredictionForm({
                 disabled={!canProceed()}
                 className={`flex-1 px-6 py-4 rounded-xl font-semibold transition-all ${
                   canProceed()
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
                 🔬 Analyze Disease Risks

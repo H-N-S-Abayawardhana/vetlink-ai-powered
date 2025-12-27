@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { listPets, type Pet } from '@/lib/pets';
-import DiseasePredictionForm from '@/components/dashboard/bcs/DiseasePredictionForm';
-import DiseasePredictionResults from '@/components/dashboard/bcs/DiseasePredictionResults';
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { listPets, type Pet } from "@/lib/pets";
+import DiseasePredictionForm from "@/components/dashboard/bcs/DiseasePredictionForm";
+import DiseasePredictionResults from "@/components/dashboard/bcs/DiseasePredictionResults";
 import type {
   DiseasePredictionFormState,
   DiseasePredictionResult,
-} from '@/types/disease-prediction';
-import { formStateToApiInput } from '@/types/disease-prediction';
+} from "@/types/disease-prediction";
+import { formStateToApiInput } from "@/types/disease-prediction";
 import {
   Stethoscope,
   PawPrint,
@@ -17,12 +17,12 @@ import {
   Check,
   AlertCircle,
   Info,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function DiseasePredictionPage() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [selected, setSelected] = useState<Pet | null>(null);
-  const [step, setStep] = useState<'select' | 'form' | 'result'>('select');
+  const [step, setStep] = useState<"select" | "form" | "result">("select");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DiseasePredictionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export default function DiseasePredictionPage() {
 
   function onSelectPet(pet: Pet) {
     setSelected(pet);
-    setStep('form');
+    setStep("form");
     setResult(null);
     setError(null);
   }
@@ -50,29 +50,33 @@ export default function DiseasePredictionPage() {
       const apiInput = formStateToApiInput(formData, selected?.id);
 
       if (!apiInput) {
-        throw new Error('Please fill in all required fields');
+        throw new Error("Please fill in all required fields");
       }
 
-      const response = await fetch('/api/disease/multi-predict', {
-        method: 'POST',
+      const response = await fetch("/api/disease/multi-predict", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(apiInput),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to predict diseases');
+        throw new Error(errorData.error || "Failed to predict diseases");
       }
 
       const data = await response.json();
       setResult(data.result);
-      setStep('result');
+      setStep("result");
     } catch (err) {
-      console.error('Disease prediction failed:', err);
-      setError(err instanceof Error ? err.message : 'Failed to predict diseases');
-      alert(`Analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error("Disease prediction failed:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to predict diseases",
+      );
+      alert(
+        `Analysis failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -80,12 +84,12 @@ export default function DiseasePredictionPage() {
 
   function handleNewAnalysis() {
     setResult(null);
-    setStep('form');
+    setStep("form");
   }
 
   function handleBackToSelection() {
     setSelected(null);
-    setStep('select');
+    setStep("select");
     setResult(null);
     setError(null);
   }
@@ -102,8 +106,9 @@ export default function DiseasePredictionPage() {
             🔬 Multi-Disease Risk Prediction
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            AI-powered analysis to assess your pet&apos;s risk for 6 different health conditions 
-            based on health data, lifestyle, and clinical signs.
+            AI-powered analysis to assess your pet&apos;s risk for 6 different
+            health conditions based on health data, lifestyle, and clinical
+            signs.
           </p>
         </div>
 
@@ -149,50 +154,52 @@ export default function DiseasePredictionPage() {
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-12 gap-2">
-          {['Select Pet', 'Health Assessment', 'View Results'].map((label, idx) => {
-            const stepMap = ['select', 'form', 'result'];
-            const currentIdx = stepMap.indexOf(step);
-            const isActive = idx === currentIdx;
-            const isCompleted = idx < currentIdx;
+          {["Select Pet", "Health Assessment", "View Results"].map(
+            (label, idx) => {
+              const stepMap = ["select", "form", "result"];
+              const currentIdx = stepMap.indexOf(step);
+              const isActive = idx === currentIdx;
+              const isCompleted = idx < currentIdx;
 
-            return (
-              <React.Fragment key={label}>
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                      isActive
-                        ? 'bg-purple-600 text-white shadow-lg scale-105'
-                        : isCompleted
-                          ? 'bg-green-500 text-white'
-                          : 'bg-white text-gray-400 border border-gray-200'
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-semibold">
-                        {idx + 1}
+              return (
+                <React.Fragment key={label}>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                        isActive
+                          ? "bg-purple-600 text-white shadow-lg scale-105"
+                          : isCompleted
+                            ? "bg-green-500 text-white"
+                            : "bg-white text-gray-400 border border-gray-200"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-semibold">
+                          {idx + 1}
+                        </span>
+                      )}
+                      <span className="text-sm font-medium hidden sm:inline">
+                        {label}
                       </span>
-                    )}
-                    <span className="text-sm font-medium hidden sm:inline">
-                      {label}
-                    </span>
+                    </div>
                   </div>
-                </div>
-                {idx < 2 && (
-                  <ChevronRight
-                    className={`w-5 h-5 ${isCompleted ? 'text-green-500' : 'text-gray-300'}`}
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
+                  {idx < 2 && (
+                    <ChevronRight
+                      className={`w-5 h-5 ${isCompleted ? "text-green-500" : "text-gray-300"}`}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            },
+          )}
         </div>
 
         {/* Main Content */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Step 1: Select Pet */}
-          {step === 'select' && (
+          {step === "select" && (
             <div className="p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <PawPrint className="w-6 h-6 text-purple-600" />
@@ -208,69 +215,77 @@ export default function DiseasePredictionPage() {
                 <>
                   <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      <strong>Note:</strong> Only pets with a calculated Body Condition Score (BCS) can be assessed. 
-                      Please calculate BCS first if needed.
+                      <strong>Note:</strong> Only pets with a calculated Body
+                      Condition Score (BCS) can be assessed. Please calculate
+                      BCS first if needed.
                     </p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {pets.map((pet) => {
-                    const avatar =
-                      (pet as any).avatarDataUrl ||
-                      (pet as any).avatarUrl ||
-                      (pet.type === 'dog'
-                        ? '/uploads/default-dog.png'
-                        : '/uploads/default-cat.png');
-                    const hasAvatar = Boolean(
-                      (pet as any).avatarDataUrl || (pet as any).avatarUrl
-                    );
-                    const hasBCS = pet.bcs !== null && pet.bcs !== undefined;
+                    {pets.map((pet) => {
+                      const avatar =
+                        (pet as any).avatarDataUrl ||
+                        (pet as any).avatarUrl ||
+                        (pet.type === "dog"
+                          ? "/uploads/default-dog.png"
+                          : "/uploads/default-cat.png");
+                      const hasAvatar = Boolean(
+                        (pet as any).avatarDataUrl || (pet as any).avatarUrl,
+                      );
+                      const hasBCS = pet.bcs !== null && pet.bcs !== undefined;
 
-                    return (
-                      <button
-                        key={pet.id}
-                        onClick={() => onSelectPet(pet)}
-                        disabled={!hasBCS}
-                        className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
-                          !hasBCS
-                            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                            : selected?.id === pet.id
-                              ? 'border-purple-500 bg-purple-50 shadow-lg'
-                              : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/50'
-                        }`}
-                      >
-                        {hasAvatar ? (
-                          <Image
-                            src={avatar}
-                            alt={pet.name}
-                            width={56}
-                            height={56}
-                            unoptimized
-                            className="w-14 h-14 object-cover rounded-xl"
-                          />
-                        ) : (
-                          <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-indigo-400 rounded-xl flex items-center justify-center text-white text-xl font-bold">
-                            {pet.name.charAt(0)}
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <p className="font-bold text-gray-900">{pet.name}</p>
-                          <p className="text-sm text-gray-600">
-                            {pet.breed || pet.type} • {pet.ageYears ? `${pet.ageYears} years` : 'Age unknown'}
-                          </p>
-                          {hasBCS ? (
-                            <p className="text-xs text-purple-600 font-medium mt-1">
-                              ✅ BCS: {pet.bcs}/9
-                            </p>
+                      return (
+                        <button
+                          key={pet.id}
+                          onClick={() => onSelectPet(pet)}
+                          disabled={!hasBCS}
+                          className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                            !hasBCS
+                              ? "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                              : selected?.id === pet.id
+                                ? "border-purple-500 bg-purple-50 shadow-lg"
+                                : "border-gray-200 hover:border-purple-300 hover:bg-purple-50/50"
+                          }`}
+                        >
+                          {hasAvatar ? (
+                            <Image
+                              src={avatar}
+                              alt={pet.name}
+                              width={56}
+                              height={56}
+                              unoptimized
+                              className="w-14 h-14 object-cover rounded-xl"
+                            />
                           ) : (
-                            <p className="text-xs text-amber-600 font-medium mt-1">
-                              ⚠️ BCS not calculated
-                            </p>
+                            <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-indigo-400 rounded-xl flex items-center justify-center text-white text-xl font-bold">
+                              {pet.name.charAt(0)}
+                            </div>
                           )}
-                        </div>
-                        <ChevronRight className={`w-5 h-5 ${hasBCS ? 'text-gray-400' : 'text-gray-300'}`} />
-                      </button>
-                    );
-                  })}
+                          <div className="flex-1">
+                            <p className="font-bold text-gray-900">
+                              {pet.name}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {pet.breed || pet.type} •{" "}
+                              {pet.ageYears
+                                ? `${pet.ageYears} years`
+                                : "Age unknown"}
+                            </p>
+                            {hasBCS ? (
+                              <p className="text-xs text-purple-600 font-medium mt-1">
+                                ✅ BCS: {pet.bcs}/9
+                              </p>
+                            ) : (
+                              <p className="text-xs text-amber-600 font-medium mt-1">
+                                ⚠️ BCS not calculated
+                              </p>
+                            )}
+                          </div>
+                          <ChevronRight
+                            className={`w-5 h-5 ${hasBCS ? "text-gray-400" : "text-gray-300"}`}
+                          />
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               )}
@@ -278,7 +293,7 @@ export default function DiseasePredictionPage() {
           )}
 
           {/* Step 2: Form (shown as modal via DiseasePredictionForm) */}
-          {step === 'form' && selected && (
+          {step === "form" && selected && (
             <DiseasePredictionForm
               onSubmit={handleFormSubmit}
               onCancel={handleBackToSelection}
@@ -290,7 +305,7 @@ export default function DiseasePredictionPage() {
           )}
 
           {/* Step 3: Results */}
-          {step === 'result' && result && selected && (
+          {step === "result" && result && selected && (
             <div className="p-4">
               <DiseasePredictionResults
                 result={result}
@@ -311,7 +326,8 @@ export default function DiseasePredictionPage() {
                 🔬 Analyzing Disease Risks...
               </h3>
               <p className="text-gray-600">
-                Our AI is processing your pet&apos;s health data across 6 different conditions.
+                Our AI is processing your pet&apos;s health data across 6
+                different conditions.
               </p>
             </div>
           </div>
@@ -320,8 +336,8 @@ export default function DiseasePredictionPage() {
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-600">
           <p>
-            💡 This AI analysis is for informational purposes only. Always consult 
-            your veterinarian for professional medical advice.
+            💡 This AI analysis is for informational purposes only. Always
+            consult your veterinarian for professional medical advice.
           </p>
         </div>
       </div>

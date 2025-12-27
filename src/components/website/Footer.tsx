@@ -82,7 +82,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-12 mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
-            <Link href="/" className="inline-block mb-4">
+            <Link href="/" className="inline-block mb-4 cursor-pointer">
               <div className="flex items-center gap-2">
                 <Image
                   src="/vetlink_logo.png"
@@ -109,7 +109,7 @@ export default function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-xl p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all ring-1 ring-transparent hover:ring-indigo-200/50"
+                  className="rounded-xl p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all ring-1 ring-transparent hover:ring-indigo-200/50 cursor-pointer"
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   aria-label={social.name}
@@ -134,7 +134,7 @@ export default function Footer() {
                 >
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-indigo-600 transition-colors text-sm"
+                    className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
                   >
                     {link.name}
                   </a>
@@ -157,7 +157,7 @@ export default function Footer() {
                 >
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-indigo-600 transition-colors text-sm"
+                    className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
                   >
                     {link.name}
                   </a>
