@@ -9,6 +9,11 @@ import {
   clearSkinDiseaseHistory,
   type SkinDiseaseRecord,
 } from "@/lib/skin-disease-records";
+import {
+  listLimpingRecords,
+  clearLimpingHistory,
+  type LimpingRecord,
+} from "@/lib/limping-records";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { UserRole } from "@/types/next-auth";
@@ -26,10 +31,16 @@ export default function PetProfile({ pet }: PetProfileProps) {
   const isOwner = userRole === "USER";
   const [skinRecords, setSkinRecords] = useState<SkinDiseaseRecord[]>([]);
   const [skinLoading, setSkinLoading] = useState(false);
+  const [limpingRecords, setLimpingRecords] = useState<LimpingRecord[]>([]);
+  const [limpingLoading, setLimpingLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isClearingHistory, setIsClearingHistory] = useState(false);
+  const [isClearingLimpingHistory, setIsClearingLimpingHistory] =
+    useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showClearHistoryModal, setShowClearHistoryModal] = useState(false);
+  const [showClearLimpingHistoryModal, setShowClearLimpingHistoryModal] =
+    useState(false);
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "—";
@@ -49,6 +60,8 @@ export default function PetProfile({ pet }: PetProfileProps) {
     if (!pet?.id) {
       setSkinRecords([]);
       setSkinLoading(false);
+      setLimpingRecords([]);
+      setLimpingLoading(false);
       return;
     }
 
@@ -65,6 +78,20 @@ export default function PetProfile({ pet }: PetProfileProps) {
         if (!cancelled) setSkinLoading(false);
       }
     })();
+
+    (async () => {
+      setLimpingLoading(true);
+      try {
+        const records = await listLimpingRecords(pet.id);
+        if (!cancelled) setLimpingRecords(records || []);
+      } catch (e) {
+        // Silently handle errors (404s are expected if pet was deleted)
+        if (!cancelled) setLimpingRecords([]);
+      } finally {
+        if (!cancelled) setLimpingLoading(false);
+      }
+    })();
+
     return () => {
       cancelled = true;
     };
@@ -109,6 +136,25 @@ export default function PetProfile({ pet }: PetProfileProps) {
       alert("Failed to clear history. Please try again.");
     } finally {
       setIsClearingHistory(false);
+    }
+  };
+
+  const handleClearLimpingHistoryClick = () => {
+    setShowClearLimpingHistoryModal(true);
+  };
+
+  const handleClearLimpingHistoryConfirm = async () => {
+    setIsClearingLimpingHistory(true);
+    try {
+      await clearLimpingHistory(pet.id);
+      // Refresh the records list
+      setLimpingRecords([]);
+      setShowClearLimpingHistoryModal(false);
+    } catch (error) {
+      console.error("Error clearing limping history:", error);
+      alert("Failed to clear history. Please try again.");
+    } finally {
+      setIsClearingLimpingHistory(false);
     }
   };
 
@@ -450,6 +496,145 @@ export default function PetProfile({ pet }: PetProfileProps) {
         isLoading={isDeleting}
       />
 
+      {/* Limping History */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Limping Detection History
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Recent limping detection and mobility analysis for this pet
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {isOwner && limpingRecords.length > 0 && (
+              <button
+                onClick={handleClearLimpingHistoryClick}
+                disabled={isClearingLimpingHistory}
+                className="cursor-pointer text-sm text-red-600 hover:text-red-800 underline whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Clear History
+              </button>
+            )}
+            <Link
+              href="/dashboard/Limping"
+              className="text-sm text-blue-600 hover:text-blue-800 underline whitespace-nowrap cursor-pointer"
+            >
+              New analysis
+            </Link>
+          </div>
+        </div>
+
+        {limpingLoading ? (
+          <div className="flex items-center justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+          </div>
+        ) : limpingRecords.length === 0 ? (
+          <div className="mt-4 rounded-lg border border-dashed border-gray-300 p-6 text-center">
+            <p className="text-sm text-gray-700">
+              No limping detection records yet.
+            </p>
+            <p className="text-sm text-gray-600 mt-1">
+              Run an analysis from the limping detection page to save records
+              here.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {limpingRecords.slice(0, 5).map((rec) => (
+              <div
+                key={rec.id}
+                className="flex items-center gap-4 p-3 rounded-lg border border-gray-200"
+              >
+                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0 relative">
+                  {rec.videoUrl ? (
+                    <div className="relative w-full h-full">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <video
+                        src={rec.videoUrl}
+                        className="w-full h-full object-cover"
+                        muted
+                        preload="metadata"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-2xl">🎥</span>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-semibold text-gray-900 truncate">
+                      {rec.predictedDisease || "Analysis"}
+                    </div>
+                    <div className="text-xs text-gray-500 whitespace-nowrap">
+                      {formatDate(rec.createdAt)}
+                    </div>
+                  </div>
+                  <div className="mt-1 text-sm text-gray-600 space-y-1">
+                    <div>
+                      Limping:{" "}
+                      <span
+                        className={`font-medium ${
+                          rec.limpingDetected === 1
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {rec.limpingDetected === 1
+                          ? "Detected"
+                          : "Not Detected"}
+                      </span>
+                      {rec.limpingConfidence != null && (
+                        <span className="text-gray-500 ml-1">
+                          ({rec.limpingConfidence.toFixed(1)}%)
+                        </span>
+                      )}
+                    </div>
+                    {rec.diseaseConfidence != null && (
+                      <div>
+                        Disease Confidence: {rec.diseaseConfidence.toFixed(1)}%
+                      </div>
+                    )}
+                    {rec.riskLevel && (
+                      <div>
+                        Risk Level:{" "}
+                        <span
+                          className={`font-medium ${
+                            rec.riskLevel === "High"
+                              ? "text-red-600"
+                              : rec.riskLevel === "Medium"
+                                ? "text-yellow-600"
+                                : "text-green-600"
+                          }`}
+                        >
+                          {rec.riskLevel}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {limpingRecords.length > 5 && (
+              <div className="text-sm text-gray-500">
+                Showing 5 of {limpingRecords.length} records.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Clear History Confirmation Modal */}
       <ConfirmationModal
         isOpen={showClearHistoryModal}
@@ -461,6 +646,19 @@ export default function PetProfile({ pet }: PetProfileProps) {
         cancelText="Cancel"
         confirmButtonColor="red"
         isLoading={isClearingHistory}
+      />
+
+      {/* Clear Limping History Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showClearLimpingHistoryModal}
+        onClose={() => setShowClearLimpingHistoryModal(false)}
+        onConfirm={handleClearLimpingHistoryConfirm}
+        title="Clear Limping Detection History"
+        message={`Are you sure you want to clear all limping detection history for ${pet.name}? This action cannot be undone and will delete all associated videos.`}
+        confirmText="Clear History"
+        cancelText="Cancel"
+        confirmButtonColor="red"
+        isLoading={isClearingLimpingHistory}
       />
     </div>
   );
