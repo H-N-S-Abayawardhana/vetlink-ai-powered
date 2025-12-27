@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validEnvironments = ['Indoor', 'Outdoor', 'Mixed'];
+    const validEnvironments = ['Indoor', 'Outdoor', 'Mixed', 'Suburban', 'Rural', 'Urban'];
     if (!validEnvironments.includes(environment)) {
       return NextResponse.json(
         { error: 'Invalid environment type' },
