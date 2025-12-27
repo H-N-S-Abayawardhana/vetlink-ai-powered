@@ -331,7 +331,7 @@ Please consult a veterinarian for professional medical advice.
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
           <button
             onClick={handleDownloadReport}
             className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
@@ -345,12 +345,6 @@ Please consult a veterinarian for professional medical advice.
           >
             <RefreshCw className="w-5 h-5" />
             New Analysis
-          </button>
-          <button
-            onClick={onClose}
-            className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-          >
-            Back to BCS
           </button>
         </div>
       </div>
