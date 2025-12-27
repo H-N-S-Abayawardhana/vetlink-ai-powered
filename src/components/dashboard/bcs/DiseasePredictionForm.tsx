@@ -291,8 +291,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Breed Size <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    What is the dog&apos;s breed size category?
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-blue-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    <span><strong>Small</strong> &lt;10kg · <strong>Medium</strong> 10-25kg · <strong>Large</strong> &gt;25kg</span>
                   </p>
                   <div className="grid grid-cols-3 gap-3">
                     <button
@@ -363,10 +364,11 @@ export default function DiseasePredictionForm({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Neutered Status <span className="text-red-500">*</span>
+                    Spayed/Neutered Status <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Has the dog been spayed (female) or neutered (male)?
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-purple-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Surgery to prevent breeding. Select <strong>Intact</strong> if not done.
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -419,8 +421,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Pale Gums <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Are the dog&apos;s gums pale, white, or yellowish? (Normal gums are pink like human lips)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-rose-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Lift lip to check. Healthy = <span className="text-green-600 font-medium">pink</span> · Concern = <span className="text-red-600 font-medium">white/gray/yellow</span>
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -452,8 +455,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Skin Lesions <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Does the dog have skin lumps, bumps, itchy spots, or hair loss patches?
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-amber-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Any lumps, bumps, red patches, scabs, rashes, or bald spots?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -483,10 +487,11 @@ export default function DiseasePredictionForm({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Polyuria (Excessive Urination) <span className="text-red-500">*</span>
+                    Increased Thirst &amp; Urination <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Is the dog drinking much more water and urinating more frequently than usual?
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-cyan-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Drinking more water than usual? Needing to go outside more often?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -529,8 +534,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Tick Prevention <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Does the dog receive regular tick prevention treatment? (Products like Bravecto, NexGard, Frontline, etc.)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-green-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Uses flea/tick products? (chews, spot-on drops, or collar)
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -562,8 +568,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Heartworm Prevention <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Does the dog get monthly heartworm tablets? (Like Heartgard or similar mosquito prevention)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-red-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Monthly heartworm tablets or annual injection from vet?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -591,41 +598,47 @@ export default function DiseasePredictionForm({
                   </div>
                 </div>
 
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Diet Type <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    What does the dog mainly eat?
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-orange-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    What&apos;s your dog&apos;s main food source?
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, diet_type: 'Commercial' })}
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${formData.diet_type === 'Commercial' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.diet_type === 'Commercial'
+                          ? 'bg-blue-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                     >
                       🏪 Commercial
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, diet_type: 'Homemade' })}
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${formData.diet_type === 'Homemade' ? 'bg-orange-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.diet_type === 'Homemade'
+                          ? 'bg-orange-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                     >
                       🏠 Homemade
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, diet_type: 'Mixed' })}
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${formData.diet_type === 'Mixed' ? 'bg-purple-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.diet_type === 'Mixed'
+                          ? 'bg-purple-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                     >
                       🍽️ Mixed
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, diet_type: 'Raw' })}
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${formData.diet_type === 'Raw' ? 'bg-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      🥩 Raw
                     </button>
                   </div>
                 </div>
@@ -634,8 +647,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Exercise Level <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    How active is the dog? (Low = mostly rests, Moderate = regular walks, High = very active/runs daily)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-indigo-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    <span><strong>Low</strong> &lt;30 min · <strong>Moderate</strong> 30-60 min · <strong>High</strong> 60+ min daily</span>
                   </p>
                   <div className="grid grid-cols-3 gap-3">
                     <button
@@ -676,10 +690,11 @@ export default function DiseasePredictionForm({
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Environment <span className="text-red-500">*</span>
+                    Living Environment <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Where does the dog live? (Urban = city/apartment, Suburban = residential area, Rural = countryside/farm)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-teal-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Where does your dog primarily live and spend time?
                   </p>
                   <div className="grid grid-cols-3 gap-3">
                     <button
