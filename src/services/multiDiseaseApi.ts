@@ -69,7 +69,9 @@ export class MultiDiseaseApiService {
           headers: {
             'Content-Type': 'application/json',
           },
-        );
+          body: JSON.stringify(gradioData),
+          signal: controller.signal,
+        });
 
         if (!submitResponse.ok) {
           const errorText = await submitResponse.text();
@@ -108,7 +110,17 @@ export class MultiDiseaseApiService {
 
         // Parse HTML and transform to our format
         return this.transformHtmlResponse(htmlResponse, input);
-      } catch (fetchError: unknown) {
+      } catch (fetchError: unknown) {      // ...existing code...
+              // Step 1: Submit the prediction request
+              const submitResponse = await fetch(`${MULTI_DISEASE_API_URL}/gradio_api/call/predict_diseases`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(AudioData),
+                signal: controller.signal,
+              });
+      // ...existing code...
         clearTimeout(timeoutId);
         if (fetchError instanceof Error && fetchError.name === "AbortError") {
           throw new Error(
