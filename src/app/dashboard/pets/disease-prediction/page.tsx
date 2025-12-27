@@ -299,6 +299,8 @@ export default function DiseasePredictionPage() {
               petName={selected.name}
               petAge={selected.ageYears}
               petGender={selected.gender}
+              petBreed={selected.breed}
+              petWeight={selected.weightKg}
             />
           )}
 

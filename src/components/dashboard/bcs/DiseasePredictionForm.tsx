@@ -20,6 +20,8 @@ interface DiseasePredictionFormProps {
   petName?: string;
   petAge?: number | null;
   petGender?: string | null;
+  petBreed?: string | null;
+  petWeight?: number | null;
 }
 
 export default function DiseasePredictionForm({
@@ -29,6 +31,8 @@ export default function DiseasePredictionForm({
   petName,
   petAge,
   petGender,
+  petBreed,
+  petWeight,
 }: DiseasePredictionFormProps) {
   // BCS is required - if not available, show error
   const hasBCS = initialBCS !== null && initialBCS !== undefined;
@@ -49,6 +53,30 @@ export default function DiseasePredictionForm({
         initial.sex = 'Male';
       } else if (normalizedGender === 'female' || normalizedGender === 'f') {
         initial.sex = 'Female';
+      }
+    }
+    
+    // Auto-detect breed size based on weight or breed name
+    if (petWeight !== null && petWeight !== undefined) {
+      if (petWeight < 10) {
+        initial.breed_size = 'Small';
+      } else if (petWeight <= 25) {
+        initial.breed_size = 'Medium';
+      } else {
+        initial.breed_size = 'Large';
+      }
+    } else if (petBreed) {
+      // Fallback: detect from breed name
+      const breedLower = petBreed.toLowerCase();
+      const smallBreeds = ['chihuahua', 'pomeranian', 'yorkshire', 'maltese', 'shih tzu', 'pug', 'french bulldog', 'boston terrier', 'dachshund', 'corgi', 'beagle', 'cavalier', 'miniature', 'toy', 'terrier', 'poodle'];
+      const largeBreeds = ['german shepherd', 'labrador', 'golden retriever', 'rottweiler', 'boxer', 'doberman', 'husky', 'malamute', 'great dane', 'mastiff', 'saint bernard', 'bernese', 'newfoundland', 'akita', 'bullmastiff', 'cane corso', 'irish wolfhound'];
+      
+      if (smallBreeds.some(b => breedLower.includes(b))) {
+        initial.breed_size = 'Small';
+      } else if (largeBreeds.some(b => breedLower.includes(b))) {
+        initial.breed_size = 'Large';
+      } else {
+        initial.breed_size = 'Medium';
       }
     }
     
