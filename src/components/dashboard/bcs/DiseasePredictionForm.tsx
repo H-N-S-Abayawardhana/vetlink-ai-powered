@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, FileText, Info, AlertTriangle, Stethoscope } from 'lucide-react';
 import type {
   DiseasePredictionFormState,
@@ -57,6 +57,14 @@ export default function DiseasePredictionForm({
 
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3; // Reduced from 4 since BCS is now read-only
+  const formContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top of form when step changes
+  const scrollToTop = () => {
+    if (formContainerRef.current) {
+      formContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Validation
   const isStep1Valid = () => {
@@ -106,12 +114,14 @@ export default function DiseasePredictionForm({
   const handleNext = () => {
     if (currentStep < totalSteps && canProceed()) {
       setCurrentStep(currentStep + 1);
+      setTimeout(scrollToTop, 50);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      setTimeout(scrollToTop, 50);
     }
   };
 
@@ -179,7 +189,7 @@ export default function DiseasePredictionForm({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+      <div ref={formContainerRef} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-700 px-8 py-6 sticky top-0 z-10">
           <div className="flex items-center justify-between">
@@ -218,42 +228,42 @@ export default function DiseasePredictionForm({
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
-          {/* BCS Display Card - Read-only from database */}
-          <div className={`mb-6 p-4 rounded-xl border-2 ${getBCSBorderColor(initialBCS)} ${getBCSBgColor(initialBCS)}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 ${getBCSColor(initialBCS)} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
-                  {initialBCS}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Body Condition Score</p>
-                  <p className={`font-bold text-lg ${getBCSTextColor(initialBCS)}`}>
-                    {getBCSLabel(initialBCS)} ({initialBCS}/9)
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-sm text-gray-600">
-                  <span>📊</span> From Pet Profile
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Info banner */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg">
-            <div className="flex gap-3">
-              <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
-                <strong>AI-Powered Analysis:</strong> This assessment uses machine learning to evaluate
-                the risk of 6 different conditions based on your pet&apos;s health data, lifestyle, and clinical signs.
-              </div>
-            </div>
-          </div>
-
           {/* Step 1: Demographic Information */}
           {currentStep === 1 && (
             <div className="space-y-6">
+              {/* BCS Display Card - Read-only from database - Only shown in Step 1 */}
+              <div className={`mb-6 p-4 rounded-xl border-2 ${getBCSBorderColor(initialBCS)} ${getBCSBgColor(initialBCS)}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 ${getBCSColor(initialBCS)} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
+                      {initialBCS}
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Body Condition Score</p>
+                      <p className={`font-bold text-lg ${getBCSTextColor(initialBCS)}`}>
+                        {getBCSLabel(initialBCS)} ({initialBCS}/9)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-sm text-gray-600">
+                      <span>📊</span> From Pet Profile
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Info banner */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg">
+                <div className="flex gap-3">
+                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-800">
+                    <strong>AI-Powered Analysis:</strong> This assessment uses machine learning to evaluate
+                    the risk of 6 different conditions based on your pet&apos;s health data, lifestyle, and clinical signs.
+                  </div>
+                </div>
+              </div>
+
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                 📋 Demographic Information
               </h3>
@@ -328,6 +338,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Neutered/Spayed? <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Has the dog been spayed (female) or neutered (male)?
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -380,7 +393,7 @@ export default function DiseasePredictionForm({
                     Pale Gums <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    Indicator of anemia or poor circulation (tick disease, parasites)
+                    Are the dog&apos;s gums pale, white, or yellowish? (Normal gums are pink like human lips)
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -413,7 +426,7 @@ export default function DiseasePredictionForm({
                     Skin Lesions <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    Wounds or rashes (tick bites, allergies, infections)
+                    Does the dog have skin lumps, bumps, itchy spots, or hair loss patches?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -446,7 +459,7 @@ export default function DiseasePredictionForm({
                     Polyuria (Excessive Urination) <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    Frequent or increased urination (diabetes, kidney issues)
+                    Is the dog drinking much more water and urinating more frequently than usual?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -489,6 +502,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Tick Prevention <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    How often do you give tick medicine? (Regular = monthly like Bravecto/NexGard, Irregular = occasionally, None = never)
+                  </p>
                   <select
                     required
                     value={formData.tick_prevention}
@@ -506,6 +522,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Heartworm Prevention <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Does the dog get monthly heartworm tablets? (Like Heartgard or similar mosquito prevention)
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -536,6 +555,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Diet Type <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    What does the dog mainly eat? (Commercial = pedigree dry/wet food, Homemade = family food/rice, Mixed = both)
+                  </p>
                   <select
                     required
                     value={formData.diet_type}
@@ -554,6 +576,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Exercise Level <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    How active is the dog? (Low = mostly sleeps indoors, Moderate = short walks, High = runs/plays daily)
+                  </p>
                   <select
                     required
                     value={formData.exercise_level}
@@ -571,6 +596,9 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Environment <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Where does the dog spend most time? (Indoor = house/AC room, Outdoor = garden/kennel, Mixed = both)
+                  </p>
                   <div className="grid grid-cols-3 gap-3">
                     <button
                       type="button"
