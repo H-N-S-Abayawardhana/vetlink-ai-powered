@@ -48,10 +48,6 @@ export class PharmacyDemandApiService {
     input: PharmacyDemandInput,
   ): Promise<PharmacyDemandResult> {
     try {
-      console.log(
-        `Connecting to pharmacy demand API: ${PHARMACY_DEMAND_API_URL}`,
-      );
-
       // Set defaults for optional fields
       const fullInput = {
         inventory_id: input.inventory_id ?? 101,
@@ -98,12 +94,9 @@ export class PharmacyDemandApiService {
         // 1. Full URL: "https://username-space-name.hf.space"
         // 2. Space identifier: "username/space-name" (if we know it)
         // Let's try the full URL first
-        console.log(`Connecting to Gradio space: ${PHARMACY_DEMAND_API_URL}`);
         const app = await Client.connect(PHARMACY_DEMAND_API_URL);
 
-        console.log("Gradio client connected, making prediction...");
         const result: any = await app.predict(0, inputs);
-        console.log("Prediction result received:", result);
 
         // Parse the result
         return this.parsePredictionResult(result);
@@ -161,7 +154,6 @@ export class PharmacyDemandApiService {
     for (const endpoint of endpoints) {
       try {
         const url = `${PHARMACY_DEMAND_API_URL}${endpoint}`;
-        console.log(`Trying endpoint: ${url}`);
 
         const response = await fetch(url, {
           method: "POST",
@@ -174,11 +166,8 @@ export class PharmacyDemandApiService {
           }),
         });
 
-        console.log(`Response status: ${response.status} for ${endpoint}`);
-
         if (response.ok) {
           const data = await response.json();
-          console.log(`Success with endpoint: ${endpoint}`, data);
           return this.parsePredictionResult(data);
         } else {
           const errorText = await response.text();

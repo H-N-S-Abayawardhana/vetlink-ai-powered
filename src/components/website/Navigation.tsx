@@ -66,7 +66,10 @@ export default function Navigation() {
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
-            <Link href="/" className="flex items-center gap-2 group">
+            <Link
+              href="/"
+              className="flex items-center gap-2 group cursor-pointer"
+            >
               <div className="relative">
                 <motion.div
                   className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-500/20 to-teal-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -108,7 +111,7 @@ export default function Navigation() {
                 <motion.a
                   key={item.href}
                   href={item.href}
-                  className="group relative px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-indigo-700 transition-colors duration-200"
+                  className="group relative px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-indigo-700 transition-colors duration-200 cursor-pointer"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05, duration: 0.3 }}
@@ -130,7 +133,7 @@ export default function Navigation() {
           <div className="hidden lg:flex items-center space-x-3">
             <motion.a
               href="/signin"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 ring-1 ring-gray-200/60 transition-all hover:bg-gray-50/80 hover:ring-indigo-200/60 hover:shadow-sm"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 ring-1 ring-gray-200/60 transition-all hover:bg-gray-50/80 hover:ring-indigo-200/60 hover:shadow-sm cursor-pointer"
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -139,7 +142,7 @@ export default function Navigation() {
             </motion.a>
             <motion.a
               href="/signup"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:from-indigo-700 hover:to-indigo-800 hover:shadow-xl hover:shadow-indigo-500/30"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:from-indigo-700 hover:to-indigo-800 hover:shadow-xl hover:shadow-indigo-500/30 cursor-pointer"
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -152,7 +155,7 @@ export default function Navigation() {
           <div className="lg:hidden">
             <motion.button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2.5 text-gray-700 hover:text-indigo-700 hover:bg-gray-100/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-colors"
+              className="p-2.5 text-gray-700 hover:text-indigo-700 hover:bg-gray-100/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-colors cursor-pointer"
               whileTap={{ scale: 0.95 }}
               aria-label="Toggle mobile menu"
             >
@@ -180,7 +183,7 @@ export default function Navigation() {
               <motion.a
                 key={item.href}
                 href={item.href}
-                className="block px-4 py-3.5 rounded-xl text-base font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50/50 transition-colors"
+                className="block px-4 py-3.5 rounded-xl text-base font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50/50 transition-colors cursor-pointer"
                 onClick={() => setIsMenuOpen(false)}
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
@@ -191,7 +194,7 @@ export default function Navigation() {
             <div className="pt-4 mt-4 border-t border-gray-200/60 space-y-2">
               <motion.a
                 href="/signin"
-                className="flex items-center justify-center gap-2 bg-white text-gray-700 px-4 py-3.5 rounded-xl text-base font-semibold hover:bg-gray-50 transition-colors ring-1 ring-gray-200/60"
+                className="flex items-center justify-center gap-2 bg-white text-gray-700 px-4 py-3.5 rounded-xl text-base font-semibold hover:bg-gray-50 transition-colors ring-1 ring-gray-200/60 cursor-pointer"
                 onClick={() => setIsMenuOpen(false)}
                 whileTap={{ scale: 0.98 }}
               >
@@ -200,7 +203,7 @@ export default function Navigation() {
               </motion.a>
               <motion.a
                 href="/signup"
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-4 py-3.5 rounded-xl text-base font-semibold transition-all shadow-lg shadow-indigo-500/25"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-4 py-3.5 rounded-xl text-base font-semibold transition-all shadow-lg shadow-indigo-500/25 cursor-pointer"
                 onClick={() => setIsMenuOpen(false)}
                 whileTap={{ scale: 0.98 }}
               >

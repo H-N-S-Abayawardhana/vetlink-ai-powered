@@ -118,7 +118,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <div key={item.name}>
           <button
             onClick={() => toggleDropdown(item.name)}
-            className={`group w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+            className={`group w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
               isActive
                 ? "bg-blue-50 text-blue-700"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -152,7 +152,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     key={child.name}
                     href={child.href || "#"}
                     onClick={onToggle}
-                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
                       isChildActive
                         ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -183,7 +183,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         key={item.name}
         href={item.href || "#"}
         onClick={onToggle}
-        className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+        className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
           isActive
             ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"

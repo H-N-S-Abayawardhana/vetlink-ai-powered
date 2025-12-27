@@ -57,7 +57,7 @@ function makeRecordId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-// GET /api/pets/:id/skin-disease - list scan records for a pet
+// list of skin diseases history for a pet
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -113,7 +113,7 @@ export async function GET(
   }
 }
 
-// POST /api/pets/:id/skin-disease - create a scan record + upload affected image
+// create a scan record + upload affected image
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -194,7 +194,6 @@ export async function POST(
       createdAt: new Date().toISOString(),
     };
 
-    // Append record into pets.skin_disease_history (JSONB array)
     await pool.query(
       `UPDATE pets
        SET skin_disease_history = COALESCE(skin_disease_history, '[]'::jsonb) || $1::jsonb,
@@ -219,7 +218,7 @@ export async function POST(
   }
 }
 
-// DELETE /api/pets/:id/skin-disease - clear all skin disease history and delete S3 images
+// clear all skin disease history for a pet
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -239,7 +238,6 @@ export async function DELETE(
       );
     }
 
-    // Get current history to extract S3 URLs
     const result = await pool.query(
       "SELECT skin_disease_history FROM pets WHERE id = $1",
       [id],
@@ -247,7 +245,6 @@ export async function DELETE(
     const row = result.rows?.[0];
     const history = ensureArray(row?.skin_disease_history);
 
-    // Collect all S3 URLs to delete
     const s3UrlsToDelete: string[] = [];
     history.forEach((record: any) => {
       if (record?.imageUrl && isS3Url(record.imageUrl)) {
@@ -259,16 +256,11 @@ export async function DELETE(
     if (s3UrlsToDelete.length > 0) {
       try {
         const deletedCount = await deleteMultipleFromS3ByUrls(s3UrlsToDelete);
-        console.log(
-          `Deleted ${deletedCount} of ${s3UrlsToDelete.length} S3 images for pet ${id} skin disease history`,
-        );
       } catch (e) {
         console.error("Error deleting S3 images:", e);
-        // Continue with database update even if S3 deletion fails
       }
     }
 
-    // Clear the skin_disease_history JSONB array
     await pool.query(
       `UPDATE pets
        SET skin_disease_history = '[]'::jsonb,

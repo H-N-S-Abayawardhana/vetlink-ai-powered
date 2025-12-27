@@ -1,6 +1,3 @@
-// src/services/multiDiseaseApi.ts
-// Service for Multi-Disease Prediction API (Gradio-based Hugging Face Space)
-
 import type {
   DiseasePredictionInput,
   DiseasePredictionResult,
@@ -36,10 +33,6 @@ export class MultiDiseaseApiService {
     input: DiseasePredictionInput,
   ): Promise<DiseasePredictionResult> {
     try {
-      console.log(
-        `Calling Gradio disease prediction API: ${MULTI_DISEASE_API_URL}/gradio_api/call/predict_disease`,
-      );
-
       // Create AbortController for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(

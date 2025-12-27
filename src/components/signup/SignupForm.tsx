@@ -166,7 +166,7 @@ export default function SignupForm() {
               Already have an account?{" "}
               <a
                 href="/signin"
-                className="font-semibold text-blue-700 hover:text-blue-600 transition-colors"
+                className="font-semibold text-blue-700 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 Sign in here
               </a>
@@ -372,7 +372,7 @@ export default function SignupForm() {
                     I agree to the{" "}
                     <a
                       href="#"
-                      className="font-semibold text-blue-700 hover:text-blue-600 transition-colors"
+                      className="font-semibold text-blue-700 hover:text-blue-600 transition-colors cursor-pointer"
                     >
                       Terms and Conditions
                     </a>

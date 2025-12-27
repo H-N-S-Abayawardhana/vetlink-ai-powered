@@ -9,7 +9,7 @@ import {
   isS3Url,
 } from "@/lib/s3";
 
-// GET /api/pets/:id
+// get pet details
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -28,8 +28,6 @@ export async function GET(
 
     const petRow = result.rows[0];
     const pet = mapRowToPet(petRow);
-    // Authorization: owner or vet/admin can view
-    // Cast owner_id to text to match UUID string from session
     const userRole = (session.user as any)?.userRole;
     const ownerIdStr = petRow.owner_id ? String(petRow.owner_id) : null;
     if (
@@ -50,7 +48,7 @@ export async function GET(
   }
 }
 
-// PUT /api/pets/:id
+// update a pet
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -72,9 +70,7 @@ export async function PUT(
     const petRow = result.rows[0];
     const pet = mapRowToPet(petRow);
     const userRole = (session.user as any)?.userRole;
-    // Cast owner_id to text to match UUID string from session
     const ownerIdStr = petRow.owner_id ? String(petRow.owner_id) : null;
-    // Only owners and SUPER_ADMIN can edit pets, not VETERINARIAN
     if (ownerIdStr !== session.user.id && userRole !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -130,7 +126,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/pets/:id
+// delete a pet
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -149,9 +145,7 @@ export async function DELETE(
 
     const pet = result.rows[0];
     const userRole = (session.user as any)?.userRole;
-    // Cast owner_id to text to match UUID string from session
     const ownerIdStr = pet.owner_id ? String(pet.owner_id) : null;
-    // Only owners and SUPER_ADMIN can delete pets, not VETERINARIAN
     if (ownerIdStr !== session.user.id && userRole !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -164,7 +158,7 @@ export async function DELETE(
       s3UrlsToDelete.push(pet.avatar_url);
     }
 
-    // 2. Delete all skin disease images from S3
+    //  Delete all skin disease images from S3
     if (pet.skin_disease_history) {
       try {
         const history = Array.isArray(pet.skin_disease_history)
@@ -185,16 +179,12 @@ export async function DELETE(
     if (s3UrlsToDelete.length > 0) {
       try {
         const deletedCount = await deleteMultipleFromS3ByUrls(s3UrlsToDelete);
-        console.log(
-          `Deleted ${deletedCount} of ${s3UrlsToDelete.length} S3 objects for pet ${id}`,
-        );
       } catch (e) {
         console.error("Error deleting S3 objects:", e);
-        // Continue with database deletion even if S3 deletion fails
       }
     }
 
-    // Delete from database (cascade will handle related records)
+    // Delete from database
     await pool.query("DELETE FROM pets WHERE id = $1", [id]);
     return NextResponse.json({ message: "Pet deleted" });
   } catch (error) {
@@ -206,7 +196,7 @@ export async function DELETE(
   }
 }
 
-// PATCH /api/pets/:id - partial update
+// partial update
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -227,9 +217,7 @@ export async function PATCH(
 
     const petRow = result.rows[0];
     const userRole = (session.user as any)?.userRole;
-    // Cast owner_id to text to match UUID string from session
     const ownerIdStr = petRow.owner_id ? String(petRow.owner_id) : null;
-    // Only owners and SUPER_ADMIN can patch pets, not VETERINARIAN
     if (ownerIdStr !== session.user.id && userRole !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

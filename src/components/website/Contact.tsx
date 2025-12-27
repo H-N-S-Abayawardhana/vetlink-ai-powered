@@ -127,7 +127,7 @@ export default function Contact() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <motion.a
               href="/signup"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-3.5 text-lg font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-3.5 text-lg font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 cursor-pointer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -136,7 +136,7 @@ export default function Contact() {
             </motion.a>
             <motion.a
               href="#pricing"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 px-8 py-3.5 text-lg font-semibold ring-1 ring-gray-200/60 transition-all hover:bg-white hover:ring-indigo-200/60 hover:shadow-md"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 px-8 py-3.5 text-lg font-semibold ring-1 ring-gray-200/60 transition-all hover:bg-white hover:ring-indigo-200/60 hover:shadow-md cursor-pointer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -322,7 +322,7 @@ export default function Contact() {
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-4 px-6 font-semibold shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
+                  className="cursor-pointer w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-4 px-6 font-semibold shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
                   whileHover={!isSubmitting ? { scale: 1.02, y: -2 } : {}}
                   whileTap={!isSubmitting ? { scale: 0.98 } : {}}
                 >

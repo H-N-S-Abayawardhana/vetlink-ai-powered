@@ -623,11 +623,11 @@ const DiseaseAnalysis = ({
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-          <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+          <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 cursor-pointer">
             <Download className="w-5 h-5" />
             Download Report
           </button>
-          <button className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+          <button className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 cursor-pointer">
             <Share2 className="w-5 h-5" />
             Share with Vet
           </button>
