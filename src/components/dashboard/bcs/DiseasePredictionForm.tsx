@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, FileText, Info, AlertTriangle, Stethoscope } from 'lucide-react';
 import type {
   DiseasePredictionFormState,
@@ -10,8 +10,11 @@ import type {
   DietType,
   ExerciseLevel,
   Environment,
-} from '@/types/disease-prediction';
-import { initialFormState, formStateToApiInput } from '@/types/disease-prediction';
+} from "@/types/disease-prediction";
+import {
+  initialFormState,
+  formStateToApiInput,
+} from "@/types/disease-prediction";
 
 interface DiseasePredictionFormProps {
   onSubmit: (formData: DiseasePredictionFormState) => void;
@@ -20,6 +23,8 @@ interface DiseasePredictionFormProps {
   petName?: string;
   petAge?: number | null;
   petGender?: string | null;
+  petBreed?: string | null;
+  petWeight?: number | null;
 }
 
 export default function DiseasePredictionForm({
@@ -29,13 +34,15 @@ export default function DiseasePredictionForm({
   petName,
   petAge,
   petGender,
+  petBreed,
+  petWeight,
 }: DiseasePredictionFormProps) {
   // BCS is required - if not available, show error
   const hasBCS = initialBCS !== null && initialBCS !== undefined;
 
   const [formData, setFormData] = useState<DiseasePredictionFormState>(() => {
     const initial = { ...initialFormState };
-    
+
     // Pre-fill from pet data if available
     if (hasBCS) {
       initial.body_condition_score = initialBCS;
@@ -45,10 +52,34 @@ export default function DiseasePredictionForm({
     }
     if (petGender) {
       const normalizedGender = petGender.toLowerCase();
-      if (normalizedGender === 'male' || normalizedGender === 'm') {
-        initial.sex = 'Male';
-      } else if (normalizedGender === 'female' || normalizedGender === 'f') {
-        initial.sex = 'Female';
+      if (normalizedGender === "male" || normalizedGender === "m") {
+        initial.sex = "Male";
+      } else if (normalizedGender === "female" || normalizedGender === "f") {
+        initial.sex = "Female";
+      }
+    }
+    
+    // Auto-detect breed size based on weight or breed name
+    if (petWeight !== null && petWeight !== undefined) {
+      if (petWeight < 10) {
+        initial.breed_size = 'Small';
+      } else if (petWeight <= 25) {
+        initial.breed_size = 'Medium';
+      } else {
+        initial.breed_size = 'Large';
+      }
+    } else if (petBreed) {
+      // Fallback: detect from breed name
+      const breedLower = petBreed.toLowerCase();
+      const smallBreeds = ['chihuahua', 'pomeranian', 'yorkshire', 'maltese', 'shih tzu', 'pug', 'french bulldog', 'boston terrier', 'dachshund', 'corgi', 'beagle', 'cavalier', 'miniature', 'toy', 'terrier', 'poodle'];
+      const largeBreeds = ['german shepherd', 'labrador', 'golden retriever', 'rottweiler', 'boxer', 'doberman', 'husky', 'malamute', 'great dane', 'mastiff', 'saint bernard', 'bernese', 'newfoundland', 'akita', 'bullmastiff', 'cane corso', 'irish wolfhound'];
+      
+      if (smallBreeds.some(b => breedLower.includes(b))) {
+        initial.breed_size = 'Small';
+      } else if (largeBreeds.some(b => breedLower.includes(b))) {
+        initial.breed_size = 'Large';
+      } else {
+        initial.breed_size = 'Medium';
       }
     }
     
@@ -57,42 +88,54 @@ export default function DiseasePredictionForm({
 
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3; // Reduced from 4 since BCS is now read-only
+  const formContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top of form when step changes
+  const scrollToTop = () => {
+    if (formContainerRef.current) {
+      formContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Validation
   const isStep1Valid = () => {
     return (
-      formData.age_years !== '' &&
+      formData.age_years !== "" &&
       parseInt(formData.age_years) > 0 &&
-      formData.breed_size !== '' &&
-      formData.sex !== '' &&
-      formData.is_neutered !== ''
+      formData.breed_size !== "" &&
+      formData.sex !== "" &&
+      formData.is_neutered !== ""
     );
   };
 
   const isStep2Valid = () => {
     return (
-      formData.pale_gums !== '' &&
-      formData.skin_lesions !== '' &&
-      formData.polyuria !== ''
+      formData.pale_gums !== "" &&
+      formData.skin_lesions !== "" &&
+      formData.polyuria !== ""
     );
   };
 
   const isStep3Valid = () => {
     return (
-      formData.tick_prevention !== '' &&
-      formData.heartworm_prevention !== '' &&
-      formData.diet_type !== '' &&
-      formData.exercise_level !== '' &&
-      formData.environment !== ''
+      formData.tick_prevention !== "" &&
+      formData.heartworm_prevention !== "" &&
+      formData.diet_type !== "" &&
+      formData.exercise_level !== "" &&
+      formData.environment !== ""
     );
   };
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1: return isStep1Valid();
-      case 2: return isStep2Valid();
-      case 3: return isStep3Valid();
-      default: return false;
+      case 1:
+        return isStep1Valid();
+      case 2:
+        return isStep2Valid();
+      case 3:
+        return isStep3Valid();
+      default:
+        return false;
     }
   };
 
@@ -106,49 +149,51 @@ export default function DiseasePredictionForm({
   const handleNext = () => {
     if (currentStep < totalSteps && canProceed()) {
       setCurrentStep(currentStep + 1);
+      setTimeout(scrollToTop, 50);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      setTimeout(scrollToTop, 50);
     }
   };
 
   // BCS display helper
   const getBCSColor = (score: number) => {
-    if (score <= 3) return 'bg-orange-400';
-    if (score <= 5) return 'bg-green-500';
-    if (score <= 7) return 'bg-amber-400';
-    return 'bg-red-500';
+    if (score <= 3) return "bg-orange-400";
+    if (score <= 5) return "bg-green-500";
+    if (score <= 7) return "bg-amber-400";
+    return "bg-red-500";
   };
 
   const getBCSLabel = (score: number) => {
-    if (score <= 3) return 'Underweight';
-    if (score <= 5) return 'Ideal';
-    if (score <= 7) return 'Overweight';
-    return 'Obese';
+    if (score <= 3) return "Underweight";
+    if (score <= 5) return "Ideal";
+    if (score <= 7) return "Overweight";
+    return "Obese";
   };
 
   const getBCSBorderColor = (score: number) => {
-    if (score <= 3) return 'border-orange-300';
-    if (score <= 5) return 'border-green-300';
-    if (score <= 7) return 'border-amber-300';
-    return 'border-red-300';
+    if (score <= 3) return "border-orange-300";
+    if (score <= 5) return "border-green-300";
+    if (score <= 7) return "border-amber-300";
+    return "border-red-300";
   };
 
   const getBCSBgColor = (score: number) => {
-    if (score <= 3) return 'bg-orange-50';
-    if (score <= 5) return 'bg-green-50';
-    if (score <= 7) return 'bg-amber-50';
-    return 'bg-red-50';
+    if (score <= 3) return "bg-orange-50";
+    if (score <= 5) return "bg-green-50";
+    if (score <= 7) return "bg-amber-50";
+    return "bg-red-50";
   };
 
   const getBCSTextColor = (score: number) => {
-    if (score <= 3) return 'text-orange-700';
-    if (score <= 5) return 'text-green-700';
-    if (score <= 7) return 'text-amber-700';
-    return 'text-red-700';
+    if (score <= 3) return "text-orange-700";
+    if (score <= 5) return "text-green-700";
+    if (score <= 7) return "text-amber-700";
+    return "text-red-700";
   };
 
   // If no BCS, show error state
@@ -159,12 +204,11 @@ export default function DiseasePredictionForm({
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-8 h-8 text-amber-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            BCS Required
-          </h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">BCS Required</h3>
           <p className="text-gray-600 mb-6">
-            Please calculate the Body Condition Score (BCS) for {petName || 'your pet'} first 
-            before running the disease risk assessment.
+            Please calculate the Body Condition Score (BCS) for{" "}
+            {petName || "your pet"} first before running the disease risk
+            assessment.
           </p>
           <button
             onClick={onCancel}
@@ -179,7 +223,7 @@ export default function DiseasePredictionForm({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+      <div ref={formContainerRef} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-700 px-8 py-6 sticky top-0 z-10">
           <div className="flex items-center justify-between">
@@ -192,7 +236,8 @@ export default function DiseasePredictionForm({
                   🔬 Multi-Disease Risk Assessment
                 </h2>
                 <p className="text-purple-100 text-sm">
-                  {petName ? `For ${petName} - ` : ''}Step {currentStep} of {totalSteps}
+                  {petName ? `For ${petName} - ` : ""}Step {currentStep} of{" "}
+                  {totalSteps}
                 </p>
               </div>
             </div>
@@ -210,7 +255,7 @@ export default function DiseasePredictionForm({
               <div
                 key={idx}
                 className={`h-2 flex-1 rounded-full transition-all ${
-                  idx < currentStep ? 'bg-white' : 'bg-white/30'
+                  idx < currentStep ? "bg-white" : "bg-white/30"
                 }`}
               />
             ))}
@@ -218,42 +263,42 @@ export default function DiseasePredictionForm({
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
-          {/* BCS Display Card - Read-only from database */}
-          <div className={`mb-6 p-4 rounded-xl border-2 ${getBCSBorderColor(initialBCS)} ${getBCSBgColor(initialBCS)}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 ${getBCSColor(initialBCS)} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
-                  {initialBCS}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Body Condition Score</p>
-                  <p className={`font-bold text-lg ${getBCSTextColor(initialBCS)}`}>
-                    {getBCSLabel(initialBCS)} ({initialBCS}/9)
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-sm text-gray-600">
-                  <span>📊</span> From Pet Profile
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Info banner */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg">
-            <div className="flex gap-3">
-              <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
-                <strong>AI-Powered Analysis:</strong> This assessment uses machine learning to evaluate
-                the risk of 6 different conditions based on your pet&apos;s health data, lifestyle, and clinical signs.
-              </div>
-            </div>
-          </div>
-
           {/* Step 1: Demographic Information */}
           {currentStep === 1 && (
             <div className="space-y-6">
+              {/* BCS Display Card - Read-only from database - Only shown in Step 1 */}
+              <div className={`mb-6 p-4 rounded-xl border-2 ${getBCSBorderColor(initialBCS)} ${getBCSBgColor(initialBCS)}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 ${getBCSColor(initialBCS)} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
+                      {initialBCS}
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Body Condition Score</p>
+                      <p className={`font-bold text-lg ${getBCSTextColor(initialBCS)}`}>
+                        {getBCSLabel(initialBCS)} ({initialBCS}/9)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-sm text-gray-600">
+                      <span>📊</span> From Pet Profile
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Info banner */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg">
+                <div className="flex gap-3">
+                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-800">
+                    <strong>AI-Powered Analysis:</strong> This assessment uses machine learning to evaluate
+                    the risk of 6 different conditions based on your pet&apos;s health data, lifestyle, and clinical signs.
+                  </div>
+                </div>
+              </div>
+
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                 📋 Demographic Information
               </h3>
@@ -267,31 +312,63 @@ export default function DiseasePredictionForm({
                     type="number"
                     min="0"
                     max="30"
-                    step="0.5"
+                    step="1"
                     required
                     value={formData.age_years}
-                    onChange={(e) => setFormData({ ...formData, age_years: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, age_years: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                     placeholder="e.g., 7"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Enter age in years (0-30)</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter age in years (0-30)
+                  </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Breed Size <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    required
-                    value={formData.breed_size}
-                    onChange={(e) => setFormData({ ...formData, breed_size: e.target.value as BreedSize })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  >
-                    <option value="">Select breed size</option>
-                    <option value="Small">🐕 Small (Under 10 kg)</option>
-                    <option value="Medium">🐕 Medium (10-25 kg)</option>
-                    <option value="Large">🐕 Large (Over 25 kg)</option>
-                  </select>
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-blue-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    <span><strong>Small</strong> &lt;10kg · <strong>Medium</strong> 10-25kg · <strong>Large</strong> &gt;25kg</span>
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, breed_size: 'Small' })}
+                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                        formData.breed_size === 'Small'
+                          ? 'bg-green-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🐕 Small
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, breed_size: 'Medium' })}
+                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                        formData.breed_size === 'Medium'
+                          ? 'bg-blue-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🐕 Medium
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, breed_size: 'Large' })}
+                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                        formData.breed_size === 'Large'
+                          ? 'bg-purple-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🐕 Large
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -301,22 +378,24 @@ export default function DiseasePredictionForm({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, sex: 'Male' })}
+                      onClick={() => setFormData({ ...formData, sex: "Male" })}
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.sex === 'Male'
-                          ? 'bg-blue-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.sex === "Male"
+                          ? "bg-blue-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ♂️ Male
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, sex: 'Female' })}
+                      onClick={() =>
+                        setFormData({ ...formData, sex: "Female" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.sex === 'Female'
-                          ? 'bg-pink-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.sex === "Female"
+                          ? "bg-pink-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ♀️ Female
@@ -326,30 +405,38 @@ export default function DiseasePredictionForm({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Neutered/Spayed? <span className="text-red-500">*</span>
+                    Spayed/Neutered Status <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-purple-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Surgery to prevent breeding. Select <strong>Intact</strong> if not done.
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, is_neutered: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, is_neutered: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.is_neutered === 'yes'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.is_neutered === "yes"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ✅ Yes
+                      ✂️ Neutered
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, is_neutered: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, is_neutered: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.is_neutered === 'no'
-                          ? 'bg-gray-500 text-white shadow-lg'
+                          ? 'bg-blue-500 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      ❌ No
+                      🐕 Intact
                     </button>
                   </div>
                 </div>
@@ -368,8 +455,8 @@ export default function DiseasePredictionForm({
                 <div className="flex gap-3">
                   <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-amber-800">
-                    Please indicate any symptoms you have observed. These are important indicators
-                    for disease risk assessment.
+                    Please indicate any symptoms you have observed. These are
+                    important indicators for disease risk assessment.
                   </div>
                 </div>
               </div>
@@ -379,28 +466,33 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Pale Gums <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Indicator of anemia or poor circulation (tick disease, parasites)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-rose-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Lift lip to check. Healthy = <span className="text-green-600 font-medium">pink</span> · Concern = <span className="text-red-600 font-medium">white/gray/yellow</span>
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, pale_gums: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, pale_gums: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.pale_gums === 'yes'
-                          ? 'bg-red-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.pale_gums === "yes"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ⚠️ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, pale_gums: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, pale_gums: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.pale_gums === 'no'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.pale_gums === "no"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ No
@@ -412,28 +504,33 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Skin Lesions <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Wounds or rashes (tick bites, allergies, infections)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-amber-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Any lumps, bumps, red patches, scabs, rashes, or bald spots?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, skin_lesions: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, skin_lesions: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.skin_lesions === 'yes'
-                          ? 'bg-red-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.skin_lesions === "yes"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ⚠️ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, skin_lesions: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, skin_lesions: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.skin_lesions === 'no'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.skin_lesions === "no"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ No
@@ -443,30 +540,35 @@ export default function DiseasePredictionForm({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Polyuria (Excessive Urination) <span className="text-red-500">*</span>
+                    Increased Thirst &amp; Urination <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Frequent or increased urination (diabetes, kidney issues)
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-cyan-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Drinking more water than usual? Needing to go outside more often?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, polyuria: 'yes' })}
+                      onClick={() =>
+                        setFormData({ ...formData, polyuria: "yes" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.polyuria === 'yes'
-                          ? 'bg-red-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.polyuria === "yes"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ⚠️ Yes
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, polyuria: 'no' })}
+                      onClick={() =>
+                        setFormData({ ...formData, polyuria: "no" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.polyuria === 'no'
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.polyuria === "no"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       ✅ No
@@ -489,29 +591,16 @@ export default function DiseasePredictionForm({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Tick Prevention <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    required
-                    value={formData.tick_prevention}
-                    onChange={(e) => setFormData({ ...formData, tick_prevention: e.target.value as TickPrevention })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  >
-                    <option value="">Select tick prevention</option>
-                    <option value="None">❌ None</option>
-                    <option value="Irregular">⚠️ Irregular</option>
-                    <option value="Regular">✅ Regular</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Heartworm Prevention <span className="text-red-500">*</span>
-                  </label>
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-green-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Uses flea/tick products? (chews, spot-on drops, or collar)
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, heartworm_prevention: 'yes' })}
+                      onClick={() => setFormData({ ...formData, tick_prevention: 'Regular' })}
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.heartworm_prevention === 'yes'
+                        formData.tick_prevention === 'Regular'
                           ? 'bg-green-500 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
@@ -520,9 +609,9 @@ export default function DiseasePredictionForm({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, heartworm_prevention: 'no' })}
+                      onClick={() => setFormData({ ...formData, tick_prevention: 'None' })}
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.heartworm_prevention === 'no'
+                        formData.tick_prevention === 'None' || formData.tick_prevention === 'Irregular'
                           ? 'bg-red-500 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
@@ -534,76 +623,176 @@ export default function DiseasePredictionForm({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Diet Type <span className="text-red-500">*</span>
+                    Heartworm Prevention <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    required
-                    value={formData.diet_type}
-                    onChange={(e) => setFormData({ ...formData, diet_type: e.target.value as DietType })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  >
-                    <option value="">Select diet type</option>
-                    <option value="Commercial">🏪 Commercial</option>
-                    <option value="Homemade">🏠 Homemade</option>
-                    <option value="Raw">🥩 Raw</option>
-                    <option value="Mixed">🍽️ Mixed</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Exercise Level <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.exercise_level}
-                    onChange={(e) => setFormData({ ...formData, exercise_level: e.target.value as ExerciseLevel })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  >
-                    <option value="">Select exercise level</option>
-                    <option value="Low">🛋️ Low (Minimal activity)</option>
-                    <option value="Moderate">🚶 Moderate (Regular walks)</option>
-                    <option value="High">🏃 High (Very active)</option>
-                  </select>
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-red-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Monthly heartworm tablets or annual injection from vet?
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          heartworm_prevention: "yes",
+                        })
+                      }
+                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                        formData.heartworm_prevention === "yes"
+                          ? "bg-green-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      ✅ Yes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({ ...formData, heartworm_prevention: "no" })
+                      }
+                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                        formData.heartworm_prevention === "no"
+                          ? "bg-red-500 text-white shadow-lg"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      ❌ No
+                    </button>
+                  </div>
                 </div>
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Environment <span className="text-red-500">*</span>
+                    Diet Type <span className="text-red-500">*</span>
                   </label>
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-orange-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    What&apos;s your dog&apos;s main food source?
+                  </p>
                   <div className="grid grid-cols-3 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, environment: 'Indoor' })}
+                      onClick={() => setFormData({ ...formData, diet_type: 'Commercial' })}
                       className={`px-4 py-4 rounded-xl font-medium transition-all ${
-                        formData.environment === 'Indoor'
+                        formData.diet_type === 'Commercial'
                           ? 'bg-blue-500 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      🏠 Indoor
+                      🏪 Commercial
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, environment: 'Outdoor' })}
+                      onClick={() => setFormData({ ...formData, diet_type: 'Homemade' })}
                       className={`px-4 py-4 rounded-xl font-medium transition-all ${
-                        formData.environment === 'Outdoor'
-                          ? 'bg-green-500 text-white shadow-lg'
+                        formData.diet_type === 'Homemade'
+                          ? 'bg-orange-500 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      🌳 Outdoor
+                      🏠 Homemade
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, environment: 'Mixed' })}
+                      onClick={() => setFormData({ ...formData, diet_type: 'Mixed' })}
                       className={`px-4 py-4 rounded-xl font-medium transition-all ${
-                        formData.environment === 'Mixed'
+                        formData.diet_type === 'Mixed'
                           ? 'bg-purple-500 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      🏡 Mixed
+                      🍽️ Mixed
+                    </button>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Exercise Level <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-indigo-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    <span><strong>Low</strong> &lt;30 min · <strong>Moderate</strong> 30-60 min · <strong>High</strong> 60+ min daily</span>
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, exercise_level: 'Low' })}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.exercise_level === 'Low'
+                          ? 'bg-orange-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🛋️ Low
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, exercise_level: 'Moderate' })}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.exercise_level === 'Moderate'
+                          ? 'bg-blue-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🚶 Moderate
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, exercise_level: 'High' })}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.exercise_level === 'High'
+                          ? 'bg-green-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🏃 High
+                    </button>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Living Environment <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                    <span className="inline-block w-5 h-5 bg-teal-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    Where does your dog primarily live and spend time?
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, environment: 'Urban' })}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.environment === 'Urban'
+                          ? 'bg-blue-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🏙️ Urban
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, environment: 'Suburban' })}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.environment === 'Suburban'
+                          ? 'bg-purple-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🏡 Suburban
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, environment: 'Rural' })}
+                      className={`px-4 py-4 rounded-xl font-medium transition-all ${
+                        formData.environment === 'Rural'
+                          ? 'bg-green-500 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🌾 Rural
                     </button>
                   </div>
                 </div>
@@ -638,8 +827,8 @@ export default function DiseasePredictionForm({
                 disabled={!canProceed()}
                 className={`flex-1 px-6 py-4 rounded-xl font-semibold transition-all ${
                   canProceed()
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
                 Next →
@@ -650,8 +839,8 @@ export default function DiseasePredictionForm({
                 disabled={!canProceed()}
                 className={`flex-1 px-6 py-4 rounded-xl font-semibold transition-all ${
                   canProceed()
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
                 🔬 Analyze Disease Risks

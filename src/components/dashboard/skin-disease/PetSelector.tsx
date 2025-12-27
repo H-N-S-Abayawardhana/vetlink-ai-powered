@@ -45,7 +45,7 @@ export default function PetSelector({
           <button
             type="button"
             onClick={onRefresh}
-            className="px-3 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="px-3 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer disabled:cursor-not-allowed"
             disabled={loading}
           >
             Refresh
@@ -81,7 +81,7 @@ export default function PetSelector({
                 type="button"
                 key={pet.id}
                 onClick={() => onSelectPetId(pet.id)}
-                className={`text-left rounded-xl border p-4 transition-all ${
+                className={`text-left rounded-xl border p-4 transition-all cursor-pointer ${
                   selected
                     ? "border-blue-500 ring-2 ring-blue-200 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
@@ -132,7 +132,7 @@ export default function PetSelector({
         <button
           type="button"
           onClick={onContinueWithoutPet}
-          className="px-4 py-3 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors"
+          className="px-4 py-3 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors cursor-pointer"
         >
           Continue without selecting a pet
         </button>
@@ -141,7 +141,7 @@ export default function PetSelector({
           type="button"
           onClick={onContinueWithPet}
           disabled={!selectedPetId}
-          className="px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           Continue with selected pet
         </button>

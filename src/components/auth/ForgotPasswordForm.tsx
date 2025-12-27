@@ -138,7 +138,7 @@ export default function ForgotPasswordForm() {
             <div className="mt-6 text-center">
               <Link
                 href="/signin"
-                className="text-sm font-semibold text-blue-700 hover:text-blue-600 transition-colors"
+                className="text-sm font-semibold text-blue-700 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 ← Back to Sign in
               </Link>

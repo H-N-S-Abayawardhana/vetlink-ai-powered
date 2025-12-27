@@ -196,7 +196,7 @@ export default function Hero() {
           >
             <motion.a
               href="/signup"
-              className="group relative inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-4 text-base sm:text-lg font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 hover:from-indigo-700 hover:to-indigo-800"
+              className="group relative inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-4 text-base sm:text-lg font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 hover:from-indigo-700 hover:to-indigo-800 cursor-pointer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -209,7 +209,7 @@ export default function Hero() {
             </motion.a>
             <motion.a
               href="#intelligence"
-              className="inline-flex items-center gap-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 px-8 py-4 text-base sm:text-lg font-semibold ring-1 ring-gray-200/60 transition-all hover:bg-white hover:ring-indigo-200/60 hover:shadow-md"
+              className="inline-flex items-center gap-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 px-8 py-4 text-base sm:text-lg font-semibold ring-1 ring-gray-200/60 transition-all hover:bg-white hover:ring-indigo-200/60 hover:shadow-md cursor-pointer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >

@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Pet } from "@/lib/pets";
 import { listPets } from "@/lib/pets";
-import SkinAnalysis from "./SkinAnalysis";
-import PetSelector from "./PetSelector";
+import LimpingAnalysis from "./LimpingAnalysis";
+import PetSelector from "../skin-disease/PetSelector";
 
 type Step = "pick" | "analyze";
 
-export default function SkinDiseaseFlow() {
+export default function LimpingFlow() {
   const [step, setStep] = useState<Step>("pick");
   const [pets, setPets] = useState<Pet[]>([]);
   const [loadingPets, setLoadingPets] = useState(true);
@@ -29,7 +29,7 @@ export default function SkinDiseaseFlow() {
       const data = await listPets();
       setPets(data || []);
     } catch (e) {
-      console.error("Error loading pets for skin disease page:", e);
+      console.error("Error loading pets for limping page:", e);
       setPets([]);
       setPetsError(
         "Failed to load your pets. You can still continue without selecting a pet.",
@@ -48,7 +48,7 @@ export default function SkinDiseaseFlow() {
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Dog Skin Disease Detection
+            Pet Mobility & Limping Detection
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
             Select a pet to attach results to a profile — or continue without
@@ -93,7 +93,7 @@ export default function SkinDiseaseFlow() {
   }
 
   return (
-    <SkinAnalysis
+    <LimpingAnalysis
       selectedPet={selectedPet}
       onChangePet={() => {
         setStep("pick");

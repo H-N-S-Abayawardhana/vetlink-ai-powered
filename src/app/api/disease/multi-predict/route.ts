@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import MultiDiseaseApiService from '@/services/multiDiseaseApi';
-import pool from '@/lib/db';
-import type { DiseasePredictionInput } from '@/types/disease-prediction';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import MultiDiseaseApiService from "@/services/multiDiseaseApi";
+import pool from "@/lib/db";
+import type { DiseasePredictionInput } from "@/types/disease-prediction";
 
 // POST /api/disease/multi-predict - Predict multiple disease risks
 export async function POST(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -49,71 +49,68 @@ export async function POST(request: NextRequest) {
       !environment
     ) {
       return NextResponse.json(
-        { error: 'All required fields must be provided' },
-        { status: 400 }
+        { error: "All required fields must be provided" },
+        { status: 400 },
       );
     }
 
     // Validate field values
     if (age_years < 0 || age_years > 30) {
       return NextResponse.json(
-        { error: 'Age must be between 0 and 30 years' },
-        { status: 400 }
+        { error: "Age must be between 0 and 30 years" },
+        { status: 400 },
       );
     }
 
     if (body_condition_score < 1 || body_condition_score > 9) {
       return NextResponse.json(
-        { error: 'Body condition score must be between 1 and 9' },
-        { status: 400 }
+        { error: "Body condition score must be between 1 and 9" },
+        { status: 400 },
       );
     }
 
-    const validBreedSizes = ['Small', 'Medium', 'Large'];
+    const validBreedSizes = ["Small", "Medium", "Large"];
     if (!validBreedSizes.includes(breed_size)) {
       return NextResponse.json(
-        { error: 'Invalid breed size. Must be Small, Medium, or Large' },
-        { status: 400 }
+        { error: "Invalid breed size. Must be Small, Medium, or Large" },
+        { status: 400 },
       );
     }
 
-    const validSexes = ['Male', 'Female'];
+    const validSexes = ["Male", "Female"];
     if (!validSexes.includes(sex)) {
       return NextResponse.json(
-        { error: 'Invalid sex. Must be Male or Female' },
-        { status: 400 }
+        { error: "Invalid sex. Must be Male or Female" },
+        { status: 400 },
       );
     }
 
-    const validTickPrevention = ['None', 'Irregular', 'Regular'];
+    const validTickPrevention = ["None", "Irregular", "Regular"];
     if (!validTickPrevention.includes(tick_prevention)) {
       return NextResponse.json(
-        { error: 'Invalid tick prevention value' },
-        { status: 400 }
+        { error: "Invalid tick prevention value" },
+        { status: 400 },
       );
     }
 
-    const validDietTypes = ['Commercial', 'Homemade', 'Raw', 'Mixed'];
+    const validDietTypes = ["Commercial", "Homemade", "Raw", "Mixed"];
     if (!validDietTypes.includes(diet_type)) {
-      return NextResponse.json(
-        { error: 'Invalid diet type' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid diet type" }, { status: 400 });
     }
 
-    const validExerciseLevels = ['Low', 'Moderate', 'High'];
+    const validExerciseLevels = ["Low", "Moderate", "High"];
     if (!validExerciseLevels.includes(exercise_level)) {
       return NextResponse.json(
-        { error: 'Invalid exercise level' },
-        { status: 400 }
+        { error: "Invalid exercise level" },
+        { status: 400 },
       );
     }
 
-    const validEnvironments = ['Indoor', 'Outdoor', 'Mixed'];
+    const validEnvironments = ['Indoor', 'Outdoor', 'Mixed', 'Suburban', 'Rural', 'Urban'];
     if (!validEnvironments.includes(environment)) {
       return NextResponse.json(
-        { error: 'Invalid environment type' },
-        { status: 400 }
+        { error: "Invalid environment type" },
+        { status: 400 },
       );
     }
 
@@ -140,10 +137,13 @@ export async function POST(request: NextRequest) {
     try {
       result = await MultiDiseaseApiService.predictDiseases(input);
     } catch (apiError) {
-      console.error('Disease prediction API error:', apiError);
+      console.error("Disease prediction API error:", apiError);
       return NextResponse.json(
-        { error: 'Failed to connect to prediction service. Please try again later.' },
-        { status: 503 }
+        {
+          error:
+            "Failed to connect to prediction service. Please try again later.",
+        },
+        { status: 503 },
       );
     }
 
@@ -233,12 +233,12 @@ export async function POST(request: NextRequest) {
             JSON.stringify(result.recommendations),
             JSON.stringify(result.pet_profile),
             result.analyzed_at,
-          ]
+          ],
         );
 
         analysisId = dbResult.rows[0]?.id;
       } catch (dbError) {
-        console.error('Failed to save disease analysis to database:', dbError);
+        console.error("Failed to save disease analysis to database:", dbError);
         // Continue without saving - don't fail the request
       }
     }
@@ -249,10 +249,10 @@ export async function POST(request: NextRequest) {
       result,
     });
   } catch (error) {
-    console.error('Multi-disease prediction error:', error);
+    console.error("Multi-disease prediction error:", error);
     return NextResponse.json(
-      { error: 'Failed to predict diseases. Please try again.' },
-      { status: 500 }
+      { error: "Failed to predict diseases. Please try again." },
+      { status: 500 },
     );
   }
 }

@@ -103,7 +103,7 @@ export default function PetCard({ pet }: PetCardProps) {
                 <Link
                   href={`/dashboard/pets/${pet.id}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-200"
+                  className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors duration-200 cursor-pointer"
                   aria-label={`Edit ${pet.name}`}
                 >
                   <svg

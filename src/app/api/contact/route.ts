@@ -144,9 +144,6 @@ This is an automated confirmation. Please do not reply to this email.
       transporter.sendMail(userConfirmationOptions),
     ]);
 
-    console.log("Contact form email sent to admin:", adminResult.messageId);
-    console.log("Confirmation email sent to user:", userResult.messageId);
-
     return NextResponse.json(
       {
         success: true,

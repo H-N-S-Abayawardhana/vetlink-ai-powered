@@ -15,8 +15,6 @@ const transporter = nodemailer.createTransport({
 transporter.verify((error, success) => {
   if (error) {
     console.error("SMTP connection error:", error);
-  } else {
-    console.log("SMTP server is ready to take our messages");
   }
 });
 
@@ -105,10 +103,6 @@ export async function sendAppointmentNotificationToVet(
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log(
-      "Appointment notification sent to veterinarian:",
-      result.messageId,
-    );
     return { success: true, messageId: result.messageId };
   } catch (error) {
     console.error(
@@ -211,10 +205,6 @@ export async function sendAppointmentStatusToUser(data: AppointmentEmailData) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log(
-      `Appointment ${statusText.toLowerCase()} notification sent to user:`,
-      result.messageId,
-    );
     return { success: true, messageId: result.messageId };
   } catch (error) {
     console.error(
@@ -285,7 +275,6 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log("Password reset email sent:", result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
     console.error("Error sending password reset email:", error);

@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import type { ComponentType, SVGProps } from "react";
+import type { UserRole } from "@/types/next-auth";
 import {
   HomeIcon,
   HeartIcon,
@@ -12,34 +14,183 @@ import {
   CalendarIcon,
   LightBulbIcon,
   EyeIcon,
-  UserIcon,
   CogIcon,
+  BuildingStorefrontIcon,
+  CubeIcon,
   XMarkIcon,
   ChevronDownIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import {
-  getSidebarNavItems,
-  type SidebarNavItem,
-} from "@/components/dashboard/sidebar-nav";
-import { UserRole } from "@/types/next-auth";
+import { ScanFace } from "lucide-react";
+
+// ============================================================================
+// Types and Interfaces
+// ============================================================================
+
+export type SidebarIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+export type SidebarNavPlacement = "top" | "bottom";
+
+export interface SidebarNavItem {
+  name: string;
+  href?: string;
+  icon: SidebarIcon;
+  roles: UserRole[];
+  placement?: SidebarNavPlacement;
+  children?: SidebarNavItem[];
+}
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-// Icon mapping for navigation items
-const iconMap = {
-  HomeIcon: HomeIcon,
-  HeartIcon: HeartIcon,
-  DocumentTextIcon: DocumentTextIcon,
-  CalendarIcon: CalendarIcon,
-  LightBulbIcon: LightBulbIcon,
-  EyeIcon: EyeIcon,
-  UserIcon: UserIcon,
-  CogIcon: CogIcon,
-};
+// ============================================================================
+// Navigation Items Configuration
+// ============================================================================
+
+const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: HomeIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+  },
+  {
+    name: "My Pets",
+    href: "/dashboard/pets",
+    icon: HeartIcon,
+    roles: ["USER"],
+  },
+  {
+    name: "All Pets",
+    href: "/dashboard/pets",
+    icon: HeartIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN"],
+  },
+  {
+    name: "BCS Calculator",
+    href: "/dashboard/pets/bcs",
+    icon: LightBulbIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+  },
+  {
+    name: "Disease Prediction",
+    href: "/dashboard/pets/disease-prediction",
+    icon: LightBulbIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+  },
+  {
+    name: "Diet Recommendations",
+    href: "/dashboard/pets/diet",
+    icon: DocumentTextIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+  },
+  {
+    name: "Schedule Appointment",
+    href: "/dashboard/appointment-schedule",
+    icon: CalendarIcon,
+    roles: ["USER"],
+  },
+  {
+    name: "Appointments",
+    href: "/dashboard/appointment-schedule",
+    icon: CalendarIcon,
+    roles: ["SUPER_ADMIN"],
+  },
+  {
+    name: "Manage Appointments",
+    href: "/dashboard/veterinarian-appointments",
+    icon: CalendarIcon,
+    roles: ["VETERINARIAN"],
+  },
+  {
+    name: "Skin Disease Detection",
+    href: "/dashboard/skin-disease",
+    icon: ScanFace,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+  },
+  {
+    name: "Limping Detection",
+    href: "/dashboard/Limping",
+    icon: EyeIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+  },
+  {
+    name: "Pharmacy",
+    icon: BuildingStorefrontIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+    children: [
+      {
+        name: "Dashboard",
+        href: "/dashboard/pharmacy",
+        icon: BuildingStorefrontIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Register",
+        href: "/dashboard/pharmacy/register",
+        icon: BuildingStorefrontIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Inventory",
+        href: "/dashboard/pharmacy/inventory",
+        icon: CubeIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Owner Dashboard",
+        href: "/dashboard/pharmacy/owner",
+        icon: BuildingStorefrontIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN"],
+      },
+    ],
+  },
+  {
+    name: "Settings",
+    href: "/dashboard/settings",
+    icon: CogIcon,
+    roles: ["SUPER_ADMIN"],
+    placement: "bottom",
+  },
+];
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Filters navigation items based on user role and returns top and bottom items
+ */
+function getSidebarNavItems(userRole: UserRole): {
+  top: SidebarNavItem[];
+  bottom: SidebarNavItem[];
+} {
+  const allowed = SIDEBAR_NAV_ITEMS.filter((item) =>
+    item.roles.includes(userRole),
+  ).map((item) => {
+    // Filter children based on user role
+    if (item.children) {
+      return {
+        ...item,
+        children: item.children.filter((child) =>
+          child.roles.includes(userRole),
+        ),
+      };
+    }
+    return item;
+  });
+
+  return {
+    top: allowed.filter((item) => (item.placement ?? "top") === "top"),
+    bottom: allowed.filter((item) => item.placement === "bottom"),
+  };
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
 
 export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
@@ -71,6 +222,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         }
       }
     });
+
     bottomNavItems.forEach((item: SidebarNavItem) => {
       if (item.children) {
         const hasActiveChild = item.children.some(
@@ -85,6 +237,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     setOpenDropdowns(newOpenDropdowns);
   }, [pathname, userRole]);
 
+  /**
+   * Toggles the dropdown state for a navigation item
+   */
   const toggleDropdown = (itemName: string) => {
     setOpenDropdowns((prev) => {
       const newSet = new Set(prev);
@@ -97,6 +252,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     });
   };
 
+  /**
+   * Checks if a navigation item is active based on current pathname
+   */
   const isItemActive = (item: SidebarNavItem): boolean => {
     if (item.href && pathname === item.href) return true;
     if (item.children) {
@@ -107,18 +265,22 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     return false;
   };
 
+  /**
+   * Renders a navigation item (with or without children)
+   */
   const renderNavItem = (item: SidebarNavItem, isBottom = false) => {
     const hasChildren = item.children && item.children.length > 0;
     const isOpen = openDropdowns.has(item.name);
     const isActive = isItemActive(item);
     const IconComponent = item.icon;
 
+    // Item with children (dropdown)
     if (hasChildren) {
       return (
         <div key={item.name}>
           <button
             onClick={() => toggleDropdown(item.name)}
-            className={`group w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+            className={`group w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
               isActive
                 ? "bg-blue-50 text-blue-700"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -152,7 +314,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     key={child.name}
                     href={child.href || "#"}
                     onClick={onToggle}
-                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
                       isChildActive
                         ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -183,7 +345,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         key={item.name}
         href={item.href || "#"}
         onClick={onToggle}
-        className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+        className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer ${
           isActive
             ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -219,6 +381,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        {/* Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -240,6 +403,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </button>
         </div>
 
+        {/* Navigation */}
         <nav className="mt-6 px-3 flex flex-col flex-1 overflow-y-auto">
           <div className="space-y-3">
             {navigationItems.map((item: SidebarNavItem) => renderNavItem(item))}

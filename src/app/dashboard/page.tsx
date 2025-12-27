@@ -505,7 +505,7 @@ export default function DashboardPage() {
             <div className="mt-4">
               <Link
                 href="/dashboard/pets"
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
               >
                 View all pets →
               </Link>
@@ -596,7 +596,7 @@ export default function DashboardPage() {
                       ? "/dashboard/veterinarian-appointments"
                       : "/dashboard/appointment-schedule"
                 }
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
               >
                 View all appointments →
               </Link>
@@ -615,7 +615,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Link
                 href="/dashboard/pets/new"
-                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300"
+                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
               >
                 <div>
                   <span className="rounded-lg inline-flex p-3 bg-blue-50 text-blue-700 ring-4 ring-white">
@@ -647,7 +647,7 @@ export default function DashboardPage() {
 
               <Link
                 href="/dashboard/appointment-schedule"
-                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300"
+                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
               >
                 <div>
                   <span className="rounded-lg inline-flex p-3 bg-green-50 text-green-700 ring-4 ring-white">
@@ -679,7 +679,7 @@ export default function DashboardPage() {
 
               <Link
                 href="/dashboard/ai-analysis"
-                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300"
+                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
               >
                 <div>
                   <span className="rounded-lg inline-flex p-3 bg-purple-50 text-purple-700 ring-4 ring-white">
@@ -711,7 +711,7 @@ export default function DashboardPage() {
 
               <Link
                 href="/dashboard/health-records"
-                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300"
+                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
               >
                 <div>
                   <span className="rounded-lg inline-flex p-3 bg-orange-50 text-orange-700 ring-4 ring-white">
@@ -774,7 +774,7 @@ export default function DashboardPage() {
                     console.error("Failed to refresh activity:", e);
                   }
                 }}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
               >
                 Refresh
               </button>
@@ -850,7 +850,7 @@ export default function DashboardPage() {
                       <Link
                         key={`${item.type}-${item.id}`}
                         href={item.href}
-                        className="block"
+                        className="block cursor-pointer"
                       >
                         {row}
                       </Link>

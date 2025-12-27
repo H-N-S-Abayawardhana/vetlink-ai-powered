@@ -30,6 +30,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate file size (50MB limit)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+    if (videoFile.size > MAX_FILE_SIZE) {
+      const fileSizeMB = (videoFile.size / (1024 * 1024)).toFixed(2);
+      return NextResponse.json(
+        {
+          error: `Video file is too large (${fileSizeMB} MB). Maximum file size is 50 MB.`,
+        },
+        { status: 400 },
+      );
+    }
+
     // Call Hugging Face limping detection API
     const result: LimpingDetectionResult =
       await GaitApiService.detectLimping(videoFile);

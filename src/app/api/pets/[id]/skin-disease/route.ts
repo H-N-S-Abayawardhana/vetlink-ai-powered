@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
-import fs from "fs";
-import path from "path";
+import { uploadImageToS3, deleteMultipleFromS3ByUrls, isS3Url } from "@/lib/s3";
 
 export const runtime = "nodejs";
 
@@ -58,7 +57,7 @@ function makeRecordId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-// GET /api/pets/:id/skin-disease - list scan records for a pet
+// list of skin diseases history for a pet
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -114,7 +113,7 @@ export async function GET(
   }
 }
 
-// POST /api/pets/:id/skin-disease - create a scan record + upload affected image
+// create a scan record + upload affected image
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -166,24 +165,16 @@ export async function POST(
         ? safeJsonParse(allProbRaw)
         : safeJsonParse(String(allProbRaw || ""));
 
-    // Save image to public/uploads/skin-disease
-    const uploadsDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "skin-disease",
-    );
-    if (!fs.existsSync(uploadsDir))
-      fs.mkdirSync(uploadsDir, { recursive: true });
-
+    // Upload image to S3
     const mime = image.type || "application/octet-stream";
     const ext = extFromMime(mime);
     const filename = `skin-${id}-${Date.now()}.${ext}`;
-    const filePath = path.join(uploadsDir, filename);
 
     const arrayBuffer = await image.arrayBuffer();
-    fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
-    const imageUrl = `/uploads/skin-disease/${filename}`;
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Upload to S3 and get the URL
+    const imageUrl = await uploadImageToS3(buffer, filename, mime);
 
     const ownerId = access.petRow.owner_id
       ? String(access.petRow.owner_id)
@@ -203,7 +194,6 @@ export async function POST(
       createdAt: new Date().toISOString(),
     };
 
-    // Append record into pets.skin_disease_history (JSONB array)
     await pool.query(
       `UPDATE pets
        SET skin_disease_history = COALESCE(skin_disease_history, '[]'::jsonb) || $1::jsonb,
@@ -221,6 +211,67 @@ export async function POST(
     return NextResponse.json({ record });
   } catch (error) {
     console.error("Error creating skin disease record:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+// clear all skin disease history for a pet
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await context.params;
+    const access = await assertPetAccess(id, session);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.error },
+        { status: access.status },
+      );
+    }
+
+    const result = await pool.query(
+      "SELECT skin_disease_history FROM pets WHERE id = $1",
+      [id],
+    );
+    const row = result.rows?.[0];
+    const history = ensureArray(row?.skin_disease_history);
+
+    const s3UrlsToDelete: string[] = [];
+    history.forEach((record: any) => {
+      if (record?.imageUrl && isS3Url(record.imageUrl)) {
+        s3UrlsToDelete.push(record.imageUrl);
+      }
+    });
+
+    // Delete all S3 images
+    if (s3UrlsToDelete.length > 0) {
+      try {
+        const deletedCount = await deleteMultipleFromS3ByUrls(s3UrlsToDelete);
+      } catch (e) {
+        console.error("Error deleting S3 images:", e);
+      }
+    }
+
+    await pool.query(
+      `UPDATE pets
+       SET skin_disease_history = '[]'::jsonb,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1`,
+      [id],
+    );
+
+    return NextResponse.json({ message: "Skin disease history cleared" });
+  } catch (error) {
+    console.error("Error clearing skin disease history:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -63,7 +63,7 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
         <div className="flex items-center">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 lg:hidden"
+            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 lg:hidden cursor-pointer"
           >
             <svg
               className="w-6 h-6"
@@ -86,7 +86,7 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
           {/* Notifications */}
           <div className="relative">
             <button
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md relative transition-colors duration-200"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md relative transition-colors duration-200 cursor-not-allowed"
               disabled
             >
               <svg
@@ -156,7 +156,7 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
                   {/* Profile link for all roles */}
                   <Link
                     href="/dashboard/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   >
                     My Profile
                   </Link>
@@ -165,14 +165,14 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
                   {userRole === "USER" ? (
                     <Link
                       href="/dashboard/pets"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                     >
                       Pet Profile
                     </Link>
                   ) : (
                     <Link
                       href="/dashboard/pets"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                     >
                       All Pets
                     </Link>
@@ -181,7 +181,7 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
                   {userRole === "SUPER_ADMIN" && (
                     <Link
                       href="/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                     >
                       Settings
                     </Link>
@@ -189,7 +189,7 @@ export default function NavBar({ onMenuClick }: NavBarProps) {
 
                   <Link
                     href="/dashboard/billing"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   >
                     Billing
                   </Link>
