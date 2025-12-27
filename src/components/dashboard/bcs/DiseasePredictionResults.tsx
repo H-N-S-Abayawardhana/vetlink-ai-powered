@@ -154,10 +154,13 @@ export default function DiseasePredictionResults({
       checkNewPage(35);
       
       // Disease box
-      const isPositive = prediction.is_positive && prediction.disease !== 'Healthy';
-      const bgColor = isPositive 
-        ? (prediction.risk_level === 'High' ? [254, 226, 226] : [254, 243, 199])
-        : [240, 253, 244];
+      const isHealthy = prediction.disease === 'Healthy';
+      const isPositive = prediction.is_positive && !isHealthy;
+      const bgColor = isHealthy
+        ? [220, 252, 231] // Green for Healthy
+        : isPositive 
+          ? (prediction.risk_level === 'High' ? [254, 226, 226] : [254, 243, 199])
+          : [240, 253, 244];
       
       doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
       doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 28, 2, 2, 'F');
@@ -168,21 +171,21 @@ export default function DiseasePredictionResults({
       doc.setTextColor(31, 41, 55);
       doc.text(prediction.disease, margin + 5, yPos + 8);
       
-      // Risk level badge
+      // Risk level badge - show "Healthy" instead of risk level for Healthy
       const riskColors: Record<RiskLevel, number[]> = {
         'High': [220, 38, 38],
         'Moderate': [202, 138, 4],
         'Low': [22, 163, 74]
       };
-      const riskColor = riskColors[prediction.risk_level];
+      const riskColor = isHealthy ? [22, 163, 74] : riskColors[prediction.risk_level];
       doc.setTextColor(riskColor[0], riskColor[1], riskColor[2]);
       doc.setFontSize(10);
-      doc.text(`${prediction.risk_level} Risk`, margin + 100, yPos + 8);
+      doc.text(isHealthy ? '✓ Healthy' : `${prediction.risk_level} Risk`, margin + 100, yPos + 8);
       
       // Probability
       doc.setTextColor(107, 114, 128);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Probability: ${prediction.probability.toFixed(1)}%`, margin + 5, yPos + 18);
+      doc.text(isHealthy ? `Wellness: ${prediction.probability.toFixed(1)}%` : `Probability: ${prediction.probability.toFixed(1)}%`, margin + 5, yPos + 18);
       
       // Status
       doc.setTextColor(isPositive ? 220 : 22, isPositive ? 38 : 163, isPositive ? 38 : 74);
@@ -304,18 +307,32 @@ export default function DiseasePredictionResults({
                   <p className="text-xs text-gray-500 uppercase">Weight Status</p>
                   <p className="font-bold text-gray-900">{result.pet_profile.weight_status}</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-xs text-gray-500 uppercase">Risk Factors</p>
-                  <p className={`font-bold ${
-                    result.pet_profile.risk_factors_count >= 5
-                      ? 'text-red-600'
-                      : result.pet_profile.risk_factors_count >= 3
-                        ? 'text-yellow-600'
-                        : 'text-green-600'
-                  }`}>
-                    {result.pet_profile.risk_factors_count}
-                  </p>
-                </div>
+                {result.has_risk ? (
+                  <div className="text-center">
+                    <p className="text-xs text-gray-500 uppercase">Diseases at Risk</p>
+                    {(() => {
+                      const riskCount = result.predictions.filter(
+                        p => p.disease !== 'Healthy' && (p.risk_level === 'High' || p.risk_level === 'Moderate')
+                      ).length;
+                      return (
+                        <p className={`font-bold ${
+                          riskCount >= 3
+                            ? 'text-red-600'
+                            : riskCount >= 2
+                              ? 'text-yellow-600'
+                              : 'text-orange-600'
+                        }`}>
+                          {riskCount}
+                        </p>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-xs text-gray-500 uppercase">Status</p>
+                    <p className="font-bold text-green-600">✓ Good</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -361,20 +378,29 @@ export default function DiseasePredictionResults({
                     </div>
 
                     <div className="flex items-center gap-4">
-                      {/* Probability */}
+                      {/* Probability - show as "wellness score" for Healthy */}
                       <div className="text-right">
                         <p className="text-2xl font-bold text-gray-900">
                           {prediction.probability.toFixed(0)}%
                         </p>
-                        <p className="text-xs text-gray-500">probability</p>
+                        <p className="text-xs text-gray-500">
+                          {prediction.disease === 'Healthy' ? 'wellness score' : 'probability'}
+                        </p>
                       </div>
 
-                      {/* Risk Badge */}
-                      <div className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 ${
-                        riskStyles.bg} ${riskStyles.text}`}>
-                        <span>{RISK_LEVEL_EMOJI[prediction.risk_level]}</span>
-                        <span>{prediction.risk_level}</span>
-                      </div>
+                      {/* Risk Badge - show "Healthy" badge instead of risk level for Healthy */}
+                      {prediction.disease === 'Healthy' ? (
+                        <div className="px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 bg-green-100 text-green-700">
+                          <span>✅</span>
+                          <span>Healthy</span>
+                        </div>
+                      ) : (
+                        <div className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 ${
+                          riskStyles.bg} ${riskStyles.text}`}>
+                          <span>{RISK_LEVEL_EMOJI[prediction.risk_level]}</span>
+                          <span>{prediction.risk_level}</span>
+                        </div>
+                      )}
 
                       {/* Status Badge */}
                       {prediction.is_positive && prediction.disease !== 'Healthy' && (
@@ -398,27 +424,31 @@ export default function DiseasePredictionResults({
                       {/* Progress Bar */}
                       <div className="mb-4">
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">Risk Probability</span>
+                          <span className="text-gray-600">
+                            {prediction.disease === 'Healthy' ? 'Wellness Score' : 'Risk Probability'}
+                          </span>
                           <span className="font-semibold">{prediction.probability.toFixed(1)}%</span>
                         </div>
                         <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                           <div
-                            className={`h-full transition-all duration-500 ${getProgressBarColor(prediction.probability)}`}
+                            className={`h-full transition-all duration-500 ${prediction.disease === 'Healthy' ? 'bg-green-500' : getProgressBarColor(prediction.probability)}`}
                             style={{ width: `${prediction.probability}%` }}
                           />
                         </div>
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>Low (0-30%)</span>
-                          <span>Moderate (30-60%)</span>
-                          <span>High (60-100%)</span>
-                        </div>
+                        {prediction.disease !== 'Healthy' && (
+                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Low (0-30%)</span>
+                            <span>Moderate (30-60%)</span>
+                            <span>High (60-100%)</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Key Indicators */}
                       {prediction.key_indicators.length > 0 && (
                         <div>
                           <p className="text-sm font-semibold text-gray-700 mb-2">
-                            Key Risk Indicators:
+                            {prediction.disease === 'Healthy' ? 'Positive Health Indicators:' : 'Key Risk Indicators:'}
                           </p>
                           <ul className="space-y-1">
                             {prediction.key_indicators.map((indicator, idx) => (
