@@ -179,7 +179,6 @@ export async function DELETE(
     if (s3UrlsToDelete.length > 0) {
       try {
         const deletedCount = await deleteMultipleFromS3ByUrls(s3UrlsToDelete);
-
       } catch (e) {
         console.error("Error deleting S3 objects:", e);
       }

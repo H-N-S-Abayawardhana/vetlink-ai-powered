@@ -48,7 +48,7 @@ export default function PetsPage() {
           <div>
             <Link
               href="/dashboard/pets/new"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -82,7 +82,7 @@ export default function PetsPage() {
             {isUser && (
               <Link
                 href="/dashboard/pets/new"
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
               >
                 Create your first pet profile
               </Link>

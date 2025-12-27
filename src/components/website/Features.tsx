@@ -165,7 +165,7 @@ export default function Features() {
                 {/* Learn more link */}
                 <motion.a
                   href="#"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700 transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700 transition-colors cursor-pointer"
                   whileHover={{ x: 4 }}
                 >
                   Learn more

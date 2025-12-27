@@ -166,7 +166,7 @@ export default function ResetPasswordForm() {
               )}
               <Link
                 href="/forgot-password"
-                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:from-blue-800 hover:to-blue-700 transition-all"
+                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:from-blue-800 hover:to-blue-700 transition-all cursor-pointer"
               >
                 Request New Reset Link
               </Link>
@@ -286,7 +286,7 @@ export default function ResetPasswordForm() {
             <div className="mt-6 text-center">
               <Link
                 href="/signin"
-                className="text-sm font-semibold text-blue-700 hover:text-blue-600 transition-colors"
+                className="text-sm font-semibold text-blue-700 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 ← Back to Sign in
               </Link>

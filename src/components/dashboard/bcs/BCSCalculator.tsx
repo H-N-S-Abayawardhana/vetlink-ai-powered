@@ -432,7 +432,7 @@ export default function BCSCalculator() {
                 disabled={!canCalculate || loading}
                 className={`mt-8 w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 ${
                   canCalculate && !loading
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >
