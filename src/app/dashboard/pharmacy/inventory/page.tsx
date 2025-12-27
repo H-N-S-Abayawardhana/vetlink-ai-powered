@@ -1,362 +1,695 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import ProductGrid from "@/components/website/ProductGrid";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Package,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  DollarSign,
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 import { formatLKR } from "@/lib/currency";
+import { AuthGuard } from "@/lib/auth-guard";
 
-interface Product {
+interface InventoryItem {
   id: number;
   name: string;
+  form: string;
+  strength?: string;
+  stock: number;
+  expiry?: string | null;
   price: number;
-  stock?: number;
-  category?: string;
-  image?: string;
-  description?: string;
 }
 
-interface CartItem {
-  id: number;
-  qty: number;
-  product: Product;
-}
-
-export default function PharmacyInventoryShop() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [uploadedPrescription, setUploadedPrescription] = useState<File | null>(
-    null,
+export default function PharmacyInventoryPage() {
+  const { data: session } = useSession();
+  const [pharmacyId, setPharmacyId] = useState<string | null>(null);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>(
+    [],
   );
-  const [uploadedName, setUploadedName] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
+  // Get user's pharmacy
   useEffect(() => {
-    async function load() {
+    async function fetchPharmacy() {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch("/api/pharmacies");
         const data = await res.json();
-        if (res.ok) setProducts(data.products || []);
+        if (res.ok && data.pharmacies) {
+          // Find pharmacy owned by current user
+          const userPharmacy = data.pharmacies.find(
+            (p: any) => p.owner_id === session?.user?.id,
+          );
+          if (userPharmacy) {
+            setPharmacyId(userPharmacy.id);
+          } else {
+            setMessage({
+              type: "error",
+              text: "No pharmacy found. Please register a pharmacy first.",
+            });
+          }
+        }
       } catch (err) {
-        console.error("Failed to load products", err);
+        console.error("Failed to fetch pharmacy:", err);
+        setMessage({
+          type: "error",
+          text: "Failed to load pharmacy information",
+        });
       }
     }
-    load();
-  }, []);
+    if (session?.user?.id) {
+      fetchPharmacy();
+    }
+  }, [session]);
 
-  const addToCart = (p: Product) => {
-    setCart((prev) => {
-      const idx = prev.findIndex((i) => i.id === p.id);
-      if (idx !== -1) {
-        const copy = [...prev];
-        copy[idx].qty += 1;
-        return copy;
+  // Fetch inventory
+  useEffect(() => {
+    if (pharmacyId) {
+      fetchInventory();
+    }
+  }, [pharmacyId]);
+
+  // Filter inventory
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredInventory(inventory);
+    } else {
+      const query = searchQuery.toLowerCase();
+      setFilteredInventory(
+        inventory.filter(
+          (item) =>
+            item.name.toLowerCase().includes(query) ||
+            item.form.toLowerCase().includes(query) ||
+            (item.strength || "").toLowerCase().includes(query),
+        ),
+      );
+    }
+  }, [searchQuery, inventory]);
+
+  const fetchInventory = async () => {
+    if (!pharmacyId) return;
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/pharmacies/${pharmacyId}/inventory`);
+      const data = await res.json();
+      if (res.ok) {
+        setInventory(data.inventory || []);
+      } else {
+        setMessage({ type: "error", text: data.error || "Failed to load inventory" });
       }
-      return [{ id: p.id, qty: 1, product: p }, ...prev];
-    });
+    } catch (err) {
+      console.error("Failed to fetch inventory:", err);
+      setMessage({ type: "error", text: "Failed to load inventory" });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateQuantity = (id: number, delta: number) => {
-    setCart((prev) => {
-      const copy = [...prev];
-      const idx = copy.findIndex((i) => i.id === id);
-      if (idx !== -1) {
-        copy[idx].qty += delta;
-        if (copy[idx].qty <= 0) {
-          copy.splice(idx, 1);
-        }
+  const handleDelete = async (itemId: number) => {
+    if (!pharmacyId) return;
+    if (!confirm("Are you sure you want to delete this item?")) return;
+
+    try {
+      const res = await fetch(
+        `/api/pharmacies/${pharmacyId}/inventory/${itemId}`,
+        { method: "DELETE" },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ type: "success", text: "Item deleted successfully" });
+        fetchInventory();
+      } else {
+        setMessage({ type: "error", text: data.error || "Failed to delete item" });
       }
-      return copy;
-    });
+    } catch (err) {
+      console.error("Failed to delete item:", err);
+      setMessage({ type: "error", text: "Failed to delete item" });
+    }
   };
 
-  const removeFromCart = (id: number) => {
-    setCart((prev) => prev.filter((i) => i.id !== id));
+  const handleEdit = (item: InventoryItem) => {
+    setEditingItem(item);
+    setIsModalOpen(true);
   };
 
-  const total = cart.reduce(
-    (acc, i) => acc + i.qty * (i.product.price || 0),
-    0,
-  );
+  const handleAdd = () => {
+    setEditingItem(null);
+    setIsModalOpen(true);
+  };
 
-  // derive categories from the loaded products so filter pills always match available data
-  const derivedCategories = [
-    "all",
-    ...Array.from(
-      new Set(products.map((p: any) => p.category || "Uncategorized")),
-    ),
-  ] as string[];
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingItem(null);
+  };
 
-  const categoryIcons: Record<string, string> = {
-    all: "✨",
-    Food: "🍖",
-    Supplements: "💊",
-    Preventatives: "🛡️",
-    Toys: "🧸",
-    "First Aid": "🩺",
-    Uncategorized: "✨",
+  const handleSave = () => {
+    fetchInventory();
+    handleModalClose();
+  };
+
+  // Calculate statistics
+  const stats = {
+    totalItems: inventory.length,
+    lowStock: inventory.filter((item) => item.stock < 10).length,
+    totalValue: inventory.reduce((sum, item) => sum + item.stock * item.price, 0),
+    expiringSoon: inventory.filter((item) => {
+      if (!item.expiry) return false;
+      const expiryDate = new Date(item.expiry);
+      const today = new Date();
+      const daysUntilExpiry = Math.ceil(
+        (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
+    }).length,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
-              <span>✨</span>
-              <span>Premium Pet Healthcare</span>
+    <AuthGuard allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER"]}>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                  <Package className="w-8 h-8" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold">Inventory Management</h1>
+                  <p className="text-blue-100 text-sm mt-1">
+                    Manage your pharmacy inventory items
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleAdd}
+                className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Add Item
+              </button>
             </div>
-            <h1 className="text-5xl font-bold">🐾 Pet Pharmacy</h1>
-            <p className="text-xl text-emerald-100">
-              Quality medicines & supplements for your beloved pets
-            </p>
+          </div>
+        </div>
 
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mt-8">
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-                  🔍
-                </span>
+        <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+          {/* Message Alert */}
+          {message && (
+            <div
+              className={`p-4 rounded-xl flex items-start gap-3 ${
+                message.type === "success"
+                  ? "bg-green-50 border border-green-200 text-green-800"
+                  : "bg-red-50 border border-red-200 text-red-800"
+              }`}
+            >
+              {message.type === "success" ? (
+                <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              ) : (
+                <XCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              )}
+              <p className="text-sm font-medium flex-1">{message.text}</p>
+              <button
+                onClick={() => setMessage(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Package className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">Total Items</div>
+              <div className="text-3xl font-bold text-gray-900">
+                {stats.totalItems}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">Low Stock</div>
+              <div className="text-3xl font-bold text-red-600">
+                {stats.lowStock}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-green-600" />
+                </div>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">Total Value</div>
+              <div className="text-3xl font-bold text-green-600">
+                {formatLKR(stats.totalValue)}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-orange-600" />
+                </div>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">Expiring Soon</div>
+              <div className="text-3xl font-bold text-orange-600">
+                {stats.expiringSoon}
+              </div>
+            </div>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search for medicines, supplements, or health products..."
+                  placeholder="Search by name, form, or strength..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl text-gray-800 shadow-xl focus:outline-none focus:ring-4 focus:ring-emerald-300 transition-all"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
-                {/* Upload prescription CTA (hidden input + button) */}
-                <div className="mt-3 flex items-center gap-3 justify-center sm:justify-start">
-                  <input
-                    aria-hidden
-                    ref={fileInputRef}
-                    id="prescription-upload"
-                    type="file"
-                    accept="image/*,application/pdf"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] || null;
-                      setUploadedPrescription(file);
-                      setUploadedName(file ? file.name : null);
-                    }}
-                  />
-
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-700 rounded-full text-sm font-semibold hover:bg-emerald-50 border border-white/30 shadow-sm"
-                  >
-                    📤 Upload your prescription
-                  </button>
-
-                  <div className="text-xs text-white/90">
-                    {uploadedName ? (
-                      <span className="font-medium">
-                        Uploaded:{" "}
-                        <span className="text-sm ml-1 font-normal">
-                          {uploadedName}
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="opacity-80">
-                        Upload an image or PDF to find medicines easily
-                      </span>
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid gap-8 lg:grid-cols-4">
-          {/* Main Content */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Category Filter Pills */}
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {derivedCategories.map((cat) => {
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`flex items-center gap-2 px-5 py-3 rounded-xl whitespace-nowrap transition-all ${
-                      selectedCategory === cat
-                        ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg scale-105"
-                        : "bg-white text-gray-700 hover:bg-emerald-50 border border-gray-200"
-                    }`}
-                  >
-                    <span className="text-lg">
-                      {categoryIcons[cat] || "✨"}
-                    </span>
-                    <span className="font-medium">
-                      {cat === "all" ? "All Products" : cat}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Products Grid */}
-            <div>
-              {/* Apply search + category filters before rendering */}
-              {(() => {
-                const q = searchQuery.trim().toLowerCase();
-                const filtered = products.filter((p: any) => {
-                  const matchesCategory =
-                    selectedCategory === "all" ||
-                    p.category === selectedCategory;
-                  const matchesQuery =
-                    !q ||
-                    p.name.toLowerCase().includes(q) ||
-                    (p.description || "").toLowerCase().includes(q);
-                  return matchesCategory && matchesQuery;
-                });
-
-                if (filtered.length === 0) {
-                  return (
-                    <div className="p-12 text-center text-gray-500 bg-white rounded-lg border border-gray-200">
-                      No products match your search.
-                    </div>
-                  );
-                }
-
-                return (
-                  <ProductGrid products={filtered} onAddToCart={addToCart} />
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Sidebar - Cart & Info */}
-          <aside className="lg:col-span-1 space-y-6">
-            {/* Shopping Cart */}
-            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden sticky top-6">
-              {/* Cart Header */}
-              <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-lg flex items-center gap-2">
-                    <span className="text-xl">🛒</span>
-                    Shopping Cart
-                  </h3>
-                  <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold">
-                    {cart.length} items
-                  </div>
-                </div>
+          {/* Inventory Table */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               </div>
+            ) : filteredInventory.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg font-medium">
+                  {inventory.length === 0
+                    ? "No inventory items yet"
+                    : "No items match your search"}
+                </p>
+                <p className="text-gray-400 text-sm mt-2">
+                  {inventory.length === 0
+                    ? "Click 'Add Item' to get started"
+                    : "Try adjusting your search query"}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Item Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Form & Strength
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Stock
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Expiry Date
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Price
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Total Value
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredInventory.map((item) => {
+                      const isLowStock = item.stock < 10;
+                      const isExpiringSoon =
+                        item.expiry &&
+                        new Date(item.expiry) <=
+                          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                      const isExpired =
+                        item.expiry && new Date(item.expiry) < new Date();
 
-              {/* Cart Items */}
-              <div className="p-5">
-                <>
-                  {cart.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400">
-                      <div className="mx-auto mb-3 opacity-30 text-5xl">🛒</div>
-                      <p className="text-sm">Your cart is empty</p>
-                      <p className="text-xs mt-1">
-                        Add products to get started
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 max-h-96 overflow-auto pr-2">
-                      {cart.map((item) => (
-                        <div
+                      return (
+                        <tr
                           key={item.id}
-                          className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-200 shadow-sm"
+                          className="hover:bg-gray-50 transition-colors"
                         >
-                          <div className="flex justify-between items-start mb-3">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-emerald-900 text-sm leading-tight">
-                                {item.product.name}
-                              </h4>
-                              <p className="text-xs text-emerald-700 mt-1">
-                                {formatLKR(item.product.price)} each
-                              </p>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-semibold text-gray-900">
+                              {item.name}
                             </div>
-                            <button
-                              onClick={() => removeFromCart(item.id)}
-                              className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition"
-                            >
-                              🗑️
-                            </button>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 bg-white rounded-lg border border-emerald-300 p-1">
-                              <button
-                                onClick={() => updateQuantity(item.id, -1)}
-                                className="hover:bg-emerald-100 p-1 rounded transition"
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {item.form}
+                              {item.strength && (
+                                <span className="text-gray-400">
+                                  {" "}
+                                  — {item.strength}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`font-semibold ${
+                                  isLowStock ? "text-red-600" : "text-gray-900"
+                                }`}
                               >
-                                ➖
-                              </button>
-                              <span className="text-sm font-semibold text-emerald-900 w-8 text-center">
-                                {item.qty}
+                                {item.stock}
                               </span>
+                              {isLowStock && (
+                                <AlertCircle className="w-4 h-4 text-red-500" />
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div
+                              className={`text-sm ${
+                                isExpired
+                                  ? "text-red-600 font-semibold"
+                                  : isExpiringSoon
+                                    ? "text-orange-600 font-medium"
+                                    : "text-gray-600"
+                              }`}
+                            >
+                              {item.expiry
+                                ? new Date(item.expiry).toLocaleDateString()
+                                : "—"}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {formatLKR(item.price)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-semibold text-gray-900">
+                              {formatLKR(item.stock * item.price)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => updateQuantity(item.id, 1)}
-                                className="hover:bg-emerald-100 p-1 rounded transition"
+                                onClick={() => handleEdit(item)}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Edit"
                               >
-                                ➕
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(item.id)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                            <div className="font-bold text-emerald-700">
-                              {formatLKR(item.product.price * item.qty)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-
-                {/* Cart Total & Checkout */}
-                {cart.length > 0 && (
-                  <div className="mt-5 pt-5 border-t border-gray-200 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 font-medium">
-                        Subtotal:
-                      </span>
-                      <span className="text-2xl font-bold text-emerald-700">
-                        {formatLKR(total)}
-                      </span>
-                    </div>
-                    <button className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                      Proceed to Checkout
-                    </button>
-                    <p className="text-xs text-center text-gray-500">
-                      🚚 Free delivery on orders over LKR 5,000
-                    </p>
-                  </div>
-                )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            </div>
-
-            {/* Info Cards */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-200 shadow-md">
-              <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                <span>❤️</span>
-                Why Choose Us?
-              </h3>
-              <ul className="space-y-2 text-sm text-blue-800">
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
-                  <span>Certified veterinary products</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
-                  <span>Fast & secure delivery</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
-                  <span>Expert consultation available</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">✓</span>
-                  <span>100% authentic guarantee</span>
-                </li>
-              </ul>
-            </div>
-          </aside>
+            )}
+          </div>
         </div>
+
+        {/* Add/Edit Modal */}
+        {isModalOpen && (
+          <InventoryItemModal
+            pharmacyId={pharmacyId}
+            item={editingItem}
+            onClose={handleModalClose}
+            onSave={handleSave}
+          />
+        )}
+      </div>
+    </AuthGuard>
+  );
+}
+
+// Inventory Item Modal Component
+function InventoryItemModal({
+  pharmacyId,
+  item,
+  onClose,
+  onSave,
+}: {
+  pharmacyId: string | null;
+  item: InventoryItem | null;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  const [formData, setFormData] = useState({
+    name: "",
+    form: "",
+    strength: "",
+    stock: 0,
+    expiry: "",
+    price: 0,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        name: item.name,
+        form: item.form,
+        strength: item.strength || "",
+        stock: item.stock,
+        expiry: item.expiry || "",
+        price: item.price,
+      });
+    }
+  }, [item]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pharmacyId) {
+      setError("Pharmacy ID is required");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const payload = {
+        name: formData.name,
+        form: formData.form,
+        strength: formData.strength || null,
+        stock: Number(formData.stock),
+        expiry: formData.expiry || null,
+        price: Number(formData.price),
+      };
+
+      let url = `/api/pharmacies/${pharmacyId}/inventory`;
+      let method = "POST";
+
+      if (item) {
+        url = `/api/pharmacies/${pharmacyId}/inventory/${item.id}`;
+        method = "PUT";
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to save item");
+        return;
+      }
+
+      onSave();
+    } catch (err) {
+      console.error("Failed to save item:", err);
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">
+              {item ? "Edit Inventory Item" : "Add New Inventory Item"}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Item Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              required
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="e.g., Amoxicillin"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Form <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.form}
+                onChange={(e) =>
+                  setFormData({ ...formData, form: e.target.value })
+                }
+                required
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., Capsule, Tablet"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Strength
+              </label>
+              <input
+                type="text"
+                value={formData.strength}
+                onChange={(e) =>
+                  setFormData({ ...formData, strength: e.target.value })
+                }
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., 250 mg"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Stock Quantity
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.stock}
+                onChange={(e) =>
+                  setFormData({ ...formData, stock: Number(e.target.value) })
+                }
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Expiry Date
+              </label>
+              <input
+                type="date"
+                value={formData.expiry}
+                onChange={(e) =>
+                  setFormData({ ...formData, expiry: e.target.value })
+                }
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Price (LKR)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: Number(e.target.value) })
+                }
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-5 h-5" />
+                  {item ? "Update Item" : "Add Item"}
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

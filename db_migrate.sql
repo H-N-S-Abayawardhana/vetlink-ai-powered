@@ -79,3 +79,36 @@ CREATE INDEX IF NOT EXISTS idx_pharmacies_location ON pharmacies(latitude, longi
 
 -- Add comment to table
 COMMENT ON TABLE pharmacies IS 'Stores pharmacy registration information';
+
+
+-- ============================================================================
+-- Migration: Create pharmacy_inventory_items table
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS pharmacy_inventory_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pharmacy_id UUID REFERENCES pharmacies(id) ON DELETE CASCADE,
+    
+    -- Item Information
+    name VARCHAR(255) NOT NULL,
+    form VARCHAR(100) NOT NULL,
+    strength VARCHAR(100),
+    
+    -- Stock Information
+    stock INTEGER DEFAULT 0,
+    price DECIMAL(10, 2) DEFAULT 0,
+    expiry_date DATE,
+    
+    -- Timestamps
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_inventory_pharmacy_id ON pharmacy_inventory_items(pharmacy_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_created_at ON pharmacy_inventory_items(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_inventory_expiry_date ON pharmacy_inventory_items(expiry_date);
+CREATE INDEX IF NOT EXISTS idx_inventory_stock ON pharmacy_inventory_items(stock);
+
+-- Add comment to table
+COMMENT ON TABLE pharmacy_inventory_items IS 'Stores inventory items for each pharmacy';
