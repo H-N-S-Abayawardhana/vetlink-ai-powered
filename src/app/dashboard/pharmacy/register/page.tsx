@@ -419,10 +419,10 @@ export default function PharmacyRegister() {
             <div>
               <h3 className="font-bold text-lg mb-2">What happens next?</h3>
               <p className="text-blue-100 text-sm leading-relaxed">
-                After registration, you&apos;ll be able to manage your inventory,
-                track sales, and use AI-powered demand prediction to optimize
-                your stock levels. Our team will review your registration and
-                activate your account shortly.
+                After registration, you&apos;ll be able to manage your
+                inventory, track sales, and use AI-powered demand prediction to
+                optimize your stock levels. Our team will review your
+                registration and activate your account shortly.
               </p>
             </div>
           </div>

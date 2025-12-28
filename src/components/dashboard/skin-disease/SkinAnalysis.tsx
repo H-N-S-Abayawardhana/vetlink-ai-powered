@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import MLApiService, {
   PredictionResult,
+  parseDiseaseName,
 } from "@/services/skin-disease-detection/mlApi";
 import type { Pet } from "@/lib/pets";
 import { createSkinDiseaseRecord } from "@/lib/skin-disease-records";
@@ -184,6 +185,49 @@ export default function SkinAnalysis({
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+  };
+
+  // Get severity badge styling
+  const getSeverityBadge = (severity: "mild" | "severe" | null) => {
+    if (!severity) return null;
+
+    const isSevere = severity === "severe";
+    return (
+      <span
+        className={`inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
+          isSevere
+            ? "bg-red-100 text-red-800 border border-red-300"
+            : "bg-yellow-100 text-yellow-800 border border-yellow-300"
+        }`}
+      >
+        {isSevere ? (
+          <svg
+            className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clipRule="evenodd"
+            />
+          </svg>
+        )}
+        {isSevere ? "Severe" : "Mild"}
+      </span>
+    );
   };
 
   return (
@@ -611,9 +655,22 @@ export default function SkinAnalysis({
                     <p className="text-xs sm:text-sm text-gray-500 mb-2">
                       Detected Condition
                     </p>
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 break-words">
-                      {formatDiseaseName(prediction.prediction.disease)}
-                    </p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                      <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 break-words">
+                        {prediction.prediction.parsed?.disease ||
+                          formatDiseaseName(prediction.prediction.disease)}
+                      </p>
+                      {prediction.prediction.parsed?.severity &&
+                        getSeverityBadge(prediction.prediction.parsed.severity)}
+                    </div>
+                    {prediction.prediction.parsed?.severity && (
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                        Severity Level:{" "}
+                        <span className="font-semibold capitalize">
+                          {prediction.prediction.parsed.severity}
+                        </span>
+                      </p>
+                    )}
                   </div>
                   <div className="text-left sm:text-right">
                     <p className="text-xs sm:text-sm text-gray-500 mb-2">
@@ -656,24 +713,40 @@ export default function SkinAnalysis({
                 <div className="space-y-2 sm:space-y-3">
                   {Object.entries(prediction.prediction.all_probabilities)
                     .sort(([, a], [, b]) => b - a)
-                    .map(([disease, prob]) => (
-                      <div key={disease} className="group">
-                        <div className="flex justify-between items-center mb-1 sm:mb-2 gap-2">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors break-words flex-1">
-                            {formatDiseaseName(disease)}
-                          </span>
-                          <span className="text-xs sm:text-sm font-semibold text-gray-600 whitespace-nowrap">
-                            {(prob * 100).toFixed(1)}%
-                          </span>
+                    .map(([disease, prob]) => {
+                      const parsed = parseDiseaseName(disease);
+                      return (
+                        <div key={disease} className="group">
+                          <div className="flex justify-between items-center mb-1 sm:mb-2 gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors break-words">
+                                {parsed.disease}
+                              </span>
+                              {parsed.severity && (
+                                <span
+                                  className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
+                                    parsed.severity === "severe"
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-yellow-100 text-yellow-700"
+                                  }`}
+                                >
+                                  {parsed.severity}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs sm:text-sm font-semibold text-gray-600 whitespace-nowrap">
+                              {(prob * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5 overflow-hidden">
+                            <div
+                              className="bg-gradient-to-r from-blue-400 to-indigo-500 h-2 sm:h-2.5 rounded-full transition-all duration-700 ease-out"
+                              style={{ width: `${prob * 100}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5 overflow-hidden">
-                          <div
-                            className="bg-gradient-to-r from-blue-400 to-indigo-500 h-2 sm:h-2.5 rounded-full transition-all duration-700 ease-out"
-                            style={{ width: `${prob * 100}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
 

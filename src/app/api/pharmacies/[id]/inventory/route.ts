@@ -23,17 +23,17 @@ export async function GET(
     );
 
     if (pharmacyCheck.rows.length === 0) {
-      return NextResponse.json({ error: "Pharmacy not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Pharmacy not found" },
+        { status: 404 },
+      );
     }
 
     const pharmacy = pharmacyCheck.rows[0];
 
     // Check if user owns the pharmacy or is admin
     const userRole = (session.user as any)?.userRole || "USER";
-    if (
-      pharmacy.owner_id !== session.user.id &&
-      userRole !== "SUPER_ADMIN"
-    ) {
+    if (pharmacy.owner_id !== session.user.id && userRole !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -114,16 +114,16 @@ export async function POST(
     );
 
     if (pharmacyCheck.rows.length === 0) {
-      return NextResponse.json({ error: "Pharmacy not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Pharmacy not found" },
+        { status: 404 },
+      );
     }
 
     const pharmacy = pharmacyCheck.rows[0];
     const userRole = (session.user as any)?.userRole || "USER";
 
-    if (
-      pharmacy.owner_id !== session.user.id &&
-      userRole !== "SUPER_ADMIN"
-    ) {
+    if (pharmacy.owner_id !== session.user.id && userRole !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -141,15 +141,7 @@ export async function POST(
         updated_at
       ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *`,
-      [
-        paramId,
-        name,
-        form,
-        strength || null,
-        stock,
-        price,
-        expiry || null,
-      ],
+      [paramId, name, form, strength || null, stock, price, expiry || null],
     );
 
     const itemRow = result.rows[0];
@@ -181,9 +173,6 @@ export async function POST(
       }
     }
 
-    return NextResponse.json(
-      { error: "Failed to add item" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to add item" }, { status: 500 });
   }
 }

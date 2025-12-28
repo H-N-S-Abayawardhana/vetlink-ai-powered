@@ -27,7 +27,7 @@ export async function GET() {
         created_at,
         updated_at
       FROM pharmacies
-      ORDER BY created_at DESC`
+      ORDER BY created_at DESC`,
     );
 
     // Transform database rows to match expected format
@@ -59,7 +59,7 @@ export async function GET() {
     console.error("Error fetching pharmacies:", error);
     return NextResponse.json(
       { error: "Failed to fetch pharmacies" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -73,26 +73,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      name,
-      address,
-      location,
-      contact,
-      delivery = {},
-    } = body;
+    const { name, address, location, contact, delivery = {} } = body;
 
     // Validate required fields
     if (!name) {
       return NextResponse.json(
         { error: "Pharmacy name is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!location || location.lat === undefined || location.lng === undefined) {
       return NextResponse.json(
         { error: "Location (latitude and longitude) is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -124,7 +118,7 @@ export async function POST(request: NextRequest) {
         delivery.pickup !== undefined ? delivery.pickup : true,
         delivery.delivery !== undefined ? delivery.delivery : false,
         delivery.delivery_fee ? Number(delivery.delivery_fee) : 0,
-      ]
+      ],
     );
 
     const pharmacyRow = result.rows[0];
@@ -157,30 +151,30 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, pharmacy: newPharmacy },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error registering pharmacy:", error);
-    
+
     // Handle database constraint errors
     if (error instanceof Error) {
       if (error.message.includes("duplicate key")) {
         return NextResponse.json(
           { error: "Pharmacy with this name already exists" },
-          { status: 409 }
+          { status: 409 },
         );
       }
       if (error.message.includes("foreign key")) {
         return NextResponse.json(
           { error: "Invalid owner ID" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
     return NextResponse.json(
       { error: "Failed to register pharmacy" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
