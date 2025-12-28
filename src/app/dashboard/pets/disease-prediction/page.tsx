@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
-import { listPets, type Pet } from '@/lib/pets';
-import DiseasePredictionForm from '@/components/dashboard/bcs/DiseasePredictionForm';
-import DiseasePredictionResults from '@/components/dashboard/bcs/DiseasePredictionResults';
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { listPets, type Pet } from "@/lib/pets";
+import DiseasePredictionForm from "@/components/dashboard/bcs/DiseasePredictionForm";
+import DiseasePredictionResults from "@/components/dashboard/bcs/DiseasePredictionResults";
 import type {
   DiseasePredictionFormState,
   DiseasePredictionResult,
@@ -22,8 +22,8 @@ import {
 
 export default function DiseasePredictionPage() {
   const searchParams = useSearchParams();
-  const petIdFromUrl = searchParams.get('petId');
-  
+  const petIdFromUrl = searchParams.get("petId");
+
   const [pets, setPets] = useState<Pet[]>([]);
   const [selected, setSelected] = useState<Pet | null>(null);
   const [step, setStep] = useState<"select" | "form" | "result">("select");
@@ -35,13 +35,13 @@ export default function DiseasePredictionPage() {
     async function load() {
       const p = await listPets();
       setPets(p);
-      
+
       // Auto-select pet if petId is provided in URL (coming from BCS calculator)
       if (petIdFromUrl) {
         const petFromUrl = p.find((pet) => pet.id === petIdFromUrl);
         if (petFromUrl && petFromUrl.bcs) {
           setSelected(petFromUrl);
-          setStep('form');
+          setStep("form");
         }
       }
     }

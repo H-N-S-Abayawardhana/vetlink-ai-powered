@@ -87,7 +87,10 @@ export default function PharmacyInventoryPage() {
       if (res.ok) {
         setInventory(data.inventory || []);
       } else {
-        setMessage({ type: "error", text: data.error || "Failed to load inventory" });
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to load inventory",
+        });
       }
     } catch (err) {
       console.error("Failed to fetch inventory:", err);
@@ -135,7 +138,10 @@ export default function PharmacyInventoryPage() {
         setMessage({ type: "success", text: "Item deleted successfully" });
         fetchInventory();
       } else {
-        setMessage({ type: "error", text: data.error || "Failed to delete item" });
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to delete item",
+        });
       }
     } catch (err) {
       console.error("Failed to delete item:", err);
@@ -167,7 +173,10 @@ export default function PharmacyInventoryPage() {
   const stats = {
     totalItems: inventory.length,
     lowStock: inventory.filter((item) => item.stock < 10).length,
-    totalValue: inventory.reduce((sum, item) => sum + item.stock * item.price, 0),
+    totalValue: inventory.reduce(
+      (sum, item) => sum + item.stock * item.price,
+      0,
+    ),
     expiringSoon: inventory.filter((item) => {
       if (!item.expiry) return false;
       const expiryDate = new Date(item.expiry);
