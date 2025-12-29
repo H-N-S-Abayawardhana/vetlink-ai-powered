@@ -3,6 +3,7 @@ import { UserRole } from "@/types/next-auth";
 // Role hierarchy for permission checking
 export const roleHierarchy: Record<UserRole, number> = {
   USER: 1,
+  PHARMACIST: 2,
   VETERINARIAN: 2,
   SUPER_ADMIN: 3,
 };
@@ -19,6 +20,7 @@ export function hasRolePermission(
 export function getRoleDisplayName(role: UserRole): string {
   const displayNames: Record<UserRole, string> = {
     USER: "User",
+    PHARMACIST: "Pharmacist",
     VETERINARIAN: "Veterinarian",
     SUPER_ADMIN: "Super Admin",
   };
@@ -29,6 +31,7 @@ export function getRoleDisplayName(role: UserRole): string {
 export function getRoleDescription(role: UserRole): string {
   const descriptions: Record<UserRole, string> = {
     USER: "Basic user with limited access to dashboard features",
+    PHARMACIST: "Pharmacist with access to dashboard and pharmacy management",
     VETERINARIAN:
       "Veterinarian with access to medical tools and patient management",
     SUPER_ADMIN: "System administrator with full access to all features",
@@ -44,4 +47,9 @@ export function isAdmin(userRole: UserRole): boolean {
 // Check if user can access veterinarian features
 export function isVeterinarian(userRole: UserRole): boolean {
   return userRole === "VETERINARIAN" || userRole === "SUPER_ADMIN";
+}
+
+// Check if user can access pharmacist features
+export function isPharmacist(userRole: UserRole): boolean {
+  return userRole === "PHARMACIST" || userRole === "SUPER_ADMIN";
 }

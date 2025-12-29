@@ -64,7 +64,12 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validate role
-    const validRoles: UserRole[] = ["USER", "VETERINARIAN", "SUPER_ADMIN"];
+    const validRoles: UserRole[] = [
+      "USER",
+      "VETERINARIAN",
+      "SUPER_ADMIN",
+      "PHARMACIST",
+    ];
     if (!validRoles.includes(newRole)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }

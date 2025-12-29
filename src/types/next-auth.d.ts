@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 
 // Define user roles
-export type UserRole = "SUPER_ADMIN" | "VETERINARIAN" | "USER";
+export type UserRole = "SUPER_ADMIN" | "VETERINARIAN" | "USER" | "PHARMACIST";
 
 declare module "next-auth" {
   interface Session {

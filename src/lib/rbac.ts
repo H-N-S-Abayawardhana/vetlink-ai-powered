@@ -33,6 +33,15 @@ export const rolePermissions = {
     ],
     description: "Basic user access with appointment scheduling",
   },
+  PHARMACIST: {
+    allowedPaths: [
+      "/",
+      "/dashboard",
+      "/dashboard/pharmacy",
+      "/dashboard/pharmacy/register",
+    ],
+    description: "Pharmacist access to dashboard and pharmacy management",
+  },
 };
 
 // Check if a user role has access to a specific path
