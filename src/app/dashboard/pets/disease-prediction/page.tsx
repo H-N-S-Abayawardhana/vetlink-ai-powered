@@ -316,6 +316,11 @@ export default function DiseasePredictionPage() {
               petGender={selected.gender}
               petBreed={selected.breed}
               petWeight={selected.weightKg}
+              petActivityLevel={selected.activityLevel}
+              petLivingEnvironment={selected.livingEnvironment}
+              petPreferredDiet={selected.preferredDiet}
+              petSpayedNeutered={selected.spayedNeutered}
+              petId={selected.id}
             />
           )}
 
