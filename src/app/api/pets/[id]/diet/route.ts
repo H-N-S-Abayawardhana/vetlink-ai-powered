@@ -35,12 +35,6 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    if (pet.type !== "dog")
-      return NextResponse.json(
-        { error: "Diet recommendations only supported for dogs" },
-        { status: 400 },
-      );
-
     const input = {
       id: pet.id,
       name: pet.name,

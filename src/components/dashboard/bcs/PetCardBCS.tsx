@@ -15,9 +15,7 @@ interface Props {
 export default function PetCardBCS({ pet, selected, onSelect }: Props) {
   const avatar =
     pet.avatarDataUrl ||
-    (pet.type === "dog"
-      ? "/uploads/default-dog.png"
-      : "/uploads/default-cat.png");
+    "/uploads/default-dog.png";
 
   return (
     <button
@@ -48,7 +46,7 @@ export default function PetCardBCS({ pet, selected, onSelect }: Props) {
             </p>
           )}
           <p className="text-xs text-gray-500 mt-1">
-            {pet.type === "dog" ? "🐕 Dog" : "🐈 Cat"} •{" "}
+            🐕 Dog •{" "}
             {pet.ageYears ? `${pet.ageYears} years` : "Age unknown"}
           </p>
         </div>

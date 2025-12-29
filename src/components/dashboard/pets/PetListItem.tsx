@@ -54,9 +54,6 @@ export default function PetListItem({ pet }: PetListItemProps) {
           <h3 className="text-base font-medium text-gray-900 truncate">
             {pet.name}
           </h3>
-          {pet.type && (
-            <span className="text-xs text-gray-500 capitalize">{pet.type}</span>
-          )}
         </div>
         {(isAdminPetsView || isVeterinarian) &&
           (pet.ownerUsername || pet.ownerEmail || pet.ownerId) && (

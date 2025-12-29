@@ -1,18 +1,12 @@
 // Types for Multi-Disease Prediction System
 
-export type BreedSize = "Small" | "Medium" | "Large";
-export type Sex = "Male" | "Female";
-export type TickPrevention = "None" | "Irregular" | "Regular";
-export type DietType = "Commercial" | "Homemade" | "Raw" | "Mixed";
-export type ExerciseLevel = "Low" | "Moderate" | "High";
-export type Environment =
-  | "Indoor"
-  | "Outdoor"
-  | "Mixed"
-  | "Suburban"
-  | "Rural"
-  | "Urban";
-export type RiskLevel = "Low" | "Moderate" | "High";
+export type BreedSize = 'Small' | 'Medium' | 'Large';
+export type Sex = 'Male' | 'Female';
+export type TickPrevention = 'None' | 'Irregular' | 'Regular';
+export type DietType = 'Commercial' | 'Homemade' | 'Mixed';
+export type ExerciseLevel = 'Low' | 'Moderate' | 'High';
+export type Environment = 'Indoor' | 'Outdoor' | 'Mixed' | 'Suburban' | 'Rural' | 'Urban';
+export type RiskLevel = 'Low' | 'Moderate' | 'High';
 
 // The 6 diseases the model can predict
 export type DiseaseType =

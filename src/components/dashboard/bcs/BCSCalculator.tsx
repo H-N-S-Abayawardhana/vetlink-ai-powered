@@ -280,9 +280,7 @@ export default function BCSCalculator() {
                   const avatar =
                     (selected as any).avatarDataUrl ||
                     (selected as any).avatarUrl ||
-                    (selected.type === "dog"
-                      ? "/uploads/default-dog.png"
-                      : "/uploads/default-cat.png");
+                    "/uploads/default-dog.png";
                   const hasAvatar = Boolean(
                     (selected as any).avatarDataUrl ||
                     (selected as any).avatarUrl,

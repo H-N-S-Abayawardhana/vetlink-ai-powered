@@ -162,12 +162,11 @@ export class MultiDiseaseApiService {
    * Map diet type from frontend format to API format
    */
   private static mapDietType(dietType: string): string {
-    // API accepts: Commercial, Homemade, Mixed, Raw
+    // API accepts: Commercial, Homemade, Mixed
     const dietMap: Record<string, string> = {
-      Commercial: "Commercial",
-      Homemade: "Homemade",
-      Raw: "Raw",
-      Mixed: "Mixed",
+      'Commercial': 'Commercial',
+      'Homemade': 'Homemade',
+      'Mixed': 'Mixed',
     };
     return dietMap[dietType] || "Commercial";
   }

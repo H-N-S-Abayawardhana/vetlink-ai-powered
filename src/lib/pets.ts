@@ -12,7 +12,6 @@ export interface Pet {
   ownerId?: string | null; // Owner's user ID
   ownerUsername?: string | null; // Present for SUPER_ADMIN list views
   ownerEmail?: string | null; // Present for SUPER_ADMIN list views
-  type: "dog" | "cat" | "other";
   name: string;
   breed?: string;
   weightKg?: number | null;
@@ -23,8 +22,20 @@ export interface Pet {
   gender?: string | null;
   allergies?: string[];
   preferredDiet?: string | null;
+  livingEnvironment?: string | null;
   healthNotes?: string | null;
-  vaccinationStatus?: string | null;
+  // New professional profile fields
+  microchipNumber?: string | null;
+  microchipImplantDate?: string | null; // ISO date string
+  spayedNeutered?: boolean | null;
+  spayNeuterDate?: string | null; // ISO date string
+  bloodType?: string | null;
+  dateOfBirth?: string | null; // ISO date string
+  ownerPhone?: string | null;
+  secondaryContactName?: string | null;
+  secondaryContactPhone?: string | null;
+  vetClinicName?: string | null;
+  vetClinicPhone?: string | null;
   avatarDataUrl?: string | null; // base64 image preview
   createdAt: string;
   updatedAt: string;
