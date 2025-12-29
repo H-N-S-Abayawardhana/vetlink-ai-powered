@@ -69,28 +69,63 @@ export default function DiseasePredictionForm({
         initial.sex = "Female";
       }
     }
-    
+
     // Auto-detect breed size based on weight or breed name
     if (petWeight !== null && petWeight !== undefined) {
       if (petWeight < 10) {
-        initial.breed_size = 'Small';
+        initial.breed_size = "Small";
       } else if (petWeight <= 25) {
-        initial.breed_size = 'Medium';
+        initial.breed_size = "Medium";
       } else {
-        initial.breed_size = 'Large';
+        initial.breed_size = "Large";
       }
     } else if (petBreed) {
       // Fallback: detect from breed name
       const breedLower = petBreed.toLowerCase();
-      const smallBreeds = ['chihuahua', 'pomeranian', 'yorkshire', 'maltese', 'shih tzu', 'pug', 'french bulldog', 'boston terrier', 'dachshund', 'corgi', 'beagle', 'cavalier', 'miniature', 'toy', 'terrier', 'poodle'];
-      const largeBreeds = ['german shepherd', 'labrador', 'golden retriever', 'rottweiler', 'boxer', 'doberman', 'husky', 'malamute', 'great dane', 'mastiff', 'saint bernard', 'bernese', 'newfoundland', 'akita', 'bullmastiff', 'cane corso', 'irish wolfhound'];
-      
-      if (smallBreeds.some(b => breedLower.includes(b))) {
-        initial.breed_size = 'Small';
-      } else if (largeBreeds.some(b => breedLower.includes(b))) {
-        initial.breed_size = 'Large';
+      const smallBreeds = [
+        "chihuahua",
+        "pomeranian",
+        "yorkshire",
+        "maltese",
+        "shih tzu",
+        "pug",
+        "french bulldog",
+        "boston terrier",
+        "dachshund",
+        "corgi",
+        "beagle",
+        "cavalier",
+        "miniature",
+        "toy",
+        "terrier",
+        "poodle",
+      ];
+      const largeBreeds = [
+        "german shepherd",
+        "labrador",
+        "golden retriever",
+        "rottweiler",
+        "boxer",
+        "doberman",
+        "husky",
+        "malamute",
+        "great dane",
+        "mastiff",
+        "saint bernard",
+        "bernese",
+        "newfoundland",
+        "akita",
+        "bullmastiff",
+        "cane corso",
+        "irish wolfhound",
+      ];
+
+      if (smallBreeds.some((b) => breedLower.includes(b))) {
+        initial.breed_size = "Small";
+      } else if (largeBreeds.some((b) => breedLower.includes(b))) {
+        initial.breed_size = "Large";
       } else {
-        initial.breed_size = 'Medium';
+        initial.breed_size = "Medium";
       }
     }
     
@@ -152,7 +187,7 @@ export default function DiseasePredictionForm({
   // Scroll to top of form when step changes
   const scrollToTop = () => {
     if (formContainerRef.current) {
-      formContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      formContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -264,7 +299,10 @@ export default function DiseasePredictionForm({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div ref={formContainerRef} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+      <div
+        ref={formContainerRef}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-700 px-8 py-6 sticky top-0 z-10">
           <div className="flex items-center justify-between">
@@ -420,8 +458,15 @@ export default function DiseasePredictionForm({
                     Pale Gums <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-rose-100 rounded-full text-center leading-5 text-[10px]">?</span>
-                    Lift lip to check. Healthy = <span className="text-green-600 font-medium">pink</span> · Concern = <span className="text-red-600 font-medium">white/gray/yellow</span>
+                    <span className="inline-block w-5 h-5 bg-rose-100 rounded-full text-center leading-5 text-[10px]">
+                      ?
+                    </span>
+                    Lift lip to check. Healthy ={" "}
+                    <span className="text-green-600 font-medium">pink</span> ·
+                    Concern ={" "}
+                    <span className="text-red-600 font-medium">
+                      white/gray/yellow
+                    </span>
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -458,7 +503,9 @@ export default function DiseasePredictionForm({
                     Skin Lesions <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-amber-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    <span className="inline-block w-5 h-5 bg-amber-100 rounded-full text-center leading-5 text-[10px]">
+                      ?
+                    </span>
                     Any lumps, bumps, red patches, scabs, rashes, or bald spots?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
@@ -493,11 +540,15 @@ export default function DiseasePredictionForm({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Increased Thirst &amp; Urination <span className="text-red-500">*</span>
+                    Increased Thirst &amp; Urination{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-cyan-100 rounded-full text-center leading-5 text-[10px]">?</span>
-                    Drinking more water than usual? Needing to go outside more often?
+                    <span className="inline-block w-5 h-5 bg-cyan-100 rounded-full text-center leading-5 text-[10px]">
+                      ?
+                    </span>
+                    Drinking more water than usual? Needing to go outside more
+                    often?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -541,13 +592,17 @@ export default function DiseasePredictionForm({
                     Tick Prevention <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-green-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    <span className="inline-block w-5 h-5 bg-green-100 rounded-full text-center leading-5 text-[10px]">
+                      ?
+                    </span>
                     Uses flea/tick products? (chews, spot-on drops, or collar)
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, tick_prevention: 'Regular' })}
+                      onClick={() =>
+                        setFormData({ ...formData, tick_prevention: "Regular" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.tick_prevention === 'Regular'
                           ? 'bg-blue-600 text-white shadow'
@@ -558,7 +613,9 @@ export default function DiseasePredictionForm({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, tick_prevention: 'None' })}
+                      onClick={() =>
+                        setFormData({ ...formData, tick_prevention: "None" })
+                      }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.tick_prevention === 'None' || formData.tick_prevention === 'Irregular'
                           ? 'bg-red-600 text-white shadow'
@@ -575,7 +632,9 @@ export default function DiseasePredictionForm({
                     Heartworm Prevention <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-red-100 rounded-full text-center leading-5 text-[10px]">?</span>
+                    <span className="inline-block w-5 h-5 bg-red-100 rounded-full text-center leading-5 text-[10px]">
+                      ?
+                    </span>
                     Monthly heartworm tablets or annual injection from vet?
                   </p>
                   <div className="grid grid-cols-2 gap-3">
