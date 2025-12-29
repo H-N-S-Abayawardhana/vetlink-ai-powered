@@ -33,7 +33,6 @@ export default function PetForm({ petId }: PetFormProps) {
     preferredDiet: "",
     livingEnvironment: "",
     healthNotes: "",
-    vaccinationStatus: "",
     avatarDataUrl: null,
   });
 
@@ -65,17 +64,10 @@ export default function PetForm({ petId }: PetFormProps) {
     if (!form.name || form.name.trim() === "") e.name = "Name is required";
     if (!form.activityLevel) e.activityLevel = "Activity level is required";
     if (!form.gender) e.gender = "Gender is required";
-    if (
-      !form.vaccinationStatus ||
-      (typeof form.vaccinationStatus === "string" &&
-        form.vaccinationStatus.trim() === "")
-    )
-      e.vaccinationStatus = "Vaccination status is required";
 
     // Text-field patterns (allow letters, some punctuation where appropriate)
     const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/u; // letters and spaces only
     const breedPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/u;
-    const vaccinationPattern = /^[A-Za-z0-9 ,.-]+$/;
     const allergyPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/u; // tokens: letters and spaces only; commas separate tokens in the input
 
     // Name format
@@ -112,15 +104,6 @@ export default function PetForm({ petId }: PetFormProps) {
     // Photo required
     if (!form.avatarDataUrl) {
       e.avatarDataUrl = "Photo is required";
-    }
-
-    // Vaccination status format
-    if (
-      form.vaccinationStatus &&
-      typeof form.vaccinationStatus === "string" &&
-      !vaccinationPattern.test(form.vaccinationStatus)
-    ) {
-      e.vaccinationStatus = "Vaccination status contains invalid characters";
     }
 
     // Preferred diet validation (must be one of the valid options)
@@ -324,24 +307,6 @@ export default function PetForm({ petId }: PetFormProps) {
               </select>
               {errors.gender && (
                 <p className="mt-1 text-sm text-red-600">{errors.gender}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Vaccination Status
-              </label>
-              <input
-                value={form.vaccinationStatus || ""}
-                onChange={(e) =>
-                  handleChange("vaccinationStatus", e.target.value)
-                }
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.vaccinationStatus ? "border-red-500" : ""}`}
-              />
-              {errors.vaccinationStatus && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.vaccinationStatus}
-                </p>
               )}
             </div>
           </div>

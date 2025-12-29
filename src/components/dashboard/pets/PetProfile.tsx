@@ -292,14 +292,6 @@ export default function PetProfile({ pet }: PetProfileProps) {
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">
-                Vaccination Status
-              </dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                {pet.vaccinationStatus || "—"}
-              </dd>
-            </div>
-            <div>
               <dt className="text-sm font-medium text-gray-500">Allergies</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {pet.allergies && pet.allergies.length > 0

@@ -25,7 +25,6 @@ export interface Pet {
   preferredDiet?: string | null;
   livingEnvironment?: string | null;
   healthNotes?: string | null;
-  vaccinationStatus?: string | null;
   avatarDataUrl?: string | null; // base64 image preview
   createdAt: string;
   updatedAt: string;
