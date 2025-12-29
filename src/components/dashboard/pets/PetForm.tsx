@@ -213,10 +213,10 @@ export default function PetForm({ petId }: PetFormProps) {
       e.vetClinicPhone = "Invalid phone number format";
     }
 
-    // Blood type validation
-    const bloodPattern = /^[A-Za-z0-9+\- ]{1,10}$/;
+    // Blood type validation (e.g., DEA 1.1+, O, AB, etc.)
+    const bloodPattern = /^[A-Za-z0-9+.\- ]{1,15}$/;
     if (form.bloodType && !bloodPattern.test(form.bloodType)) {
-      e.bloodType = "Invalid blood type";
+      e.bloodType = "Blood type may only contain letters, numbers, +, ., -, and spaces";
     }
 
     // Microchip number validation (alphanumeric, 6-20 chars)
