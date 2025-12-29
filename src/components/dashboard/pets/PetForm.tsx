@@ -48,16 +48,59 @@ export default function PetForm({ petId }: PetFormProps) {
     avatarDataUrl: null,
   });
 
+  // Helper function to format date from ISO to YYYY-MM-DD
+  const formatDateForInput = (dateString: string | null | undefined): string => {
+    if (!dateString) return "";
+    try {
+      // Handle both ISO strings and YYYY-MM-DD format
+      const dateStr = String(dateString);
+      
+      // If already in YYYY-MM-DD format, return as is
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        return dateStr;
+      }
+      
+      // Parse and format to YYYY-MM-DD
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "";
+      
+      // Use UTC to avoid timezone issues
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } catch {
+      return "";
+    }
+  };
+
   useEffect(() => {
     if (petId) {
       (async () => {
         const pet = await getPet(petId);
         if (pet) {
+          console.log("Loaded pet data:", pet);
+          console.log("Date of Birth raw:", pet.dateOfBirth);
+          console.log("Spay Neuter Date raw:", pet.spayNeuterDate);
+          console.log("Microchip Implant Date raw:", pet.microchipImplantDate);
+          
           // Normalize backend `avatarUrl` -> frontend `avatarDataUrl` so ImageUpload shows the image
+          // Format date fields for input type="date"
+          const formattedDOB = formatDateForInput(pet.dateOfBirth);
+          const formattedSpay = formatDateForInput(pet.spayNeuterDate);
+          const formattedMicrochip = formatDateForInput(pet.microchipImplantDate);
+          
+          console.log("Date of Birth formatted:", formattedDOB);
+          console.log("Spay Neuter Date formatted:", formattedSpay);
+          console.log("Microchip Implant Date formatted:", formattedMicrochip);
+          
           const normalized = {
             ...pet,
             avatarDataUrl:
               (pet as any).avatarDataUrl || (pet as any).avatarUrl || null,
+            dateOfBirth: formattedDOB,
+            spayNeuterDate: formattedSpay,
+            microchipImplantDate: formattedMicrochip,
           } as Partial<Pet>;
           setForm(normalized);
         }
