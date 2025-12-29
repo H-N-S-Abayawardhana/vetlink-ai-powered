@@ -276,12 +276,7 @@ export default function PetProfile({ pet }: PetProfileProps) {
               <dt className="text-sm font-medium text-gray-500">Name</dt>
               <dd className="mt-1 text-sm text-gray-900">{pet.name}</dd>
             </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Type</dt>
-              <dd className="mt-1 text-sm text-gray-900 capitalize">
-                {pet.type || "—"}
-              </dd>
-            </div>
+            
             <div>
               <dt className="text-sm font-medium text-gray-500">Breed</dt>
               <dd className="mt-1 text-sm text-gray-900">{pet.breed || "—"}</dd>

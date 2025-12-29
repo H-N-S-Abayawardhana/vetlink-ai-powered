@@ -274,20 +274,6 @@ export default function PetForm({ petId }: PetFormProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Type
-                </label>
-                <select
-                  value={form.type || "dog"}
-                  onChange={(e) => handleChange("type", e.target.value)}
-                  className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="dog">Dog</option>
-                  <option value="cat">Cat</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Breed
               </label>
@@ -320,6 +306,24 @@ export default function PetForm({ petId }: PetFormProps) {
               {errors.weightKg && (
                 <p className="mt-1 text-sm text-red-600">{errors.weightKg}</p>
               )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Gender
+                </label>
+                <select
+                  value={form.gender || ""}
+                  onChange={(e) => handleChange("gender", e.target.value)}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.gender ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select gender</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+                {errors.gender && (
+                  <p className="mt-1 text-sm text-red-600">{errors.gender}</p>
+                )}
               </div>
             </div>
 
@@ -363,24 +367,6 @@ export default function PetForm({ petId }: PetFormProps) {
                 />
                 {errors.ageYears && (
                   <p className="mt-1 text-sm text-red-600">{errors.ageYears}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Gender
-                </label>
-                <select
-                  value={form.gender || ""}
-                  onChange={(e) => handleChange("gender", e.target.value)}
-                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.gender ? "border-red-500" : ""}`}
-                >
-                  <option value="">Select gender</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Other</option>
-                </select>
-                {errors.gender && (
-                  <p className="mt-1 text-sm text-red-600">{errors.gender}</p>
                 )}
               </div>
             </div>
@@ -488,48 +474,9 @@ export default function PetForm({ petId }: PetFormProps) {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Allergies (comma separated)
-            </label>
-            <input
-              value={(form.allergies || []).join(", ")}
-              onChange={(e) =>
-                handleChange(
-                  "allergies",
-                  e.target.value
-                    .split(",")
-                    .map((s) => s.trim())
-                    .filter(Boolean),
-                )
-              }
-              className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.allergies ? "border-red-500" : ""}`}
-            />
-            {errors.allergies && (
-              <p className="mt-1 text-sm text-red-600">{errors.allergies}</p>
-            )}
-          </div>
+          
 
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Preferred Diet
-            </label>
-            <select
-              value={form.preferredDiet || ""}
-              onChange={(e) => handleChange("preferredDiet", e.target.value)}
-              className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.preferredDiet ? "border-red-500" : ""}`}
-            >
-              <option value="">Select diet type</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Homemade">Homemade</option>
-              <option value="Mixed">Mixed</option>
-            </select>
-            {errors.preferredDiet && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.preferredDiet}
-              </p>
-            )}
-          </div>
+          
 
           {/* Section: Diet & Environment */}
           <div className="pt-6 border-t border-gray-200">
