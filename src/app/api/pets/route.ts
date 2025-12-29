@@ -134,6 +134,7 @@ export async function POST(request: NextRequest) {
       gender,
       allergies,
       preferredDiet,
+      livingEnvironment,
       healthNotes,
       vaccinationStatus,
       avatarDataUrl,
@@ -147,8 +148,8 @@ export async function POST(request: NextRequest) {
     // If owner_id column is UUID, PostgreSQL will handle the conversion
     // If owner_id is still BIGINT, you need to run the migration script first
     const result = await pool.query(
-      `INSERT INTO pets (owner_id, type, name, breed, weight_kg, activity_level, age_years, gender, allergies, preferred_diet, health_notes, vaccination_status, avatar_url, created_at, updated_at)
-       VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      `INSERT INTO pets (owner_id, type, name, breed, weight_kg, activity_level, age_years, gender, allergies, preferred_diet, living_environment, health_notes, vaccination_status, avatar_url, created_at, updated_at)
+       VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
        RETURNING *`,
       [
         session.user.id,
@@ -165,6 +166,7 @@ export async function POST(request: NextRequest) {
             ? [allergies]
             : [],
         preferredDiet || null,
+        livingEnvironment || null,
         healthNotes || null,
         vaccinationStatus || null,
         avatarDataUrl || null,

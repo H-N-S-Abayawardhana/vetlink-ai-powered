@@ -31,6 +31,7 @@ export default function PetForm({ petId }: PetFormProps) {
     gender: undefined,
     allergies: [],
     preferredDiet: "",
+    livingEnvironment: "",
     healthNotes: "",
     vaccinationStatus: "",
     avatarDataUrl: null,
@@ -70,18 +71,11 @@ export default function PetForm({ petId }: PetFormProps) {
         form.vaccinationStatus.trim() === "")
     )
       e.vaccinationStatus = "Vaccination status is required";
-    if (
-      form.preferredDiet &&
-      typeof form.preferredDiet === "string" &&
-      form.preferredDiet.length > 200
-    )
-      e.preferredDiet = "Preferred diet must be 200 characters or fewer";
 
     // Text-field patterns (allow letters, some punctuation where appropriate)
     const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/u; // letters and spaces only
     const breedPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/u;
     const vaccinationPattern = /^[A-Za-z0-9 ,.-]+$/;
-    const dietPattern = /^[A-Za-z0-9 ,\-\/()]+$/;
     const allergyPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/u; // tokens: letters and spaces only; commas separate tokens in the input
 
     // Name format
@@ -129,13 +123,15 @@ export default function PetForm({ petId }: PetFormProps) {
       e.vaccinationStatus = "Vaccination status contains invalid characters";
     }
 
-    // Preferred diet format
+    // Preferred diet validation (must be one of the valid options)
+    const validDietTypes = ["Commercial", "Homemade", "Mixed"];
     if (
       form.preferredDiet &&
       typeof form.preferredDiet === "string" &&
-      !dietPattern.test(form.preferredDiet)
+      form.preferredDiet.trim() !== "" &&
+      !validDietTypes.includes(form.preferredDiet)
     ) {
-      e.preferredDiet = "Preferred diet contains invalid characters";
+      e.preferredDiet = "Please select a valid diet type";
     }
 
     // Allergies (comma separated) - validate each token
@@ -376,14 +372,40 @@ export default function PetForm({ petId }: PetFormProps) {
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Preferred Diet
             </label>
-            <input
+            <select
               value={form.preferredDiet || ""}
               onChange={(e) => handleChange("preferredDiet", e.target.value)}
               className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.preferredDiet ? "border-red-500" : ""}`}
-            />
+            >
+              <option value="">Select diet type</option>
+              <option value="Commercial">Commercial</option>
+              <option value="Homemade">Homemade</option>
+              <option value="Mixed">Mixed</option>
+            </select>
             {errors.preferredDiet && (
               <p className="mt-1 text-sm text-red-600">
                 {errors.preferredDiet}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Living Environment
+            </label>
+            <select
+              value={form.livingEnvironment || ""}
+              onChange={(e) => handleChange("livingEnvironment", e.target.value)}
+              className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.livingEnvironment ? "border-red-500" : ""}`}
+            >
+              <option value="">Select environment</option>
+              <option value="Urban">Urban</option>
+              <option value="Suburban">Suburban</option>
+              <option value="Rural">Rural</option>
+            </select>
+            {errors.livingEnvironment && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.livingEnvironment}
               </p>
             )}
           </div>

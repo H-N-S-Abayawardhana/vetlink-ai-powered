@@ -317,6 +317,14 @@ export default function PetProfile({ pet }: PetProfileProps) {
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">
+                Living Environment
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {pet.livingEnvironment || "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">
                 Health Notes
               </dt>
               <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">

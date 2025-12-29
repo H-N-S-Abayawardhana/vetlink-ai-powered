@@ -87,12 +87,13 @@ export async function PUT(
       gender,
       allergies,
       preferredDiet,
+      livingEnvironment,
       healthNotes,
       vaccinationStatus,
       avatarDataUrl,
     } = body;
     const updateResult = await pool.query(
-      `UPDATE pets SET type=$1, name=$2, breed=$3, weight_kg=$4, bcs=$5, bcs_calculated_at=$6, activity_level=$7, age_years=$8, gender=$9, allergies=$10, preferred_diet=$11, health_notes=$12, vaccination_status=$13, avatar_url=$14, updated_at=CURRENT_TIMESTAMP WHERE id=$15 RETURNING *`,
+      `UPDATE pets SET type=$1, name=$2, breed=$3, weight_kg=$4, bcs=$5, bcs_calculated_at=$6, activity_level=$7, age_years=$8, gender=$9, allergies=$10, preferred_diet=$11, living_environment=$12, health_notes=$13, vaccination_status=$14, avatar_url=$15, updated_at=CURRENT_TIMESTAMP WHERE id=$16 RETURNING *`,
       [
         type || petRow.type,
         name || petRow.name,
@@ -109,6 +110,7 @@ export async function PUT(
             ? [allergies]
             : petRow.allergies,
         preferredDiet || petRow.preferred_diet,
+        livingEnvironment || petRow.living_environment,
         healthNotes || petRow.health_notes,
         vaccinationStatus || petRow.vaccination_status,
         avatarDataUrl || petRow.avatar_url,

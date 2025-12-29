@@ -14,6 +14,7 @@ export interface DbPetRow {
   gender?: string | null;
   allergies?: string[] | null;
   preferred_diet?: string | null;
+  living_environment?: string | null;
   health_notes?: string | null;
   vaccination_status?: string | null;
   avatar_url?: string | null;
@@ -36,6 +37,7 @@ export function mapRowToPet(row: DbPetRow) {
     gender: row.gender || null,
     allergies: row.allergies || [],
     preferredDiet: row.preferred_diet || null,
+    livingEnvironment: row.living_environment || null,
     healthNotes: row.health_notes || null,
     vaccinationStatus: row.vaccination_status || null,
     avatarUrl: row.avatar_url || null,

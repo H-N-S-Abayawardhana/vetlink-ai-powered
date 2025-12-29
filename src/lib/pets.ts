@@ -23,6 +23,7 @@ export interface Pet {
   gender?: string | null;
   allergies?: string[];
   preferredDiet?: string | null;
+  livingEnvironment?: string | null;
   healthNotes?: string | null;
   vaccinationStatus?: string | null;
   avatarDataUrl?: string | null; // base64 image preview

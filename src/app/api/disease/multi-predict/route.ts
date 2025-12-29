@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validDietTypes = ["Commercial", "Homemade", "Raw", "Mixed"];
+    const validDietTypes = ["Commercial", "Homemade", "Mixed"];
     if (!validDietTypes.includes(diet_type)) {
       return NextResponse.json({ error: "Invalid diet type" }, { status: 400 });
     }
