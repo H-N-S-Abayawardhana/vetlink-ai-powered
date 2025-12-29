@@ -238,9 +238,7 @@ export default function DiseasePredictionPage() {
                       const avatar =
                         (pet as any).avatarDataUrl ||
                         (pet as any).avatarUrl ||
-                        (pet.type === "dog"
-                          ? "/uploads/default-dog.png"
-                          : "/uploads/default-cat.png");
+                        "/uploads/default-dog.png";
                       const hasAvatar = Boolean(
                         (pet as any).avatarDataUrl || (pet as any).avatarUrl,
                       );
@@ -278,7 +276,7 @@ export default function DiseasePredictionPage() {
                               {pet.name}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {pet.breed || pet.type} •{" "}
+                              {pet.breed || "Unknown breed"} •{" "}
                               {pet.ageYears
                                 ? `${pet.ageYears} years`
                                 : "Age unknown"}

@@ -37,9 +37,7 @@ export default function DietPage() {
       try {
         const all = await listPets();
         if (!mounted) return;
-        const dogs = Array.isArray(all)
-          ? (all as Pet[]).filter((p) => p.type === "dog")
-          : [];
+        const dogs = Array.isArray(all) ? (all as Pet[]) : [];
         setPets(dogs);
         setSelectedId((prev) => prev ?? (dogs.length > 0 ? dogs[0].id : null));
       } catch (err) {
