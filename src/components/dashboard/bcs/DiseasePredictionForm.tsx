@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { X, FileText, Info, AlertTriangle, Stethoscope } from 'lucide-react';
+import { X, AlertTriangle, Stethoscope } from 'lucide-react';
 import type {
   DiseasePredictionFormState,
   BreedSize,
@@ -212,14 +212,6 @@ export default function DiseasePredictionForm({
     }
   };
 
-  // BCS display helper
-  const getBCSColor = (score: number) => {
-    if (score <= 3) return "bg-orange-400";
-    if (score <= 5) return "bg-green-500";
-    if (score <= 7) return "bg-amber-400";
-    return "bg-red-500";
-  };
-
   const getBCSLabel = (score: number) => {
     if (score <= 3) return "Underweight";
     if (score <= 5) return "Ideal";
@@ -227,26 +219,23 @@ export default function DiseasePredictionForm({
     return "Obese";
   };
 
-  const getBCSBorderColor = (score: number) => {
-    if (score <= 3) return "border-orange-300";
-    if (score <= 5) return "border-green-300";
-    if (score <= 7) return "border-amber-300";
-    return "border-red-300";
-  };
-
-  const getBCSBgColor = (score: number) => {
-    if (score <= 3) return "bg-orange-50";
-    if (score <= 5) return "bg-green-50";
-    if (score <= 7) return "bg-amber-50";
-    return "bg-red-50";
-  };
-
-  const getBCSTextColor = (score: number) => {
-    if (score <= 3) return "text-orange-700";
-    if (score <= 5) return "text-green-700";
-    if (score <= 7) return "text-amber-700";
-    return "text-red-700";
-  };
+  const SummaryItem = ({
+    label,
+    value,
+    hint,
+  }: {
+    label: string;
+    value: string;
+    hint?: string;
+  }) => (
+    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        {label}
+      </p>
+      <p className="mt-1 text-base font-semibold text-gray-900">{value}</p>
+      {hint ? <p className="text-xs text-gray-500 mt-0.5">{hint}</p> : null}
+    </div>
+  );
 
   // If no BCS, show error state
   if (!hasBCS) {
@@ -318,237 +307,89 @@ export default function DiseasePredictionForm({
           {/* Step 1: Pet Profile (Auto-filled from Database) */}
           {currentStep === 1 && (
             <div className="space-y-6">
-              {/* BCS Display Card - Read-only from database - Only shown in Step 1 */}
-              <div className={`mb-6 p-4 rounded-xl border-2 ${getBCSBorderColor(initialBCS)} ${getBCSBgColor(initialBCS)}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 ${getBCSColor(initialBCS)} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
-                      {initialBCS}
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Body Condition Score</p>
-                      <p className={`font-bold text-lg ${getBCSTextColor(initialBCS)}`}>
-                        {getBCSLabel(initialBCS)} ({initialBCS}/9)
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-sm text-gray-600">
-                      <span>📊</span> From Pet Profile
-                    </span>
-                  </div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Step 1</p>
+                  <h3 className="mt-1 text-xl font-semibold text-gray-900">
+                    Review auto-filled profile
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    We pulled these details from the pet profile. Confirm or adjust anything that looks off before moving on.
+                  </p>
                 </div>
-              </div>
-
-              {/* Info banner */}
-              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg">
-                <div className="flex gap-3">
-                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-800">
-                    <strong>Step 1:</strong> Review and confirm your pet&apos;s profile information. These details have been auto-filled from the database. You can edit any field if needed.
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  📋 Pet Profile & Lifestyle
-                </h3>
                 {petId && (
                   <Link
                     href={`/dashboard/pets/${petId}`}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-purple-700 border border-purple-200 rounded-lg hover:border-purple-400 hover:text-purple-900 bg-purple-50"
+                    className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm hover:border-blue-300 hover:bg-blue-100"
                   >
                     Edit pet profile
                   </Link>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Age Display */}
-                <div className="p-4 rounded-xl border-2 border-blue-200 bg-blue-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                        {formData.age_years || '?'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Age</p>
-                        <p className="font-bold text-lg text-blue-700">
-                          {formData.age_years ? `${formData.age_years} years` : 'Not set'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-xs text-gray-600">
-                        <span>📊</span> Auto-filled
-                      </span>
-                    </div>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Body condition score
+                    </p>
+                    <p className="mt-1 text-2xl font-semibold text-gray-900">
+                      {initialBCS}/9
+                    </p>
+                    <p className="text-sm text-gray-600">{getBCSLabel(initialBCS)}</p>
                   </div>
-                </div>
-
-                {/* Breed Size Display */}
-                <div className="p-4 rounded-xl border-2 border-purple-200 bg-purple-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                        {formData.breed_size ? formData.breed_size.charAt(0) : '?'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Breed Size</p>
-                        <p className="font-bold text-lg text-purple-700">
-                          {formData.breed_size || 'Not set'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-xs text-gray-600">
-                        <span>📊</span> Auto-filled
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sex Display */}
-                <div className={`p-4 rounded-xl border-2 ${formData.sex === 'Male' ? 'border-blue-200 bg-blue-50' : 'border-pink-200 bg-pink-50'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 ${formData.sex === 'Male' ? 'bg-blue-500' : 'bg-pink-500'} rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
-                        {formData.sex === 'Male' ? 'M' : formData.sex === 'Female' ? 'F' : '?'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Sex</p>
-                        <p className={`font-bold text-lg ${formData.sex === 'Male' ? 'text-blue-700' : 'text-pink-700'}`}>
-                          {formData.sex || 'Not set'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-xs text-gray-600">
-                        <span>📊</span> Auto-filled
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Spayed/Neutered Display */}
-                <div className={`p-4 rounded-xl border-2 ${formData.is_neutered === 'yes' ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 ${formData.is_neutered === 'yes' ? 'bg-green-500' : 'bg-amber-500'} rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg`}>
-                        {formData.is_neutered === 'yes' ? 'Yes' : formData.is_neutered === 'no' ? 'No' : '?'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Spayed/Neutered</p>
-                        <p className={`font-bold text-lg ${formData.is_neutered === 'yes' ? 'text-green-700' : 'text-amber-700'}`}>
-                          {formData.is_neutered === 'yes' ? 'Neutered' : formData.is_neutered === 'no' ? 'Intact' : 'Not set'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-xs text-gray-600">
-                        <span>📊</span> Auto-filled
-                      </span>
-                    </div>
+                  <div className="text-right text-xs text-gray-500">
+                    <p className="font-semibold text-gray-700">From pet profile</p>
+                    <p>BCS stays read-only in this step.</p>
                   </div>
                 </div>
               </div>
 
-              {/* Lifestyle & Environment Section */}
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4 mt-8 pt-6 border-t border-gray-200">
-                🏡 Lifestyle & Environment
-              </h3>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <SummaryItem
+                  label="Age"
+                  value={formData.age_years ? `${formData.age_years} years` : "Not set"}
+                  hint="Update in pet profile if this is outdated."
+                />
+                <SummaryItem
+                  label="Breed size"
+                  value={formData.breed_size || "Not set"}
+                  hint="Estimated from weight/breed where available."
+                />
+                <SummaryItem
+                  label="Sex"
+                  value={formData.sex || "Not set"}
+                  hint="Auto-detected from profile."
+                />
+                <SummaryItem
+                  label="Spayed / neutered"
+                  value={
+                    formData.is_neutered === "yes"
+                      ? "Neutered"
+                      : formData.is_neutered === "no"
+                        ? "Intact"
+                        : "Not set"
+                  }
+                  hint="Based on recorded procedure status."
+                />
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Diet Type Display */}
-                <div className="p-4 rounded-xl border-2 border-orange-200 bg-orange-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                        {formData.diet_type ? formData.diet_type.charAt(0) : '?'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Diet Type</p>
-                        <p className="font-bold text-lg text-orange-700">
-                          {formData.diet_type || 'Not set'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-xs text-gray-600">
-                        <span>📊</span> Auto-filled
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Exercise Level Display */}
-                <div className={`p-4 rounded-xl border-2 ${
-                  formData.exercise_level === 'Low' ? 'border-amber-200 bg-amber-50' : 
-                  formData.exercise_level === 'Moderate' ? 'border-blue-200 bg-blue-50' : 
-                  'border-green-200 bg-green-50'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 ${
-                        formData.exercise_level === 'Low' ? 'bg-amber-500' : 
-                        formData.exercise_level === 'Moderate' ? 'bg-blue-500' : 
-                        'bg-green-500'
-                      } rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg`}>
-                        {formData.exercise_level ? formData.exercise_level.charAt(0) : '?'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Exercise Level</p>
-                        <p className={`font-bold text-lg ${
-                          formData.exercise_level === 'Low' ? 'text-amber-700' : 
-                          formData.exercise_level === 'Moderate' ? 'text-blue-700' : 
-                          'text-green-700'
-                        }`}>
-                          {formData.exercise_level || 'Not set'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-xs text-gray-600">
-                        <span>📊</span> Auto-filled
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Living Environment Display */}
-                <div className={`p-4 rounded-xl border-2 md:col-span-2 ${
-                  formData.environment === 'Urban' ? 'border-blue-200 bg-blue-50' : 
-                  formData.environment === 'Suburban' ? 'border-purple-200 bg-purple-50' : 
-                  'border-green-200 bg-green-50'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 ${
-                        formData.environment === 'Urban' ? 'bg-blue-500' : 
-                        formData.environment === 'Suburban' ? 'bg-purple-500' : 
-                        'bg-green-500'
-                      } rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg`}>
-                        {formData.environment ? formData.environment.charAt(0) : '?'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Living Environment</p>
-                        <p className={`font-bold text-lg ${
-                          formData.environment === 'Urban' ? 'text-blue-700' : 
-                          formData.environment === 'Suburban' ? 'text-purple-700' : 
-                          'text-green-700'
-                        }`}>
-                          {formData.environment || 'Not set'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/80 rounded-lg text-xs text-gray-600">
-                        <span>📊</span> Auto-filled
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <SummaryItem
+                  label="Diet type"
+                  value={formData.diet_type || "Not set"}
+                  hint="What the pet usually eats."
+                />
+                <SummaryItem
+                  label="Exercise level"
+                  value={formData.exercise_level || "Not set"}
+                  hint="Mapped from activity level."
+                />
+                <SummaryItem
+                  label="Living environment"
+                  value={formData.environment || "Not set"}
+                  hint="Urban / suburban / rural."
+                />
               </div>
             </div>
           )}
@@ -590,11 +431,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.pale_gums === "yes"
-                          ? "bg-red-500 text-white shadow-lg"
+                          ? "bg-blue-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ⚠️ Yes
+                      Yes
                     </button>
                     <button
                       type="button"
@@ -603,11 +444,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.pale_gums === "no"
-                          ? "bg-green-500 text-white shadow-lg"
+                          ? "bg-red-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ✅ No
+                      No
                     </button>
                   </div>
                 </div>
@@ -628,11 +469,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.skin_lesions === "yes"
-                          ? "bg-red-500 text-white shadow-lg"
+                          ? "bg-blue-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ⚠️ Yes
+                      Yes
                     </button>
                     <button
                       type="button"
@@ -641,11 +482,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.skin_lesions === "no"
-                          ? "bg-green-500 text-white shadow-lg"
+                          ? "bg-red-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ✅ No
+                      No
                     </button>
                   </div>
                 </div>
@@ -666,11 +507,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.polyuria === "yes"
-                          ? "bg-red-500 text-white shadow-lg"
+                          ? "bg-blue-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ⚠️ Yes
+                      Yes
                     </button>
                     <button
                       type="button"
@@ -679,11 +520,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.polyuria === "no"
-                          ? "bg-green-500 text-white shadow-lg"
+                          ? "bg-red-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ✅ No
+                      No
                     </button>
                   </div>
                 </div>
@@ -709,22 +550,22 @@ export default function DiseasePredictionForm({
                       onClick={() => setFormData({ ...formData, tick_prevention: 'Regular' })}
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.tick_prevention === 'Regular'
-                          ? 'bg-green-500 text-white shadow-lg'
+                          ? 'bg-blue-600 text-white shadow'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      ✅ Yes
+                      Yes
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, tick_prevention: 'None' })}
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.tick_prevention === 'None' || formData.tick_prevention === 'Irregular'
-                          ? 'bg-red-500 text-white shadow-lg'
+                          ? 'bg-red-600 text-white shadow'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      ❌ No
+                      No
                     </button>
                   </div>
                 </div>
@@ -748,11 +589,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.heartworm_prevention === "yes"
-                          ? "bg-green-500 text-white shadow-lg"
+                          ? "bg-blue-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ✅ Yes
+                      Yes
                     </button>
                     <button
                       type="button"
@@ -761,11 +602,11 @@ export default function DiseasePredictionForm({
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
                         formData.heartworm_prevention === "no"
-                          ? "bg-red-500 text-white shadow-lg"
+                          ? "bg-red-600 text-white shadow"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      ❌ No
+                      No
                     </button>
                   </div>
                 </div>
