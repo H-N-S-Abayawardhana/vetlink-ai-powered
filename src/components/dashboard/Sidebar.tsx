@@ -54,7 +54,7 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     name: "Dashboard",
     href: "/dashboard",
     icon: HomeIcon,
-    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
   },
   {
     name: "My Pets",
@@ -119,19 +119,19 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
   {
     name: "Pharmacy",
     icon: BuildingStorefrontIcon,
-    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
     children: [
       {
         name: "Dashboard",
         href: "/dashboard/pharmacy",
         icon: BuildingStorefrontIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
       },
       {
         name: "Register",
         href: "/dashboard/pharmacy/register",
         icon: BuildingStorefrontIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
       },
       {
         name: "Inventory",

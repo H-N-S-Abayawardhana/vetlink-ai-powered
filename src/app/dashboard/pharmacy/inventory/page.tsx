@@ -189,7 +189,9 @@ export default function PharmacyInventoryPage() {
   };
 
   return (
-    <AuthGuard allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER"]}>
+    <AuthGuard
+      allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"]}
+    >
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl">
