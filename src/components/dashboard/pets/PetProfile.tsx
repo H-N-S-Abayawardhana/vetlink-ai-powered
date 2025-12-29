@@ -44,6 +44,24 @@ export default function PetProfile({ pet }: PetProfileProps) {
     }
   };
 
+  const computedAgeLabel = () => {
+    if (pet.dateOfBirth) {
+      const dob = new Date(pet.dateOfBirth);
+      if (!isNaN(dob.getTime())) {
+        const today = new Date();
+        let years = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) years--;
+        if (years < 0) years = 0;
+        return `${years} ${years === 1 ? "year" : "years"}`;
+      }
+    }
+    if (pet.ageYears !== null && pet.ageYears !== undefined) {
+      return `${pet.ageYears} ${pet.ageYears === 1 ? "year" : "years"}`;
+    }
+    return "—";
+  };
+
   useEffect(() => {
     // Don't load records if pet ID is invalid
     if (!pet?.id) {
@@ -217,6 +235,35 @@ export default function PetProfile({ pet }: PetProfileProps) {
         </div>
       </div>
 
+      {/* At-a-glance Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="text-xs text-gray-500">Age</div>
+          <div className="mt-1 text-lg font-semibold text-gray-900">{computedAgeLabel()}</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="text-xs text-gray-500">Weight</div>
+          <div className="mt-1 text-lg font-semibold text-gray-900">
+            {pet.weightKg != null ? `${pet.weightKg} kg` : "—"}
+          </div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="text-xs text-gray-500">BCS</div>
+          <div className="mt-1 text-lg font-semibold text-gray-900">
+            {pet.bcs != null ? pet.bcs : "—"}
+          </div>
+          {pet.bcsCalculatedAt && (
+            <div className="text-[11px] text-gray-500">{formatDate(pet.bcsCalculatedAt)}</div>
+          )}
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="text-xs text-gray-500">Spayed/Neutered</div>
+          <div className="mt-1 text-lg font-semibold text-gray-900">
+            {pet.spayedNeutered == null ? "—" : pet.spayedNeutered ? "Yes" : "No"}
+          </div>
+        </div>
+      </div>
+
       {/* Profile Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
@@ -240,6 +287,12 @@ export default function PetProfile({ pet }: PetProfileProps) {
               <dd className="mt-1 text-sm text-gray-900">{pet.breed || "—"}</dd>
             </div>
             <div>
+              <dt className="text-sm font-medium text-gray-500">Date of Birth</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {pet.dateOfBirth ? formatDate(pet.dateOfBirth) : "—"}
+              </dd>
+            </div>
+            <div>
               <dt className="text-sm font-medium text-gray-500">Gender</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {pet.gender || "—"}
@@ -248,9 +301,7 @@ export default function PetProfile({ pet }: PetProfileProps) {
             <div>
               <dt className="text-sm font-medium text-gray-500">Age</dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {pet.ageYears !== null && pet.ageYears !== undefined
-                  ? `${pet.ageYears} ${pet.ageYears === 1 ? "year" : "years"}`
-                  : "—"}
+                {computedAgeLabel()}
               </dd>
             </div>
             <div>
@@ -290,6 +341,25 @@ export default function PetProfile({ pet }: PetProfileProps) {
                   </span>
                 )}
               </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Spayed/Neutered</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {pet.spayedNeutered == null
+                  ? "—"
+                  : pet.spayedNeutered
+                  ? "Yes"
+                  : "No"}
+                {pet.spayNeuterDate && (
+                  <span className="text-xs text-gray-500 ml-2">
+                    ({formatDate(pet.spayNeuterDate)})
+                  </span>
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Blood Type</dt>
+              <dd className="mt-1 text-sm text-gray-900">{pet.bloodType || "—"}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Allergies</dt>
@@ -333,6 +403,36 @@ export default function PetProfile({ pet }: PetProfileProps) {
           Additional Information
         </h2>
         <dl className="space-y-4">
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Microchip Number</dt>
+            <dd className="mt-1 text-sm text-gray-900">{pet.microchipNumber || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Microchip Implant Date</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {pet.microchipImplantDate ? formatDate(pet.microchipImplantDate) : "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Owner Phone</dt>
+            <dd className="mt-1 text-sm text-gray-900">{pet.ownerPhone || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Secondary Contact</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {pet.secondaryContactName || pet.secondaryContactPhone
+                ? `${pet.secondaryContactName || "—"} (${pet.secondaryContactPhone || "—"})`
+                : "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Vet Clinic</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {pet.vetClinicName || pet.vetClinicPhone
+                ? `${pet.vetClinicName || "—"}${pet.vetClinicPhone ? `, ${pet.vetClinicPhone}` : ""}`
+                : "—"}
+            </dd>
+          </div>
           <div>
             <dt className="text-sm font-medium text-gray-500">Created</dt>
             <dd className="mt-1 text-sm text-gray-900">

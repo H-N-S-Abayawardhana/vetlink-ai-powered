@@ -136,6 +136,17 @@ export async function POST(request: NextRequest) {
       preferredDiet,
       livingEnvironment,
       healthNotes,
+      microchipNumber,
+      microchipImplantDate,
+      spayedNeutered,
+      spayNeuterDate,
+      bloodType,
+      dateOfBirth,
+      ownerPhone,
+      secondaryContactName,
+      secondaryContactPhone,
+      vetClinicName,
+      vetClinicPhone,
       avatarDataUrl,
     } = body;
 
@@ -147,8 +158,19 @@ export async function POST(request: NextRequest) {
     // If owner_id column is UUID, PostgreSQL will handle the conversion
     // If owner_id is still BIGINT, you need to run the migration script first
     const result = await pool.query(
-      `INSERT INTO pets (owner_id, type, name, breed, weight_kg, activity_level, age_years, gender, allergies, preferred_diet, living_environment, health_notes, avatar_url, created_at, updated_at)
-       VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      `INSERT INTO pets (
+         owner_id, type, name, breed, weight_kg, activity_level, age_years, gender, allergies,
+         preferred_diet, living_environment, health_notes,
+         microchip_number, microchip_implant_date, spayed_neutered, spay_neuter_date, blood_type, date_of_birth,
+         owner_phone, secondary_contact_name, secondary_contact_phone, vet_clinic_name, vet_clinic_phone,
+         avatar_url, created_at, updated_at
+       )
+       VALUES (
+         $1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
+         $13,$14,$15,$16,$17,$18,
+         $19,$20,$21,$22,$23,
+         $24,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+       )
        RETURNING *`,
       [
         session.user.id,
@@ -167,6 +189,17 @@ export async function POST(request: NextRequest) {
         preferredDiet || null,
         livingEnvironment || null,
         healthNotes || null,
+        microchipNumber || null,
+        microchipImplantDate || null,
+        spayedNeutered ?? null,
+        spayNeuterDate || null,
+        bloodType || null,
+        dateOfBirth || null,
+        ownerPhone || null,
+        secondaryContactName || null,
+        secondaryContactPhone || null,
+        vetClinicName || null,
+        vetClinicPhone || null,
         avatarDataUrl || null,
       ],
     );

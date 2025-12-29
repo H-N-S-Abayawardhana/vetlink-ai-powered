@@ -33,6 +33,18 @@ export default function PetForm({ petId }: PetFormProps) {
     preferredDiet: "",
     livingEnvironment: "",
     healthNotes: "",
+    // New fields
+    microchipNumber: "",
+    microchipImplantDate: "",
+    spayedNeutered: null,
+    spayNeuterDate: "",
+    bloodType: "",
+    dateOfBirth: "",
+    ownerPhone: "",
+    secondaryContactName: "",
+    secondaryContactPhone: "",
+    vetClinicName: "",
+    vetClinicPhone: "",
     avatarDataUrl: null,
   });
 
@@ -52,6 +64,25 @@ export default function PetForm({ petId }: PetFormProps) {
       })();
     }
   }, [petId]);
+
+  // Derive ageYears from dateOfBirth when DOB is provided
+  useEffect(() => {
+    if (form.dateOfBirth) {
+      const dob = new Date(form.dateOfBirth);
+      if (!isNaN(dob.getTime())) {
+        const today = new Date();
+        let years = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+          years--;
+        }
+        const normalized = years < 0 ? 0 : years;
+        if (form.ageYears !== normalized) {
+          setForm((prev) => ({ ...prev, ageYears: normalized }));
+        }
+      }
+    }
+  }, [form.dateOfBirth]);
 
   const handleChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -83,13 +114,16 @@ export default function PetForm({ petId }: PetFormProps) {
     else if (!breedPattern.test(String(form.breed)))
       e.breed = "Breed may only contain letters, spaces and hyphens";
 
-    // Age required and range
-    if (form.ageYears === null || form.ageYears === undefined) {
-      e.ageYears = "Age is required";
-    } else if (Number(form.ageYears) < 0) {
-      e.ageYears = "Age must be 0 or greater";
-    } else if (Number(form.ageYears) > 30) {
-      e.ageYears = "Age must be 30 years or less";
+    // Age/DOB requirement and range
+    if ((form.ageYears === null || form.ageYears === undefined) && !form.dateOfBirth) {
+      e.ageYears = "Provide age or date of birth";
+    }
+    if (form.ageYears !== null && form.ageYears !== undefined) {
+      if (Number(form.ageYears) < 0) {
+        e.ageYears = "Age must be 0 or greater";
+      } else if (Number(form.ageYears) > 30) {
+        e.ageYears = "Age must be 30 years or less";
+      }
     }
 
     // Weight required and range
@@ -139,6 +173,27 @@ export default function PetForm({ petId }: PetFormProps) {
       }
     }
 
+    // Optional: validate new fields if provided
+    const phonePattern = /^[0-9+()\-\s]{6,20}$/;
+    if (form.ownerPhone && !phonePattern.test(form.ownerPhone)) {
+      e.ownerPhone = "Invalid phone number format";
+    }
+    if (
+      form.secondaryContactPhone &&
+      !phonePattern.test(form.secondaryContactPhone)
+    ) {
+      e.secondaryContactPhone = "Invalid phone number format";
+    }
+    const bloodPattern = /^[A-Za-z0-9+\- ]{1,10}$/;
+    if (form.bloodType && !bloodPattern.test(form.bloodType)) {
+      e.bloodType = "Invalid blood type";
+    }
+
+    // If spay/neuter date present, require spayedNeutered selection
+    if (form.spayNeuterDate && form.spayedNeutered == null) {
+      e.spayedNeutered = "Select spayed/neutered status";
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -182,7 +237,7 @@ export default function PetForm({ petId }: PetFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="sm:col-span-1">
           <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -197,7 +252,12 @@ export default function PetForm({ petId }: PetFormProps) {
           )}
         </div>
 
-        <div className="sm:col-span-2 space-y-4">
+        <div className="sm:col-span-2 space-y-6">
+          {/* Section: Basic Information */}
+          <div>
+            <div className="mb-3">
+              <h3 className="text-base font-semibold text-gray-900">Basic Information</h3>
+            </div>
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Name
@@ -212,8 +272,22 @@ export default function PetForm({ petId }: PetFormProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Type
+                </label>
+                <select
+                  value={form.type || "dog"}
+                  onChange={(e) => handleChange("type", e.target.value)}
+                  className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="dog">Dog</option>
+                  <option value="cat">Cat</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Breed
               </label>
@@ -225,8 +299,8 @@ export default function PetForm({ petId }: PetFormProps) {
               {errors.breed && (
                 <p className="mt-1 text-sm text-red-600">{errors.breed}</p>
               )}
-            </div>
-            <div>
+              </div>
+              <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Weight (kg)
               </label>
@@ -246,8 +320,11 @@ export default function PetForm({ petId }: PetFormProps) {
               {errors.weightKg && (
                 <p className="mt-1 text-sm text-red-600">{errors.weightKg}</p>
               )}
+              </div>
             </div>
-            <div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+              <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Activity Level
               </label>
@@ -266,48 +343,148 @@ export default function PetForm({ petId }: PetFormProps) {
                   {errors.activityLevel}
                 </p>
               )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Age (years){form.dateOfBirth ? " (calculated from DOB)" : ""}
+                </label>
+                <input
+                  value={form.ageYears ?? ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "ageYears",
+                      e.target.value ? Number(e.target.value) : null,
+                    )
+                  }
+                  type="number"
+                  min="0"
+                  disabled={!!form.dateOfBirth}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.ageYears ? "border-red-500" : ""}`}
+                />
+                {errors.ageYears && (
+                  <p className="mt-1 text-sm text-red-600">{errors.ageYears}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Gender
+                </label>
+                <select
+                  value={form.gender || ""}
+                  onChange={(e) => handleChange("gender", e.target.value)}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.gender ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select gender</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+                {errors.gender && (
+                  <p className="mt-1 text-sm text-red-600">{errors.gender}</p>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Section: Dates & Reproductive Status */}
+          <div className="pt-6 border-t border-gray-200">
+            <div className="mb-3">
+              <h3 className="text-base font-semibold text-gray-900">Dates & Reproductive Status</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Age (years)
+                Date of Birth
               </label>
               <input
-                value={form.ageYears ?? ""}
-                onChange={(e) =>
-                  handleChange(
-                    "ageYears",
-                    e.target.value ? Number(e.target.value) : null,
-                  )
-                }
-                type="number"
-                min="0"
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.ageYears ? "border-red-500" : ""}`}
+                value={form.dateOfBirth || ""}
+                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                type="date"
+                className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
-              {errors.ageYears && (
-                <p className="mt-1 text-sm text-red-600">{errors.ageYears}</p>
-              )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Gender
+                Spayed/Neutered
               </label>
               <select
-                value={form.gender || ""}
-                onChange={(e) => handleChange("gender", e.target.value)}
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.gender ? "border-red-500" : ""}`}
+                value={
+                  form.spayedNeutered == null
+                    ? ""
+                    : form.spayedNeutered
+                    ? "yes"
+                    : "no"
+                }
+                onChange={(e) =>
+                  handleChange(
+                    "spayedNeutered",
+                    e.target.value === "" ? null : e.target.value === "yes",
+                  )
+                }
+                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.spayedNeutered ? "border-red-500" : ""}`}
               >
-                <option value="">Select gender</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
+                <option value="">Select status</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
               </select>
-              {errors.gender && (
-                <p className="mt-1 text-sm text-red-600">{errors.gender}</p>
+              {errors.spayedNeutered && (
+                <p className="mt-1 text-sm text-red-600">{errors.spayedNeutered}</p>
               )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Spay/Neuter Date
+              </label>
+              <input
+                value={form.spayNeuterDate || ""}
+                onChange={(e) => handleChange("spayNeuterDate", e.target.value)}
+                type="date"
+                className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            </div>
+          </div>
+
+          {/* Section: Identification */}
+          <div className="pt-6 border-t border-gray-200">
+            <div className="mb-3">
+              <h3 className="text-base font-semibold text-gray-900">Identification</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Microchip Number
+              </label>
+              <input
+                value={form.microchipNumber || ""}
+                onChange={(e) => handleChange("microchipNumber", e.target.value)}
+                className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Microchip Implant Date
+              </label>
+              <input
+                value={form.microchipImplantDate || ""}
+                onChange={(e) => handleChange("microchipImplantDate", e.target.value)}
+                type="date"
+                className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Blood Type
+              </label>
+              <input
+                value={form.bloodType || ""}
+                onChange={(e) => handleChange("bloodType", e.target.value)}
+                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.bloodType ? "border-red-500" : ""}`}
+              />
+              {errors.bloodType && (
+                <p className="mt-1 text-sm text-red-600">{errors.bloodType}</p>
+              )}
+            </div>
             </div>
           </div>
 
@@ -354,25 +531,161 @@ export default function PetForm({ petId }: PetFormProps) {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Living Environment
-            </label>
-            <select
-              value={form.livingEnvironment || ""}
-              onChange={(e) => handleChange("livingEnvironment", e.target.value)}
-              className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.livingEnvironment ? "border-red-500" : ""}`}
-            >
-              <option value="">Select environment</option>
-              <option value="Urban">Urban</option>
-              <option value="Suburban">Suburban</option>
-              <option value="Rural">Rural</option>
-            </select>
-            {errors.livingEnvironment && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.livingEnvironment}
-              </p>
-            )}
+          {/* Section: Diet & Environment */}
+          <div className="pt-6 border-t border-gray-200">
+            <div className="mb-3">
+              <h3 className="text-base font-semibold text-gray-900">Diet & Environment</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-1">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Living Environment
+                </label>
+                <select
+                  value={form.livingEnvironment || ""}
+                  onChange={(e) => handleChange("livingEnvironment", e.target.value)}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.livingEnvironment ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select environment</option>
+                  <option value="Urban">Urban</option>
+                  <option value="Suburban">Suburban</option>
+                  <option value="Rural">Rural</option>
+                </select>
+                {errors.livingEnvironment && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.livingEnvironment}
+                  </p>
+                )}
+              </div>
+              <div className="sm:col-span-1">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Preferred Diet
+                </label>
+                <select
+                  value={form.preferredDiet || ""}
+                  onChange={(e) => handleChange("preferredDiet", e.target.value)}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.preferredDiet ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select diet type</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="Homemade">Homemade</option>
+                  <option value="Mixed">Mixed</option>
+                </select>
+                {errors.preferredDiet && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.preferredDiet}
+                  </p>
+                )}
+              </div>
+              <div className="sm:col-span-1">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Allergies (comma separated)
+                </label>
+                <input
+                  value={(form.allergies || []).join(", ")}
+                  onChange={(e) =>
+                    handleChange(
+                      "allergies",
+                      e.target.value
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    )
+                  }
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.allergies ? "border-red-500" : ""}`}
+                />
+                {errors.allergies && (
+                  <p className="mt-1 text-sm text-red-600">{errors.allergies}</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Health Notes
+              </label>
+              <textarea
+                value={form.healthNotes || ""}
+                onChange={(e) => handleChange("healthNotes", e.target.value)}
+                rows={4}
+                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.healthNotes ? "border-red-500" : ""}`}
+              />
+              {errors.healthNotes && (
+                <p className="mt-1 text-sm text-red-600">{errors.healthNotes}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Section: Emergency & Vet Contacts */}
+          <div className="pt-6 border-t border-gray-200">
+            <div className="mb-3">
+              <h3 className="text-base font-semibold text-gray-900">Emergency & Vet Contacts</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Owner Phone
+                </label>
+                <input
+                  value={form.ownerPhone || ""}
+                  onChange={(e) => handleChange("ownerPhone", e.target.value)}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.ownerPhone ? "border-red-500" : ""}`}
+                />
+                {errors.ownerPhone && (
+                  <p className="mt-1 text-sm text-red-600">{errors.ownerPhone}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Secondary Contact Name
+                </label>
+                <input
+                  value={form.secondaryContactName || ""}
+                  onChange={(e) =>
+                    handleChange("secondaryContactName", e.target.value)
+                  }
+                  className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Secondary Contact Phone
+                </label>
+                <input
+                  value={form.secondaryContactPhone || ""}
+                  onChange={(e) =>
+                    handleChange("secondaryContactPhone", e.target.value)
+                  }
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.secondaryContactPhone ? "border-red-500" : ""}`}
+                />
+                {errors.secondaryContactPhone && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.secondaryContactPhone}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Vet Clinic Name
+                </label>
+                <input
+                  value={form.vetClinicName || ""}
+                  onChange={(e) => handleChange("vetClinicName", e.target.value)}
+                  className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Vet Clinic Phone
+                </label>
+                <input
+                  value={form.vetClinicPhone || ""}
+                  onChange={(e) => handleChange("vetClinicPhone", e.target.value)}
+                  className="block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
           </div>
 
           <div>
