@@ -23,7 +23,6 @@ export default function PetForm({ petId }: PetFormProps) {
   const [showSpayedTooltip, setShowSpayedTooltip] = useState(false);
 
   const [form, setForm] = useState<Partial<Pet>>({
-    type: "dog",
     name: "",
     breed: "",
     weightKg: null,

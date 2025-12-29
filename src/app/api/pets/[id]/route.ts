@@ -76,7 +76,6 @@ export async function PUT(
     }
 
     const {
-      type,
       name,
       breed,
       weightKg,
@@ -104,14 +103,13 @@ export async function PUT(
     } = body;
     const updateResult = await pool.query(
       `UPDATE pets SET
-         type=$1, name=$2, breed=$3, weight_kg=$4, bcs=$5, bcs_calculated_at=$6, activity_level=$7, age_years=$8, gender=$9,
-         allergies=$10, preferred_diet=$11, living_environment=$12, health_notes=$13,
-         microchip_number=$14, microchip_implant_date=$15, spayed_neutered=$16, spay_neuter_date=$17, blood_type=$18, date_of_birth=$19,
-         owner_phone=$20, secondary_contact_name=$21, secondary_contact_phone=$22, vet_clinic_name=$23, vet_clinic_phone=$24,
-         avatar_url=$25, updated_at=CURRENT_TIMESTAMP
-       WHERE id=$26 RETURNING *`,
+         name=$1, breed=$2, weight_kg=$3, bcs=$4, bcs_calculated_at=$5, activity_level=$6, age_years=$7, gender=$8,
+         allergies=$9, preferred_diet=$10, living_environment=$11, health_notes=$12,
+         microchip_number=$13, microchip_implant_date=$14, spayed_neutered=$15, spay_neuter_date=$16, blood_type=$17, date_of_birth=$18,
+         owner_phone=$19, secondary_contact_name=$20, secondary_contact_phone=$21, vet_clinic_name=$22, vet_clinic_phone=$23,
+         avatar_url=$24, updated_at=CURRENT_TIMESTAMP
+       WHERE id=$25 RETURNING *`,
       [
-        type || petRow.type,
         name || petRow.name,
         breed || petRow.breed,
         weightKg ?? petRow.weight_kg,

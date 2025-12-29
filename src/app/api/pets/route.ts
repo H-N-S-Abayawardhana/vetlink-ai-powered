@@ -14,27 +14,7 @@ export async function GET(request: NextRequest) {
     }
     const userRole = ((session.user as any)?.userRole as UserRole) || "USER";
 
-    // Support optional filtering by type via query param (e.g. ?type=dog)
-    const url = new URL(request.url);
-    const typeFilter = url.searchParams.get("type");
-
     if (userRole === "SUPER_ADMIN") {
-      if (typeFilter) {
-        const result = await pool.query(
-          `SELECT p.*, u.username AS owner_username, u.email AS owner_email
-           FROM pets p
-           LEFT JOIN users u ON u.id::text = p.owner_id::text
-           WHERE p.type = $1
-           ORDER BY p.created_at DESC`,
-          [typeFilter],
-        );
-        const pets = result.rows.map((row) => ({
-          ...mapRowToPet(row),
-          ownerUsername: row.owner_username ?? null,
-          ownerEmail: row.owner_email ?? null,
-        }));
-        return NextResponse.json({ pets });
-      }
       const result = await pool.query(
         `SELECT p.*, u.username AS owner_username, u.email AS owner_email
          FROM pets p
@@ -50,22 +30,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (userRole === "VETERINARIAN") {
-      if (typeFilter) {
-        const result = await pool.query(
-          `SELECT p.*, u.username AS owner_username, u.email AS owner_email
-           FROM pets p
-           LEFT JOIN users u ON u.id::text = p.owner_id::text
-           WHERE p.type = $1
-           ORDER BY p.created_at DESC`,
-          [typeFilter],
-        );
-        const pets = result.rows.map((row) => ({
-          ...mapRowToPet(row),
-          ownerUsername: row.owner_username ?? null,
-          ownerEmail: row.owner_email ?? null,
-        }));
-        return NextResponse.json({ pets });
-      }
       const result = await pool.query(
         `SELECT p.*, u.username AS owner_username, u.email AS owner_email
          FROM pets p
@@ -80,17 +44,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ pets });
     }
 
-    // Regular users: only their pets (optionally filter by type)
+    // Regular users: only their pets
     // Cast owner_id to text to match UUID string from session
-    if (typeFilter) {
-      const result = await pool.query(
-        "SELECT * FROM pets WHERE owner_id::text = $1 AND type = $2 ORDER BY created_at DESC",
-        [session.user.id, typeFilter],
-      );
-      const pets = result.rows.map(mapRowToPet);
-      return NextResponse.json({ pets });
-    }
-
     const result = await pool.query(
       "SELECT * FROM pets WHERE owner_id::text = $1 ORDER BY created_at DESC",
       [session.user.id],
@@ -125,7 +80,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      type,
       name,
       breed,
       weightKg,
@@ -159,22 +113,21 @@ export async function POST(request: NextRequest) {
     // If owner_id is still BIGINT, you need to run the migration script first
     const result = await pool.query(
       `INSERT INTO pets (
-         owner_id, type, name, breed, weight_kg, activity_level, age_years, gender, allergies,
+         owner_id, name, breed, weight_kg, activity_level, age_years, gender, allergies,
          preferred_diet, living_environment, health_notes,
          microchip_number, microchip_implant_date, spayed_neutered, spay_neuter_date, blood_type, date_of_birth,
          owner_phone, secondary_contact_name, secondary_contact_phone, vet_clinic_name, vet_clinic_phone,
          avatar_url, created_at, updated_at
        )
        VALUES (
-         $1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
-         $13,$14,$15,$16,$17,$18,
-         $19,$20,$21,$22,$23,
-         $24,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+         $1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+         $12,$13,$14,$15,$16,$17,
+         $18,$19,$20,$21,$22,
+         $23,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
        )
        RETURNING *`,
       [
         session.user.id,
-        type || "dog",
         name,
         breed || null,
         weightKg ?? null,

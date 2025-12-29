@@ -225,12 +225,7 @@ export default function PetProfile({ pet }: PetProfileProps) {
 
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{pet.name}</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {pet.type
-                ? pet.type.charAt(0).toUpperCase() + pet.type.slice(1)
-                : "Pet"}{" "}
-              Profile
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Pet Profile</p>
           </div>
         </div>
       </div>

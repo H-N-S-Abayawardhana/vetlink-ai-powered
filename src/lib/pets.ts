@@ -12,7 +12,6 @@ export interface Pet {
   ownerId?: string | null; // Owner's user ID
   ownerUsername?: string | null; // Present for SUPER_ADMIN list views
   ownerEmail?: string | null; // Present for SUPER_ADMIN list views
-  type: "dog" | "cat" | "other";
   name: string;
   breed?: string;
   weightKg?: number | null;
