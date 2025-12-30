@@ -113,6 +113,7 @@ const HealthInfoForm = ({
   onSubmit,
   onCancel,
   limpingResult,
+  selectedPet,
 }: {
   onSubmit: (formData: HealthFormData) => void;
   onCancel: () => void;
@@ -123,10 +124,19 @@ const HealthInfoForm = ({
     SI_back?: number;
     SI_overall?: number;
   } | null;
+  selectedPet?: Pet | null;
 }) => {
+  // Helper function to calculate weight category from weight in kg
+  const calculateWeightCategory = (weightKg: number | null | undefined): string => {
+    if (weightKg == null) return "";
+    if (weightKg < 10) return "Light";
+    if (weightKg <= 25) return "Medium";
+    return "Heavy";
+  };
+
   const [formData, setFormData] = useState<HealthFormData>({
-    age_years: "",
-    weight_category: "",
+    age_years: selectedPet?.ageYears != null ? String(selectedPet.ageYears) : "",
+    weight_category: calculateWeightCategory(selectedPet?.weightKg),
     limping_detected: "",
     pain_while_walking: "",
     difficulty_standing: "",
@@ -142,6 +152,17 @@ const HealthInfoForm = ({
       }));
     }
   }, [limpingResult]);
+
+  // Auto-fill form when selectedPet changes
+  React.useEffect(() => {
+    if (selectedPet) {
+      setFormData((prev) => ({
+        ...prev,
+        age_years: selectedPet.ageYears != null ? String(selectedPet.ageYears) : prev.age_years,
+        weight_category: calculateWeightCategory(selectedPet.weightKg) || prev.weight_category,
+      }));
+    }
+  }, [selectedPet]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -161,9 +182,19 @@ const HealthInfoForm = ({
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                 Dog Health Information
+                {selectedPet && (
+                  <span className="text-base sm:text-lg font-normal text-gray-600 ml-2">
+                    - {selectedPet.name}
+                  </span>
+                )}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 Required information for disease prediction
+                {selectedPet && (
+                  <span className="block mt-1 text-xs text-gray-500">
+                    Pet information auto-filled from database
+                  </span>
+                )}
               </p>
             </div>
             <button
@@ -241,7 +272,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  Yes (1)
+                  Yes
                 </button>
                 <button
                   type="button"
@@ -254,7 +285,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  No (0)
+                  No
                 </button>
               </div>
             </div>
@@ -275,7 +306,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  Yes (1)
+                  Yes
                 </button>
                 <button
                   type="button"
@@ -288,7 +319,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  No (0)
+                  No
                 </button>
               </div>
             </div>
@@ -309,7 +340,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  Yes (1)
+                  Yes
                 </button>
                 <button
                   type="button"
@@ -322,7 +353,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  No (0)
+                  No
                 </button>
               </div>
             </div>
@@ -343,7 +374,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  Yes (1)
+                  Yes
                 </button>
                 <button
                   type="button"
@@ -356,7 +387,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  No (0)
+                  No
                 </button>
               </div>
             </div>
@@ -377,7 +408,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  Yes (1)
+                  Yes
                 </button>
                 <button
                   type="button"
@@ -390,7 +421,7 @@ const HealthInfoForm = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  No (0)
+                  No
                 </button>
               </div>
             </div>
@@ -1027,6 +1058,7 @@ export default function LimpingAnalysis({
           onSubmit={handleHealthFormSubmit}
           onCancel={() => setShowHealthForm(false)}
           limpingResult={limpingResult}
+          selectedPet={selectedPet}
         />
       )}
     </div>
