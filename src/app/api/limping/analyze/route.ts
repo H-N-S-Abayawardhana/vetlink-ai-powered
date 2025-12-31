@@ -50,14 +50,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
+    // ✅ FIXED: Use correct field names matching the updated interface
     return NextResponse.json({
       success: true,
       result: {
-        class: result.class,
+        prediction: result.prediction,
         confidence: result.confidence,
-        SI_front: result.SI_front,
-        SI_back: result.SI_back,
-        SI_overall: result.SI_overall,
+        symmetry_indices: result.symmetry_indices,
+        leg_status: result.leg_status,
+        stride_measurements: result.stride_measurements,
+        frames_analyzed: result.frames_analyzed,
       },
     });
   } catch (error) {
