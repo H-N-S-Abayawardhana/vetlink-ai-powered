@@ -164,9 +164,9 @@ export class MultiDiseaseApiService {
   private static mapDietType(dietType: string): string {
     // API accepts: Commercial, Homemade, Mixed
     const dietMap: Record<string, string> = {
-      'Commercial': 'Commercial',
-      'Homemade': 'Homemade',
-      'Mixed': 'Mixed',
+      Commercial: "Commercial",
+      Homemade: "Homemade",
+      Mixed: "Mixed",
     };
     return dietMap[dietType] || "Commercial";
   }

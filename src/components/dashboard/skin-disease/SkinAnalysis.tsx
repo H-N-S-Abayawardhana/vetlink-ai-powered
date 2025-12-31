@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, ReactElement } from "react";
 import MLApiService, {
   PredictionResult,
   parseDiseaseName,
@@ -9,6 +9,9 @@ import type { Pet } from "@/lib/pets";
 import { createSkinDiseaseRecord } from "@/lib/skin-disease-records";
 import ImageUpload from "./ImageUpload";
 import CameraCapture from "./CameraCapture";
+import AIGuidanceCards, { AIGuidanceCardsRef } from "./AIGuidanceCards";
+import HealthySkinCard, { HealthySkinCardRef } from "./HealthySkinCard";
+import jsPDF from "jspdf";
 
 interface SkinAnalysisProps {
   selectedPet?: Pet | null;
@@ -39,11 +42,27 @@ export default function SkinAnalysis({
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const guidanceCardsRef = useRef<AIGuidanceCardsRef | null>(null);
+  const healthySkinCardRef = useRef<HealthySkinCardRef | null>(null);
+  const detectionResultsRef = useRef<HTMLDivElement | null>(null);
 
   // Check API health on component mount
   useEffect(() => {
     checkApiHealth();
   }, []);
+
+  // Auto-scroll to Detection Results when prediction is available
+  useEffect(() => {
+    if (prediction && detectionResultsRef.current) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        detectionResultsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    }
+  }, [prediction]);
 
   const checkApiHealth = async () => {
     setApiStatus("checking");
@@ -77,14 +96,16 @@ export default function SkinAnalysis({
     try {
       const result = await MLApiService.predictFromFile(file);
       setPrediction(result);
+      // Stop loading as soon as we have the prediction
+      setLoading(false);
 
       // If backend says image is invalid / not in-distribution, stop here.
       if (result.valid === false) {
-        setLoading(false);
         return;
       }
 
       // Save scan record to pet history (best-effort) when a pet is selected
+      // This happens in the background after prediction is shown
       if (selectedPet?.id && result.prediction) {
         setSaveStatus("saving");
         try {
@@ -104,14 +125,13 @@ export default function SkinAnalysis({
         }
       }
     } catch (err) {
+      setLoading(false);
       setError(
         err instanceof Error
           ? err.message
           : "Failed to analyze image. Please try again or check your internet connection.",
       );
       console.error("Prediction error:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -133,14 +153,16 @@ export default function SkinAnalysis({
     try {
       const result = await MLApiService.predictFromFile(file);
       setPrediction(result);
+      // Stop loading as soon as we have the prediction
+      setLoading(false);
 
       // If backend says image is invalid / not in-distribution, stop here.
       if (result.valid === false) {
-        setLoading(false);
         return;
       }
 
       // Save scan record to pet history (best-effort) when a pet is selected
+      // This happens in the background after prediction is shown
       if (selectedPet?.id && result.prediction) {
         setSaveStatus("saving");
         try {
@@ -160,14 +182,13 @@ export default function SkinAnalysis({
         }
       }
     } catch (err) {
+      setLoading(false);
       setError(
         err instanceof Error
           ? err.message
           : "Failed to analyze image. Please try again or check your internet connection.",
       );
       console.error("Prediction error:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -178,6 +199,526 @@ export default function SkinAnalysis({
     setLoading(false);
     setSaveStatus("idle");
     setSaveError(null);
+  };
+
+  const generatePDFReport = async () => {
+    if (!prediction?.prediction || !selectedImage) return;
+
+    try {
+      const doc = new jsPDF();
+      let yPos = 20;
+
+      // Add logo and header
+      try {
+        const logoResponse = await fetch("/vetlink_logo.png", {
+          cache: "no-cache",
+        });
+        if (logoResponse.ok) {
+          const logoBlob = await logoResponse.blob();
+          const logoUrl = URL.createObjectURL(logoBlob);
+          const img = new Image();
+          img.src = logoUrl;
+          await new Promise((resolve) => {
+            img.onload = () => {
+              doc.addImage(img, "PNG", 14, yPos, 30, 10);
+              resolve(null);
+            };
+            img.onerror = () => resolve(null);
+          });
+          URL.revokeObjectURL(logoUrl);
+        }
+      } catch (e) {
+        console.error("Error loading logo:", e);
+      }
+
+      // Company name
+      doc.setFontSize(18);
+      doc.setTextColor(37, 99, 235); // Blue color
+      doc.text("VETLINK - Smart Pet Health Care", 50, yPos + 6);
+      yPos += 20;
+
+      // Title
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Skin Disease Detection Report", 14, yPos);
+      yPos += 10;
+
+      // Scan date and time
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      const scanDate = new Date().toLocaleString();
+      doc.text(`Scan Date & Time: ${scanDate}`, 14, yPos);
+      yPos += 8;
+
+      // Pet details (if available)
+      if (selectedPet) {
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text("Pet Details:", 14, yPos);
+        yPos += 6;
+        doc.setFontSize(10);
+        doc.text(`Name: ${selectedPet.name}`, 20, yPos);
+        yPos += 5;
+        if (selectedPet.breed) {
+          doc.text(`Breed: ${selectedPet.breed}`, 20, yPos);
+          yPos += 5;
+        }
+        if (selectedPet.ageYears != null) {
+          doc.text(
+            `Age: ${selectedPet.ageYears} ${selectedPet.ageYears === 1 ? "year" : "years"}`,
+            20,
+            yPos,
+          );
+          yPos += 5;
+        }
+        yPos += 3;
+      }
+
+      // Detection Results
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Detection Results:", 14, yPos);
+      yPos += 6;
+
+      doc.setFontSize(11);
+      doc.setTextColor(37, 99, 235); // Blue
+      const diseaseName =
+        prediction.prediction.parsed?.disease ||
+        formatDiseaseName(prediction.prediction.disease);
+      doc.text(`Detected Condition: ${diseaseName}`, 20, yPos);
+      yPos += 6;
+
+      // Severity
+      if (prediction.prediction.parsed?.severity) {
+        const severity = prediction.prediction.parsed.severity;
+        const isSevere = severity === "severe";
+        if (isSevere) {
+          doc.setTextColor(220, 38, 38); // Red
+        } else {
+          doc.setTextColor(202, 138, 4); // Yellow
+        }
+        doc.text(
+          `Severity Level: ${severity.charAt(0).toUpperCase() + severity.slice(1)}`,
+          20,
+          yPos,
+        );
+        yPos += 6;
+      }
+
+      // Confidence
+      doc.setTextColor(0, 0, 0);
+      doc.text(
+        `Confidence Level: ${(prediction.prediction.confidence * 100).toFixed(1)}%`,
+        20,
+        yPos,
+      );
+      yPos += 10;
+
+      // Affected Image
+      if (selectedImage) {
+        try {
+          const img = new Image();
+          img.src = selectedImage;
+          await new Promise((resolve) => {
+            img.onload = () => {
+              const imgWidth = 80;
+              const imgHeight = (img.height * imgWidth) / img.width;
+              if (yPos + imgHeight > 250) {
+                doc.addPage();
+                yPos = 20;
+              }
+              doc.setFontSize(10);
+              doc.setTextColor(0, 0, 0);
+              doc.text("Affected Image:", 14, yPos);
+              yPos += 5;
+              doc.addImage(img, "JPEG", 14, yPos, imgWidth, imgHeight);
+              yPos += imgHeight + 10;
+              resolve(null);
+            };
+            img.onerror = () => resolve(null);
+          });
+        } catch (e) {
+          console.error("Error adding image:", e);
+        }
+      }
+
+      // AI Health Assistant (if used)
+      if (guidanceCardsRef.current) {
+        const cardContents = guidanceCardsRef.current.getCardContents();
+        const hasGuidance = Object.values(cardContents).some(
+          (content) => content.fullText,
+        );
+
+        if (hasGuidance) {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          doc.setFontSize(12);
+          doc.setTextColor(0, 0, 0);
+          doc.text("AI Health Assistant:", 14, yPos);
+          yPos += 8;
+
+          doc.setFontSize(10);
+          const cardTitles: Record<string, string> = {
+            disease_info: "What is this disease?",
+            stage_meaning: `What does ${prediction.prediction.parsed?.severity || "Mild"} mean?`,
+            care_tips: "Basic care tips",
+          };
+
+          Object.entries(cardContents).forEach(([cardType, content]) => {
+            if (content.fullText) {
+              if (yPos > 250) {
+                doc.addPage();
+                yPos = 20;
+              }
+
+              doc.setFontSize(11);
+              doc.setTextColor(37, 99, 235);
+              doc.text(cardTitles[cardType] || cardType, 20, yPos);
+              yPos += 6;
+
+              doc.setFontSize(9);
+              doc.setTextColor(0, 0, 0);
+              const lines = doc.splitTextToSize(content.fullText, 180);
+              lines.forEach((line: string) => {
+                if (yPos > 280) {
+                  doc.addPage();
+                  yPos = 20;
+                }
+                doc.text(line, 20, yPos);
+                yPos += 5;
+              });
+              yPos += 3;
+            }
+          });
+        }
+      }
+
+      // Healthy Skin Care Card (if used)
+      if (healthySkinCardRef.current) {
+        const healthyContent = healthySkinCardRef.current.getContent();
+        if (healthyContent.fullText) {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          doc.setFontSize(12);
+          doc.setTextColor(0, 0, 0);
+          doc.text("AI Health Assistant:", 14, yPos);
+          yPos += 8;
+
+          doc.setFontSize(11);
+          doc.setTextColor(37, 99, 235);
+          doc.text("How to Keep Your Dog's Skin Healthy", 20, yPos);
+          yPos += 6;
+
+          doc.setFontSize(9);
+          doc.setTextColor(0, 0, 0);
+          const lines = doc.splitTextToSize(healthyContent.fullText, 180);
+          lines.forEach((line: string) => {
+            if (yPos > 280) {
+              doc.addPage();
+              yPos = 20;
+            }
+            doc.text(line, 20, yPos);
+            yPos += 5;
+          });
+          yPos += 3;
+        }
+      }
+
+      // Footer
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: "center" });
+      }
+
+      // Save PDF
+      const fileName = `Skin_Disease_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate report. Please try again.");
+    }
+  };
+
+  // Function to render markdown-like text with proper formatting
+  const renderFormattedText = (text: string) => {
+    if (!text) return null;
+
+    const lines = text.split("\n");
+    const elements: ReactElement[] = [];
+    let inList = false;
+    let listItems: string[] = [];
+    let listType: "ul" | "ol" = "ul";
+
+    lines.forEach((line, index) => {
+      const trimmed = line.trim();
+
+      // Headers
+      if (trimmed.startsWith("### ")) {
+        if (inList) {
+          elements.push(
+            <ul
+              key={`list-${index}`}
+              className="list-disc list-inside mb-4 space-y-1"
+            >
+              {listItems.map((item, i) => (
+                <li key={i} className="text-gray-700">
+                  {item}
+                </li>
+              ))}
+            </ul>,
+          );
+          listItems = [];
+          inList = false;
+        }
+        elements.push(
+          <h3 key={index} className="text-lg font-bold text-gray-900 mt-6 mb-3">
+            {trimmed.substring(4)}
+          </h3>,
+        );
+      } else if (trimmed.startsWith("## ")) {
+        if (inList) {
+          elements.push(
+            <ul
+              key={`list-${index}`}
+              className="list-disc list-inside mb-4 space-y-1"
+            >
+              {listItems.map((item, i) => (
+                <li key={i} className="text-gray-700">
+                  {item}
+                </li>
+              ))}
+            </ul>,
+          );
+          listItems = [];
+          inList = false;
+        }
+        elements.push(
+          <h2 key={index} className="text-xl font-bold text-gray-900 mt-6 mb-4">
+            {trimmed.substring(3)}
+          </h2>,
+        );
+      } else if (trimmed.startsWith("# ")) {
+        if (inList) {
+          elements.push(
+            <ul
+              key={`list-${index}`}
+              className="list-disc list-inside mb-4 space-y-1"
+            >
+              {listItems.map((item, i) => (
+                <li key={i} className="text-gray-700">
+                  {item}
+                </li>
+              ))}
+            </ul>,
+          );
+          listItems = [];
+          inList = false;
+        }
+        elements.push(
+          <h1
+            key={index}
+            className="text-2xl font-bold text-gray-900 mt-6 mb-4"
+          >
+            {trimmed.substring(2)}
+          </h1>,
+        );
+      }
+      // Lists
+      else if (trimmed.match(/^[-*]\s/)) {
+        if (!inList) {
+          inList = true;
+          listType = "ul";
+        }
+        listItems.push(trimmed.substring(2));
+      } else if (trimmed.match(/^\d+\.\s/)) {
+        if (!inList) {
+          inList = true;
+          listType = "ol";
+        }
+        listItems.push(trimmed.replace(/^\d+\.\s/, ""));
+      }
+      // Empty line
+      else if (trimmed === "") {
+        if (inList) {
+          elements.push(
+            listType === "ul" ? (
+              <ul
+                key={`list-${index}`}
+                className="list-disc list-inside mb-4 space-y-1"
+              >
+                {listItems.map((item, i) => (
+                  <li key={i} className="text-gray-700">
+                    {formatInlineMarkdown(item)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ol
+                key={`list-${index}`}
+                className="list-decimal list-inside mb-4 space-y-1"
+              >
+                {listItems.map((item, i) => (
+                  <li key={i} className="text-gray-700">
+                    {formatInlineMarkdown(item)}
+                  </li>
+                ))}
+              </ol>
+            ),
+          );
+          listItems = [];
+          inList = false;
+        }
+        elements.push(<br key={index} />);
+      }
+      // Regular paragraph
+      else {
+        if (inList) {
+          elements.push(
+            listType === "ul" ? (
+              <ul
+                key={`list-${index}`}
+                className="list-disc list-inside mb-4 space-y-1"
+              >
+                {listItems.map((item, i) => (
+                  <li key={i} className="text-gray-700">
+                    {formatInlineMarkdown(item)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ol
+                key={`list-${index}`}
+                className="list-decimal list-inside mb-4 space-y-1"
+              >
+                {listItems.map((item, i) => (
+                  <li key={i} className="text-gray-700">
+                    {formatInlineMarkdown(item)}
+                  </li>
+                ))}
+              </ol>
+            ),
+          );
+          listItems = [];
+          inList = false;
+        }
+        elements.push(
+          <p key={index} className="text-gray-700 mb-4 leading-relaxed">
+            {formatInlineMarkdown(trimmed)}
+          </p>,
+        );
+      }
+    });
+
+    // Handle remaining list items
+    if (inList && listItems.length > 0) {
+      elements.push(
+        listType === "ul" ? (
+          <ul key="list-final" className="list-disc list-inside mb-4 space-y-1">
+            {listItems.map((item, i) => (
+              <li key={i} className="text-gray-700">
+                {formatInlineMarkdown(item)}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ol
+            key="list-final"
+            className="list-decimal list-inside mb-4 space-y-1"
+          >
+            {listItems.map((item, i) => (
+              <li key={i} className="text-gray-700">
+                {formatInlineMarkdown(item)}
+              </li>
+            ))}
+          </ol>
+        ),
+      );
+    }
+
+    return <div>{elements}</div>;
+  };
+
+  // Function to format inline markdown (bold, italic)
+  const formatInlineMarkdown = (text: string) => {
+    const parts: (string | ReactElement)[] = [];
+    let currentIndex = 0;
+    let key = 0;
+
+    // Handle bold (**text** or __text__)
+    const boldRegex = /(\*\*|__)(.+?)\1/g;
+    let match;
+    const boldMatches: Array<{ start: number; end: number; text: string }> = [];
+
+    while ((match = boldRegex.exec(text)) !== null) {
+      boldMatches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        text: match[2],
+      });
+    }
+
+    // Handle italic (*text* or _text_)
+    const italicRegex = /(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g;
+    const italicMatches: Array<{ start: number; end: number; text: string }> =
+      [];
+
+    while ((match = italicRegex.exec(text)) !== null) {
+      // Check if it's not part of a bold match
+      const isInBold = boldMatches.some(
+        (b) => match!.index >= b.start && match!.index < b.end,
+      );
+      if (!isInBold) {
+        italicMatches.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          text: match[1],
+        });
+      }
+    }
+
+    // Combine and sort all matches
+    const allMatches = [
+      ...boldMatches.map((m) => ({ ...m, type: "bold" as const })),
+      ...italicMatches.map((m) => ({ ...m, type: "italic" as const })),
+    ].sort((a, b) => a.start - b.start);
+
+    allMatches.forEach((match) => {
+      // Add text before match
+      if (match.start > currentIndex) {
+        parts.push(text.substring(currentIndex, match.start));
+      }
+      // Add formatted match
+      if (match.type === "bold") {
+        parts.push(
+          <strong key={key++} className="font-bold text-gray-900">
+            {match.text}
+          </strong>,
+        );
+      } else {
+        parts.push(
+          <em key={key++} className="italic text-gray-800">
+            {match.text}
+          </em>,
+        );
+      }
+      currentIndex = match.end;
+    });
+
+    // Add remaining text
+    if (currentIndex < text.length) {
+      parts.push(text.substring(currentIndex));
+    }
+
+    return parts.length > 0 ? <>{parts}</> : text;
   };
 
   const formatDiseaseName = (disease: string) => {
@@ -194,15 +735,15 @@ export default function SkinAnalysis({
     const isSevere = severity === "severe";
     return (
       <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
+        className={`inline-flex items-center px-4 py-2 rounded-lg text-sm sm:text-base md:text-lg font-bold shadow-md ${
           isSevere
-            ? "bg-red-100 text-red-800 border border-red-300"
-            : "bg-yellow-100 text-yellow-800 border border-yellow-300"
+            ? "bg-red-500 text-white border-2 border-red-600"
+            : "bg-yellow-400 text-yellow-900 border-2 border-yellow-500"
         }`}
       >
         {isSevere ? (
           <svg
-            className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+            className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -214,7 +755,7 @@ export default function SkinAnalysis({
           </svg>
         ) : (
           <svg
-            className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+            className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -269,7 +810,7 @@ export default function SkinAnalysis({
                     <button
                       type="button"
                       onClick={onChangePet}
-                      className="text-sm text-blue-600 hover:text-blue-800 underline"
+                      className="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer"
                     >
                       Change pet
                     </button>
@@ -278,7 +819,7 @@ export default function SkinAnalysis({
                     <button
                       type="button"
                       onClick={onClearPet}
-                      className="text-sm text-gray-600 hover:text-gray-800 underline"
+                      className="text-sm text-gray-600 hover:text-gray-800 underline cursor-pointer"
                     >
                       Clear selection
                     </button>
@@ -340,7 +881,7 @@ export default function SkinAnalysis({
               </p>
               <button
                 onClick={checkApiHealth}
-                className="mt-2 text-xs sm:text-sm text-orange-700 hover:text-orange-900 underline"
+                className="mt-2 text-xs sm:text-sm text-orange-700 hover:text-orange-900 underline cursor-pointer"
               >
                 Retry Connection
               </button>
@@ -355,7 +896,7 @@ export default function SkinAnalysis({
           <div className="flex space-x-2 sm:space-x-4 border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab("upload")}
-              className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === "upload"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-500 hover:text-gray-700"
@@ -380,7 +921,7 @@ export default function SkinAnalysis({
             </button>
             <button
               onClick={() => setActiveTab("camera")}
-              className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === "camera"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-500 hover:text-gray-700"
@@ -514,15 +1055,28 @@ export default function SkinAnalysis({
           >
             {/* Pet Details (optional) */}
             {selectedPet && (
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="p-3 sm:p-4 bg-gray-50 border-b border-gray-200">
-                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+              <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                <div className="p-4 sm:p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
                     Pet Details
                   </h2>
                 </div>
-                <div className="p-3 sm:p-4 md:p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <div className="p-4 sm:p-6">
+                  <div className="flex items-start gap-4 sm:gap-6">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0 shadow-md ring-2 ring-gray-200">
                       {getPetAvatarSrc(selectedPet) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -531,23 +1085,63 @@ export default function SkinAnalysis({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-4xl">🐕</span>
+                        <span className="text-5xl sm:text-6xl">🐕</span>
                       )}
                     </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="text-lg font-bold text-gray-900 truncate">
-                        {selectedPet.name}
+                    <div className="min-w-0 flex-1 space-y-3 pt-1">
+                      <div>
+                        <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                          {selectedPet.name}
+                        </div>
+                        <div className="h-0.5 w-12 bg-blue-500 rounded-full"></div>
                       </div>
-                      <div className="mt-1 text-sm text-gray-700">
-                        <span className="font-semibold">Breed:</span>{" "}
-                        {selectedPet.breed || "—"}
-                      </div>
-                      <div className="mt-1 text-sm text-gray-700">
-                        <span className="font-semibold">Age:</span>{" "}
-                        {selectedPet.ageYears != null
-                          ? `${selectedPet.ageYears} ${selectedPet.ageYears === 1 ? "year" : "years"}`
-                          : "—"}
+
+                      <div className="space-y-2.5">
+                        <div className="flex items-center gap-2 text-sm sm:text-base text-gray-700">
+                          <svg
+                            className="w-4 h-4 text-gray-500 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                            />
+                          </svg>
+                          <span className="font-medium text-gray-600">
+                            Breed:
+                          </span>
+                          <span className="text-gray-900">
+                            {selectedPet.breed || "Not specified"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm sm:text-base text-gray-700">
+                          <svg
+                            className="w-4 h-4 text-gray-500 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <span className="font-medium text-gray-600">
+                            Age:
+                          </span>
+                          <span className="text-gray-900">
+                            {selectedPet.ageYears != null
+                              ? `${selectedPet.ageYears} ${selectedPet.ageYears === 1 ? "year" : "years"}`
+                              : "Not specified"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -573,8 +1167,8 @@ export default function SkinAnalysis({
             </div>
           </div>
 
-          {/* Loading State */}
-          {loading && (
+          {/* Loading State - Only show when loading and no prediction yet */}
+          {loading && !prediction && (
             <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
               <p className="text-gray-600 font-medium text-base sm:text-lg">
@@ -630,7 +1224,10 @@ export default function SkinAnalysis({
 
           {/* Prediction Results */}
           {prediction?.prediction && prediction.valid !== false && (
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-md p-4 sm:p-6 md:p-8 border border-blue-200">
+            <div
+              ref={detectionResultsRef}
+              className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-md p-4 sm:p-6 md:p-8 border border-blue-200"
+            >
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center">
                 <svg
                   className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-blue-600"
@@ -652,24 +1249,29 @@ export default function SkinAnalysis({
               <div className="bg-white rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm text-gray-500 mb-2">
-                      Detected Condition
+                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 break-words mb-2">
+                      {prediction.prediction.parsed?.disease ||
+                        formatDiseaseName(prediction.prediction.disease)}
                     </p>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                      <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 break-words">
-                        {prediction.prediction.parsed?.disease ||
-                          formatDiseaseName(prediction.prediction.disease)}
-                      </p>
-                      {prediction.prediction.parsed?.severity &&
-                        getSeverityBadge(prediction.prediction.parsed.severity)}
-                    </div>
                     {prediction.prediction.parsed?.severity && (
-                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                        Severity Level:{" "}
-                        <span className="font-semibold capitalize">
+                      <div
+                        className={`inline-block px-4 py-2 rounded-lg mt-2 ${
+                          prediction.prediction.parsed.severity === "severe"
+                            ? "bg-red-200"
+                            : "bg-yellow-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-sm sm:text-base font-semibold capitalize ${
+                            prediction.prediction.parsed.severity === "severe"
+                              ? "text-red-900"
+                              : "text-yellow-900"
+                          }`}
+                        >
+                          Severity Level -{" "}
                           {prediction.prediction.parsed.severity}
-                        </span>
-                      </p>
+                        </p>
+                      </div>
                     )}
                   </div>
                   <div className="text-left sm:text-right">
@@ -692,63 +1294,27 @@ export default function SkinAnalysis({
                 </div>
               </div>
 
-              {/* All Probabilities */}
-              <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
-                <h3 className="font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center text-base sm:text-lg">
-                  <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
-                  All Detected Probabilities
-                </h3>
-                <div className="space-y-2 sm:space-y-3">
-                  {Object.entries(prediction.prediction.all_probabilities)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([disease, prob]) => {
-                      const parsed = parseDiseaseName(disease);
-                      return (
-                        <div key={disease} className="group">
-                          <div className="flex justify-between items-center mb-1 sm:mb-2 gap-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <span className="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors break-words">
-                                {parsed.disease}
-                              </span>
-                              {parsed.severity && (
-                                <span
-                                  className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
-                                    parsed.severity === "severe"
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-yellow-100 text-yellow-700"
-                                  }`}
-                                >
-                                  {parsed.severity}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-xs sm:text-sm font-semibold text-gray-600 whitespace-nowrap">
-                              {(prob * 100).toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5 overflow-hidden">
-                            <div
-                              className="bg-gradient-to-r from-blue-400 to-indigo-500 h-2 sm:h-2.5 rounded-full transition-all duration-700 ease-out"
-                              style={{ width: `${prob * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
+              {/* AI Health Assistant - Only show for diseases, not for healthy */}
+              {prediction.prediction &&
+                prediction.prediction.parsed?.disease?.toLowerCase() !==
+                  "healthy" && (
+                  <AIGuidanceCards
+                    ref={guidanceCardsRef}
+                    diseaseName={prediction.prediction.disease}
+                    diseaseStage={
+                      prediction.prediction.parsed?.severity === "severe"
+                        ? "Severe"
+                        : prediction.prediction.parsed?.severity === "mild"
+                          ? "Mild"
+                          : null
+                    }
+                  />
+                )}
+
+              {/* Healthy Skin Care Card - Only show for healthy detection */}
+              {prediction.prediction &&
+                prediction.prediction.parsed?.disease?.toLowerCase() ===
+                  "healthy" && <HealthySkinCard ref={healthySkinCardRef} />}
 
               {/* Disclaimer */}
               <div className="mt-4 sm:mt-6 p-3 sm:p-4 md:p-5 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
@@ -804,8 +1370,8 @@ export default function SkinAnalysis({
 
             {prediction && (
               <button
-                onClick={() => window.print()}
-                className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base cursor-pointer"
+                onClick={generatePDFReport}
+                className="px-4 sm:px-6 py-3 sm:py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base cursor-pointer"
               >
                 <svg
                   className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
@@ -817,10 +1383,10 @@ export default function SkinAnalysis({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <span className="whitespace-nowrap">Print Results</span>
+                <span className="whitespace-nowrap">Download Report</span>
               </button>
             )}
           </div>

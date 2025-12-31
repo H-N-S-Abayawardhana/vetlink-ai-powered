@@ -68,8 +68,12 @@ export class GaitApiService {
       formData.append("video", videoFile);
 
       // Log request details for debugging
-      console.log(`[Limping API] Sending request to: ${LIMPING_API_URL}/predict`);
-      console.log(`[Limping API] Video file: ${videoFile.name}, size: ${(videoFile.size / 1024 / 1024).toFixed(2)} MB, type: ${videoFile.type}`);
+      console.log(
+        `[Limping API] Sending request to: ${LIMPING_API_URL}/predict`,
+      );
+      console.log(
+        `[Limping API] Video file: ${videoFile.name}, size: ${(videoFile.size / 1024 / 1024).toFixed(2)} MB, type: ${videoFile.type}`,
+      );
 
       // Create AbortController for timeout
       const controller = new AbortController();
@@ -87,42 +91,53 @@ export class GaitApiService {
           // Don't set Content-Type header - let browser set it with boundary for multipart/form-data
         });
         const duration = Date.now() - startTime;
-        console.log(`[Limping API] Response received in ${duration}ms, status: ${response.status}`);
+        console.log(
+          `[Limping API] Response received in ${duration}ms, status: ${response.status}`,
+        );
 
         clearTimeout(timeoutId);
 
         if (!response.ok) {
           let errorText = "";
           let errorJson = null;
-          
+
           try {
             // Try to parse as JSON first (FastAPI might return JSON error)
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {
               errorJson = await response.json();
-              errorText = errorJson.detail || errorJson.error || errorJson.message || JSON.stringify(errorJson);
+              errorText =
+                errorJson.detail ||
+                errorJson.error ||
+                errorJson.message ||
+                JSON.stringify(errorJson);
             } else {
               errorText = await response.text();
             }
           } catch (e) {
             errorText = `Failed to read error response: ${e}`;
           }
-          
+
           console.error(
             `[Limping API] Error - Status: ${response.status}, URL: ${LIMPING_API_URL}/predict`,
           );
-          console.error(`[Limping API] Error response: ${errorText.substring(0, 1000)}`);
+          console.error(
+            `[Limping API] Error response: ${errorText.substring(0, 1000)}`,
+          );
           if (errorJson) {
-            console.error(`[Limping API] Full error JSON:`, JSON.stringify(errorJson, null, 2));
+            console.error(
+              `[Limping API] Full error JSON:`,
+              JSON.stringify(errorJson, null, 2),
+            );
           }
-          
+
           // Provide more helpful error messages
           if (response.status === 500) {
             throw new Error(
               `API server error (500). The video processing may have failed. Details: ${errorText.substring(0, 500)}. Please try with a different video or check if the API is running properly.`,
             );
           }
-          
+
           throw new Error(
             `HTTP error! status: ${response.status}, message: ${errorText.substring(0, 500)}`,
           );
@@ -133,22 +148,30 @@ export class GaitApiService {
           data = await response.json();
         } catch (jsonError) {
           const responseText = await response.text();
-          console.error("Failed to parse JSON response:", responseText.substring(0, 500));
+          console.error(
+            "Failed to parse JSON response:",
+            responseText.substring(0, 500),
+          );
           throw new Error(`Invalid JSON response from API: ${jsonError}`);
         }
-        
+
         // ✅ Check for error object in response (API can return 200 with error object)
         if (data.error) {
           console.error("API returned error object:", data.error);
           throw new Error(`API error: ${data.error}`);
         }
-        
+
         // ✅ Validate response structure
-        if (!data.prediction || typeof data.confidence !== 'number') {
-          console.error("Invalid response structure:", JSON.stringify(data, null, 2));
-          throw new Error('Invalid response format from API - missing prediction or confidence');
+        if (!data.prediction || typeof data.confidence !== "number") {
+          console.error(
+            "Invalid response structure:",
+            JSON.stringify(data, null, 2),
+          );
+          throw new Error(
+            "Invalid response format from API - missing prediction or confidence",
+          );
         }
-        
+
         return data;
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
@@ -236,7 +259,7 @@ export class GaitApiService {
       const response = await fetch(`${LIMPING_API_URL}/`, {
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
 
       if (!response.ok) {
@@ -261,7 +284,7 @@ export class GaitApiService {
       const response = await fetch(`${DISEASE_API_URL}/`, {
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
 
       if (!response.ok) {

@@ -280,7 +280,9 @@ export default function PetProfile({ pet }: PetProfileProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="text-xs text-gray-500">Age</div>
-          <div className="mt-1 text-lg font-semibold text-gray-900">{computedAgeLabel()}</div>
+          <div className="mt-1 text-lg font-semibold text-gray-900">
+            {computedAgeLabel()}
+          </div>
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="text-xs text-gray-500">Weight</div>
@@ -294,13 +296,19 @@ export default function PetProfile({ pet }: PetProfileProps) {
             {pet.bcs != null ? pet.bcs : "—"}
           </div>
           {pet.bcsCalculatedAt && (
-            <div className="text-[11px] text-gray-500">{formatDate(pet.bcsCalculatedAt)}</div>
+            <div className="text-[11px] text-gray-500">
+              {formatDate(pet.bcsCalculatedAt)}
+            </div>
           )}
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="text-xs text-gray-500">Spayed/Neutered</div>
           <div className="mt-1 text-lg font-semibold text-gray-900">
-            {pet.spayedNeutered == null ? "—" : pet.spayedNeutered ? "Yes" : "No"}
+            {pet.spayedNeutered == null
+              ? "—"
+              : pet.spayedNeutered
+                ? "Yes"
+                : "No"}
           </div>
         </div>
       </div>
@@ -317,13 +325,15 @@ export default function PetProfile({ pet }: PetProfileProps) {
               <dt className="text-sm font-medium text-gray-500">Name</dt>
               <dd className="mt-1 text-sm text-gray-900">{pet.name}</dd>
             </div>
-            
+
             <div>
               <dt className="text-sm font-medium text-gray-500">Breed</dt>
               <dd className="mt-1 text-sm text-gray-900">{pet.breed || "—"}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Date of Birth</dt>
+              <dt className="text-sm font-medium text-gray-500">
+                Date of Birth
+              </dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {pet.dateOfBirth ? formatDate(pet.dateOfBirth) : "—"}
               </dd>
@@ -379,13 +389,15 @@ export default function PetProfile({ pet }: PetProfileProps) {
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Spayed/Neutered</dt>
+              <dt className="text-sm font-medium text-gray-500">
+                Spayed/Neutered
+              </dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {pet.spayedNeutered == null
                   ? "—"
                   : pet.spayedNeutered
-                  ? "Yes"
-                  : "No"}
+                    ? "Yes"
+                    : "No"}
                 {pet.spayNeuterDate && (
                   <span className="text-xs text-gray-500 ml-2">
                     ({formatDate(pet.spayNeuterDate)})
@@ -395,7 +407,9 @@ export default function PetProfile({ pet }: PetProfileProps) {
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Blood Type</dt>
-              <dd className="mt-1 text-sm text-gray-900">{pet.bloodType || "—"}</dd>
+              <dd className="mt-1 text-sm text-gray-900">
+                {pet.bloodType || "—"}
+              </dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Allergies</dt>
@@ -440,21 +454,33 @@ export default function PetProfile({ pet }: PetProfileProps) {
         </h2>
         <dl className="space-y-4">
           <div>
-            <dt className="text-sm font-medium text-gray-500">Microchip Number</dt>
-            <dd className="mt-1 text-sm text-gray-900">{pet.microchipNumber || "—"}</dd>
+            <dt className="text-sm font-medium text-gray-500">
+              Microchip Number
+            </dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {pet.microchipNumber || "—"}
+            </dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-gray-500">Microchip Implant Date</dt>
+            <dt className="text-sm font-medium text-gray-500">
+              Microchip Implant Date
+            </dt>
             <dd className="mt-1 text-sm text-gray-900">
-              {pet.microchipImplantDate ? formatDate(pet.microchipImplantDate) : "—"}
+              {pet.microchipImplantDate
+                ? formatDate(pet.microchipImplantDate)
+                : "—"}
             </dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-gray-500">Owner Phone</dt>
-            <dd className="mt-1 text-sm text-gray-900">{pet.ownerPhone || "—"}</dd>
+            <dd className="mt-1 text-sm text-gray-900">
+              {pet.ownerPhone || "—"}
+            </dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-gray-500">Secondary Contact</dt>
+            <dt className="text-sm font-medium text-gray-500">
+              Secondary Contact
+            </dt>
             <dd className="mt-1 text-sm text-gray-900">
               {pet.secondaryContactName || pet.secondaryContactPhone
                 ? `${pet.secondaryContactName || "—"} (${pet.secondaryContactPhone || "—"})`

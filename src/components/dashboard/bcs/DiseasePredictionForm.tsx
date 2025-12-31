@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { X, AlertTriangle, Stethoscope } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { X, AlertTriangle, Stethoscope } from "lucide-react";
 import type {
   DiseasePredictionFormState,
   BreedSize,
@@ -128,12 +128,12 @@ export default function DiseasePredictionForm({
         initial.breed_size = "Medium";
       }
     }
-    
+
     // Auto-fill spayed/neutered status from pet profile
     if (petSpayedNeutered !== null && petSpayedNeutered !== undefined) {
       initial.is_neutered = petSpayedNeutered ? "yes" : "no";
     }
-    
+
     // Auto-fill exercise level from activity level
     if (petActivityLevel) {
       const activityLower = petActivityLevel.toLowerCase();
@@ -145,16 +145,24 @@ export default function DiseasePredictionForm({
         initial.exercise_level = "High";
       }
     }
-    
+
     // Auto-fill environment from living environment
     if (petLivingEnvironment) {
       const envLower = petLivingEnvironment.toLowerCase();
       // Map common living environment values to API expected values
-      if (envLower.includes("urban") || envLower.includes("city") || envLower.includes("apartment")) {
+      if (
+        envLower.includes("urban") ||
+        envLower.includes("city") ||
+        envLower.includes("apartment")
+      ) {
         initial.environment = "Urban";
       } else if (envLower.includes("suburban") || envLower.includes("suburb")) {
         initial.environment = "Suburban";
-      } else if (envLower.includes("rural") || envLower.includes("farm") || envLower.includes("country")) {
+      } else if (
+        envLower.includes("rural") ||
+        envLower.includes("farm") ||
+        envLower.includes("country")
+      ) {
         initial.environment = "Rural";
       } else if (envLower.includes("indoor")) {
         initial.environment = "Urban"; // Map indoor to Urban
@@ -164,19 +172,28 @@ export default function DiseasePredictionForm({
         initial.environment = "Suburban"; // Map mixed to Suburban
       }
     }
-    
+
     // Auto-fill diet type from preferred diet
     if (petPreferredDiet) {
       const dietLower = petPreferredDiet.toLowerCase();
-      if (dietLower.includes("commercial") || dietLower.includes("kibble") || dietLower.includes("dry") || dietLower.includes("wet")) {
+      if (
+        dietLower.includes("commercial") ||
+        dietLower.includes("kibble") ||
+        dietLower.includes("dry") ||
+        dietLower.includes("wet")
+      ) {
         initial.diet_type = "Commercial";
-      } else if (dietLower.includes("homemade") || dietLower.includes("home") || dietLower.includes("raw")) {
+      } else if (
+        dietLower.includes("homemade") ||
+        dietLower.includes("home") ||
+        dietLower.includes("raw")
+      ) {
         initial.diet_type = "Homemade";
       } else if (dietLower.includes("mixed") || dietLower.includes("both")) {
         initial.diet_type = "Mixed";
       }
     }
-    
+
     return initial;
   });
 
@@ -347,12 +364,15 @@ export default function DiseasePredictionForm({
             <div className="space-y-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Step 1</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Step 1
+                  </p>
                   <h3 className="mt-1 text-xl font-semibold text-gray-900">
                     Review auto-filled profile
                   </h3>
                   <p className="mt-1 text-sm text-gray-600">
-                    We pulled these details from the pet profile. Confirm or adjust anything that looks off before moving on.
+                    We pulled these details from the pet profile. Confirm or
+                    adjust anything that looks off before moving on.
                   </p>
                 </div>
                 {petId && (
@@ -374,10 +394,14 @@ export default function DiseasePredictionForm({
                     <p className="mt-1 text-2xl font-semibold text-gray-900">
                       {initialBCS}/9
                     </p>
-                    <p className="text-sm text-gray-600">{getBCSLabel(initialBCS)}</p>
+                    <p className="text-sm text-gray-600">
+                      {getBCSLabel(initialBCS)}
+                    </p>
                   </div>
                   <div className="text-right text-xs text-gray-500">
-                    <p className="font-semibold text-gray-700">From pet profile</p>
+                    <p className="font-semibold text-gray-700">
+                      From pet profile
+                    </p>
                     <p>BCS stays read-only in this step.</p>
                   </div>
                 </div>
@@ -386,7 +410,11 @@ export default function DiseasePredictionForm({
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <SummaryItem
                   label="Age"
-                  value={formData.age_years ? `${formData.age_years} years` : "Not set"}
+                  value={
+                    formData.age_years
+                      ? `${formData.age_years} years`
+                      : "Not set"
+                  }
                   hint="Update in pet profile if this is outdated."
                 />
                 <SummaryItem
@@ -443,7 +471,8 @@ export default function DiseasePredictionForm({
                 <div className="flex gap-3">
                   <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-amber-800">
-                    Please provide information about your pet&apos;s current health symptoms and preventive care.
+                    Please provide information about your pet&apos;s current
+                    health symptoms and preventive care.
                   </div>
                 </div>
               </div>
@@ -604,9 +633,9 @@ export default function DiseasePredictionForm({
                         setFormData({ ...formData, tick_prevention: "Regular" })
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.tick_prevention === 'Regular'
-                          ? 'bg-blue-600 text-white shadow'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.tick_prevention === "Regular"
+                          ? "bg-blue-600 text-white shadow"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       Yes
@@ -617,9 +646,10 @@ export default function DiseasePredictionForm({
                         setFormData({ ...formData, tick_prevention: "None" })
                       }
                       className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.tick_prevention === 'None' || formData.tick_prevention === 'Irregular'
-                          ? 'bg-red-600 text-white shadow'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        formData.tick_prevention === "None" ||
+                        formData.tick_prevention === "Irregular"
+                          ? "bg-red-600 text-white shadow"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       No
