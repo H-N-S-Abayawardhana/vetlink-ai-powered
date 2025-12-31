@@ -49,25 +49,27 @@ export default function PetForm({ petId }: PetFormProps) {
   });
 
   // Helper function to format date from ISO to YYYY-MM-DD
-  const formatDateForInput = (dateString: string | null | undefined): string => {
+  const formatDateForInput = (
+    dateString: string | null | undefined,
+  ): string => {
     if (!dateString) return "";
     try {
       // Handle both ISO strings and YYYY-MM-DD format
       const dateStr = String(dateString);
-      
+
       // If already in YYYY-MM-DD format, return as is
       if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         return dateStr;
       }
-      
+
       // Parse and format to YYYY-MM-DD
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return "";
-      
+
       // Use UTC to avoid timezone issues
       const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(date.getUTCDate()).padStart(2, '0');
+      const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(date.getUTCDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     } catch {
       return "";
@@ -83,17 +85,19 @@ export default function PetForm({ petId }: PetFormProps) {
           console.log("Date of Birth raw:", pet.dateOfBirth);
           console.log("Spay Neuter Date raw:", pet.spayNeuterDate);
           console.log("Microchip Implant Date raw:", pet.microchipImplantDate);
-          
+
           // Normalize backend `avatarUrl` -> frontend `avatarDataUrl` so ImageUpload shows the image
           // Format date fields for input type="date"
           const formattedDOB = formatDateForInput(pet.dateOfBirth);
           const formattedSpay = formatDateForInput(pet.spayNeuterDate);
-          const formattedMicrochip = formatDateForInput(pet.microchipImplantDate);
-          
+          const formattedMicrochip = formatDateForInput(
+            pet.microchipImplantDate,
+          );
+
           console.log("Date of Birth formatted:", formattedDOB);
           console.log("Spay Neuter Date formatted:", formattedSpay);
           console.log("Microchip Implant Date formatted:", formattedMicrochip);
-          
+
           const normalized = {
             ...pet,
             avatarDataUrl:
@@ -125,6 +129,7 @@ export default function PetForm({ petId }: PetFormProps) {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.dateOfBirth]);
 
   const handleChange = (field: string, value: any) => {
@@ -134,15 +139,19 @@ export default function PetForm({ petId }: PetFormProps) {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    
+
     // Basic required checks
     if (!form.name || form.name.trim() === "") e.name = "Name is required";
     if (!form.activityLevel) e.activityLevel = "Activity level is required";
     if (!form.gender) e.gender = "Gender is required";
-    if (!form.livingEnvironment) e.livingEnvironment = "Living environment is required";
-    if (!form.preferredDiet || form.preferredDiet.trim() === "") e.preferredDiet = "Preferred diet is required";
-    if (form.spayedNeutered == null) e.spayedNeutered = "Spayed/neutered status is required";
-    if (!form.ownerPhone || form.ownerPhone.trim() === "") e.ownerPhone = "Owner phone is required";
+    if (!form.livingEnvironment)
+      e.livingEnvironment = "Living environment is required";
+    if (!form.preferredDiet || form.preferredDiet.trim() === "")
+      e.preferredDiet = "Preferred diet is required";
+    if (form.spayedNeutered == null)
+      e.spayedNeutered = "Spayed/neutered status is required";
+    if (!form.ownerPhone || form.ownerPhone.trim() === "")
+      e.ownerPhone = "Owner phone is required";
 
     // Text-field patterns (allow letters, some punctuation where appropriate)
     const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/u; // letters and spaces only
@@ -164,7 +173,10 @@ export default function PetForm({ petId }: PetFormProps) {
       e.breed = "Breed may only contain letters, spaces and hyphens";
 
     // Age/DOB requirement and range
-    if ((form.ageYears === null || form.ageYears === undefined) && !form.dateOfBirth) {
+    if (
+      (form.ageYears === null || form.ageYears === undefined) &&
+      !form.dateOfBirth
+    ) {
       e.ageYears = "Provide age or date of birth";
     }
     if (form.ageYears !== null && form.ageYears !== undefined) {
@@ -259,37 +271,49 @@ export default function PetForm({ petId }: PetFormProps) {
     // Blood type validation (e.g., DEA 1.1+, O, AB, etc.)
     const bloodPattern = /^[A-Za-z0-9+.\- ]{1,15}$/;
     if (form.bloodType && !bloodPattern.test(form.bloodType)) {
-      e.bloodType = "Blood type may only contain letters, numbers, +, ., -, and spaces";
+      e.bloodType =
+        "Blood type may only contain letters, numbers, +, ., -, and spaces";
     }
 
     // Microchip number validation (alphanumeric, 6-20 chars)
     const microchipPattern = /^[A-Za-z0-9]{6,20}$/;
     if (form.microchipNumber && !microchipPattern.test(form.microchipNumber)) {
-      e.microchipNumber = "Microchip number must be 6-20 alphanumeric characters";
+      e.microchipNumber =
+        "Microchip number must be 6-20 alphanumeric characters";
     }
 
     // Secondary contact name validation
-    if (form.secondaryContactName && !nameOnlyPattern.test(form.secondaryContactName)) {
-      e.secondaryContactName = "Secondary contact name may only contain letters and spaces";
+    if (
+      form.secondaryContactName &&
+      !nameOnlyPattern.test(form.secondaryContactName)
+    ) {
+      e.secondaryContactName =
+        "Secondary contact name may only contain letters and spaces";
     }
 
     // Vet clinic name validation
     const clinicNamePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ &.,'-]+$/u;
     if (form.vetClinicName && !clinicNamePattern.test(form.vetClinicName)) {
-      e.vetClinicName = "Vet clinic name may only contain letters, spaces, and common punctuation";
+      e.vetClinicName =
+        "Vet clinic name may only contain letters, spaces, and common punctuation";
     }
 
     // Microchip implant date validation
-    if (form.microchipImplantDate && typeof form.microchipImplantDate === "string") {
+    if (
+      form.microchipImplantDate &&
+      typeof form.microchipImplantDate === "string"
+    ) {
       const implantDate = new Date(form.microchipImplantDate);
       const today = new Date();
       if (implantDate > today) {
-        e.microchipImplantDate = "Microchip implant date cannot be in the future";
+        e.microchipImplantDate =
+          "Microchip implant date cannot be in the future";
       }
       if (form.dateOfBirth) {
         const dob = new Date(form.dateOfBirth);
         if (implantDate < dob) {
-          e.microchipImplantDate = "Microchip implant date cannot be before date of birth";
+          e.microchipImplantDate =
+            "Microchip implant date cannot be before date of birth";
         }
       }
     }
@@ -381,7 +405,9 @@ export default function PetForm({ petId }: PetFormProps) {
           {/* Section: Basic Information */}
           <div>
             <div className="mb-3">
-              <h3 className="text-base font-semibold text-gray-900">Basic Information</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Basic Information
+              </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
               <div>
@@ -399,38 +425,38 @@ export default function PetForm({ petId }: PetFormProps) {
               </div>
 
               <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Breed <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.breed || ""}
-                onChange={(e) => handleChange("breed", e.target.value)}
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.breed ? "border-red-500" : ""}`}
-              />
-              {errors.breed && (
-                <p className="mt-1 text-sm text-red-600">{errors.breed}</p>
-              )}
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Breed <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={form.breed || ""}
+                  onChange={(e) => handleChange("breed", e.target.value)}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.breed ? "border-red-500" : ""}`}
+                />
+                {errors.breed && (
+                  <p className="mt-1 text-sm text-red-600">{errors.breed}</p>
+                )}
               </div>
               <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Weight (kg) <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.weightKg ?? ""}
-                onChange={(e) =>
-                  handleChange(
-                    "weightKg",
-                    e.target.value ? Number(e.target.value) : null,
-                  )
-                }
-                type="number"
-                min="0"
-                step="0.1"
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.weightKg ? "border-red-500" : ""}`}
-              />
-              {errors.weightKg && (
-                <p className="mt-1 text-sm text-red-600">{errors.weightKg}</p>
-              )}
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Weight (kg) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={form.weightKg ?? ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "weightKg",
+                      e.target.value ? Number(e.target.value) : null,
+                    )
+                  }
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.weightKg ? "border-red-500" : ""}`}
+                />
+                {errors.weightKg && (
+                  <p className="mt-1 text-sm text-red-600">{errors.weightKg}</p>
+                )}
               </div>
             </div>
 
@@ -453,28 +479,31 @@ export default function PetForm({ petId }: PetFormProps) {
                 )}
               </div>
               <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Activity Level <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={form.activityLevel || ""}
-                onChange={(e) => handleChange("activityLevel", e.target.value)}
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.activityLevel ? "border-red-500" : ""}`}
-              >
-                <option value="">Select activity level</option>
-                <option>Low</option>
-                <option>Medium</option>
-                <option>High</option>
-              </select>
-              {errors.activityLevel && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.activityLevel}
-                </p>
-              )}
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Activity Level <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={form.activityLevel || ""}
+                  onChange={(e) =>
+                    handleChange("activityLevel", e.target.value)
+                  }
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.activityLevel ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select activity level</option>
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                </select>
+                {errors.activityLevel && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.activityLevel}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Age (years){form.dateOfBirth ? " (calculated from DOB)" : ""} <span className="text-red-500">*</span>
+                  Age (years){form.dateOfBirth ? " (calculated from DOB)" : ""}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   value={form.ageYears ?? ""}
@@ -499,156 +528,180 @@ export default function PetForm({ petId }: PetFormProps) {
           {/* Section: Dates & Reproductive Status */}
           <div className="pt-6 border-t border-gray-200">
             <div className="mb-3">
-              <h3 className="text-base font-semibold text-gray-900">Dates & Reproductive Status</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Dates & Reproductive Status
+              </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Date of Birth
-              </label>
-              <input
-                value={form.dateOfBirth || ""}
-                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-                type="date"
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.dateOfBirth ? "border-red-500" : ""}`}
-              />
-              {errors.dateOfBirth && (
-                <p className="mt-1 text-sm text-red-600">{errors.dateOfBirth}</p>
-              )}
-            </div>
-            <div>
-              <div className="relative mb-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                  Spayed/Neutered <span className="text-red-500">*</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowSpayedTooltip(!showSpayedTooltip)}
-                    className="inline-flex items-center justify-center w-5 h-5 text-gray-500 hover:text-blue-600 cursor-help"
-                    title="Click for more information"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Date of Birth
                 </label>
-                {showSpayedTooltip && (
-                  <div className="absolute z-10 w-64 p-2 text-xs text-gray-700 bg-blue-50 border border-blue-200 rounded-lg bottom-full mb-2 left-0">
-                    <p className="font-semibold text-blue-900 mb-1">Spayed/Neutered?</p>
-                    <p className="mb-1">
-                      <strong>Spaying:</strong> Remove ovaries and uterus from female pet.
-                    </p>
-                    <p>
-                      <strong>Neutering:</strong> Remove testicles from male pet.
-                    </p>
-                  </div>
+                <input
+                  value={form.dateOfBirth || ""}
+                  onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                  type="date"
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.dateOfBirth ? "border-red-500" : ""}`}
+                />
+                {errors.dateOfBirth && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.dateOfBirth}
+                  </p>
                 )}
               </div>
-              <select
-                value={
-                  form.spayedNeutered == null
-                    ? ""
-                    : form.spayedNeutered
-                    ? "yes"
-                    : "no"
-                }
-                onChange={(e) =>
-                  handleChange(
-                    "spayedNeutered",
-                    e.target.value === "" ? null : e.target.value === "yes",
-                  )
-                }
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.spayedNeutered ? "border-red-500" : ""}`}
-              >
-                <option value="">Select status</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-              {errors.spayedNeutered && (
-                <p className="mt-1 text-sm text-red-600">{errors.spayedNeutered}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Spay/Neuter Date
-              </label>
-              <input
-                value={form.spayNeuterDate || ""}
-                onChange={(e) => handleChange("spayNeuterDate", e.target.value)}
-                type="date"
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.spayNeuterDate ? "border-red-500" : ""}`}
-              />
-              {errors.spayNeuterDate && (
-                <p className="mt-1 text-sm text-red-600">{errors.spayNeuterDate}</p>
-              )}
-            </div>
+              <div>
+                <div className="relative mb-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                    Spayed/Neutered <span className="text-red-500">*</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowSpayedTooltip(!showSpayedTooltip)}
+                      className="inline-flex items-center justify-center w-5 h-5 text-gray-500 hover:text-blue-600 cursor-help"
+                      title="Click for more information"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </label>
+                  {showSpayedTooltip && (
+                    <div className="absolute z-10 w-64 p-2 text-xs text-gray-700 bg-blue-50 border border-blue-200 rounded-lg bottom-full mb-2 left-0">
+                      <p className="font-semibold text-blue-900 mb-1">
+                        Spayed/Neutered?
+                      </p>
+                      <p className="mb-1">
+                        <strong>Spaying:</strong> Remove ovaries and uterus from
+                        female pet.
+                      </p>
+                      <p>
+                        <strong>Neutering:</strong> Remove testicles from male
+                        pet.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <select
+                  value={
+                    form.spayedNeutered == null
+                      ? ""
+                      : form.spayedNeutered
+                        ? "yes"
+                        : "no"
+                  }
+                  onChange={(e) =>
+                    handleChange(
+                      "spayedNeutered",
+                      e.target.value === "" ? null : e.target.value === "yes",
+                    )
+                  }
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.spayedNeutered ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select status</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+                {errors.spayedNeutered && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.spayedNeutered}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Spay/Neuter Date
+                </label>
+                <input
+                  value={form.spayNeuterDate || ""}
+                  onChange={(e) =>
+                    handleChange("spayNeuterDate", e.target.value)
+                  }
+                  type="date"
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.spayNeuterDate ? "border-red-500" : ""}`}
+                />
+                {errors.spayNeuterDate && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.spayNeuterDate}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Section: Identification */}
           <div className="pt-6 border-t border-gray-200">
             <div className="mb-3">
-              <h3 className="text-base font-semibold text-gray-900">Identification</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Identification
+              </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Microchip Number
-              </label>
-              <input
-                value={form.microchipNumber || ""}
-                onChange={(e) => handleChange("microchipNumber", e.target.value)}
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.microchipNumber ? "border-red-500" : ""}`}
-              />
-              {errors.microchipNumber && (
-                <p className="mt-1 text-sm text-red-600">{errors.microchipNumber}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Microchip Implant Date
-              </label>
-              <input
-                value={form.microchipImplantDate || ""}
-                onChange={(e) => handleChange("microchipImplantDate", e.target.value)}
-                type="date"
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.microchipImplantDate ? "border-red-500" : ""}`}
-              />
-              {errors.microchipImplantDate && (
-                <p className="mt-1 text-sm text-red-600">{errors.microchipImplantDate}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Blood Type
-              </label>
-              <input
-                value={form.bloodType || ""}
-                onChange={(e) => handleChange("bloodType", e.target.value)}
-                className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.bloodType ? "border-red-500" : ""}`}
-              />
-              {errors.bloodType && (
-                <p className="mt-1 text-sm text-red-600">{errors.bloodType}</p>
-              )}
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Microchip Number
+                </label>
+                <input
+                  value={form.microchipNumber || ""}
+                  onChange={(e) =>
+                    handleChange("microchipNumber", e.target.value)
+                  }
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.microchipNumber ? "border-red-500" : ""}`}
+                />
+                {errors.microchipNumber && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.microchipNumber}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Microchip Implant Date
+                </label>
+                <input
+                  value={form.microchipImplantDate || ""}
+                  onChange={(e) =>
+                    handleChange("microchipImplantDate", e.target.value)
+                  }
+                  type="date"
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.microchipImplantDate ? "border-red-500" : ""}`}
+                />
+                {errors.microchipImplantDate && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.microchipImplantDate}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Blood Type
+                </label>
+                <input
+                  value={form.bloodType || ""}
+                  onChange={(e) => handleChange("bloodType", e.target.value)}
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.bloodType ? "border-red-500" : ""}`}
+                />
+                {errors.bloodType && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.bloodType}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-
-          
-
-          
 
           {/* Section: Diet & Environment */}
           <div className="pt-6 border-t border-gray-200">
             <div className="mb-3">
-              <h3 className="text-base font-semibold text-gray-900">Diet & Environment</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Diet & Environment
+              </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-1">
@@ -657,7 +710,9 @@ export default function PetForm({ petId }: PetFormProps) {
                 </label>
                 <select
                   value={form.livingEnvironment || ""}
-                  onChange={(e) => handleChange("livingEnvironment", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("livingEnvironment", e.target.value)
+                  }
                   className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.livingEnvironment ? "border-red-500" : ""}`}
                 >
                   <option value="">Select environment</option>
@@ -677,7 +732,9 @@ export default function PetForm({ petId }: PetFormProps) {
                 </label>
                 <select
                   value={form.preferredDiet || ""}
-                  onChange={(e) => handleChange("preferredDiet", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("preferredDiet", e.target.value)
+                  }
                   className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.preferredDiet ? "border-red-500" : ""}`}
                 >
                   <option value="">Select diet type</option>
@@ -709,7 +766,9 @@ export default function PetForm({ petId }: PetFormProps) {
                   className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.allergies ? "border-red-500" : ""}`}
                 />
                 {errors.allergies && (
-                  <p className="mt-1 text-sm text-red-600">{errors.allergies}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.allergies}
+                  </p>
                 )}
               </div>
             </div>
@@ -724,7 +783,9 @@ export default function PetForm({ petId }: PetFormProps) {
                 className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.healthNotes ? "border-red-500" : ""}`}
               />
               {errors.healthNotes && (
-                <p className="mt-1 text-sm text-red-600">{errors.healthNotes}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.healthNotes}
+                </p>
               )}
             </div>
           </div>
@@ -732,7 +793,9 @@ export default function PetForm({ petId }: PetFormProps) {
           {/* Section: Emergency & Vet Contacts */}
           <div className="pt-6 border-t border-gray-200">
             <div className="mb-3">
-              <h3 className="text-base font-semibold text-gray-900">Emergency & Vet Contacts</h3>
+              <h3 className="text-base font-semibold text-gray-900">
+                Emergency & Vet Contacts
+              </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
@@ -745,7 +808,9 @@ export default function PetForm({ petId }: PetFormProps) {
                   className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.ownerPhone ? "border-red-500" : ""}`}
                 />
                 {errors.ownerPhone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.ownerPhone}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.ownerPhone}
+                  </p>
                 )}
               </div>
               <div>
@@ -760,7 +825,9 @@ export default function PetForm({ petId }: PetFormProps) {
                   className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.secondaryContactName ? "border-red-500" : ""}`}
                 />
                 {errors.secondaryContactName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.secondaryContactName}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.secondaryContactName}
+                  </p>
                 )}
               </div>
               <div>
@@ -788,11 +855,15 @@ export default function PetForm({ petId }: PetFormProps) {
                 </label>
                 <input
                   value={form.vetClinicName || ""}
-                  onChange={(e) => handleChange("vetClinicName", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("vetClinicName", e.target.value)
+                  }
                   className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.vetClinicName ? "border-red-500" : ""}`}
                 />
                 {errors.vetClinicName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.vetClinicName}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.vetClinicName}
+                  </p>
                 )}
               </div>
               <div>
@@ -801,11 +872,15 @@ export default function PetForm({ petId }: PetFormProps) {
                 </label>
                 <input
                   value={form.vetClinicPhone || ""}
-                  onChange={(e) => handleChange("vetClinicPhone", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("vetClinicPhone", e.target.value)
+                  }
                   className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.vetClinicPhone ? "border-red-500" : ""}`}
                 />
                 {errors.vetClinicPhone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.vetClinicPhone}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.vetClinicPhone}
+                  </p>
                 )}
               </div>
             </div>

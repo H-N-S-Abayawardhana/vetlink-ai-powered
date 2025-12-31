@@ -13,9 +13,7 @@ interface Props {
 }
 
 export default function PetCardBCS({ pet, selected, onSelect }: Props) {
-  const avatar =
-    pet.avatarDataUrl ||
-    "/uploads/default-dog.png";
+  const avatar = pet.avatarDataUrl || "/uploads/default-dog.png";
 
   return (
     <button
@@ -46,8 +44,7 @@ export default function PetCardBCS({ pet, selected, onSelect }: Props) {
             </p>
           )}
           <p className="text-xs text-gray-500 mt-1">
-            🐕 Dog •{" "}
-            {pet.ageYears ? `${pet.ageYears} years` : "Age unknown"}
+            🐕 Dog • {pet.ageYears ? `${pet.ageYears} years` : "Age unknown"}
           </p>
         </div>
         <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-indigo-600 transition-colors" />
