@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
-import { uploadVideoToS3, deleteMultipleFromS3ByUrls, isS3Url } from "@/lib/s3";
+import { uploadVideoToS3, deleteMultipleFromS3ByUrls, isS3Url, isLocalUrl } from "@/lib/s3";
 
 export const runtime = "nodejs";
 
@@ -379,19 +379,20 @@ export async function DELETE(
     const row = result.rows?.[0];
     const history = ensureArray(row?.limping_history);
 
-    const s3UrlsToDelete: string[] = [];
+    const urlsToDelete: string[] = [];
     history.forEach((record: any) => {
-      if (record?.videoUrl && isS3Url(record.videoUrl)) {
-        s3UrlsToDelete.push(record.videoUrl);
+      if (record?.videoUrl && (isS3Url(record.videoUrl) || isLocalUrl(record.videoUrl))) {
+        urlsToDelete.push(record.videoUrl);
       }
     });
 
-    // Delete all S3 videos
-    if (s3UrlsToDelete.length > 0) {
+    // Delete all videos (S3 or local)
+    if (urlsToDelete.length > 0) {
       try {
-        const deletedCount = await deleteMultipleFromS3ByUrls(s3UrlsToDelete);
+        const deletedCount = await deleteMultipleFromS3ByUrls(urlsToDelete);
+        console.log(`Deleted ${deletedCount} of ${urlsToDelete.length} videos`);
       } catch (e) {
-        console.error("Error deleting S3 videos:", e);
+        console.error("Error deleting videos:", e);
       }
     }
 
