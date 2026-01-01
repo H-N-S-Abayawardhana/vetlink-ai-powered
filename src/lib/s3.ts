@@ -54,7 +54,7 @@ function saveToPublicFolder(
   if (isVercel()) {
     throw new Error(
       "Cannot write to public folder on Vercel. Please configure AWS S3 credentials or use Vercel Blob Storage. " +
-      "Set NEXT_AWS_ACCESS_KEY_ID, NEXT_AWS_SECRET_ACCESS_KEY, and S3_BUCKET_NAME environment variables.",
+        "Set NEXT_AWS_ACCESS_KEY_ID, NEXT_AWS_SECRET_ACCESS_KEY, and S3_BUCKET_NAME environment variables.",
     );
   }
 

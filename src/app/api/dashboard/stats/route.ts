@@ -143,7 +143,8 @@ export async function GET(request: NextRequest) {
       }
 
       // Sum all AI analyses
-      stats.aiAnalyses = skinDiseaseCount + limpingCount + diseasePredictionCount;
+      stats.aiAnalyses =
+        skinDiseaseCount + limpingCount + diseasePredictionCount;
     } catch (e) {
       console.error("Error calculating aiAnalyses:", e);
       stats.aiAnalyses = 0;

@@ -19,7 +19,7 @@ interface CreatePaymentRequest {
  * Generate PayHere hash
  * PayHere uses a nested hash formula:
  * hash = to_upper_case(md5(merchant_id + order_id + amount + currency + to_upper_case(md5(merchant_secret))))
- * 
+ *
  * Steps:
  * 1. Hash the merchant_secret: md5(merchant_secret)
  * 2. Convert to uppercase
@@ -40,17 +40,17 @@ function generatePayHereHash(
     .update(merchantSecret)
     .digest("hex")
     .toUpperCase();
-  
+
   // Step 3: Concatenate all values
   const hashString = `${merchantId}${orderId}${amount}${currency}${hashedSecret}`;
-  
+
   // Step 4 & 5: Hash the concatenated string and convert to uppercase
   const finalHash = crypto
     .createHash("md5")
     .update(hashString)
     .digest("hex")
     .toUpperCase();
-  
+
   return finalHash;
 }
 
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     // The secret from dashboard is base64 encoded - decode it before use
     let secretForHash = merchantSecret;
     const cleanedSecret = merchantSecret.replace(/[:=]+$/, "");
-    
+
     try {
       secretForHash = Buffer.from(cleanedSecret, "base64").toString("utf-8");
     } catch (error) {
@@ -120,9 +120,10 @@ export async function POST(request: NextRequest) {
     );
 
     // Determine checkout URL - use sandbox by default, production if PAYHERE_ENV=production
-    const checkoutUrl = process.env.PAYHERE_ENV === "production" 
-      ? PAYHERE_PRODUCTION_URL 
-      : PAYHERE_SANDBOX_URL;
+    const checkoutUrl =
+      process.env.PAYHERE_ENV === "production"
+        ? PAYHERE_PRODUCTION_URL
+        : PAYHERE_SANDBOX_URL;
 
     return NextResponse.json({
       success: true,
@@ -141,4 +142,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
