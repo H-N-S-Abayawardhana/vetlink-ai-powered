@@ -3,11 +3,78 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
+import fs from "fs";
+import path from "path";
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || "";
 const FOLDER_PATH = process.env.SKIN_DISEASES_HISTORY_FOLDER_PATH || "";
 const LIMPING_FOLDER_PATH =
   process.env.LIMPING_DETECTION_HISTORY_FOLDER_PATH || "";
+
+/**
+ * Check if AWS credentials are configured
+ * @returns True if AWS credentials are available
+ */
+function hasAwsCredentials(): boolean {
+  return !!(
+    BUCKET_NAME &&
+    process.env.NEXT_AWS_ACCESS_KEY_ID &&
+    process.env.NEXT_AWS_SECRET_ACCESS_KEY
+  );
+}
+
+/**
+ * Check if we're running on Vercel
+ * @returns True if running on Vercel
+ */
+function isVercel(): boolean {
+  return !!(
+    process.env.VERCEL ||
+    process.env.VERCEL_ENV ||
+    process.env.NEXT_PUBLIC_VERCEL_URL
+  );
+}
+
+/**
+ * Save file to local public folder (fallback for local development)
+ * Note: On Vercel, the filesystem is read-only, so this will fail.
+ * For Vercel deployments, AWS S3 or Vercel Blob Storage should be used.
+ * @param buffer - File buffer
+ * @param filename - Filename
+ * @param subfolder - Subfolder within uploads (e.g., 'skin-disease', 'limping')
+ * @returns Public URL path
+ * @throws Error if file cannot be written (e.g., on Vercel without write permissions)
+ */
+function saveToPublicFolder(
+  buffer: Buffer,
+  filename: string,
+  subfolder?: string,
+): string {
+  // Warn if trying to write on Vercel
+  if (isVercel()) {
+    throw new Error(
+      "Cannot write to public folder on Vercel. Please configure AWS S3 credentials or use Vercel Blob Storage. " +
+      "Set NEXT_AWS_ACCESS_KEY_ID, NEXT_AWS_SECRET_ACCESS_KEY, and S3_BUCKET_NAME environment variables.",
+    );
+  }
+
+  const uploadsDir = path.join(process.cwd(), "public", "uploads");
+  const targetDir = subfolder ? path.join(uploadsDir, subfolder) : uploadsDir;
+
+  // Create directory if it doesn't exist
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+
+  const filePath = path.join(targetDir, filename);
+  fs.writeFileSync(filePath, buffer);
+
+  // Return public URL path
+  const publicPath = subfolder
+    ? `/uploads/${subfolder}/${filename}`
+    : `/uploads/${filename}`;
+  return publicPath;
+}
 
 // Get S3 client with proper configuration
 function getS3Client() {
@@ -25,19 +92,31 @@ function getS3Client() {
 }
 
 /**
- * Upload a video buffer to S3
+ * Upload a video buffer to S3 (or fallback to local storage)
  * @param buffer - The video file buffer
  * @param filename - The filename to use in S3
  * @param contentType - The MIME type of the video
- * @returns The S3 URL of the uploaded video
+ * @returns The S3 URL or local public URL of the uploaded video
  */
 export async function uploadVideoToS3(
   buffer: Buffer,
   filename: string,
   contentType: string,
 ): Promise<string> {
-  if (!BUCKET_NAME) {
-    throw new Error("S3_BUCKET_NAME is not configured");
+  // Fallback to local storage if AWS credentials are not configured
+  if (!hasAwsCredentials()) {
+    console.warn(
+      "AWS credentials not configured. Falling back to local public folder storage.",
+    );
+
+    // On Vercel, warn that files won't persist
+    if (isVercel()) {
+      console.warn(
+        "WARNING: Running on Vercel without AWS credentials. Files saved to public folder will not persist across deployments. Consider configuring AWS S3 or Vercel Blob Storage.",
+      );
+    }
+
+    return saveToPublicFolder(buffer, filename, "limping");
   }
 
   // Construct the S3 key (path) for the video using limping folder path
@@ -95,38 +174,66 @@ export async function uploadVideoToS3(
           const s3Url = `https://${BUCKET_NAME}.s3.${actualRegion}.amazonaws.com/${s3Key}`;
           return s3Url;
         } catch (retryError: any) {
+          // If retry also fails, fallback to local storage
           console.error(
-            "Error uploading video to S3 after region retry:",
+            "Error uploading video to S3 after region retry, falling back to local storage:",
             retryError,
           );
-          throw new Error(
-            `Failed to upload video to S3: ${retryError?.message || retryError?.Code || "Unknown error"}`,
-          );
+          try {
+            return saveToPublicFolder(buffer, filename, "limping");
+          } catch (fallbackError) {
+            console.error("Error saving to local folder:", fallbackError);
+            throw new Error(
+              `Failed to upload video: S3 error (${retryError?.message || retryError?.Code || "Unknown"}) and local fallback failed (${fallbackError instanceof Error ? fallbackError.message : "Unknown"})`,
+            );
+          }
         }
       }
     }
 
-    console.error("Error uploading video to S3:", error);
-    throw new Error(
-      `Failed to upload video to S3: ${error?.message || error?.Code || "Unknown error"}`,
+    // If S3 upload fails, fallback to local storage
+    console.error(
+      "Error uploading video to S3, falling back to local storage:",
+      error,
     );
+
+    try {
+      return saveToPublicFolder(buffer, filename, "limping");
+    } catch (fallbackError) {
+      console.error("Error saving to local folder:", fallbackError);
+      throw new Error(
+        `Failed to upload video: S3 error (${error?.message || error?.Code || "Unknown"}) and local fallback failed (${fallbackError instanceof Error ? fallbackError.message : "Unknown"})`,
+      );
+    }
   }
 }
 
 /**
- * Upload an image buffer to S3
+ * Upload an image buffer to S3 (or fallback to local storage)
  * @param buffer - The image file buffer
  * @param filename - The filename to use in S3
  * @param contentType - The MIME type of the image
- * @returns The S3 URL of the uploaded image
+ * @returns The S3 URL or local public URL of the uploaded image
  */
 export async function uploadImageToS3(
   buffer: Buffer,
   filename: string,
   contentType: string,
 ): Promise<string> {
-  if (!BUCKET_NAME) {
-    throw new Error("S3_BUCKET_NAME is not configured");
+  // Fallback to local storage if AWS credentials are not configured
+  if (!hasAwsCredentials()) {
+    console.warn(
+      "AWS credentials not configured. Falling back to local public folder storage.",
+    );
+
+    // On Vercel, warn that files won't persist
+    if (isVercel()) {
+      console.warn(
+        "WARNING: Running on Vercel without AWS credentials. Files saved to public folder will not persist across deployments. Consider configuring AWS S3 or Vercel Blob Storage.",
+      );
+    }
+
+    return saveToPublicFolder(buffer, filename, "skin-disease");
   }
 
   // Construct the S3 key (path) for the image
@@ -156,58 +263,20 @@ export async function uploadImageToS3(
 
     return s3Url;
   } catch (error: any) {
-    // Handle PermanentRedirect error - bucket is in a different region
-    if (
-      error?.Code === "PermanentRedirect" ||
-      error?.name === "PermanentRedirect"
-    ) {
-      // Extract region from error endpoint if available
-      const endpoint = error?.Endpoint || "";
-      const regionMatch = endpoint.match(/\.s3\.([^.]+)\.amazonaws\.com/);
-      const actualRegion = regionMatch ? regionMatch[1] : null;
-
-      if (actualRegion && actualRegion !== region) {
-        // Silently retry with the correct region (this is expected behavior)
-        try {
-          const correctS3Client = new S3Client({
-            region: actualRegion,
-            credentials: {
-              accessKeyId: process.env.NEXT_AWS_ACCESS_KEY_ID || "",
-              secretAccessKey: process.env.NEXT_AWS_SECRET_ACCESS_KEY || "",
-            },
-            forcePathStyle: false,
-          });
-
-          const retryCommand = new PutObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: s3Key,
-            Body: buffer,
-            ContentType: contentType,
-          });
-
-          await correctS3Client.send(retryCommand);
-
-          // Return URL with correct region
-          const s3Url = `https://${BUCKET_NAME}.s3.${actualRegion}.amazonaws.com/${s3Key}`;
-          return s3Url;
-        } catch (retryError: any) {
-          // If retry also fails, log and throw
-          console.error(
-            "Error uploading to S3 after region retry:",
-            retryError,
-          );
-          throw new Error(
-            `Failed to upload image to S3: ${retryError?.message || retryError?.Code || "Unknown error"}`,
-          );
-        }
-      }
-    }
-
-    // Log and throw for other errors
-    console.error("Error uploading to S3:", error);
-    throw new Error(
-      `Failed to upload image to S3: ${error?.message || error?.Code || "Unknown error"}`,
+    // If S3 upload fails, fallback to local storage
+    console.error(
+      "Error uploading to S3, falling back to local storage:",
+      error,
     );
+
+    try {
+      return saveToPublicFolder(buffer, filename, "skin-disease");
+    } catch (fallbackError) {
+      console.error("Error saving to local folder:", fallbackError);
+      throw new Error(
+        `Failed to upload image: S3 error (${error?.message || error?.Code || "Unknown"}) and local fallback failed (${fallbackError instanceof Error ? fallbackError.message : "Unknown"})`,
+      );
+    }
   }
 }
 
@@ -259,6 +328,42 @@ export function extractS3KeyFromUrl(s3Url: string): string | null {
 export function isS3Url(url: string): boolean {
   if (!url || typeof url !== "string") return false;
   return url.includes(".s3.") && url.includes(".amazonaws.com");
+}
+
+/**
+ * Check if a URL is a local public folder URL
+ * @param url - The URL to check
+ * @returns True if it's a local URL
+ */
+export function isLocalUrl(url: string): boolean {
+  if (!url || typeof url !== "string") return false;
+  return url.startsWith("/uploads/");
+}
+
+/**
+ * Delete a file from local public folder
+ * @param url - The local URL path (e.g., /uploads/skin-disease/file.jpg)
+ * @returns True if successful
+ */
+function deleteFromLocalFolder(url: string): boolean {
+  try {
+    if (!isLocalUrl(url)) {
+      return false;
+    }
+
+    // Remove leading slash and construct file path
+    const filePath = path.join(process.cwd(), "public", url);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error deleting local file:", error);
+    return false;
+  }
 }
 
 /**
@@ -330,14 +435,20 @@ export async function deleteFromS3(s3Key: string): Promise<boolean> {
 }
 
 /**
- * Delete an object from S3 by URL
- * @param s3Url - The full S3 URL of the object to delete
+ * Delete an object from S3 by URL (or local file if it's a local URL)
+ * @param url - The full S3 URL or local URL of the object to delete
  * @returns True if successful
  */
-export async function deleteFromS3ByUrl(s3Url: string): Promise<boolean> {
-  const s3Key = extractS3KeyFromUrl(s3Url);
+export async function deleteFromS3ByUrl(url: string): Promise<boolean> {
+  // Handle local URLs
+  if (isLocalUrl(url)) {
+    return deleteFromLocalFolder(url);
+  }
+
+  // Handle S3 URLs
+  const s3Key = extractS3KeyFromUrl(url);
   if (!s3Key) {
-    console.warn(`Could not extract S3 key from URL: ${s3Url}`);
+    console.warn(`Could not extract S3 key from URL: ${url}`);
     return false;
   }
   return deleteFromS3(s3Key);
@@ -359,18 +470,18 @@ export async function deleteMultipleFromS3(s3Keys: string[]): Promise<number> {
 }
 
 /**
- * Delete multiple objects from S3 by URLs
- * @param s3Urls - Array of S3 URLs to delete
+ * Delete multiple objects from S3 by URLs (or local files if they're local URLs)
+ * @param urls - Array of S3 URLs or local URLs to delete
  * @returns Number of successfully deleted objects
  */
 export async function deleteMultipleFromS3ByUrls(
-  s3Urls: string[],
+  urls: string[],
 ): Promise<number> {
-  if (!s3Urls || s3Urls.length === 0) return 0;
+  if (!urls || urls.length === 0) return 0;
 
-  const s3Keys = s3Urls
-    .map((url) => extractS3KeyFromUrl(url))
-    .filter((key): key is string => key !== null);
+  const deletePromises = urls.map((url) => deleteFromS3ByUrl(url));
+  const results = await Promise.allSettled(deletePromises);
 
-  return deleteMultipleFromS3(s3Keys);
+  return results.filter((r) => r.status === "fulfilled" && r.value === true)
+    .length;
 }
