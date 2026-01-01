@@ -59,13 +59,14 @@ export async function POST(request: NextRequest) {
     // -2 = Failed
     // -3 = Charged Back
 
-    const paymentStatus = {
-      "2": "success",
-      "0": "pending",
-      "-1": "canceled",
-      "-2": "failed",
-      "-3": "charged_back",
-    }[statusCode] || "unknown";
+    const paymentStatus =
+      {
+        "2": "success",
+        "0": "pending",
+        "-1": "canceled",
+        "-2": "failed",
+        "-3": "charged_back",
+      }[statusCode] || "unknown";
 
     // TODO: Store payment notification in your database
     // Example: await updatePaymentStatus(orderId, { ... });
@@ -92,4 +93,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

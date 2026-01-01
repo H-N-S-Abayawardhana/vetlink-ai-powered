@@ -20,6 +20,8 @@ import {
   XMarkIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  UsersIcon,
+  UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import { ScanFace } from "lucide-react";
 
@@ -144,6 +146,25 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
         href: "/dashboard/pharmacy/owner",
         icon: BuildingStorefrontIcon,
         roles: ["SUPER_ADMIN", "VETERINARIAN"],
+      },
+    ],
+  },
+  {
+    name: "User Management",
+    icon: UsersIcon,
+    roles: ["SUPER_ADMIN"],
+    children: [
+      {
+        name: "All Users",
+        href: "/dashboard/user-management",
+        icon: UsersIcon,
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        name: "Add User",
+        href: "/dashboard/user-management/create",
+        icon: UserPlusIcon,
+        roles: ["SUPER_ADMIN"],
       },
     ],
   },
