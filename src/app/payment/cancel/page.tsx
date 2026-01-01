@@ -46,8 +46,8 @@ export default function PaymentCancelPage() {
 
             <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Need help?</strong> Our support team is available 24/7 to
-                assist you with any questions or concerns.
+                <strong>Need help?</strong> Our support team is available 24/7
+                to assist you with any questions or concerns.
               </p>
             </div>
 
@@ -74,4 +74,3 @@ export default function PaymentCancelPage() {
     </div>
   );
 }
-

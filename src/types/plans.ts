@@ -97,4 +97,3 @@ export const PLANS: Plan[] = [
     isFreeTrial: false,
   },
 ];
-

@@ -77,8 +77,9 @@ function PaymentSuccessContent() {
 
             <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>What&apos;s next?</strong> You can now access all features
-                of your plan. Check your email for the confirmation and receipt.
+                <strong>What&apos;s next?</strong> You can now access all
+                features of your plan. Check your email for the confirmation and
+                receipt.
               </p>
             </div>
 
@@ -108,13 +109,14 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
+        </div>
+      }
+    >
       <PaymentSuccessContent />
     </Suspense>
   );
 }
-
