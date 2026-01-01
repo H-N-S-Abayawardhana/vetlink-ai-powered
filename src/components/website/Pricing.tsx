@@ -2,74 +2,15 @@
 
 import { motion } from "framer-motion";
 import { CheckCircle, Sparkles, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { PLANS } from "@/types/plans";
 
 export default function Pricing() {
-  const plans = [
-    {
-      name: "Pet Owners",
-      subtitle: "B2C SAAS",
-      price: "Free",
-      priceSubtext: "Basic Plan",
-      premiumPrice: "LKR 2,400",
-      premiumSubtext: "Premium Monthly",
-      features: [
-        "AI skin disease detection",
-        "Behavioral tracking & alerts",
-        "Personalized diet plans",
-        "Nearby pharmacy finder",
-        "Health score dashboard",
-      ],
-      extra: {
-        title: "Tele-vet Consultations",
-        description: "LKR 4,500 - 7,500 per session",
-      },
-      cta: "Start Free Trial",
-      popular: false,
-      color: "indigo",
-    },
-    {
-      name: "Pet Pharmacies",
-      subtitle: "B2B COMMERCE",
-      price: "LKR 10K",
-      priceSubtext: "Monthly Subscription",
-      features: [
-        "Inventory management",
-        "Real-time clinic integration",
-        "AI demand forecasting",
-        "Automated reordering",
-        "Targeted promotions",
-      ],
-      extra: {
-        title: "Revenue Share",
-        description: "SaaS License + 3% transaction commission",
-      },
-      cta: "Contact Sales",
-      popular: true,
-      color: "indigo",
-    },
-    {
-      name: "Veterinary Clinics",
-      subtitle: "B2B PROFESSIONAL",
-      price: "Starting",
-      priceSubtext: "",
-      premiumPrice: "LKR 20K",
-      premiumSubtext: "Monthly Subscription",
-      features: [
-        "AI-assisted diagnostics",
-        "Patient health records",
-        "Analytics dashboard",
-        "Pharmacy integration",
-        "Multi-branch support",
-      ],
-      extra: {
-        title: "Tiered SaaS",
-        description: "Flexible pricing based on clinic size",
-      },
-      cta: "Get Custom Quote",
-      popular: false,
-      color: "teal",
-    },
-  ];
+  const router = useRouter();
+
+  const handlePlanClick = (planId: string) => {
+    router.push(`/plans/${planId}`);
+  };
 
   return (
     <section
@@ -115,7 +56,7 @@ export default function Pricing() {
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {plans.map((plan, index) => (
+          {PLANS.map((plan, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
@@ -254,6 +195,7 @@ export default function Pricing() {
 
                 {/* CTA Button */}
                 <motion.button
+                  onClick={() => handlePlanClick(plan.id)}
                   className={`w-full rounded-xl py-3.5 font-semibold transition-all duration-200 ${
                     plan.popular
                       ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
