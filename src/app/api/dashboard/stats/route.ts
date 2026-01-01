@@ -73,24 +73,77 @@ export async function GET(request: NextRequest) {
       stats.registeredPetOwners = 0;
     }
 
-    // AI Analyses (scan count) - sum of JSON array lengths in pets.skin_disease_history
-    // For USER: only their pets; for SUPER_ADMIN/VETERINARIAN: all pets.
+    // AI Analyses - Combined count of:
+    // 1. Skin disease detection (pets.skin_disease_history)
+    // 2. Limping detection (pets.limping_history)
+    // 3. Disease predictions (multi_disease_analyses table)
+    // For USER: only their pets/analyses; for SUPER_ADMIN/VETERINARIAN: all.
     try {
+      let skinDiseaseCount = 0;
+      let limpingCount = 0;
+      let diseasePredictionCount = 0;
+
       if (userRole === "SUPER_ADMIN" || userRole === "VETERINARIAN") {
-        const res = await pool.query(
+        // Count skin disease analyses
+        const skinRes = await pool.query(
           `SELECT COALESCE(SUM(jsonb_array_length(COALESCE(skin_disease_history, '[]'::jsonb))), 0) AS count
            FROM pets`,
         );
-        stats.aiAnalyses = parseInt(res.rows[0].count, 10) || 0;
+        skinDiseaseCount = parseInt(skinRes.rows[0].count, 10) || 0;
+
+        // Count limping detection analyses
+        const limpingRes = await pool.query(
+          `SELECT COALESCE(SUM(jsonb_array_length(COALESCE(limping_history, '[]'::jsonb))), 0) AS count
+           FROM pets`,
+        );
+        limpingCount = parseInt(limpingRes.rows[0].count, 10) || 0;
+
+        // Count disease predictions (multi_disease_analyses table)
+        try {
+          const diseaseRes = await pool.query(
+            `SELECT COUNT(*) AS count FROM multi_disease_analyses`,
+          );
+          diseasePredictionCount = parseInt(diseaseRes.rows[0].count, 10) || 0;
+        } catch (e) {
+          // Table might not exist yet, ignore error
+          console.warn("multi_disease_analyses table not found or error:", e);
+          diseasePredictionCount = 0;
+        }
       } else {
-        const res = await pool.query(
+        // Count skin disease analyses for user's pets only
+        const skinRes = await pool.query(
           `SELECT COALESCE(SUM(jsonb_array_length(COALESCE(skin_disease_history, '[]'::jsonb))), 0) AS count
            FROM pets
            WHERE owner_id::text = $1`,
           [session.user.id],
         );
-        stats.aiAnalyses = parseInt(res.rows[0].count, 10) || 0;
+        skinDiseaseCount = parseInt(skinRes.rows[0].count, 10) || 0;
+
+        // Count limping detection analyses for user's pets only
+        const limpingRes = await pool.query(
+          `SELECT COALESCE(SUM(jsonb_array_length(COALESCE(limping_history, '[]'::jsonb))), 0) AS count
+           FROM pets
+           WHERE owner_id::text = $1`,
+          [session.user.id],
+        );
+        limpingCount = parseInt(limpingRes.rows[0].count, 10) || 0;
+
+        // Count disease predictions for user only
+        try {
+          const diseaseRes = await pool.query(
+            `SELECT COUNT(*) AS count FROM multi_disease_analyses WHERE user_id = $1`,
+            [session.user.id],
+          );
+          diseasePredictionCount = parseInt(diseaseRes.rows[0].count, 10) || 0;
+        } catch (e) {
+          // Table might not exist yet, ignore error
+          console.warn("multi_disease_analyses table not found or error:", e);
+          diseasePredictionCount = 0;
+        }
       }
+
+      // Sum all AI analyses
+      stats.aiAnalyses = skinDiseaseCount + limpingCount + diseasePredictionCount;
     } catch (e) {
       console.error("Error calculating aiAnalyses:", e);
       stats.aiAnalyses = 0;

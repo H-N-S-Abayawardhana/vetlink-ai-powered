@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
-import { uploadImageToS3, deleteMultipleFromS3ByUrls, isS3Url } from "@/lib/s3";
+import { uploadImageToS3, deleteMultipleFromS3ByUrls, isS3Url, isLocalUrl } from "@/lib/s3";
 
 export const runtime = "nodejs";
 
@@ -245,19 +245,20 @@ export async function DELETE(
     const row = result.rows?.[0];
     const history = ensureArray(row?.skin_disease_history);
 
-    const s3UrlsToDelete: string[] = [];
+    const urlsToDelete: string[] = [];
     history.forEach((record: any) => {
-      if (record?.imageUrl && isS3Url(record.imageUrl)) {
-        s3UrlsToDelete.push(record.imageUrl);
+      if (record?.imageUrl && (isS3Url(record.imageUrl) || isLocalUrl(record.imageUrl))) {
+        urlsToDelete.push(record.imageUrl);
       }
     });
 
-    // Delete all S3 images
-    if (s3UrlsToDelete.length > 0) {
+    // Delete all images (S3 or local)
+    if (urlsToDelete.length > 0) {
       try {
-        const deletedCount = await deleteMultipleFromS3ByUrls(s3UrlsToDelete);
+        const deletedCount = await deleteMultipleFromS3ByUrls(urlsToDelete);
+        console.log(`Deleted ${deletedCount} of ${urlsToDelete.length} images`);
       } catch (e) {
-        console.error("Error deleting S3 images:", e);
+        console.error("Error deleting images:", e);
       }
     }
 
