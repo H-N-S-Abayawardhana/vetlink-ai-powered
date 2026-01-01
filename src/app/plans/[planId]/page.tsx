@@ -84,8 +84,11 @@ export default function PlanDetailsPage() {
         items: plan.name,
         amount: formattedAmount,
         currency: data.currency,
-        first_name: (session?.user?.username || "Customer").split(" ")[0] || "Customer",
-        last_name: (session?.user?.username || "").split(" ").slice(1).join(" ") || "User",
+        first_name:
+          (session?.user?.username || "Customer").split(" ")[0] || "Customer",
+        last_name:
+          (session?.user?.username || "").split(" ").slice(1).join(" ") ||
+          "User",
         email: session?.user?.email || "customer@example.com",
         phone: "0771234567",
         address: "No 123, Main Street",
@@ -176,9 +179,7 @@ export default function PlanDetailsPage() {
             <div className="flex items-center gap-4 mb-4">
               <div
                 className={`h-16 w-16 rounded-2xl flex items-center justify-center ${
-                  plan.color === "indigo"
-                    ? "bg-indigo-600"
-                    : "bg-teal-600"
+                  plan.color === "indigo" ? "bg-indigo-600" : "bg-teal-600"
                 }`}
               >
                 <Sparkles className="h-8 w-8 text-white" />
@@ -324,4 +325,3 @@ export default function PlanDetailsPage() {
     </div>
   );
 }
-

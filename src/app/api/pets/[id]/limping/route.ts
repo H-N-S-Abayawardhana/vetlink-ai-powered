@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
-import { uploadVideoToS3, deleteMultipleFromS3ByUrls, isS3Url, isLocalUrl } from "@/lib/s3";
+import {
+  uploadVideoToS3,
+  deleteMultipleFromS3ByUrls,
+  isS3Url,
+  isLocalUrl,
+} from "@/lib/s3";
 
 export const runtime = "nodejs";
 
@@ -381,7 +386,10 @@ export async function DELETE(
 
     const urlsToDelete: string[] = [];
     history.forEach((record: any) => {
-      if (record?.videoUrl && (isS3Url(record.videoUrl) || isLocalUrl(record.videoUrl))) {
+      if (
+        record?.videoUrl &&
+        (isS3Url(record.videoUrl) || isLocalUrl(record.videoUrl))
+      ) {
         urlsToDelete.push(record.videoUrl);
       }
     });
