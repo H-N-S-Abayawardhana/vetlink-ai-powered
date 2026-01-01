@@ -77,7 +77,7 @@ function PaymentSuccessContent() {
 
             <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>What's next?</strong> You can now access all features
+                <strong>What&apos;s next?</strong> You can now access all features
                 of your plan. Check your email for the confirmation and receipt.
               </p>
             </div>

@@ -225,7 +225,7 @@ export default function PlanDetailsPage() {
             {/* Features */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                What's Included
+                What&apos;s Included
               </h2>
               <div className="space-y-4">
                 {plan.features.map((feature, index) => (
