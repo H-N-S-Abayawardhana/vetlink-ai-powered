@@ -221,7 +221,7 @@ export default function DietPage() {
           <div className="p-6 space-y-6">
             {/* Carousel Navigation */}
             <div
-              className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide"
+              className="flex items-center justify-center gap-4 overflow-x-auto pb-4 scrollbar-hide"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {pets.map((p: any) => (
@@ -434,7 +434,7 @@ export default function DietPage() {
                     onClick={() =>
                       router.push(`/dashboard/pets/bcs?petId=${pet.id}`)
                     }
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md transition-all duration-200 transform hover:scale-105"
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md transition-all duration-200"
                   >
                     Calculate BCS
                   </button>
@@ -447,7 +447,7 @@ export default function DietPage() {
               <button
                 onClick={loadPlan}
                 disabled={!pet || loadingPlan || !pet.bcs}
-                className="flex-1 min-w-[200px] bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-300 disabled:to-gray-400 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 min-w-[200px] bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-300 disabled:to-gray-400 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loadingPlan ? (
                   <>
@@ -466,7 +466,7 @@ export default function DietPage() {
                 <>
                   <button
                     onClick={downloadPdf}
-                    className="min-w-[180px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center gap-2 cursor-pointer"
+                    className="min-w-[180px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center gap-2 cursor-pointer"
                   >
                     <Download className="w-5 h-5" />
                     Download PDF
