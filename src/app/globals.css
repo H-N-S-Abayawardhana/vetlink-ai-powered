@@ -1,3 +1,10 @@
+/* BCS Calculator Button Custom Hover */
+.bcs-calc-btn:hover:enabled {
+  background: linear-gradient(to right, #4338ca, #7c3aed);
+  /* from-indigo-700 to-purple-700 */
+  box-shadow: 0 8px 32px 0 rgba(76, 29, 149, 0.15);
+  /* No transform/scale on hover */
+}
 @import "tailwindcss";
 
 :root {

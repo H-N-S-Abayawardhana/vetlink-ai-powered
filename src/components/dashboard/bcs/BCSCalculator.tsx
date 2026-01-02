@@ -364,9 +364,9 @@ export default function BCSCalculator() {
               <button
                 onClick={handleCalculate}
                 disabled={!canCalculate || loading}
-                className={`mt-8 w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 ${
+                className={`mt-8 w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 bcs-calc-btn ${
                   canCalculate && !loading
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg cursor-pointer"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >
