@@ -1,6 +1,6 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_DOG_SKIN_DISEASE_ML_API_URL ||
-  "https://niwarthana-skin-disease-detection-of-dogs.hf.space";
+  "https://niwazzz-severity-based-detection-api.hf.space";
 
 export interface ParsedDisease {
   disease: string;
@@ -27,7 +27,7 @@ export interface PredictionResult {
  * Parse disease name to extract disease type and severity
  */
 export function parseDiseaseName(fullName: string): ParsedDisease {
-  // Handle healthy case (no severity)
+  // Handle healthy case
   if (fullName.toLowerCase() === "healthy") {
     return {
       disease: "Healthy",
@@ -36,14 +36,13 @@ export function parseDiseaseName(fullName: string): ParsedDisease {
     };
   }
 
-  // Split by "/" to separate disease and severity
   const parts = fullName.split("/");
 
   if (parts.length === 2) {
     const diseasePart = parts[0];
     const severityPart = parts[1].toLowerCase();
 
-    // Format disease name (replace underscores with spaces, capitalize)
+    // Format disease name
     const disease = diseasePart
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -86,14 +85,13 @@ export interface HealthCheckResult {
 }
 
 export class MLApiService {
-  /**
-   * Upload and predict from file
-   * Uses the new FastAPI endpoint
-   */
+
+    // Upload and predict from file
+
   static async predictFromFile(file: File): Promise<PredictionResult> {
     try {
       const formData = new FormData();
-      formData.append("file", file); // FastAPI expects "file" parameter
+      formData.append("file", file);
 
       const response = await fetch(`${API_BASE_URL}/api/predict`, {
         method: "POST",
@@ -106,14 +104,13 @@ export class MLApiService {
           const errorData = await response.json();
           errorMessage = errorData.detail || errorData.error || errorMessage;
         } catch {
-          // If response is not JSON, try text
           try {
             const errorText = await response.text();
             if (errorText && errorText.length < 200) {
               errorMessage = errorText;
             }
           } catch {
-            // Ignore
+            // Ignore error
           }
         }
         throw new Error(errorMessage);
@@ -141,15 +138,10 @@ export class MLApiService {
     }
   }
 
-  /**
-   * Predict from base64 image (useful for camera capture)
-   * Converts base64 to File and uses the same API endpoint
-   */
   static async predictFromBase64(
     base64Image: string,
   ): Promise<PredictionResult> {
     try {
-      // Convert base64 to File
       const base64Data = base64Image.startsWith("data:")
         ? base64Image.split(",")[1]
         : base64Image;
@@ -163,7 +155,6 @@ export class MLApiService {
       const blob = new Blob([byteArray], { type: "image/jpeg" });
       const file = new File([blob], "image.jpg", { type: "image/jpeg" });
 
-      // Use the same API endpoint
       return this.predictFromFile(file);
     } catch (error) {
       console.error("Error predicting from base64:", error);
@@ -174,10 +165,9 @@ export class MLApiService {
     }
   }
 
-  /**
-   * Check if API is healthy
-   * Uses the new FastAPI /health endpoint
-   */
+ 
+   // Check if API is healthy
+
   static async healthCheck(): Promise<HealthCheckResult> {
     try {
       const response = await fetch(`${API_BASE_URL}/health`, {
@@ -190,7 +180,6 @@ export class MLApiService {
 
       const data = await response.json();
 
-      // Map FastAPI response to our interface
       return {
         status: data.status || "healthy",
         model_loaded: data.model_loaded !== false,
