@@ -216,7 +216,7 @@ export default function DietPage() {
         </div>
 
         {/* Pet Selection - Carousel/Slider Design */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div id="pet-selection-section" className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
             <h2 className="text-xl font-semibold text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
@@ -451,40 +451,28 @@ export default function DietPage() {
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={loadPlan}
-                disabled={!pet || loadingPlan || !pet.bcs}
-                className="flex-1 min-w-[200px] bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-300 disabled:to-gray-400 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {loadingPlan ? (
-                  <>
-                    <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-5 h-5" />
-                    Generate Diet Recommendation
-                  </>
-                )}
-              </button>
-
-              {plan && (
-                <>
-                  <button
-                    onClick={downloadPdf}
-                    className="min-w-[180px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center gap-2 cursor-pointer"
-                  >
-                    <Download className="w-5 h-5" />
-                    Download PDF
-                  </button>
-
-                  {/* Save Plan removed — persisted via API automatically or via admin tools */}
-                </>
-              )}
-            </div>
+            {/* Action Buttons (only show here if plan is not generated) */}
+            {!plan && (
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={loadPlan}
+                  disabled={!pet || loadingPlan || !pet.bcs}
+                  className="flex-1 min-w-[200px] bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-gray-300 disabled:to-gray-400 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {loadingPlan ? (
+                    <>
+                      <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-5 h-5" />
+                      Generate Diet Recommendation
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -609,7 +597,7 @@ export default function DietPage() {
 
               {/* Notes */}
               {plan.notes && plan.notes.length > 0 && (
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-200">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-200 mb-6">
                   <h3 className="font-bold text-gray-800 text-lg mb-3">
                     Important Notes
                   </h3>
@@ -626,6 +614,55 @@ export default function DietPage() {
                   </ul>
                 </div>
               )}
+
+              {/* Action Buttons at the very bottom after notes */}
+              <div className="flex flex-wrap gap-3 justify-end pt-6">
+                <button
+                  onClick={() => {
+                    const petSelect = document.getElementById('pet-selection-section');
+                    if (petSelect) {
+                      petSelect.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    setPlan(null);
+                  }}
+                  className="flex-1 min-w-[200px] px-4 sm:px-6 py-3 sm:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base cursor-pointer"
+                >
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  <span className="whitespace-nowrap">Select Another Pet</span>
+                </button>
+
+                <button
+                  onClick={downloadPdf}
+                  className="flex-1 min-w-[200px] px-4 sm:px-6 py-3 sm:py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base cursor-pointer"
+                >
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="whitespace-nowrap">Download PDF</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
