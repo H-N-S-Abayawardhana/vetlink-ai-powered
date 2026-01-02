@@ -16,8 +16,8 @@ import { listPets, type Pet } from "@/lib/pets";
 import Image from "next/image";
 
 export default function DietPage() {
-    // Ref for the results section
-    const resultsRef = useRef<HTMLDivElement | null>(null);
+  // Ref for the results section
+  const resultsRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const [pets, setPets] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -216,7 +216,10 @@ export default function DietPage() {
         </div>
 
         {/* Pet Selection - Carousel/Slider Design */}
-        <div id="pet-selection-section" className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div
+          id="pet-selection-section"
+          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
+        >
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
             <h2 className="text-xl font-semibold text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
@@ -478,7 +481,10 @@ export default function DietPage() {
 
         {/* Diet Plan Results */}
         {plan && (
-          <div ref={resultsRef} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div
+            ref={resultsRef}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
+          >
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <TrendingUp className="w-6 h-6" />
@@ -619,9 +625,14 @@ export default function DietPage() {
               <div className="flex flex-wrap gap-3 justify-end pt-6">
                 <button
                   onClick={() => {
-                    const petSelect = document.getElementById('pet-selection-section');
+                    const petSelect = document.getElementById(
+                      "pet-selection-section",
+                    );
                     if (petSelect) {
-                      petSelect.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      petSelect.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
                     }
                     setPlan(null);
                   }}

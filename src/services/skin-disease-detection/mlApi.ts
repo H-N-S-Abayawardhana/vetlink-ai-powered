@@ -85,8 +85,7 @@ export interface HealthCheckResult {
 }
 
 export class MLApiService {
-
-    // Upload and predict from file
+  // Upload and predict from file
 
   static async predictFromFile(file: File): Promise<PredictionResult> {
     try {
@@ -165,8 +164,7 @@ export class MLApiService {
     }
   }
 
- 
-   // Check if API is healthy
+  // Check if API is healthy
 
   static async healthCheck(): Promise<HealthCheckResult> {
     try {
