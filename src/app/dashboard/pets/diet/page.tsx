@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Download,
@@ -16,6 +16,8 @@ import { listPets, type Pet } from "@/lib/pets";
 import Image from "next/image";
 
 export default function DietPage() {
+    // Ref for the results section
+    const resultsRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const [pets, setPets] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -69,6 +71,13 @@ export default function DietPage() {
       setLoadingPlan(false);
     }
   };
+
+  // Scroll to results when plan is set
+  useEffect(() => {
+    if (plan && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [plan]);
 
   const downloadPdf = () => {
     if (!plan) return alert("No plan to download");
@@ -481,7 +490,7 @@ export default function DietPage() {
 
         {/* Diet Plan Results */}
         {plan && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div ref={resultsRef} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <TrendingUp className="w-6 h-6" />
