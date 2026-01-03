@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Brain, ExternalLink, Github } from "lucide-react";
+import { Brain } from "lucide-react";
 
 export default function Footer() {
   const footerLinks = {
@@ -13,38 +13,13 @@ export default function Footer() {
       { name: "Pharmacy Forecasting", href: "/dashboard/pharmacy" },
       { name: "Health Assessment (BCS)", href: "/dashboard/pets/bcs" },
     ],
-    resources: [
-      {
-        name: "Live Demo",
-        href: "https://vet-link.vercel.app/",
-        external: true,
-      },
-      {
-        name: "GitHub Repository",
-        href: "https://github.com/H-N-S-Abayawardhana/vetlink-ai-powered",
-        external: true,
-      },
-      {
-        name: "Architecture Diagram",
-        href: "https://drive.google.com/file/d/1qwxUK4363bIKMenpspJjJ22fCEM8bsJa/view?usp=sharing",
-        external: true,
-      },
-      { name: "Deployments", href: "#deployments", external: false },
+    support: [
+      { name: "Contact Us", href: "#contact" },
+      { name: "Help Center", href: "#" },
+      { name: "Privacy Policy", href: "#" },
+      { name: "Terms of Service", href: "#" },
     ],
   };
-
-  const quickLinks = [
-    {
-      name: "Live Demo",
-      href: "https://vet-link.vercel.app/",
-      icon: ExternalLink,
-    },
-    {
-      name: "GitHub",
-      href: "https://github.com/H-N-S-Abayawardhana/vetlink-ai-powered",
-      icon: Github,
-    },
-  ];
 
   return (
     <footer className="relative overflow-hidden bg-gradient-to-b from-white to-gray-50/50 text-gray-900 py-16 sm:py-20 border-t border-gray-200/60">
@@ -89,22 +64,6 @@ export default function Footer() {
               AI-powered pet healthcare platform for skin disease detection,
               mobility analysis, pharmacy forecasting, and health assessment.
             </p>
-            <div className="flex space-x-3">
-              {quickLinks.map((link, index) => (
-                <motion.a
-                  key={index}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-xl p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all ring-1 ring-transparent hover:ring-indigo-200/50 cursor-pointer"
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  aria-label={link.name}
-                >
-                  <link.icon className="w-5 h-5" />
-                </motion.a>
-              ))}
-            </div>
           </div>
 
           {/* Modules */}
@@ -139,35 +98,24 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Support */}
           <div>
             <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              Resources
+              Support
             </h4>
             <ul className="space-y-3">
-              {footerLinks.resources.map((link, index) => (
+              {footerLinks.support.map((link, index) => (
                 <motion.li
                   key={index}
                   whileHover={{ x: 4 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  {link.external ? (
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
-                    >
-                      {link.name}
-                    </a>
-                  ) : (
-                    <a
-                      href={link.href}
-                      className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
-                    >
-                      {link.name}
-                    </a>
-                  )}
+                  <a
+                    href={link.href}
+                    className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
+                  >
+                    {link.name}
+                  </a>
                 </motion.li>
               ))}
             </ul>
@@ -188,12 +136,6 @@ export default function Footer() {
               >
                 Create an account
               </Link>
-              <a
-                href="#deployments"
-                className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 ring-1 ring-gray-200/60 hover:ring-indigo-200/60 hover:bg-gray-50 transition-all cursor-pointer"
-              >
-                View deployments
-              </a>
             </div>
           </div>
         </div>
