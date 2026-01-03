@@ -16,38 +16,36 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      pharmacy_id,
       medicine_id,
       price,
       inventory_level,
       expiry_days,
-      location_lat_x,
-      location_long_x,
+      location_lat,
+      location_long,
       promotion_flag,
-      // Optional fields
-      inventory_id,
-      current_stock,
-      reorder_level,
-      supplier_lead_time_days,
-      location_lat_y,
-      location_long_y,
-      delivery_available,
-      pickup_available,
-      price_markup_factor,
-      total_prescribed_qty,
-      avg_urgency,
+      sales_lag_1,
+      sales_lag_3,
+      sales_lag_7,
+      sales_lag_14,
+      sales_rolling_mean_7,
+      sales_rolling_mean_14,
     } = body;
 
     // Validate required fields
     if (
-      pharmacy_id === undefined ||
       medicine_id === undefined ||
       price === undefined ||
       inventory_level === undefined ||
       expiry_days === undefined ||
-      location_lat_x === undefined ||
-      location_long_x === undefined ||
-      promotion_flag === undefined
+      location_lat === undefined ||
+      location_long === undefined ||
+      promotion_flag === undefined ||
+      sales_lag_1 === undefined ||
+      sales_lag_3 === undefined ||
+      sales_lag_7 === undefined ||
+      sales_lag_14 === undefined ||
+      sales_rolling_mean_7 === undefined ||
+      sales_rolling_mean_14 === undefined
     ) {
       return NextResponse.json(
         { error: "All required fields must be provided" },
@@ -57,44 +55,19 @@ export async function POST(request: NextRequest) {
 
     // Prepare input for demand prediction API
     const input: PharmacyDemandInput = {
-      pharmacy_id: Number(pharmacy_id),
-      medicine_id: Number(medicine_id),
+      medicine_id: String(medicine_id),
       price: Number(price),
       inventory_level: Number(inventory_level),
       expiry_days: Number(expiry_days),
-      location_lat_x: Number(location_lat_x),
-      location_long_x: Number(location_long_x),
+      location_lat: Number(location_lat),
+      location_long: Number(location_long),
       promotion_flag: Number(promotion_flag),
-      // Optional fields
-      inventory_id:
-        inventory_id !== undefined ? Number(inventory_id) : undefined,
-      current_stock:
-        current_stock !== undefined ? Number(current_stock) : undefined,
-      reorder_level:
-        reorder_level !== undefined ? Number(reorder_level) : undefined,
-      supplier_lead_time_days:
-        supplier_lead_time_days !== undefined
-          ? Number(supplier_lead_time_days)
-          : undefined,
-      location_lat_y:
-        location_lat_y !== undefined ? Number(location_lat_y) : undefined,
-      location_long_y:
-        location_long_y !== undefined ? Number(location_long_y) : undefined,
-      delivery_available:
-        delivery_available !== undefined
-          ? Number(delivery_available)
-          : undefined,
-      pickup_available:
-        pickup_available !== undefined ? Number(pickup_available) : undefined,
-      price_markup_factor:
-        price_markup_factor !== undefined
-          ? Number(price_markup_factor)
-          : undefined,
-      total_prescribed_qty:
-        total_prescribed_qty !== undefined
-          ? Number(total_prescribed_qty)
-          : undefined,
-      avg_urgency: avg_urgency !== undefined ? Number(avg_urgency) : undefined,
+      sales_lag_1: Number(sales_lag_1),
+      sales_lag_3: Number(sales_lag_3),
+      sales_lag_7: Number(sales_lag_7),
+      sales_lag_14: Number(sales_lag_14),
+      sales_rolling_mean_7: Number(sales_rolling_mean_7),
+      sales_rolling_mean_14: Number(sales_rolling_mean_14),
     };
 
     // Call Hugging Face pharmacy demand prediction API
@@ -104,9 +77,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
+    // Return HTML if available (from Gradio model), otherwise return prediction number
     return NextResponse.json({
       success: true,
       prediction: result.prediction,
+      html: result.html || (result.prediction ? null : null), // HTML output from model
     });
   } catch (error) {
     console.error("Error predicting pharmacy demand:", error);
