@@ -46,10 +46,7 @@ export async function GET(request: NextRequest) {
     const pharmacy = pharmacyCheck.rows[0];
     const userRole = (session.user as any)?.userRole || "USER";
 
-    if (
-      pharmacy.owner_id !== session.user.id &&
-      userRole !== "SUPER_ADMIN"
-    ) {
+    if (pharmacy.owner_id !== session.user.id && userRole !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -249,10 +246,7 @@ export async function POST(request: NextRequest) {
     const pharmacy = pharmacyCheck.rows[0];
     const userRole = (session.user as any)?.userRole || "USER";
 
-    if (
-      pharmacy.owner_id !== session.user.id &&
-      userRole !== "SUPER_ADMIN"
-    ) {
+    if (pharmacy.owner_id !== session.user.id && userRole !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -305,4 +299,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
