@@ -2,27 +2,33 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { CheckCircle, Sparkles, Brain, Shield, Heart } from "lucide-react";
+import { Sparkles, Brain, Shield, Heart, Database } from "lucide-react";
 
 export default function About() {
   const benefits = [
     {
       icon: Brain,
-      title: "24/7 Health Monitoring",
+      title: "Explainable AI Guidance",
       description:
-        "Continuous monitoring and instant alerts for any health concerns",
+        "Predictions are paired with user-friendly, non-clinical explanations and basic care tips to improve trust and interpretability.",
     },
     {
       icon: Shield,
-      title: "AI-Powered Diagnostics",
+      title: "Service-Oriented Architecture",
       description:
-        "Advanced machine learning algorithms for accurate health assessments",
+        "Frontend, inference services, LLM guidance, and storage are separated for scalability and future extension into advanced multimodal use cases.",
+    },
+    {
+      icon: Database,
+      title: "History & Tracking",
+      description:
+        "When a pet is registered, analyses can be stored to build a longitudinal health record (assets in S3, metadata in PostgreSQL).",
     },
     {
       icon: Heart,
-      title: "Personalized Care Plans",
+      title: "Mobile-First UX",
       description:
-        "Tailored recommendations based on your pet's unique needs and health history",
+        "Designed to be highly mobile-friendly across smartphones, tablets, and desktops—so owners can capture images/videos anywhere.",
     },
   ];
 
@@ -81,9 +87,9 @@ export default function About() {
               </span>
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
-              VetLink represents the future of pet healthcare, combining
-              cutting-edge artificial intelligence with veterinary expertise to
-              provide comprehensive, personalized care for your beloved pets.
+              VetLink combines computer vision, ML-based risk prediction, and an
+              LLM guidance layer to deliver practical, explainable pet-health
+              insights—plus cloud-native storage for real-world usability.
             </p>
 
             <div className="space-y-5">
