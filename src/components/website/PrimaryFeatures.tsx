@@ -3,47 +3,46 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
-  CalendarDays,
   FileText,
-  Headset,
-  MessageCircle,
-  ArrowRight,
+  Activity,
+  LineChart,
+  ScanFace,
 } from "lucide-react";
 
 export default function PrimaryFeatures() {
   const features = [
     {
-      icon: CalendarDays,
-      title: "Appointment Scheduling",
+      icon: ScanFace,
+      title: "Skin Disease Detection Workflow",
       description:
-        "Book vet appointments instantly with smart scheduling and automated reminders.",
+        "Upload or capture a skin image → detect disease type → classify severity (mild/severe) → show explainable guidance cards → optionally save to pet history (S3 + DB).",
       image:
         "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       color: "indigo",
     },
     {
-      icon: FileText,
-      title: "Digital Health Records",
+      icon: Activity,
+      title: "Mobility & Limping Analysis Workflow",
       description:
-        "Maintain comprehensive digital health records and track medical history securely.",
+        "Upload a 30–60 second walking video → limping detection + confidence → gait symmetry indices and stride lengths → disease risk prediction from questionnaire inputs → history tracking.",
       image:
         "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       color: "teal",
     },
     {
-      icon: Headset,
-      title: "24/7 Emergency Support",
+      icon: LineChart,
+      title: "Pharmacy Forecasting Workflow",
       description:
-        "Get instant access to emergency veterinary support and first aid guidance.",
+        "Fetch inventory + product data → predict future sales demand → estimate days until stockout → recommend reorder quantity → generate priority-based restocking alerts (CRITICAL → LOW).",
       image:
         "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       color: "indigo",
     },
     {
-      icon: MessageCircle,
-      title: "Expert Vet Consultation",
+      icon: FileText,
+      title: "Health Assessment + Diet Plan Workflow",
       description:
-        "Connect with certified veterinarians for professional advice and remote diagnosis.",
+        "Register a pet profile → predict Body Condition Score (BCS) and multi-disease risks → generate a diet plan using age/weight/activity/preferences → save results for long-term monitoring.",
       image:
         "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       color: "teal",
@@ -81,14 +80,14 @@ export default function PrimaryFeatures() {
           className="text-center mb-16 sm:mb-20"
         >
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
-            Essential{" "}
+            How Each{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-teal-600 bg-clip-text text-transparent">
-              Care Services
+              Module Works
             </span>
           </h2>
           <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Essential pet care services that form the foundation of
-            comprehensive veterinary healthcare
+            Real workflows implemented in the platform—built around explainable
+            outputs, history tracking, and actionable recommendations.
           </p>
         </motion.div>
 
