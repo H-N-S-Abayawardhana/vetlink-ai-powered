@@ -2,12 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  FileText,
-  Activity,
-  LineChart,
-  ScanFace,
-} from "lucide-react";
+import { FileText, Activity, LineChart, ScanFace } from "lucide-react";
 
 export default function PrimaryFeatures() {
   const features = [

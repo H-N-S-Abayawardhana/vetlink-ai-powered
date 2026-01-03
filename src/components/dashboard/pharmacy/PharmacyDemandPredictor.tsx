@@ -47,7 +47,9 @@ export default function PharmacyDemandPredictor() {
   const [batchStatus, setBatchStatus] = useState<string>("");
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'info'>('single');
+  const [activeTab, setActiveTab] = useState<"single" | "batch" | "info">(
+    "single",
+  );
 
   // Fetch pharmacy data and medicine options
   useEffect(() => {
@@ -105,7 +107,7 @@ export default function PharmacyDemandPredictor() {
   // Fetch medicine data when Medicine ID is selected
   const handleMedicineIdChange = async (selectedMedicineId: string) => {
     setMedicineId(selectedMedicineId);
-    
+
     if (!selectedMedicineId || !pharmacy?.id) {
       return;
     }
@@ -198,7 +200,9 @@ export default function PharmacyDemandPredictor() {
         setPrediction(data.html);
       } else if (data.prediction) {
         // Fallback: if only prediction number is returned, create a simple display
-        setPrediction(`<div style="padding: 20px; text-align: center;"><h3>Predicted Sales: ${data.prediction} units</h3></div>`);
+        setPrediction(
+          `<div style="padding: 20px; text-align: center;"><h3>Predicted Sales: ${data.prediction} units</h3></div>`,
+        );
       } else {
         setPrediction("No prediction result received");
       }
@@ -239,7 +243,9 @@ export default function PharmacyDemandPredictor() {
       }
 
       setBatchResult(data.downloadUrl || data.file);
-      setBatchStatus(`✓ Processed ${data.count || 'multiple'} medicines successfully!`);
+      setBatchStatus(
+        `✓ Processed ${data.count || "multiple"} medicines successfully!`,
+      );
     } catch (err) {
       setBatchStatus(
         err instanceof Error
@@ -276,12 +282,13 @@ export default function PharmacyDemandPredictor() {
           <h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2">
             <span>🏥</span>
             Pharmacy Sales Prediction & Inventory Optimization
-        </h2>
+          </h2>
           <p className="text-blue-100 text-sm">
             Powered by XGBoost Machine Learning Model
           </p>
           <p className="text-blue-100 text-xs mt-2">
-            This application predicts pharmaceutical sales demand and provides intelligent inventory management recommendations.
+            This application predicts pharmaceutical sales demand and provides
+            intelligent inventory management recommendations.
           </p>
         </div>
       </div>
@@ -300,58 +307,62 @@ export default function PharmacyDemandPredictor() {
             <nav className="flex">
               <button
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                  activeTab === 'single'
-                    ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "single"
+                    ? "border-indigo-500 text-indigo-600 bg-indigo-50"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
-                onClick={() => setActiveTab('single')}
+                onClick={() => setActiveTab("single")}
               >
                 📊 Single Prediction
               </button>
               <button
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                  activeTab === 'batch'
-                    ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "batch"
+                    ? "border-indigo-500 text-indigo-600 bg-indigo-50"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
-                onClick={() => setActiveTab('batch')}
+                onClick={() => setActiveTab("batch")}
               >
                 📁 Batch Prediction
               </button>
               <button
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                  activeTab === 'info'
-                    ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "info"
+                    ? "border-indigo-500 text-indigo-600 bg-indigo-50"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
-                onClick={() => setActiveTab('info')}
+                onClick={() => setActiveTab("info")}
               >
                 ℹ️ Model Information
               </button>
             </nav>
-            </div>
+          </div>
 
           {/* Tab Content */}
           <div className="p-6">
             {/* Single Prediction Tab */}
-            {activeTab === 'single' && (
+            {activeTab === "single" && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Enter medicine details for sales prediction</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Enter medicine details for sales prediction
+                  </h3>
 
                   {/* Medicine Details Row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Medicine ID *
-              </label>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Medicine ID *
+                        </label>
                         <div className="relative">
                           <select
-                value={medicineId}
-                            onChange={(e) => handleMedicineIdChange(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                required
+                            value={medicineId}
+                            onChange={(e) =>
+                              handleMedicineIdChange(e.target.value)
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            required
                             disabled={loadingMedicineData}
                           >
                             <option value="">Select Medicine ID</option>
@@ -374,80 +385,88 @@ export default function PharmacyDemandPredictor() {
                               : "✓ Data auto-populated from database"}
                           </p>
                         )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Price *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Price per unit"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Current Inventory *
-              </label>
-              <input
-                type="number"
-                value={inventoryLevel}
-                onChange={(e) => setInventoryLevel(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Current stock level"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Days to Expiry *
-              </label>
-              <input
-                type="number"
-                value={expiryDays}
-                onChange={(e) => setExpiryDays(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Days until expiration"
-                required
-              />
                       </div>
-            </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Price *
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={price}
+                          onChange={(e) => setPrice(Number(e.target.value))}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="Price per unit"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Current Inventory *
+                        </label>
+                        <input
+                          type="number"
+                          value={inventoryLevel}
+                          onChange={(e) =>
+                            setInventoryLevel(Number(e.target.value))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="Current stock level"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Days to Expiry *
+                        </label>
+                        <input
+                          type="number"
+                          value={expiryDays}
+                          onChange={(e) =>
+                            setExpiryDays(Number(e.target.value))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="Days until expiration"
+                          required
+                        />
+                      </div>
+                    </div>
 
                     <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Location Latitude *
-              </label>
-              <input
-                type="number"
-                step="0.0001"
+                        </label>
+                        <input
+                          type="number"
+                          step="0.0001"
                           value={locationLat}
-                          onChange={(e) => setLocationLat(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setLocationLat(Number(e.target.value))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Pharmacy latitude"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Location Longitude *
-              </label>
-              <input
-                type="number"
-                step="0.0001"
+                        </label>
+                        <input
+                          type="number"
+                          step="0.0001"
                           value={locationLong}
-                          onChange={(e) => setLocationLong(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setLocationLong(Number(e.target.value))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Pharmacy longitude"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Promotion Active? *
                         </label>
                         <div className="space-y-2">
@@ -456,154 +475,166 @@ export default function PharmacyDemandPredictor() {
                               type="radio"
                               value={0}
                               checked={promotionFlag === 0}
-                              onChange={(e) => setPromotionFlag(Number(e.target.value))}
+                              onChange={(e) =>
+                                setPromotionFlag(Number(e.target.value))
+                              }
                               className="mr-2"
                             />
                             No (0)
-              </label>
+                          </label>
                           <label className="flex items-center">
                             <input
                               type="radio"
                               value={1}
                               checked={promotionFlag === 1}
-                onChange={(e) => setPromotionFlag(Number(e.target.value))}
+                              onChange={(e) =>
+                                setPromotionFlag(Number(e.target.value))
+                              }
                               className="mr-2"
                             />
                             Yes (1)
                           </label>
                         </div>
                       </div>
-            </div>
-          </div>
+                    </div>
+                  </div>
 
                   {/* Historical Sales Data Section */}
                   <div className="mb-6">
-                    <h4 className="text-md font-semibold text-gray-900 mb-4">Historical Sales Data (for trend analysis)</h4>
+                    <h4 className="text-md font-semibold text-gray-900 mb-4">
+                      Historical Sales Data (for trend analysis)
+                    </h4>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Sales (1 day ago) *
-              </label>
-              <input
-                type="number"
+                        </label>
+                        <input
+                          type="number"
                           value={salesLag1}
                           onChange={(e) => setSalesLag1(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Previous day sales"
                           required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Sales (3 days ago) *
-              </label>
-              <input
-                type="number"
+                        </label>
+                        <input
+                          type="number"
                           value={salesLag3}
                           onChange={(e) => setSalesLag3(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Sales 3 days prior"
                           required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Sales (7 days ago) *
-              </label>
-              <input
-                type="number"
+                        </label>
+                        <input
+                          type="number"
                           value={salesLag7}
                           onChange={(e) => setSalesLag7(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Sales 7 days prior"
                           required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Sales (14 days ago) *
-              </label>
-              <input
-                type="number"
+                        </label>
+                        <input
+                          type="number"
                           value={salesLag14}
-                          onChange={(e) => setSalesLag14(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setSalesLag14(Number(e.target.value))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Sales 14 days prior"
                           required
-              />
-            </div>
-            </div>
+                        />
+                      </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           7-Day Average Sales *
-              </label>
-              <input
-                type="number"
-                step="0.01"
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
                           value={salesRollingMean7}
-                          onChange={(e) => setSalesRollingMean7(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setSalesRollingMean7(Number(e.target.value))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Rolling 7-day average"
                           required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           14-Day Average Sales *
-              </label>
-              <input
-                type="number"
-                step="0.01"
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
                           value={salesRollingMean14}
-                          onChange={(e) => setSalesRollingMean14(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setSalesRollingMean14(Number(e.target.value))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Rolling 14-day average"
                           required
-              />
-            </div>
-          </div>
-        </div>
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-        {/* Action Buttons */}
+                  {/* Action Buttons */}
                   <div className="flex gap-3 mb-6">
-          <button
-            onClick={handlePredict}
+                    <button
+                      onClick={handlePredict}
                       disabled={loading || !medicineId}
                       className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-lg"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                Predicting...
-              </>
-            ) : (
-              <>
-                <span>🔮</span>
+                    >
+                      {loading ? (
+                        <>
+                          <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                          Predicting...
+                        </>
+                      ) : (
+                        <>
+                          <span>🔮</span>
                           Predict Sales & Generate Recommendations
-              </>
-            )}
-          </button>
-          <button
-            onClick={handleReset}
-            disabled={loading}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            Reset
-          </button>
-        </div>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleReset}
+                      disabled={loading}
+                      className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  </div>
 
-        {/* Error Display */}
-        {error && (
+                  {/* Error Display */}
+                  {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm flex items-center gap-2">
-              <span>❌</span>
-              {error}
-            </p>
-          </div>
-        )}
+                      <p className="text-red-800 text-sm flex items-center gap-2">
+                        <span>❌</span>
+                        {error}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Prediction Results */}
                   {prediction && (
@@ -619,17 +650,25 @@ export default function PharmacyDemandPredictor() {
             )}
 
             {/* Batch Prediction Tab */}
-            {activeTab === 'batch' && (
+            {activeTab === "batch" && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload CSV file for batch predictions</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Upload CSV file for batch predictions
+                  </h3>
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <h4 className="font-semibold text-blue-900 mb-2">Required columns:</h4>
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      Required columns:
+                    </h4>
                     <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• medicine_id, price, inventory_level, expiry_days</li>
+                      <li>
+                        • medicine_id, price, inventory_level, expiry_days
+                      </li>
                       <li>• location_lat, location_long, promotion_flag</li>
-                      <li>• sales_lag_1, sales_lag_3, sales_lag_7, sales_lag_14</li>
+                      <li>
+                        • sales_lag_1, sales_lag_3, sales_lag_7, sales_lag_14
+                      </li>
                       <li>• sales_rolling_mean_7, sales_rolling_mean_14</li>
                     </ul>
                   </div>
@@ -642,7 +681,9 @@ export default function PharmacyDemandPredictor() {
                       <input
                         type="file"
                         accept=".csv"
-                        onChange={(e) => setBatchFile(e.target.files?.[0] || null)}
+                        onChange={(e) =>
+                          setBatchFile(e.target.files?.[0] || null)
+                        }
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       />
                     </div>
@@ -683,18 +724,30 @@ export default function PharmacyDemandPredictor() {
             )}
 
             {/* Model Information Tab */}
-            {activeTab === 'info' && (
+            {activeTab === "info" && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">About This Model</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                    About This Model
+                  </h3>
 
                   <div className="space-y-6">
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
-                      <h4 className="text-xl font-bold text-blue-900 mb-3">XGBoost Regression Model</h4>
+                      <h4 className="text-xl font-bold text-blue-900 mb-3">
+                        XGBoost Regression Model
+                      </h4>
                       <ul className="space-y-2 text-blue-800">
-                        <li><strong>Algorithm:</strong> Gradient Boosting Decision Trees</li>
-                        <li><strong>Features:</strong> 32 engineered features including temporal, lag, and rolling statistics</li>
-                        <li><strong>Performance Metrics:</strong></li>
+                        <li>
+                          <strong>Algorithm:</strong> Gradient Boosting Decision
+                          Trees
+                        </li>
+                        <li>
+                          <strong>Features:</strong> 32 engineered features
+                          including temporal, lag, and rolling statistics
+                        </li>
+                        <li>
+                          <strong>Performance Metrics:</strong>
+                        </li>
                         <ul className="ml-6 space-y-1">
                           <li>• Mean Absolute Error (MAE): ~3-5 units</li>
                           <li>• R² Score: ~0.85-0.92</li>
@@ -704,96 +757,137 @@ export default function PharmacyDemandPredictor() {
                     </div>
 
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3">Features Used:</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                        Features Used:
+                      </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <h5 className="font-medium text-gray-800 mb-2">Temporal Features:</h5>
+                          <h5 className="font-medium text-gray-800 mb-2">
+                            Temporal Features:
+                          </h5>
                           <ul className="space-y-1 text-gray-600">
                             <li>• Month, day, week, quarter, weekend flags</li>
                           </ul>
                         </div>
                         <div>
-                          <h5 className="font-medium text-gray-800 mb-2">Lag Features:</h5>
+                          <h5 className="font-medium text-gray-800 mb-2">
+                            Lag Features:
+                          </h5>
                           <ul className="space-y-1 text-gray-600">
                             <li>• Previous 1, 3, 7, 14 days sales</li>
                           </ul>
                         </div>
                         <div>
-                          <h5 className="font-medium text-gray-800 mb-2">Rolling Statistics:</h5>
+                          <h5 className="font-medium text-gray-800 mb-2">
+                            Rolling Statistics:
+                          </h5>
                           <ul className="space-y-1 text-gray-600">
-                            <li>• 3, 7, 14-day moving averages and standard deviation</li>
+                            <li>
+                              • 3, 7, 14-day moving averages and standard
+                              deviation
+                            </li>
                           </ul>
                         </div>
                         <div>
-                          <h5 className="font-medium text-gray-800 mb-2">Inventory Features:</h5>
+                          <h5 className="font-medium text-gray-800 mb-2">
+                            Inventory Features:
+                          </h5>
                           <ul className="space-y-1 text-gray-600">
                             <li>• Stock levels, low/high stock flags</li>
                           </ul>
                         </div>
                         <div>
-                          <h5 className="font-medium text-gray-800 mb-2">Price Features:</h5>
+                          <h5 className="font-medium text-gray-800 mb-2">
+                            Price Features:
+                          </h5>
                           <ul className="space-y-1 text-gray-600">
                             <li>• Price per unit, high price indicators</li>
                           </ul>
                         </div>
                         <div>
-                          <h5 className="font-medium text-gray-800 mb-2">Expiry Features:</h5>
+                          <h5 className="font-medium text-gray-800 mb-2">
+                            Expiry Features:
+                          </h5>
                           <ul className="space-y-1 text-gray-600">
                             <li>• Days to expiry, near-expiry flags</li>
                           </ul>
                         </div>
                       </div>
                       <div className="mt-4">
-                        <h5 className="font-medium text-gray-800 mb-2">Interaction Features:</h5>
+                        <h5 className="font-medium text-gray-800 mb-2">
+                          Interaction Features:
+                        </h5>
                         <ul className="space-y-1 text-gray-600 text-sm">
-                          <li>• Price-promotion, inventory-expiry interactions</li>
+                          <li>
+                            • Price-promotion, inventory-expiry interactions
+                          </li>
                         </ul>
                       </div>
                     </div>
 
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-yellow-900 mb-3">Priority Levels:</h4>
+                      <h4 className="text-lg font-semibold text-yellow-900 mb-3">
+                        Priority Levels:
+                      </h4>
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">🔴</span>
                           <div>
                             <strong className="text-red-700">CRITICAL:</strong>
-                            <span className="text-red-600"> &lt; 5 days stock remaining - Immediate action required</span>
+                            <span className="text-red-600">
+                              {" "}
+                              &lt; 5 days stock remaining - Immediate action
+                              required
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">🟠</span>
                           <div>
                             <strong className="text-orange-700">URGENT:</strong>
-                            <span className="text-orange-600"> &lt; 10 days stock - Restock within 2-3 days</span>
+                            <span className="text-orange-600">
+                              {" "}
+                              &lt; 10 days stock - Restock within 2-3 days
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">🟡</span>
                           <div>
                             <strong className="text-yellow-700">HIGH:</strong>
-                            <span className="text-yellow-600"> &lt; 15 days stock - Plan restock soon</span>
+                            <span className="text-yellow-600">
+                              {" "}
+                              &lt; 15 days stock - Plan restock soon
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">🔵</span>
                           <div>
                             <strong className="text-blue-700">MEDIUM:</strong>
-                            <span className="text-blue-600"> Excess inventory or monitoring needed</span>
+                            <span className="text-blue-600">
+                              {" "}
+                              Excess inventory or monitoring needed
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">🟢</span>
-              <div>
+                          <div>
                             <strong className="text-green-700">LOW:</strong>
-                            <span className="text-green-600"> Optimal stock levels</span>
+                            <span className="text-green-600">
+                              {" "}
+                              Optimal stock levels
+                            </span>
                           </div>
                         </div>
-                </div>
-              </div>
+                      </div>
+                    </div>
 
                     <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-green-900 mb-3">Use Cases:</h4>
+                      <h4 className="text-lg font-semibold text-green-900 mb-3">
+                        Use Cases:
+                      </h4>
                       <ul className="space-y-2 text-green-800">
                         <li>• Daily inventory management</li>
                         <li>• Demand forecasting</li>
@@ -801,21 +895,23 @@ export default function PharmacyDemandPredictor() {
                         <li>• Expiry management</li>
                         <li>• Promotion effectiveness analysis</li>
                       </ul>
-              </div>
-            </div>
+                    </div>
+                  </div>
 
                   <div className="mt-8 pt-6 border-t border-gray-200 text-center text-gray-600">
                     <p className="text-sm">
-                      <strong>🏥 Pharmacy Sales Optimizer</strong> | Powered by XGBoost & Gradio
+                      <strong>🏥 Pharmacy Sales Optimizer</strong> | Powered by
+                      XGBoost & Gradio
                     </p>
                     <p className="text-xs mt-1">
-                      For support or questions, please contact your system administrator
+                      For support or questions, please contact your system
+                      administrator
                     </p>
                   </div>
-            </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
         </div>
       )}
     </div>

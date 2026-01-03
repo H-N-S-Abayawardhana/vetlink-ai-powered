@@ -136,7 +136,8 @@ export default function Hero() {
               {
                 icon: Sparkles,
                 title: "BCS → Risk → Diet",
-                description: "Health assessment with personalized diet planning",
+                description:
+                  "Health assessment with personalized diet planning",
                 color: "teal",
               },
               {
@@ -206,7 +207,6 @@ export default function Hero() {
                 transition={{ duration: 0.3 }}
               />
             </motion.a>
-
           </motion.div>
 
           {/* Trust Indicators */}
