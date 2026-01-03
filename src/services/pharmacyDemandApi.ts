@@ -58,18 +58,18 @@ export class PharmacyDemandApiService {
     try {
       // Prepare inputs as array in the order expected by the Gradio model
       const inputs: (string | number)[] = [
-        input.medicine_id,        // medicine_id
-        input.price,              // price
-        input.inventory_level,    // inventory_level
-        input.expiry_days,        // expiry_days
-        input.location_lat,       // location_lat
-        input.location_long,      // location_long
-        input.promotion_flag,     // promotion_flag
-        input.sales_lag_1,        // sales_lag_1
-        input.sales_lag_3,        // sales_lag_3
-        input.sales_lag_7,        // sales_lag_7
-        input.sales_lag_14,       // sales_lag_14
-        input.sales_rolling_mean_7,  // sales_rolling_mean_7
+        input.medicine_id, // medicine_id
+        input.price, // price
+        input.inventory_level, // inventory_level
+        input.expiry_days, // expiry_days
+        input.location_lat, // location_lat
+        input.location_long, // location_long
+        input.promotion_flag, // promotion_flag
+        input.sales_lag_1, // sales_lag_1
+        input.sales_lag_3, // sales_lag_3
+        input.sales_lag_7, // sales_lag_7
+        input.sales_lag_14, // sales_lag_14
+        input.sales_rolling_mean_7, // sales_rolling_mean_7
         input.sales_rolling_mean_14, // sales_rolling_mean_14
       ];
 
@@ -116,7 +116,9 @@ export class PharmacyDemandApiService {
           error.message.includes("404")
         ) {
           // Return a mock prediction when the model is not available
-          console.warn("Hugging Face model not available, returning mock prediction");
+          console.warn(
+            "Hugging Face model not available, returning mock prediction",
+          );
           return this.generateMockPrediction(input);
         }
         throw error;
@@ -272,9 +274,7 @@ export class PharmacyDemandApiService {
   /**
    * Parse prediction result from Inference API
    */
-  private static parseInferenceAPIResult(
-    result: any,
-  ): PharmacyDemandResult {
+  private static parseInferenceAPIResult(result: any): PharmacyDemandResult {
     // Inference API can return different formats:
     // 1. Direct number: 123
     // 2. Array: [123]
@@ -370,7 +370,11 @@ export class PharmacyDemandApiService {
     }
 
     // Check if the output is HTML (contains HTML tags)
-    if (outputText.includes('<div') || outputText.includes('<p') || outputText.includes('<h')) {
+    if (
+      outputText.includes("<div") ||
+      outputText.includes("<p") ||
+      outputText.includes("<h")
+    ) {
       return {
         html: outputText,
       };
@@ -402,26 +406,34 @@ export class PharmacyDemandApiService {
   /**
    * Generate a mock prediction when the Hugging Face model is not available
    */
-  private static generateMockPrediction(input: PharmacyDemandInput): PharmacyDemandResult {
+  private static generateMockPrediction(
+    input: PharmacyDemandInput,
+  ): PharmacyDemandResult {
     // Simple mock prediction based on input parameters
-    const basePrediction = Math.max(1, Math.round(
-      (input.inventory_level * 0.1) + // 10% of inventory as base
-      (input.sales_lag_1 * 0.8) +     // Recent sales trend
-      (input.sales_lag_3 * 0.15) +    // 3-day trend
-      (input.sales_lag_7 * 0.05)      // 7-day trend
-    ));
+    const basePrediction = Math.max(
+      1,
+      Math.round(
+        input.inventory_level * 0.1 + // 10% of inventory as base
+          input.sales_lag_1 * 0.8 + // Recent sales trend
+          input.sales_lag_3 * 0.15 + // 3-day trend
+          input.sales_lag_7 * 0.05, // 7-day trend
+      ),
+    );
 
     // Adjust for price (higher price might reduce demand)
     const priceAdjustment = input.price > 1500 ? 0.8 : 1.1;
     const adjustedPrediction = Math.round(basePrediction * priceAdjustment);
 
     // Adjust for expiry (closer expiry increases urgency)
-    const expiryAdjustment = input.expiry_days < 60 ? 1.3 :
-                           input.expiry_days < 120 ? 1.1 : 0.9;
+    const expiryAdjustment =
+      input.expiry_days < 60 ? 1.3 : input.expiry_days < 120 ? 1.1 : 0.9;
     const finalPrediction = Math.round(adjustedPrediction * expiryAdjustment);
 
     // Calculate days to stockout
-    const daysToStockout = Math.max(1, Math.round(input.inventory_level / Math.max(1, finalPrediction)));
+    const daysToStockout = Math.max(
+      1,
+      Math.round(input.inventory_level / Math.max(1, finalPrediction)),
+    );
 
     // Determine priority level
     let priority: string;
@@ -472,7 +484,7 @@ export class PharmacyDemandApiService {
         </div>
         <div style="padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px;">
           <p style="margin: 0; font-size: 14px; color: #666;">Recommended Restock Quantity</p>
-          <p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: #333;">${Math.max(0, Math.round((finalPrediction * 14) - input.inventory_level))} units</p>
+          <p style="margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: #333;">${Math.max(0, Math.round(finalPrediction * 14 - input.inventory_level))} units</p>
         </div>
         <div style="padding: 15px; background: ${color}; border-radius: 8px; color: white;">
           <p style="margin: 0; font-size: 16px; font-weight: bold;">✓ ${action}</p>
