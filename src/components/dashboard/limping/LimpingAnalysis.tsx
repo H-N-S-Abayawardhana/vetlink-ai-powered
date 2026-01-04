@@ -9,8 +9,10 @@ import {
   CheckCircle,
   FileText,
   X,
+  Download,
 } from "lucide-react";
 import { compressVideoSimple } from "@/lib/video-compression";
+import { jsPDF } from "jspdf";
 
 // Type definitions
 interface HealthFormData {
@@ -51,14 +53,28 @@ interface AnalysisResult {
     weight_category: string;
     age_group: string;
   };
+  inputData: {
+    age: string;
+    weight_category: string;
+    limping_detected: string;
+    pain_while_walking: string;
+    difficulty_standing: string;
+    reduced_activity: string;
+    joint_swelling: string;
+  };
   prediction: {
     primary_disease: string;
     confidence: number;
     risk_profile: string;
-    symptom_severity: number;
-    pain_severity: number;
     mobility_status: string;
     recommendations: string[];
+    disease_probabilities?: {
+      "Hip Dysplasia": number;
+      "Osteoarthritis": number;
+      "IVDD": number;
+      "Normal": number;
+      "Patellar Luxation": number;
+    };
   };
 }
 
@@ -645,14 +661,22 @@ export default function LimpingAnalysis({
           weight_category: formData.weight_category,
           age_group: age_group,
         },
+        inputData: {
+          age: formData.age_years,
+          weight_category: formData.weight_category,
+          limping_detected: limpingDetected === "1" ? "Yes" : "No",
+          pain_while_walking: formData.pain_while_walking === "1" ? "Yes" : "No",
+          difficulty_standing: formData.difficulty_standing === "1" ? "Yes" : "No",
+          reduced_activity: formData.reduced_activity === "1" ? "Yes" : "No",
+          joint_swelling: formData.joint_swelling === "1" ? "Yes" : "No",
+        },
         prediction: {
           primary_disease: data.prediction.predicted_disease,
           confidence: data.prediction.confidence,
           risk_profile: data.prediction.risk_profile,
-          symptom_severity: data.prediction.symptom_score,
-          pain_severity: data.prediction.pain_severity,
           mobility_status: data.prediction.mobility_status,
           recommendations: data.prediction.recommendations,
+          disease_probabilities: data.prediction.disease_probabilities || undefined,
         },
       };
 
@@ -758,6 +782,369 @@ export default function LimpingAnalysis({
     setIsAnalyzingVideo(false);
     setSaveStatus("idle");
     setSaveError(null);
+  };
+
+  const generatePDFReport = () => {
+    if (!analysisResult || !limpingResult) {
+      alert("No analysis data available to generate report");
+      return;
+    }
+
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      let yPos = margin;
+
+      // Helper function to add text with word wrap
+      const addWrappedText = (
+        text: string,
+        x: number,
+        y: number,
+        maxWidth: number,
+        lineHeight: number = 6,
+      ): number => {
+        const lines = doc.splitTextToSize(text, maxWidth);
+        doc.text(lines, x, y);
+        return y + lines.length * lineHeight;
+      };
+
+      // Helper to check if we need a new page
+      const checkNewPage = (requiredSpace: number) => {
+        if (yPos + requiredSpace > pageHeight - margin) {
+          doc.addPage();
+          yPos = margin;
+          return true;
+        }
+        return false;
+      };
+
+      // Header background
+      doc.setFillColor(37, 99, 235); // Blue
+      doc.rect(0, 0, pageWidth, 45, "F");
+
+      // Header text
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "bold");
+      doc.text("Pet Mobility & Limping Detection Report", margin, 20);
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      const petName = selectedPet?.name || "Unknown Pet";
+      doc.text(`Pet: ${petName}`, margin, 30);
+      const reportDate = new Date().toLocaleString();
+      doc.text(`Generated: ${reportDate}`, margin, 38);
+
+      yPos = 55;
+
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+
+      // Pet Information Section
+      doc.setFillColor(239, 246, 255); // Light blue background
+      doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 35, 3, 3, "F");
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(29, 78, 216);
+      doc.text("Pet Information", margin + 5, yPos + 10);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(60, 60, 60);
+      doc.text(
+        `Age: ${analysisResult.dogInfo.age} years (${analysisResult.dogInfo.age_group})`,
+        margin + 5,
+        yPos + 20,
+      );
+      doc.text(
+        `Weight Category: ${analysisResult.dogInfo.weight_category}`,
+        margin + 100,
+        yPos + 20,
+      );
+
+      yPos += 45;
+
+      // Input Data Section
+      checkNewPage(60);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(31, 41, 55);
+      doc.text("Input Data", margin, yPos);
+      yPos += 8;
+
+      doc.setFillColor(249, 250, 251); // Light gray background
+      doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 50, 3, 3, "F");
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(55, 65, 81);
+      const inputData = [
+        `Limping Detected: ${analysisResult.inputData.limping_detected}`,
+        `Pain While Walking: ${analysisResult.inputData.pain_while_walking}`,
+        `Difficulty Standing: ${analysisResult.inputData.difficulty_standing}`,
+        `Reduced Activity: ${analysisResult.inputData.reduced_activity}`,
+        `Joint Swelling: ${analysisResult.inputData.joint_swelling}`,
+      ];
+
+      inputData.forEach((item, index) => {
+        doc.text(item, margin + 5, yPos + 8 + index * 8);
+      });
+
+      yPos += 60;
+
+      // Limping Detection Results Section
+      checkNewPage(100);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(31, 41, 55);
+      doc.text("Limping Detection Analysis", margin, yPos);
+      yPos += 8;
+
+      doc.setFillColor(254, 243, 199); // Light yellow background
+      doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 80, 3, 3, "F");
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(60, 60, 60);
+      doc.text("Detection Result:", margin + 5, yPos + 10);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(55, 65, 81);
+      doc.text(
+        `Prediction: ${limpingResult.prediction}`,
+        margin + 5,
+        yPos + 18,
+      );
+      doc.text(
+        `Confidence: ${limpingResult.confidence.toFixed(2)}%`,
+        margin + 5,
+        yPos + 26,
+      );
+      doc.text(
+        `Frames Analyzed: ${limpingResult.frames_analyzed || "N/A"}`,
+        margin + 5,
+        yPos + 34,
+      );
+
+      // Symmetry Indices
+      if (limpingResult.symmetry_indices) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Symmetry Indices:", margin + 5, yPos + 46);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          `SI Overall: ${limpingResult.symmetry_indices.SI_overall.toFixed(2)}%`,
+          margin + 5,
+          yPos + 54,
+        );
+        doc.text(
+          `SI Front: ${limpingResult.symmetry_indices.SI_front.toFixed(2)}%`,
+          margin + 70,
+          yPos + 54,
+        );
+        doc.text(
+          `SI Back: ${limpingResult.symmetry_indices.SI_back.toFixed(2)}%`,
+          margin + 120,
+          yPos + 54,
+        );
+      }
+
+      // Leg Status
+      if (limpingResult.leg_status) {
+        doc.text(
+          `Front Legs: ${limpingResult.leg_status.front_legs}`,
+          margin + 5,
+          yPos + 62,
+        );
+        doc.text(
+          `Back Legs: ${limpingResult.leg_status.back_legs}`,
+          margin + 70,
+          yPos + 62,
+        );
+      }
+
+      // Stride Measurements
+      if (limpingResult.stride_measurements) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Stride Measurements:", margin + 5, yPos + 70);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          `Left Front: ${limpingResult.stride_measurements.left_front.toFixed(2)}`,
+          margin + 5,
+          yPos + 78,
+        );
+        doc.text(
+          `Right Front: ${limpingResult.stride_measurements.right_front.toFixed(2)}`,
+          margin + 60,
+          yPos + 78,
+        );
+        doc.text(
+          `Left Back: ${limpingResult.stride_measurements.left_back.toFixed(2)}`,
+          margin + 5,
+          yPos + 86,
+        );
+        doc.text(
+          `Right Back: ${limpingResult.stride_measurements.right_back.toFixed(2)}`,
+          margin + 60,
+          yPos + 86,
+        );
+      }
+
+      yPos += 100;
+
+      // Disease Prediction Results Section
+      checkNewPage(80);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(31, 41, 55);
+      doc.text("Disease Prediction Results", margin, yPos);
+      yPos += 8;
+
+      // Primary Diagnosis
+      doc.setFillColor(219, 234, 254); // Light blue background
+      doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 25, 3, 3, "F");
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(29, 78, 216);
+      doc.text("Primary Diagnosis:", margin + 5, yPos + 10);
+      doc.text(
+        analysisResult.prediction.primary_disease,
+        margin + 60,
+        yPos + 10,
+      );
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(55, 65, 81);
+      doc.text(
+        `Risk Probability: ${analysisResult.prediction.confidence.toFixed(2)}%`,
+        margin + 5,
+        yPos + 20,
+      );
+      doc.text(
+        `Risk Level: ${analysisResult.prediction.risk_profile}`,
+        margin + 80,
+        yPos + 20,
+      );
+      doc.text(
+        `Mobility Status: ${analysisResult.prediction.mobility_status}`,
+        margin + 130,
+        yPos + 20,
+      );
+
+      yPos += 35;
+
+      // All Disease Probabilities
+      checkNewPage(50);
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(31, 41, 55);
+      doc.text("Disease Risk Probabilities:", margin, yPos);
+      yPos += 8;
+
+      let diseases: [string, number][];
+      if (analysisResult.prediction.disease_probabilities) {
+        diseases = Object.entries(analysisResult.prediction.disease_probabilities).sort(
+          ([, a], [, b]) => (b as number) - (a as number),
+        ) as [string, number][];
+      } else {
+        // Fallback: create probabilities for all diseases
+        const primaryProb = analysisResult.prediction.confidence;
+        const remainingProb = (100 - primaryProb) / 4;
+        const diseaseList: [string, number][] = [
+          ["Hip Dysplasia", analysisResult.prediction.primary_disease === "Hip Dysplasia" ? primaryProb : remainingProb],
+          ["Osteoarthritis", analysisResult.prediction.primary_disease === "Osteoarthritis" ? primaryProb : remainingProb],
+          ["IVDD", analysisResult.prediction.primary_disease === "IVDD" ? primaryProb : remainingProb],
+          ["Normal", analysisResult.prediction.primary_disease === "Normal" ? primaryProb : remainingProb],
+          ["Patellar Luxation", analysisResult.prediction.primary_disease === "Patellar Luxation" ? primaryProb : remainingProb],
+        ];
+        diseases = diseaseList.sort(([, a], [, b]) => (a as number) - (b as number)).reverse();
+      }
+
+      diseases.forEach(([disease, probability]) => {
+        checkNewPage(12);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const isPrimary = disease === analysisResult.prediction.primary_disease;
+        doc.setTextColor(isPrimary ? 29 : 55, isPrimary ? 78 : 65, isPrimary ? 216 : 81);
+        doc.text(
+          `${disease}: ${probability.toFixed(2)}%`,
+          margin + 5,
+          yPos,
+        );
+        yPos += 8;
+      });
+
+      yPos += 5;
+
+      // Recommendations Section
+      if (
+        analysisResult.prediction.recommendations &&
+        analysisResult.prediction.recommendations.length > 0
+      ) {
+        checkNewPage(50);
+        doc.setFillColor(220, 252, 231); // Light green background
+        const recHeight = 20 + analysisResult.prediction.recommendations.length * 8;
+        doc.roundedRect(margin, yPos, pageWidth - 2 * margin, recHeight, 3, 3, "F");
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(21, 128, 61);
+        doc.text("Veterinary Recommendations", margin + 5, yPos + 10);
+
+        yPos += 16;
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(55, 65, 81);
+
+        analysisResult.prediction.recommendations.forEach((rec, index) => {
+          checkNewPage(10);
+          const bulletText = `${index + 1}. ${rec}`;
+          yPos = addWrappedText(
+            bulletText,
+            margin + 5,
+            yPos,
+            pageWidth - 2 * margin - 10,
+            5,
+          );
+          yPos += 2;
+        });
+      }
+
+      // Footer
+      yPos = pageHeight - 25;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+
+      doc.setFontSize(9);
+      doc.setTextColor(107, 114, 128);
+      doc.setFont("helvetica", "italic");
+      doc.text(
+        "This report is generated by VetLink AI Limping Detection & Disease Prediction System.",
+        margin,
+        yPos + 8,
+      );
+      doc.text(
+        "Please consult a veterinarian for professional medical advice.",
+        margin,
+        yPos + 14,
+      );
+
+      // VetLink branding
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(37, 99, 235);
+      doc.text("VetLink", pageWidth - margin - 20, yPos + 11);
+
+      // Save the PDF
+      const fileName = `Limping_Detection_Report_${petName.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      console.error("Error generating PDF report:", error);
+      alert("Failed to generate PDF report. Please try again.");
+    }
   };
 
   return (
@@ -1069,12 +1456,101 @@ export default function LimpingAnalysis({
           {/* Analysis Results */}
           {analysisResult && !isAnalyzing && (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-3 sm:p-4 bg-gray-50 border-b border-gray-200">
+              <div className="p-3 sm:p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                   Disease Prediction Results
                 </h2>
+                <button
+                  onClick={generatePDFReport}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="whitespace-nowrap">Download Report</span>
+                </button>
               </div>
               <div className="p-4 sm:p-6 space-y-4">
+                {/* Input Data Preview */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Input Data Preview
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-gray-600">Age:</span>
+                      <span className="ml-2 font-medium text-gray-900">
+                        {analysisResult.inputData.age} years
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Weight Category:</span>
+                      <span className="ml-2 font-medium text-gray-900">
+                        {analysisResult.inputData.weight_category}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Limping Detected:</span>
+                      <span
+                        className={`ml-2 font-medium ${
+                          analysisResult.inputData.limping_detected === "Yes"
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {analysisResult.inputData.limping_detected}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Pain While Walking:</span>
+                      <span
+                        className={`ml-2 font-medium ${
+                          analysisResult.inputData.pain_while_walking === "Yes"
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {analysisResult.inputData.pain_while_walking}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Difficulty Standing:</span>
+                      <span
+                        className={`ml-2 font-medium ${
+                          analysisResult.inputData.difficulty_standing === "Yes"
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {analysisResult.inputData.difficulty_standing}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Reduced Activity:</span>
+                      <span
+                        className={`ml-2 font-medium ${
+                          analysisResult.inputData.reduced_activity === "Yes"
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {analysisResult.inputData.reduced_activity}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Joint Swelling:</span>
+                      <span
+                        className={`ml-2 font-medium ${
+                          analysisResult.inputData.joint_swelling === "Yes"
+                            ? "text-red-600"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {analysisResult.inputData.joint_swelling}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Primary Diagnosis */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-start justify-between">
                     <div>
@@ -1086,26 +1562,81 @@ export default function LimpingAnalysis({
                       </h3>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-600 mb-1">Confidence</p>
+                      <p className="text-xs text-gray-600 mb-1">Risk Probability</p>
                       <p className="text-xl sm:text-2xl font-bold text-blue-600">
-                        {analysisResult.prediction.confidence}%
+                        {analysisResult.prediction.confidence.toFixed(2)}%
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-600">Symptom Severity</p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {analysisResult.prediction.symptom_severity}/4
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Pain Severity</p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {analysisResult.prediction.pain_severity}/4
-                    </p>
+                {/* All Disease Probabilities */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Disease Risk Probabilities
+                  </h3>
+                  <div className="space-y-2">
+                    {analysisResult.prediction.disease_probabilities
+                      ? Object.entries(analysisResult.prediction.disease_probabilities)
+                          .sort(([, a], [, b]) => (b as number) - (a as number))
+                          .map(([disease, probability]) => {
+                            const isPrimary = disease === analysisResult.prediction.primary_disease;
+                            return (
+                              <div
+                                key={disease}
+                                className={`flex items-center justify-between p-2 rounded-lg ${
+                                  isPrimary
+                                    ? "bg-blue-50 border border-blue-200"
+                                    : "bg-gray-50"
+                                }`}
+                              >
+                                <span className="text-sm font-medium text-gray-900">
+                                  {disease}
+                                </span>
+                                <span
+                                  className={`text-sm font-semibold ${
+                                    isPrimary ? "text-blue-600" : "text-gray-700"
+                                  }`}
+                                >
+                                  {(probability as number).toFixed(2)}%
+                                </span>
+                              </div>
+                            );
+                          })
+                      : // Fallback: Show all diseases with primary highlighted
+                        [
+                          "Hip Dysplasia",
+                          "Osteoarthritis",
+                          "IVDD",
+                          "Normal",
+                          "Patellar Luxation",
+                        ].map((disease) => {
+                          const isPrimary = disease === analysisResult.prediction.primary_disease;
+                          const probValue = isPrimary
+                            ? analysisResult.prediction.confidence
+                            : (100 - analysisResult.prediction.confidence) / 4;
+                          return (
+                            <div
+                              key={disease}
+                              className={`flex items-center justify-between p-2 rounded-lg ${
+                                isPrimary
+                                  ? "bg-blue-50 border border-blue-200"
+                                  : "bg-gray-50"
+                              }`}
+                            >
+                              <span className="text-sm font-medium text-gray-900">
+                                {disease}
+                              </span>
+                              <span
+                                className={`text-sm font-semibold ${
+                                  isPrimary ? "text-blue-600" : "text-gray-700"
+                                }`}
+                              >
+                                {probValue.toFixed(2)}%
+                              </span>
+                            </div>
+                          );
+                        })}
                   </div>
                 </div>
 
