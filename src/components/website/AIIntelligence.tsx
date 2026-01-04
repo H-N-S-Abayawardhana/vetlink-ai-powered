@@ -7,8 +7,8 @@ import {
   Database,
   LineChart,
   Network,
+  Shield,
   Sparkles,
-  TrendingUp,
   Zap,
 } from "lucide-react";
 
@@ -16,38 +16,56 @@ export default function AIIntelligence() {
   const intelligenceFeatures = [
     {
       icon: Brain,
-      title: "Deep Learning Models",
+      title: "DINOv2 + Vision Transformer (ViT)",
       description:
-        "Advanced neural networks trained on millions of pet health data points for accurate diagnostics.",
-      metric: "98.5%",
-      metricLabel: "Accuracy Rate",
+        "Dog skin disease detection + severity classification (mild/severe) with an LLM-powered guidance layer for human-friendly explanations.",
+      metric: "Image",
+      metricLabel: "Input",
+      color: "indigo",
+    },
+    {
+      icon: Network,
+      title: "Video Mobility Analysis",
+      description:
+        "Pose + gait analysis for limping detection (Normal/Limping) with confidence, symmetry indices, stride length, and leg status interpretation.",
+      metric: "30–60s",
+      metricLabel: "Video",
+      color: "teal",
+    },
+    {
+      icon: LineChart,
+      title: "XGBoost Demand Forecasting",
+      description:
+        "Forecast pharmacy sales demand and generate restock recommendations with priority alerts (CRITICAL → LOW).",
+      metric: "32",
+      metricLabel: "Engineered Features",
       color: "indigo",
     },
     {
       icon: Database,
-      title: "Real-Time Analysis",
+      title: "Cloud-Native Records & Storage",
       description:
-        "Process health data instantly with cloud-powered AI infrastructure for immediate insights.",
-      metric: "< 2s",
-      metricLabel: "Response Time",
+        "Detection history and profiles stored in Neon PostgreSQL, with uploaded images/videos stored securely in AWS S3 for long-term tracking.",
+      metric: "Neon + S3",
+      metricLabel: "Persistence",
       color: "teal",
     },
     {
-      icon: Network,
-      title: "Predictive Analytics",
+      icon: Cpu,
+      title: "Model Hosting & Inference APIs",
       description:
-        "Forecast potential health issues before they become critical with pattern recognition.",
-      metric: "30%",
-      metricLabel: "Early Detection",
+        "Deployed inference services on Hugging Face Spaces to keep AI modules modular, scalable, and easy to integrate.",
+      metric: "HF",
+      metricLabel: "Spaces",
       color: "indigo",
     },
     {
-      icon: LineChart,
-      title: "Continuous Learning",
+      icon: Shield,
+      title: "Payments & Integrations",
       description:
-        "AI models improve over time, learning from each interaction to provide better care.",
-      metric: "24/7",
-      metricLabel: "Learning Cycle",
+        "PayHere gateway for subscriptions, appointment payments, and inventory purchases—built for B2C + B2B flows.",
+      metric: "PayHere",
+      metricLabel: "Gateway",
       color: "teal",
     },
   ];
@@ -102,15 +120,15 @@ export default function AIIntelligence() {
             <span>AI Technology</span>
           </motion.div>
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
-            Intelligence That{" "}
+            Architecture That{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-teal-600 bg-clip-text text-transparent">
-              Cares
+              Ships
             </span>
           </h2>
           <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Our AI systems work silently in the background, analyzing patterns,
-            predicting outcomes, and providing insights that help you make
-            informed decisions about your pet&apos;s health.
+            VetLink is built as a modular, service-oriented platform: a Next.js
+            web app + AI/ML inference services + an LLM guidance layer + cloud
+            storage—so users get real outputs, not black-box predictions.
           </p>
         </motion.div>
 
@@ -193,10 +211,10 @@ export default function AIIntelligence() {
               </div>
               <div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  How Our AI Works
+                  End-to-End Workflow
                 </h3>
                 <p className="text-gray-600 mt-1">
-                  Continuous learning and improvement cycle
+                  From upload → inference → guidance → saved history
                 </p>
               </div>
             </div>
@@ -205,21 +223,21 @@ export default function AIIntelligence() {
               {[
                 {
                   step: "01",
-                  title: "Data Collection",
+                  title: "Capture / Upload",
                   description:
-                    "Gather comprehensive health data from multiple sources",
+                    "Upload an image or video, or use the camera—works great on mobile.",
                 },
                 {
                   step: "02",
-                  title: "AI Analysis",
+                  title: "AI Inference",
                   description:
-                    "Process through advanced ML models for pattern recognition",
+                    "Inference runs via deployed ML services (Hugging Face Spaces) for fast, modular scaling.",
                 },
                 {
                   step: "03",
-                  title: "Insights Delivery",
+                  title: "Guidance + History",
                   description:
-                    "Provide actionable recommendations in real-time",
+                    "LLM-powered explanations + basic care tips, with results saved to Neon DB and assets stored in S3.",
                 },
               ].map((step, index) => (
                 <motion.div

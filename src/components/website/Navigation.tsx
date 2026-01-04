@@ -34,11 +34,10 @@ export default function Navigation() {
   }, [isMenuOpen]);
 
   const navItems = [
-    { href: "#features", label: "Features" },
-    { href: "#intelligence", label: "AI Intelligence" },
-    { href: "#about", label: "About" },
+    { href: "#features", label: "Modules" },
+    { href: "#primary-features", label: "Workflows" },
     { href: "#pricing", label: "Pricing" },
-    { href: "#testimonials", label: "Testimonials" },
+    { href: "#deployments", label: "Deployments" },
     { href: "#contact", label: "Contact" },
   ];
 
@@ -111,7 +110,7 @@ export default function Navigation() {
                 <motion.a
                   key={item.href}
                   href={item.href}
-                  className="group relative px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-indigo-700 transition-colors duration-200 cursor-pointer"
+                  className="group relative px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-indigo-700 transition-colors duration-200 cursor-pointer whitespace-nowrap"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05, duration: 0.3 }}

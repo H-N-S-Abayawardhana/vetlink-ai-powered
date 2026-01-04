@@ -8,39 +8,43 @@ export default function Features() {
   const features = [
     {
       icon: ScanFace,
-      title: "Skin Care Detection",
+      title: "Skin Disease Detection + Severity",
       description:
-        "Advanced AI analyzes skin conditions and provides stage-based first aid recommendations for immediate care.",
+        "Upload or capture a skin image—DINOv2 + ViT predicts disease type and mild/severe stage, then generates clear, non-clinical guidance cards.",
       image:
         "https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       color: "indigo",
+      href: "/dashboard/skin-disease",
     },
     {
       icon: Activity,
-      title: "Anomaly Detection",
+      title: "Mobility & Limping Analysis",
       description:
-        "Intelligent monitoring system detects unusual behaviors including limping patterns and alerts you to potential health issues.",
+        "Upload a 30–60s walking video—pose & gait analysis outputs limping status, confidence, symmetry indices, stride lengths, and leg status.",
       image:
         "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       color: "teal",
+      href: "/dashboard/Limping",
     },
     {
       icon: Salad,
-      title: "AI Diet Plans",
+      title: "Health Assessment (BCS) + Diet Plan",
       description:
-        "Personalized nutrition recommendations based on your pet's breed, age, weight, and health conditions.",
+        "BCS-based risk prediction across multiple diseases plus a personalized diet plan using age, weight, activity, and preferences.",
       image:
         "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       color: "indigo",
+      href: "/dashboard/pets/bcs",
     },
     {
       icon: Pill,
-      title: "Intelligent Pharmacy",
+      title: "Pharmacy Demand Forecasting",
       description:
-        "Smart pharmacy matching system finds the best medications and dosages for your pet's specific needs.",
+        "Fetch inventory + sales context—XGBoost forecasts demand, estimates days-to-stockout, recommends reorder quantity, and assigns restock priority.",
       image:
         "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       color: "teal",
+      href: "/dashboard/pharmacy",
     },
   ];
 
@@ -164,7 +168,7 @@ export default function Features() {
 
                 {/* Learn more link */}
                 <motion.a
-                  href="#"
+                  href={feature.href}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700 transition-colors cursor-pointer"
                   whileHover={{ x: 4 }}
                 >
