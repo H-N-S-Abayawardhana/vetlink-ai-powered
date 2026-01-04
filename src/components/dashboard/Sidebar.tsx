@@ -119,41 +119,47 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     icon: EyeIcon,
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
   },
-  {
-    name: "Pharmacy",
-    icon: BuildingStorefrontIcon,
-    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
-    children: [
-      {
-        name: "Dashboard",
-        href: "/dashboard/pharmacy",
-        icon: BuildingStorefrontIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
-      },
-      {
-        name: "Register",
-        href: "/dashboard/pharmacy/register",
-        icon: BuildingStorefrontIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
-      },
-      {
-        name: "Inventory",
-        href: "/dashboard/pharmacy/inventory",
-        icon: CubeIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
-      },
-      {
-        name: "Shopping",
-        href: "/dashboard/pharmacy/shopping",
-        icon: ShoppingCartIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
-      },
-      {
-        name: "Owner Dashboard",
-        href: "/dashboard/pharmacy/owner",
-        icon: BuildingStorefrontIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN"],
-      },
+    {
+      name: "Pharmacy",
+      icon: BuildingStorefrontIcon,
+      roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
+      children: [
+        {
+          name: "Dashboard",
+          href: "/dashboard/pharmacy",
+          icon: BuildingStorefrontIcon,
+          roles: ["SUPER_ADMIN", "VETERINARIAN", "PHARMACIST"],
+        },
+        {
+          name: "Register",
+          href: "/dashboard/pharmacy/register",
+          icon: BuildingStorefrontIcon,
+          roles: ["SUPER_ADMIN", "VETERINARIAN", "PHARMACIST"],
+        },
+        {
+          name: "Inventory",
+          href: "/dashboard/pharmacy/inventory",
+          icon: CubeIcon,
+          roles: ["SUPER_ADMIN", "VETERINARIAN", "PHARMACIST"],
+        },
+        {
+          name: "Shopping",
+          href: "/dashboard/pharmacy/shopping",
+          icon: ShoppingCartIcon,
+          roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
+        },
+        {
+          name: "Find From Prescription",
+          href: "/dashboard/pharmacy/find-prescription",
+          icon: DocumentTextIcon,
+          roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
+        },
+        {
+          name: "Owner Dashboard",
+          href: "/dashboard/pharmacy/owner",
+          icon: BuildingStorefrontIcon,
+          roles: ["SUPER_ADMIN", "VETERINARIAN"],
+        },
     ],
   },
   {

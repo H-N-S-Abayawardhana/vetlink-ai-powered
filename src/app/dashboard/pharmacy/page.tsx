@@ -118,7 +118,6 @@ export default function PharmacyPage() {
             <div className="mt-6 flex gap-2 overflow-x-auto pb-2">
               {[
                 { id: "overview", label: "📊 Overview", icon: "📊" },
-                { id: "shopping", label: "🛒 Shopping", icon: "🛒" },
                 { id: "inventory", label: "📦 Inventory", icon: "📦" },
                 { id: "demand", label: "🔮 Demand Prediction", icon: "🔮" },
                 { id: "analytics", label: "📈 Analytics", icon: "📈" },
