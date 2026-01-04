@@ -3,6 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import GaitApiService, { LimpingDetectionResult } from "@/services/gaitApi";
 
+// Configure route for longer execution time (video processing can take time)
+export const maxDuration = 300; // 5 minutes
+export const runtime = "nodejs"; // Use Node.js runtime for better file handling
+
 // POST /api/limping/analyze - Analyze video for limping detection
 export async function POST(request: NextRequest) {
   try {
