@@ -694,6 +694,7 @@ function ShoppingModule() {
     if (pharmacies.length > 0) {
       fetchProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pharmacies]);
 
   useEffect(() => {

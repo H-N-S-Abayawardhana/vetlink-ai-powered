@@ -164,6 +164,7 @@ function ShoppingModule() {
     
     // Uncomment to fetch from database:
     // fetchPharmacies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

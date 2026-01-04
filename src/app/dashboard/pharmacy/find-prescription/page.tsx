@@ -544,6 +544,13 @@ function FindFromPrescriptionModule() {
               <div className="space-y-6 max-h-[600px] overflow-y-auto">
                 {(() => {
                   // Group products by pharmacy
+                  type PharmacyGroup = {
+                    pharmacyId: string;
+                    pharmacyName: string;
+                    pharmacyAddress?: string;
+                    products: any[];
+                  };
+
                   const groupedByPharmacy = matchedProducts.reduce(
                     (acc, product) => {
                       const key = `${product.pharmacyId}-${product.pharmacyName}`;
@@ -558,18 +565,10 @@ function FindFromPrescriptionModule() {
                       acc[key].products.push(product);
                       return acc;
                     },
-                    {} as Record<
-                      string,
-                      {
-                        pharmacyId: string;
-                        pharmacyName: string;
-                        pharmacyAddress?: string;
-                        products: any[];
-                      }
-                    >,
+                    {} as Record<string, PharmacyGroup>,
                   );
 
-                  return Object.values(groupedByPharmacy).map(
+                  return (Object.values(groupedByPharmacy) as PharmacyGroup[]).map(
                     (pharmacyGroup, groupIndex) => (
                       <div
                         key={pharmacyGroup.pharmacyId}
