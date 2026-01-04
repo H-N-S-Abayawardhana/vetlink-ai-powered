@@ -75,7 +75,6 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
     });
 
     const stopGeneration = (cardType: CardType) => {
-      // Clear typing interval
       if (typingIntervals.current[cardType]) {
         clearInterval(typingIntervals.current[cardType]!);
         typingIntervals.current[cardType] = null;
@@ -101,7 +100,6 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
     };
 
     const handleCardClick = async (cardType: CardType) => {
-      // If content already exists, just toggle expansion
       if (cardContents[cardType].fullText) {
         setCardContents((prev) => ({
           ...prev,
@@ -113,7 +111,6 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
         return;
       }
 
-      // If another card is loading, don't allow new requests
       if (activeCard && activeCard !== cardType) {
         return;
       }
@@ -126,11 +123,10 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
           isLoading: true,
           hasError: false,
           displayedText: "",
-          isExpanded: true, // Auto-expand when loading
+          isExpanded: true,
         },
       }));
 
-      // Create AbortController for this request
       const abortController = new AbortController();
       abortControllers.current[cardType] = abortController;
 
@@ -156,13 +152,11 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
         const data = await response.json();
         const fullText = data.guidance;
 
-        // Store the full text (keep isLoading: true during typing animation)
         setCardContents((prev) => ({
           ...prev,
           [cardType]: {
             ...prev[cardType],
             fullText,
-            // Keep isLoading: true so stop button stays visible during typing
           },
         }));
 
@@ -177,11 +171,10 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
                 displayedText: fullText.substring(0, currentIndex + 1),
               },
             }));
-            currentIndex += 1; // Type one character at a time
+            currentIndex += 1;
           } else {
             clearInterval(typingInterval);
             typingIntervals.current[cardType] = null;
-            // Set isLoading to false only when typing animation completes
             setCardContents((prev) => ({
               ...prev,
               [cardType]: {
@@ -191,12 +184,11 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
             }));
             setActiveCard(null);
           }
-        }, 20); // Adjust speed: lower = faster (20ms per character)
+        }, 20);
 
         // Store interval reference
         typingIntervals.current[cardType] = typingInterval;
       } catch (err) {
-        // Don't show error if it was aborted
         if (err instanceof Error && err.name === "AbortError") {
           return;
         }
@@ -216,7 +208,6 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
         setActiveCard(null);
         console.error("Guidance generation error:", err);
       } finally {
-        // Clean up
         abortControllers.current[cardType] = null;
       }
     };
@@ -328,7 +319,6 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
 
       if (content.isLoading || content.displayedText || content.fullText) {
         const textToShow = content.displayedText || content.fullText;
-        // For single paragraph, just display as is
         const displayText = textToShow.trim();
 
         return (
@@ -347,7 +337,6 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
     };
 
     const isCardDisabled = (cardType: CardType): boolean => {
-      // Disable if another card is actively loading
       return activeCard !== null && activeCard !== cardType;
     };
 
@@ -449,7 +438,7 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
           )}
         </div>
 
-        {/* Expanded Content Cards - Show all responses below */}
+        {/* Expanded Content Cards */}
         <div className="space-y-4 mt-6">
           {(["disease_info", "stage_meaning", "care_tips"] as CardType[]).map(
             (cardType) => {
@@ -459,7 +448,6 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
               const shouldShow =
                 hasContent || content.isLoading || content.hasError;
 
-              // Only show cards that have content, are loading, or have errors
               if (!shouldShow) {
                 return null;
               }
@@ -535,7 +523,7 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
                               Generating content...
                             </div>
                           )}
-                        {/* Stop button - always visible when loading, even during typing animation */}
+                        {/* Stop button */}
                         {content.isLoading && (
                           <div className="flex justify-end mt-4 sticky bottom-0">
                             <button

@@ -220,13 +220,13 @@ export default function Pricing() {
           className="text-center"
         >
           <p className="text-gray-600 mb-4">
-            All plans include 24/7 support and regular updates
+            Plans are designed for pet owners, pharmacies, and clinics
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-            <span>✓ Free setup & onboarding</span>
-            <span>✓ 30-day money-back guarantee</span>
-            <span>✓ Enterprise-grade security</span>
-            <span>✓ API access available</span>
+            <span>✓ PayHere payments</span>
+            <span>✓ Role-based access (B2C + B2B)</span>
+            <span>✓ Cloud-native storage (PostgreSQL + S3)</span>
+            <span>✓ Mobile-first UX</span>
           </div>
         </motion.div>
       </div>

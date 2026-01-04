@@ -51,10 +51,8 @@ export default function SkinAnalysis({
     checkApiHealth();
   }, []);
 
-  // Auto-scroll to Detection Results when prediction is available
   useEffect(() => {
     if (prediction && detectionResultsRef.current) {
-      // Small delay to ensure DOM is updated
       setTimeout(() => {
         detectionResultsRef.current?.scrollIntoView({
           behavior: "smooth",
@@ -84,28 +82,22 @@ export default function SkinAnalysis({
     setSaveStatus("idle");
     setSaveError(null);
 
-    // Display image preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setSelectedImage(event.target?.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Make prediction
     setLoading(true);
     try {
       const result = await MLApiService.predictFromFile(file);
       setPrediction(result);
-      // Stop loading as soon as we have the prediction
       setLoading(false);
 
-      // If backend says image is invalid / not in-distribution, stop here.
       if (result.valid === false) {
         return;
       }
 
-      // Save scan record to pet history (best-effort) when a pet is selected
-      // This happens in the background after prediction is shown
       if (selectedPet?.id && result.prediction) {
         setSaveStatus("saving");
         try {
@@ -141,28 +133,22 @@ export default function SkinAnalysis({
     setSaveStatus("idle");
     setSaveError(null);
 
-    // Display image preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setSelectedImage(event.target?.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Make prediction
     setLoading(true);
     try {
       const result = await MLApiService.predictFromFile(file);
       setPrediction(result);
-      // Stop loading as soon as we have the prediction
       setLoading(false);
 
-      // If backend says image is invalid / not in-distribution, stop here.
       if (result.valid === false) {
         return;
       }
 
-      // Save scan record to pet history (best-effort) when a pet is selected
-      // This happens in the background after prediction is shown
       if (selectedPet?.id && result.prediction) {
         setSaveStatus("saving");
         try {
@@ -208,7 +194,6 @@ export default function SkinAnalysis({
       const doc = new jsPDF();
       let yPos = 20;
 
-      // Add logo and header
       try {
         const logoResponse = await fetch("/vetlink_logo.png", {
           cache: "no-cache",
@@ -231,19 +216,16 @@ export default function SkinAnalysis({
         console.error("Error loading logo:", e);
       }
 
-      // Company name
       doc.setFontSize(18);
-      doc.setTextColor(37, 99, 235); // Blue color
+      doc.setTextColor(37, 99, 235);
       doc.text("VETLINK - Smart Pet Health Care", 50, yPos + 6);
       yPos += 20;
 
-      // Title
       doc.setFontSize(16);
       doc.setTextColor(0, 0, 0);
       doc.text("Skin Disease Detection Report", 14, yPos);
       yPos += 10;
 
-      // Scan date and time
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       const scanDate = new Date().toLocaleString();
@@ -293,9 +275,9 @@ export default function SkinAnalysis({
         const severity = prediction.prediction.parsed.severity;
         const isSevere = severity === "severe";
         if (isSevere) {
-          doc.setTextColor(220, 38, 38); // Red
+          doc.setTextColor(220, 38, 38);
         } else {
-          doc.setTextColor(202, 138, 4); // Yellow
+          doc.setTextColor(202, 138, 4);
         }
         doc.text(
           `Severity Level: ${severity.charAt(0).toUpperCase() + severity.slice(1)}`,
@@ -342,7 +324,7 @@ export default function SkinAnalysis({
         }
       }
 
-      // AI Health Assistant (if used)
+      // AI Health Assistant
       if (guidanceCardsRef.current) {
         const cardContents = guidanceCardsRef.current.getCardContents();
         const hasGuidance = Object.values(cardContents).some(
@@ -396,7 +378,7 @@ export default function SkinAnalysis({
         }
       }
 
-      // Healthy Skin Care Card (if used)
+      // Healthy Skin Care Card
       if (healthySkinCardRef.current) {
         const healthyContent = healthySkinCardRef.current.getContent();
         if (healthyContent.fullText) {
@@ -439,7 +421,7 @@ export default function SkinAnalysis({
         doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: "center" });
       }
 
-      // Save PDF
+      // Download the report as a PDF file
       const fileName = `Skin_Disease_Report_${new Date().toISOString().split("T")[0]}.pdf`;
       doc.save(fileName);
     } catch (error) {
@@ -448,7 +430,6 @@ export default function SkinAnalysis({
     }
   };
 
-  // Function to render markdown-like text with proper formatting
   const renderFormattedText = (text: string) => {
     if (!text) return null;
 
@@ -647,13 +628,11 @@ export default function SkinAnalysis({
     return <div>{elements}</div>;
   };
 
-  // Function to format inline markdown (bold, italic)
   const formatInlineMarkdown = (text: string) => {
     const parts: (string | ReactElement)[] = [];
     let currentIndex = 0;
     let key = 0;
 
-    // Handle bold (**text** or __text__)
     const boldRegex = /(\*\*|__)(.+?)\1/g;
     let match;
     const boldMatches: Array<{ start: number; end: number; text: string }> = [];
@@ -666,13 +645,11 @@ export default function SkinAnalysis({
       });
     }
 
-    // Handle italic (*text* or _text_)
     const italicRegex = /(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g;
     const italicMatches: Array<{ start: number; end: number; text: string }> =
       [];
 
     while ((match = italicRegex.exec(text)) !== null) {
-      // Check if it's not part of a bold match
       const isInBold = boldMatches.some(
         (b) => match!.index >= b.start && match!.index < b.end,
       );
@@ -685,18 +662,15 @@ export default function SkinAnalysis({
       }
     }
 
-    // Combine and sort all matches
     const allMatches = [
       ...boldMatches.map((m) => ({ ...m, type: "bold" as const })),
       ...italicMatches.map((m) => ({ ...m, type: "italic" as const })),
     ].sort((a, b) => a.start - b.start);
 
     allMatches.forEach((match) => {
-      // Add text before match
       if (match.start > currentIndex) {
         parts.push(text.substring(currentIndex, match.start));
       }
-      // Add formatted match
       if (match.type === "bold") {
         parts.push(
           <strong key={key++} className="font-bold text-gray-900">
@@ -713,7 +687,6 @@ export default function SkinAnalysis({
       currentIndex = match.end;
     });
 
-    // Add remaining text
     if (currentIndex < text.length) {
       parts.push(text.substring(currentIndex));
     }
@@ -728,7 +701,6 @@ export default function SkinAnalysis({
       .join(" ");
   };
 
-  // Get severity badge styling
   const getSeverityBadge = (severity: "mild" | "severe" | null) => {
     if (!severity) return null;
 
@@ -964,7 +936,7 @@ export default function SkinAnalysis({
       {/* Results Section */}
       {selectedImage && (
         <div className="space-y-4 sm:space-y-6">
-          {/* Invalid Image State (OOD gate) */}
+          {/* Invalid Image State */}
           {prediction?.valid === false && (
             <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 sm:p-6">
               <div className="flex">
@@ -1012,7 +984,7 @@ export default function SkinAnalysis({
             </div>
           )}
 
-          {/* Save Status (when pet selected) */}
+          {/* Save Status */}
           {selectedPet && saveStatus !== "idle" && (
             <div
               className={`rounded-lg border p-3 sm:p-4 text-sm ${
@@ -1053,7 +1025,7 @@ export default function SkinAnalysis({
           <div
             className={`grid gap-4 sm:gap-6 ${selectedPet ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}
           >
-            {/* Pet Details (optional) */}
+            {/* Pet Details */}
             {selectedPet && (
               <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
                 <div className="p-4 sm:p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
@@ -1167,7 +1139,7 @@ export default function SkinAnalysis({
             </div>
           </div>
 
-          {/* Loading State - Only show when loading and no prediction yet */}
+          {/* Loading State */}
           {loading && !prediction && (
             <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>

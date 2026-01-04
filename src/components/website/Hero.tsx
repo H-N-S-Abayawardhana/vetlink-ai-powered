@@ -1,22 +1,21 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Activity,
   ArrowDown,
   Brain,
+  Github,
+  Globe,
   Sparkles,
-  Stethoscope,
-  Tablets,
   Zap,
 } from "lucide-react";
 
 export default function Hero() {
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 500], [0, 150]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+  // Keep a subtle parallax, but avoid fading the whole hero content out on scroll
+  // (the previous 1 -> 0 opacity made the hero look like it "disappears").
+  const y = useTransform(scrollY, [0, 800], [0, 80]);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 sm:pt-24 md:pt-32 bg-gradient-to-b from-gray-50 via-white to-gray-50/50">
@@ -56,8 +55,8 @@ export default function Hero() {
 
       {/* Content */}
       <motion.div
-        style={{ y, opacity }}
-        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-12 sm:py-16"
+        style={{ y }}
+        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-12 sm:pt-16 pb-28"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -109,9 +108,9 @@ export default function Hero() {
             transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light"
           >
-            Advanced AI diagnostics, personalized care plans, and intelligent
-            monitoring—bringing veterinary expertise to your fingertips with
-            precision and compassion.
+            Early detection for dog skin diseases, mobility analysis, pharmacy
+            demand forecasting, and BCS-driven health assessment—delivered as a
+            modern, mobile-first web experience with explainable AI guidance.
           </motion.p>
 
           {/* Key Benefits Grid */}
@@ -129,21 +128,22 @@ export default function Hero() {
           >
             {[
               {
-                icon: Stethoscope,
-                title: "AI Diagnostics",
-                description: "Advanced skin & anomaly detection",
+                icon: Activity,
+                title: "Dog Skin & Mobility AI",
+                description: "Image + video analysis with explainable guidance",
                 color: "indigo",
               },
               {
-                icon: Activity,
-                title: "Personalized Care",
-                description: "Custom diet & health plans",
+                icon: Sparkles,
+                title: "BCS → Risk → Diet",
+                description:
+                  "Health assessment with personalized diet planning",
                 color: "teal",
               },
               {
-                icon: Tablets,
-                title: "Smart Pharmacy",
-                description: "Intelligent medication matching",
+                icon: Zap,
+                title: "Inventory Intelligence",
+                description: "Demand forecasting + restock priority alerts",
                 color: "indigo",
               },
             ].map((feature, index) => (
@@ -195,26 +195,17 @@ export default function Hero() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
           >
             <motion.a
-              href="/signup"
+              href="/signin"
               className="group relative inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-4 text-base sm:text-lg font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 hover:from-indigo-700 hover:to-indigo-800 cursor-pointer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
               <Sparkles className="h-5 w-5" />
-              Start Free Trial
+              Get Started
               <motion.div
                 className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 blur-xl"
                 transition={{ duration: 0.3 }}
               />
-            </motion.a>
-            <motion.a
-              href="#intelligence"
-              className="inline-flex items-center gap-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 px-8 py-4 text-base sm:text-lg font-semibold ring-1 ring-gray-200/60 transition-all hover:bg-white hover:ring-indigo-200/60 hover:shadow-md cursor-pointer"
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Zap className="h-5 w-5 text-indigo-600" />
-              See AI in Action
             </motion.a>
           </motion.div>
 
@@ -226,13 +217,15 @@ export default function Hero() {
             className="pt-8 border-t border-gray-200/60"
           >
             <p className="text-sm text-gray-500 mb-6">
-              Trusted by pet owners and professionals worldwide
+              Built on a real production stack (no placeholder metrics)
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 text-gray-700">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 justify-items-center text-gray-700">
               {[
-                "10,000+ Pet Owners",
-                "500+ Veterinary Clinics",
-                "200+ Pet Pharmacies",
+                "Next.js (App Router) + TypeScript",
+                "Deployed on Vercel",
+                "Models hosted on Hugging Face Spaces",
+                "Neon PostgreSQL + AWS S3 storage",
+                "PayHere payments",
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -242,7 +235,7 @@ export default function Hero() {
                   transition={{ delay: 1.2 + index * 0.1, duration: 0.5 }}
                 >
                   <div className="h-1.5 w-1.5 rounded-full bg-teal-500" />
-                  <span className="font-semibold text-sm sm:text-base">
+                  <span className="font-semibold text-sm sm:text-base text-center">
                     {stat}
                   </span>
                 </motion.div>

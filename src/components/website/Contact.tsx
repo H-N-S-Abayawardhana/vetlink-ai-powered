@@ -121,8 +121,9 @@ export default function Contact() {
             </span>
           </h2>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Join thousands of pet owners who trust VetLink for their pets&apos;
-            health and wellbeing.
+            Questions about the platform, deployments, or integrations for pet
+            owners, clinics, or pharmacies? Send us a message and we&apos;ll get
+            back to you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <motion.a
