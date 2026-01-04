@@ -392,15 +392,15 @@ export default function DiseasePredictionResults({
               )}
             </div>
             <div className="text-right">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <p className="text-xs text-gray-500 uppercase">Age Group</p>
+                  <p className="text-xs text-gray-500 uppercase mb-2">Age Group</p>
                   <p className="font-bold text-gray-900">
                     {result.pet_profile.age_group}
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-gray-500 uppercase mb-2">
                     Weight Status
                   </p>
                   <p className="font-bold text-gray-900">
@@ -409,7 +409,7 @@ export default function DiseasePredictionResults({
                 </div>
                 {result.has_risk ? (
                   <div className="text-center">
-                    <p className="text-xs text-gray-500 uppercase">
+                    <p className="text-xs text-gray-500 uppercase mb-2">
                       Diseases at Risk
                     </p>
                     {(() => {
