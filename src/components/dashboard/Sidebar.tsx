@@ -22,6 +22,7 @@ import {
   ChevronRightIcon,
   UsersIcon,
   UserPlusIcon,
+  ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 import { ScanFace } from "lucide-react";
 
@@ -140,6 +141,12 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
         href: "/dashboard/pharmacy/inventory",
         icon: CubeIcon,
         roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Shopping",
+        href: "/dashboard/pharmacy/shopping",
+        icon: ShoppingCartIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
       },
       {
         name: "Owner Dashboard",
