@@ -10,6 +10,7 @@ import {
   FileText,
   X,
 } from "lucide-react";
+import { compressVideoSimple } from "@/lib/video-compression";
 
 // Type definitions
 interface HealthFormData {
@@ -122,6 +123,9 @@ const VideoUpload = ({
           <p className="text-sm text-gray-600">MP4, MOV or WebM (Max 50MB)</p>
           <p className="text-xs text-gray-500 mt-1">
             Record 30-60 seconds of natural walking
+          </p>
+          <p className="text-xs text-amber-600 mt-2 font-medium">
+            Large videos will be automatically compressed before upload
           </p>
         </div>
       </label>
@@ -491,6 +495,7 @@ export default function LimpingAnalysis({
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const handleVideoSelect = async (file: File) => {
     setSelectedVideo(file);
@@ -500,10 +505,29 @@ export default function LimpingAnalysis({
     setError(null);
     setLimpingResult(null);
 
+    let videoToUpload = file;
+    const fileSizeMB = file.size / (1024 * 1024);
+
+    // Compress video if it's larger than 30MB
+    if (fileSizeMB > 30) {
+      setIsCompressing(true);
+      try {
+        console.log(`Compressing video from ${fileSizeMB.toFixed(2)} MB...`);
+        videoToUpload = await compressVideoSimple(file, { maxSizeMB: 50 });
+        const compressedSizeMB = videoToUpload.size / (1024 * 1024);
+        console.log(`Compressed to ${compressedSizeMB.toFixed(2)} MB`);
+      } catch (compressionError) {
+        console.warn("Video compression failed, using original file:", compressionError);
+        // Continue with original file if compression fails
+      } finally {
+        setIsCompressing(false);
+      }
+    }
+
     setIsAnalyzingVideo(true);
     try {
       const formData = new FormData();
-      formData.append("video", file);
+      formData.append("video", videoToUpload);
 
       const response = await fetch("/api/limping/analyze", {
         method: "POST",
@@ -511,8 +535,47 @@ export default function LimpingAnalysis({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to analyze video");
+        // Handle 413 error specifically (Payload Too Large)
+        if (response.status === 413) {
+          const fileSizeMB = videoToUpload.size / (1024 * 1024);
+          throw new Error(
+            `Video file is too large (${fileSizeMB.toFixed(2)} MB). The server cannot accept files this large. Please try:\n\n1. Compress the video using a video compression tool\n2. Record a shorter video (30-60 seconds)\n3. Reduce the video quality/resolution\n\nMaximum recommended file size is 30 MB.`,
+          );
+        }
+
+        // Try to parse error response
+        let errorMessage = "Failed to analyze video";
+        const contentType = response.headers.get("content-type");
+        
+        try {
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } else {
+            // Try to get text response
+            const errorText = await response.text();
+            if (errorText && errorText.trim().length > 0) {
+              // Check if it looks like HTML (common for 413 errors)
+              if (errorText.trim().startsWith("<")) {
+                errorMessage = `Server error (${response.status}): Request entity too large. Please use a smaller video file.`;
+              } else {
+                errorMessage = errorText.substring(0, 500);
+              }
+            } else {
+              errorMessage = `Server error (${response.status}). Please try again with a smaller video file.`;
+            }
+          }
+        } catch (parseError) {
+          // If all parsing fails, use status-based message
+          if (response.status >= 500) {
+            errorMessage = `Server error (${response.status}). Please try again later.`;
+          } else if (response.status >= 400) {
+            errorMessage = `Request error (${response.status}). Please check your video file and try again.`;
+          } else {
+            errorMessage = `Unexpected error (${response.status}). Please try again.`;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -898,12 +961,14 @@ export default function LimpingAnalysis({
                   className="w-full h-auto max-h-64 sm:max-h-80 md:max-h-96 rounded-lg"
                 />
 
-                {isAnalyzingVideo && (
+                {(isCompressing || isAnalyzingVideo) && (
                   <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       <span className="text-sm text-blue-800">
-                        Analyzing video for limping detection...
+                        {isCompressing
+                          ? "Compressing video to reduce file size..."
+                          : "Analyzing video for limping detection..."}
                       </span>
                     </div>
                   </div>
