@@ -164,6 +164,7 @@ function ShoppingModule() {
     
     // Uncomment to fetch from database:
     // fetchPharmacies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -383,12 +384,13 @@ function ShoppingModule() {
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 shadow-xl text-white">
         <div>
-          <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-            <span>🛒</span>
-            Shopping
-          </h3>
-          <p className="text-emerald-100 text-sm">
-            Browse and purchase medications from available pharmacies
+          <h1 className="text-3xl font-bold mb-3 flex items-center gap-3">
+            <span className="text-4xl">🛒</span>
+            Pharmacy Shopping
+          </h1>
+          <p className="text-emerald-100 text-base leading-relaxed">
+            Discover and purchase veterinary medications from trusted pharmacies across Sri Lanka. 
+            Compare prices, check availability, and order with confidence.
           </p>
         </div>
       </div>
