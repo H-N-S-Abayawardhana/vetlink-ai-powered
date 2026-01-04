@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *`,
       [
-        session.user.id,
+        session.user.id as string, // owner_id should be UUID
         name,
         address || null,
         location.lat,
