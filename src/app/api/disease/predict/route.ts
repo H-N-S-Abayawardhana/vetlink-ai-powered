@@ -144,6 +144,51 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // If API returns disease_probabilities, normalize them to percentages (0-100)
+    // Otherwise create a default structure with the primary disease probability and estimate others
+    let disease_probabilities: {
+      "Hip Dysplasia": number;
+      "Osteoarthritis": number;
+      "IVDD": number;
+      "Normal": number;
+      "Patellar Luxation": number;
+    };
+    
+    if (result.disease_probabilities) {
+      // Normalize probabilities to percentage format (0-100)
+      // Check if values are already in percentage (>1) or decimal (0-1)
+      disease_probabilities = {
+        "Hip Dysplasia": result.disease_probabilities["Hip Dysplasia"] > 1 
+          ? result.disease_probabilities["Hip Dysplasia"] 
+          : result.disease_probabilities["Hip Dysplasia"] * 100,
+        "Osteoarthritis": result.disease_probabilities["Osteoarthritis"] > 1 
+          ? result.disease_probabilities["Osteoarthritis"] 
+          : result.disease_probabilities["Osteoarthritis"] * 100,
+        "IVDD": result.disease_probabilities["IVDD"] > 1 
+          ? result.disease_probabilities["IVDD"] 
+          : result.disease_probabilities["IVDD"] * 100,
+        "Normal": result.disease_probabilities["Normal"] > 1 
+          ? result.disease_probabilities["Normal"] 
+          : result.disease_probabilities["Normal"] * 100,
+        "Patellar Luxation": result.disease_probabilities["Patellar Luxation"] > 1 
+          ? result.disease_probabilities["Patellar Luxation"] 
+          : result.disease_probabilities["Patellar Luxation"] * 100,
+      };
+    } else {
+      // Create probabilities structure with primary disease and estimated others
+      // This is a fallback if the API doesn't return all probabilities
+      const primaryProb = result.confidence; // Already in percentage
+      const remainingProb = (100 - primaryProb) / 4; // Distribute remaining probability equally
+      
+      disease_probabilities = {
+        "Hip Dysplasia": result.predicted_disease === "Hip Dysplasia" ? primaryProb : remainingProb,
+        "Osteoarthritis": result.predicted_disease === "Osteoarthritis" ? primaryProb : remainingProb,
+        "IVDD": result.predicted_disease === "IVDD" ? primaryProb : remainingProb,
+        "Normal": result.predicted_disease === "Normal" ? primaryProb : remainingProb,
+        "Patellar Luxation": result.predicted_disease === "Patellar Luxation" ? primaryProb : remainingProb,
+      };
+    }
+
     return NextResponse.json({
       success: true,
       prediction: {
@@ -156,6 +201,7 @@ export async function POST(request: NextRequest) {
         age_group: age_group,
         risk_profile: high_risk_profile ? "High" : "Normal",
         mobility_status: mobility_impaired ? "Impaired" : "Normal",
+        disease_probabilities: disease_probabilities,
       },
       analysis_id: analysisId,
     });
