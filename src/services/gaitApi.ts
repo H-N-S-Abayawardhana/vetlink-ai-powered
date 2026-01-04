@@ -53,6 +53,13 @@ export interface DiseasePredictionResult {
   symptom_score: number;
   pain_severity: number;
   recommendations: string[];
+  disease_probabilities?: {
+    "Hip Dysplasia": number;
+    "Osteoarthritis": number;
+    "IVDD": number;
+    "Normal": number;
+    "Patellar Luxation": number;
+  };
   error?: string;
 }
 
