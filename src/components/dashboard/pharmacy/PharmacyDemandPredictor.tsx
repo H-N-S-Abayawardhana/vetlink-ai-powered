@@ -732,29 +732,7 @@ export default function PharmacyDemandPredictor() {
                   </h3>
 
                   <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
-                      <h4 className="text-xl font-bold text-blue-900 mb-3">
-                        XGBoost Regression Model
-                      </h4>
-                      <ul className="space-y-2 text-blue-800">
-                        <li>
-                          <strong>Algorithm:</strong> Gradient Boosting Decision
-                          Trees
-                        </li>
-                        <li>
-                          <strong>Features:</strong> 32 engineered features
-                          including temporal, lag, and rolling statistics
-                        </li>
-                        <li>
-                          <strong>Performance Metrics:</strong>
-                        </li>
-                        <ul className="ml-6 space-y-1">
-                          <li>• Mean Absolute Error (MAE): ~3-5 units</li>
-                          <li>• R² Score: ~0.85-0.92</li>
-                          <li>• Training Time: ~2-3 seconds</li>
-                        </ul>
-                      </ul>
-                    </div>
+                    
 
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                       <h4 className="text-lg font-semibold text-gray-900 mb-3">
