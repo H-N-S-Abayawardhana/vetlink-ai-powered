@@ -24,7 +24,8 @@ The system follows a modular, service-oriented architecture, separating responsi
 * Cloud Storage & Database Services
 
 **Architecture Diagram:**
-[https://drive.google.com/file/d/1qwxUK4363bIKMenpspJjJ22fCEM8bsJa/view?usp=sharing]
+* Draw.io Link - [https://drive.google.com/file/d/1qwxUK4363bIKMenpspJjJ22fCEM8bsJa/view?usp=sharing]
+* Image Link (from S3 Bucket) - [https://vetlink-main.s3.eu-north-1.amazonaws.com/Architecture-Diagram/VetLink-Architecture_Diagram.drawio.png]
 
 
 ## Technology Stack & Dependencies
