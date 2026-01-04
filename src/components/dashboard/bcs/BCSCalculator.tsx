@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { listPets, updatePet, type Pet } from "@/lib/pets";
 import { formatBCSTimestamp } from "@/lib/format-date";
@@ -11,7 +12,6 @@ import {
   PawPrint,
   ChevronRight,
   Check,
-  AlertCircle,
   Stethoscope,
 } from "lucide-react";
 
@@ -65,32 +65,28 @@ export default function BCSCalculator() {
 
   const canCalculate = ageValid && weightValid;
 
+  const SummaryItem = ({
+    label,
+    value,
+    hint,
+  }: {
+    label: string;
+    value: string;
+    hint?: string;
+  }) => (
+    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        {label}
+      </p>
+      <p className="mt-1 text-base font-semibold text-gray-900">{value}</p>
+      {hint ? <p className="text-xs text-gray-500 mt-0.5">{hint}</p> : null}
+    </div>
+  );
+
   async function handleCalculate() {
     if (!selected || !canCalculate) return;
     setLoading(true);
     setResult(null);
-
-    // Persist age/weight if changed
-    try {
-      // Ensure stored values are numeric where appropriate
-      const persistPayload: any = {
-        ageYears:
-          updates.ageYears == null
-            ? null
-            : typeof updates.ageYears === "string"
-              ? parseFloat(updates.ageYears as any)
-              : updates.ageYears,
-        weightKg:
-          updates.weightKg == null
-            ? null
-            : typeof updates.weightKg === "string"
-              ? parseFloat(updates.weightKg as any)
-              : updates.weightKg,
-      };
-      await updatePet(selected.id, persistPayload);
-    } catch (e) {
-      console.warn("Failed to persist pet updates", e);
-    }
 
     // Calculate BCS
     const score = await new Promise<number>((res) => {
@@ -275,89 +271,87 @@ export default function BCSCalculator() {
                 ← Back to pets
               </button>
 
-              <div className="flex items-center gap-4 mb-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl">
-                {(() => {
-                  const avatar =
-                    (selected as any).avatarDataUrl ||
-                    (selected as any).avatarUrl ||
-                    "/uploads/default-dog.png";
-                  const hasAvatar = Boolean(
-                    (selected as any).avatarDataUrl ||
-                    (selected as any).avatarUrl,
-                  );
-                  return hasAvatar ? (
-                    <Image
-                      src={avatar as string}
-                      alt={selected.name}
-                      width={64}
-                      height={64}
-                      unoptimized
-                      className="w-16 h-16 object-cover rounded-xl shadow-md"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
-                      {selected.name.charAt(0)}
-                    </div>
-                  );
-                })()}
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {selected.name}
-                  </h2>
-                  <p className="text-gray-600">
-                    {selected.breed || "Mixed breed"}
-                  </p>
-                </div>
-              </div>
-
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Age (years)
-                  </label>
-                  <input
-                    type="number"
-                    value={updates.ageYears ?? ""}
-                    onChange={(e) =>
-                      onDetailsChange(
-                        "ageYears",
-                        e.target.value ? parseFloat(e.target.value) : null,
-                      )
-                    }
-                    placeholder="Enter age in years"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-                  />
-                  {!ageValid && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      Please enter a valid age
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Step 2
                     </p>
-                  )}
+                    <h3 className="mt-1 text-xl font-semibold text-gray-900">
+                      Review auto-filled details
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-600">
+                      These details are pulled from the pet profile. To change
+                      anything, use the edit button.
+                    </p>
+                  </div>
+                  <Link
+                    href={`/dashboard/pets/${selected.id}`}
+                    className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm hover:border-blue-300 hover:bg-blue-100"
+                  >
+                    Edit pet profile
+                  </Link>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Weight (kg) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={updates.weightKg ?? ""}
-                    onChange={(e) =>
-                      onDetailsChange(
-                        "weightKg",
-                        e.target.value ? parseFloat(e.target.value) : null,
-                      )
-                    }
-                    placeholder="Enter weight in kilograms"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-                  />
-                  {!weightValid && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      Weight is required
+                {!weightValid && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                    <p className="text-sm font-semibold text-amber-900">
+                      Weight is required to calculate BCS.
                     </p>
-                  )}
+                    <p className="text-xs text-amber-800 mt-0.5">
+                      Update your pet’s weight in the profile, then return here.
+                    </p>
+                  </div>
+                )}
+
+                {!ageValid && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                    <p className="text-sm font-semibold text-amber-900">
+                      Age looks invalid.
+                    </p>
+                    <p className="text-xs text-amber-800 mt-0.5">
+                      Update your pet’s age in the profile, then return here.
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <SummaryItem
+                    label="Name"
+                    value={selected.name}
+                    hint="From pet profile"
+                  />
+                  <SummaryItem
+                    label="Age"
+                    value={
+                      selected.ageYears != null
+                        ? `${selected.ageYears} years`
+                        : "Not set"
+                    }
+                    hint="From pet profile"
+                  />
+                  <SummaryItem
+                    label="Breed"
+                    value={selected.breed || "Not set"}
+                    hint="From pet profile"
+                  />
+                  <SummaryItem
+                    label="Weight"
+                    value={
+                      selected.weightKg != null
+                        ? `${selected.weightKg} kg`
+                        : "Not set"
+                    }
+                    hint="From pet profile"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <SummaryItem
+                    label="Activity level"
+                    value={selected.activityLevel || "Not set"}
+                    hint="From pet profile"
+                  />
                 </div>
               </div>
 
