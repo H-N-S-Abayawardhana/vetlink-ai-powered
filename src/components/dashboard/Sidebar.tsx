@@ -71,22 +71,29 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     roles: ["SUPER_ADMIN", "VETERINARIAN"],
   },
   {
-    name: "BCS Calculator",
-    href: "/dashboard/pets/bcs",
+    name: "Health Assessment",
     icon: LightBulbIcon,
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
-  },
-  {
-    name: "Disease Prediction",
-    href: "/dashboard/pets/disease-prediction",
-    icon: LightBulbIcon,
-    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
-  },
-  {
-    name: "Diet Recommendations",
-    href: "/dashboard/pets/diet",
-    icon: DocumentTextIcon,
-    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+    children: [
+      {
+        name: "BCS Calculator",
+        href: "/dashboard/pets/bcs",
+        icon: LightBulbIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Disease Prediction",
+        href: "/dashboard/pets/disease-prediction",
+        icon: LightBulbIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+      {
+        name: "Diet Recommendation",
+        href: "/dashboard/pets/diet",
+        icon: DocumentTextIcon,
+        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+      },
+    ],
   },
   {
     name: "Schedule Appointment",
