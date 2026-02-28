@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { listPets, updatePet, type Pet } from "@/lib/pets";
 import { formatBCSTimestamp } from "@/lib/format-date";
@@ -134,24 +133,6 @@ export default function BCSCalculator() {
   }, [updates]);
 
   const canCalculate = ageValid && weightValid && clinicalObservationsValid;
-
-  const SummaryItem = ({
-    label,
-    value,
-    hint,
-  }: {
-    label: string;
-    value: string;
-    hint?: string;
-  }) => (
-    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {label}
-      </p>
-      <p className="mt-1 text-base font-semibold text-gray-900">{value}</p>
-      {hint ? <p className="text-xs text-gray-500 mt-0.5">{hint}</p> : null}
-    </div>
-  );
 
   async function handleCalculate() {
     if (!selected || !canCalculate) return;
@@ -365,34 +346,8 @@ export default function BCSCalculator() {
           {/* Step 2: Enter Details */}
           {step === "details" && selected && (
             <div className="p-8">
-              <button
-                onClick={() => setStep("select")}
-                className="text-sm text-gray-600 hover:text-gray-900 mb-6 flex items-center gap-1"
-              >
-                ← Back to pets
-              </button>
-
-              <div className="space-y-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Step 2
-                    </p>
-                    <h3 className="mt-1 text-xl font-semibold text-gray-900">
-                      Pet Details & Clinical Observations
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Review pet details and provide clinical observations for accurate BCS prediction.
-                    </p>
-                  </div>
-                  <Link
-                    href={`/dashboard/pets/${selected.id}`}
-                    className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm hover:border-blue-300 hover:bg-blue-100"
-                  >
-                    Edit pet profile
-                  </Link>
-                </div>
-
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border-2 border-purple-200 p-8">
+                <div className="space-y-6">
                 {!weightValid && (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                     <p className="text-sm font-semibold text-amber-900">
@@ -415,47 +370,8 @@ export default function BCSCalculator() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <SummaryItem
-                    label="Name"
-                    value={selected.name}
-                    hint="From pet profile"
-                  />
-                  <SummaryItem
-                    label="Age"
-                    value={
-                      selected.ageYears != null
-                        ? `${selected.ageYears} years`
-                        : "Not set"
-                    }
-                    hint="From pet profile"
-                  />
-                  <SummaryItem
-                    label="Breed"
-                    value={selected.breed || "Not set"}
-                    hint="From pet profile"
-                  />
-                  <SummaryItem
-                    label="Weight"
-                    value={
-                      selected.weightKg != null
-                        ? `${selected.weightKg} kg`
-                        : "Not set"
-                    }
-                    hint="From pet profile"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <SummaryItem
-                    label="Activity level"
-                    value={selected.activityLevel || "Not set"}
-                    hint="From pet profile"
-                  />
-                </div>
-
                 {/* Clinical Observations Section */}
-                <div className="border-t pt-6">
+                <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">
                     Clinical Observations
                   </h4>
@@ -463,50 +379,7 @@ export default function BCSCalculator() {
                     These observations help provide a more accurate BCS prediction. Select the condition that best describes your pet.
                   </p>
 
-                  {/* First Row - Gender & Activity Level */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Gender *
-                      </label>
-                      <select
-                        value={updates.gender || ""}
-                        onChange={(e) =>
-                          onDetailsChange("gender", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      >
-                        <option value="">Select gender</option>
-                        {clinicalOptions.gender.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Activity Level *
-                      </label>
-                      <select
-                        value={updates.activityLevel || ""}
-                        onChange={(e) =>
-                          onDetailsChange("activityLevel", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      >
-                        <option value="">Select activity level</option>
-                        {clinicalOptions.activity_level.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Second Row - Physical Observations */}
+                  {/* Physical Observations */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -605,7 +478,7 @@ export default function BCSCalculator() {
                   </div>
 
                   {/* Fourth Row - Fat Deposits */}
-                  <div className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Fat Deposits *
@@ -632,24 +505,33 @@ export default function BCSCalculator() {
                 </div>
               </div>
 
-              <button
-                onClick={handleCalculate}
-                disabled={!canCalculate || loading}
-                className={`mt-8 w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 bcs-calc-btn ${
-                  canCalculate && !loading
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg cursor-pointer"
-                    : "bg-gray-300 cursor-not-allowed"
-                }`}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>
-                    Calculating BCS...
-                  </span>
-                ) : (
-                  "Calculate Body Condition Score"
-                )}
-              </button>
+              <div className="flex gap-4 mt-8">
+                <button
+                  onClick={() => setStep("select")}
+                  className="flex-1 py-4 rounded-xl font-semibold text-gray-700 border-2 border-gray-300 hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCalculate}
+                  disabled={!canCalculate || loading}
+                  className={`flex-1 py-4 rounded-xl font-semibold text-white transition-all duration-300 bcs-calc-btn ${
+                    canCalculate && !loading
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg cursor-pointer"
+                      : "bg-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>
+                      Calculating BCS...
+                    </span>
+                  ) : (
+                    "Calculate Body Condition Score"
+                  )}
+                </button>
+              </div>
+            </div>
             </div>
           )}
 
