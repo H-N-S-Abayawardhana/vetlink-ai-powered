@@ -23,9 +23,44 @@ export default function BCSCalculator() {
   const [updates, setUpdates] = useState<{
     ageYears?: number | null;
     weightKg?: number | null;
+    gender?: string | null;
+    activityLevel?: string | null;
+    ribCondition?: string | null;
+    waist?: string | null;
+    abdominalTuck?: string | null;
+    spineHips?: string | null;
+    fatDeposits?: string | null;
   }>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Clinical observation options from Hugging Face model
+  const clinicalOptions = {
+    activity_level: ["Low", "Medium", "High"],
+    rib_condition: [
+      "Visible/protruding",
+      "Easy to feel",
+      "Slight fat cover",
+      "Hard to feel",
+      "Cannot feel",
+    ],
+    waist: ["Severely narrowed", "Moderate waist", "Barely visible", "Oval/Round"],
+    abdominal_tuck: [
+      "Severe upward tuck",
+      "Gentle upward tuck",
+      "Slight belly hang",
+      "Sagging belly",
+    ],
+    spine_hips: [
+      "Very prominent",
+      "Easy to feel",
+      "Felt but not visible",
+      "Difficult to feel",
+    ],
+    fat_deposits: ["None", "Mild", "Moderate", "Large"],
+    gender: ["Male", "Female"],
+  };
 
   useEffect(() => {
     async function load() {
@@ -37,16 +72,39 @@ export default function BCSCalculator() {
 
   function onSelectPet(p: Pet) {
     setSelected(p);
-    setUpdates({ ageYears: p.ageYears ?? null, weightKg: p.weightKg ?? null });
+    setUpdates({
+      ageYears: p.ageYears ?? null,
+      weightKg: p.weightKg ?? null,
+      gender: p.gender ?? null,
+      activityLevel: p.activityLevel ?? "Medium",
+      ribCondition: "Easy to feel",
+      waist: "Moderate waist",
+      abdominalTuck: "Slight belly hang",
+      spineHips: "Felt but not visible",
+      fatDeposits: "Mild",
+    });
     setResult(null);
+    setError(null);
     setStep("details");
   }
 
   const onDetailsChange = useCallback(
-    (field: "ageYears" | "weightKg", value: number | null) => {
+    (
+      field:
+        | "ageYears"
+        | "weightKg"
+        | "gender"
+        | "activityLevel"
+        | "ribCondition"
+        | "waist"
+        | "abdominalTuck"
+        | "spineHips"
+        | "fatDeposits",
+      value: string | number | null
+    ) => {
       setUpdates((prev) => ({ ...prev, [field]: value }));
     },
-    [],
+    []
   );
 
   const ageValid = useMemo(() => {
@@ -63,7 +121,19 @@ export default function BCSCalculator() {
     return typeof n === "number" && !Number.isNaN(n) && n > 0;
   }, [updates]);
 
-  const canCalculate = ageValid && weightValid;
+  const clinicalObservationsValid = useMemo(() => {
+    return (
+      updates.ribCondition &&
+      updates.waist &&
+      updates.abdominalTuck &&
+      updates.spineHips &&
+      updates.fatDeposits &&
+      updates.activityLevel &&
+      updates.gender
+    );
+  }, [updates]);
+
+  const canCalculate = ageValid && weightValid && clinicalObservationsValid;
 
   const SummaryItem = ({
     label,
@@ -87,46 +157,77 @@ export default function BCSCalculator() {
     if (!selected || !canCalculate) return;
     setLoading(true);
     setResult(null);
+    setError(null);
 
-    // Calculate BCS
-    const score = await new Promise<number>((res) => {
-      setTimeout(() => {
-        const wRaw = updates.weightKg ?? selected.weightKg ?? 0;
-        const aRaw = updates.ageYears ?? selected.ageYears ?? 0;
-        const w =
-          typeof wRaw === "string" ? parseFloat(wRaw as any) : (wRaw as number);
-        const a =
-          typeof aRaw === "string" ? parseFloat(aRaw as any) : (aRaw as number);
-        const safeW = Number.isNaN(w) ? 0 : w;
-        const safeA = Number.isNaN(a) ? 0 : a;
-        const base = Math.round(Math.min(Math.max(safeW / 10 + 1, 1), 9));
-        const ageAdj = safeA >= 8 ? 1 : 0;
-        const final = Math.min(Math.max(base + ageAdj, 1), 9);
-        res(final);
-      }, 700);
-    });
-
-    setResult(score);
-    // Persist calculated BCS and timestamp
     try {
-      const when = new Date().toISOString();
-      const updated = await updatePet(selected.id, {
-        bcs: score,
-        bcsCalculatedAt: when,
+      // Get validated values
+      const wRaw = updates.weightKg ?? selected.weightKg ?? 0;
+      const aRaw = updates.ageYears ?? selected.ageYears ?? 0;
+      const w =
+        typeof wRaw === "string" ? parseFloat(wRaw as any) : (wRaw as number);
+      const a =
+        typeof aRaw === "string" ? parseFloat(aRaw as any) : (aRaw as number);
+
+      // Call the BCS prediction API with all clinical observations
+      const response = await fetch("/api/bcs/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          breed: selected.breed || "Mixed",
+          age: a,
+          weight_kg: w,
+          gender: updates.gender || selected.gender || "Male",
+          activity_level: updates.activityLevel || selected.activityLevel || "Medium",
+          rib_condition: updates.ribCondition || "Easy to feel",
+          waist: updates.waist || "Moderate waist",
+          abdominal_tuck: updates.abdominalTuck || "Slight belly hang",
+          spine_hips: updates.spineHips || "Felt but not visible",
+          fat_deposits: updates.fatDeposits || "Mild",
+        }),
       });
-      // update local selected and pets list with returned pet when available
-      if (updated) {
-        setSelected(updated as any);
-        setPets((prev) =>
-          prev.map((p) => (p.id === updated.id ? (updated as any) : p)),
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to calculate BCS from the model"
         );
       }
-    } catch (e) {
-      console.warn("Failed to persist BCS", e);
-    }
 
-    setStep("result");
-    setLoading(false);
+      const prediction = await response.json();
+      const score = prediction.bcs_score;
+
+      setResult(score);
+
+      // Persist calculated BCS and timestamp
+      try {
+        const when = new Date().toISOString();
+        const updated = await updatePet(selected.id, {
+          bcs: score,
+          bcsCalculatedAt: when,
+        });
+        // update local selected and pets list with returned pet when available
+        if (updated) {
+          setSelected(updated as any);
+          setPets((prev) =>
+            prev.map((p) => (p.id === updated.id ? (updated as any) : p)),
+          );
+        }
+      } catch (e) {
+        console.warn("Failed to persist BCS", e);
+      }
+
+      setStep("result");
+    } catch (error) {
+      console.error("BCS Calculation Error:", error);
+      const errorMsg =
+        error instanceof Error ? error.message : "Unknown error";
+      setError(errorMsg);
+      alert(`Error calculating BCS: ${errorMsg}`);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function resetCalculator() {
@@ -278,11 +379,10 @@ export default function BCSCalculator() {
                       Step 2
                     </p>
                     <h3 className="mt-1 text-xl font-semibold text-gray-900">
-                      Review auto-filled details
+                      Pet Details & Clinical Observations
                     </h3>
                     <p className="mt-1 text-sm text-gray-600">
-                      These details are pulled from the pet profile. To change
-                      anything, use the edit button.
+                      Review pet details and provide clinical observations for accurate BCS prediction.
                     </p>
                   </div>
                   <Link
@@ -352,6 +452,183 @@ export default function BCSCalculator() {
                     value={selected.activityLevel || "Not set"}
                     hint="From pet profile"
                   />
+                </div>
+
+                {/* Clinical Observations Section */}
+                <div className="border-t pt-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Clinical Observations
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    These observations help provide a more accurate BCS prediction. Select the condition that best describes your pet.
+                  </p>
+
+                  {/* First Row - Gender & Activity Level */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Gender *
+                      </label>
+                      <select
+                        value={updates.gender || ""}
+                        onChange={(e) =>
+                          onDetailsChange("gender", e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select gender</option>
+                        {clinicalOptions.gender.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Activity Level *
+                      </label>
+                      <select
+                        value={updates.activityLevel || ""}
+                        onChange={(e) =>
+                          onDetailsChange("activityLevel", e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select activity level</option>
+                        {clinicalOptions.activity_level.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Second Row - Physical Observations */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Rib Condition *
+                      </label>
+                      <select
+                        value={updates.ribCondition || ""}
+                        onChange={(e) =>
+                          onDetailsChange("ribCondition", e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select rib condition</option>
+                        {clinicalOptions.rib_condition.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        How easily can you feel the ribs?
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Waist *
+                      </label>
+                      <select
+                        value={updates.waist || ""}
+                        onChange={(e) =>
+                          onDetailsChange("waist", e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select waist condition</option>
+                        {clinicalOptions.waist.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        How prominent is the waist?
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Third Row - More Physical Observations */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Abdominal Tuck *
+                      </label>
+                      <select
+                        value={updates.abdominalTuck || ""}
+                        onChange={(e) =>
+                          onDetailsChange("abdominalTuck", e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select abdominal tuck</option>
+                        {clinicalOptions.abdominal_tuck.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        How much abdominal tuck is present?
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Spine & Hips *
+                      </label>
+                      <select
+                        value={updates.spineHips || ""}
+                        onChange={(e) =>
+                          onDetailsChange("spineHips", e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select spine/hips condition</option>
+                        {clinicalOptions.spine_hips.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        How prominent are spine and hip bones?
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Fourth Row - Fat Deposits */}
+                  <div className="pt-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Fat Deposits *
+                      </label>
+                      <select
+                        value={updates.fatDeposits || ""}
+                        onChange={(e) =>
+                          onDetailsChange("fatDeposits", e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select fat deposit level</option>
+                        {clinicalOptions.fat_deposits.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        How much fat is deposited on the body?
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
