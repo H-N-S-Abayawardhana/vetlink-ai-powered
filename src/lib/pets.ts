@@ -37,6 +37,8 @@ export interface Pet {
   vetClinicName?: string | null;
   vetClinicPhone?: string | null;
   avatarDataUrl?: string | null; // base64 image preview
+  digestiveSensitivity?: string | null; // e.g., "None", "Grain-free", "Limited ingredient"
+  mealsPerDay?: number | null; // Number of meals per day
   createdAt: string;
   updatedAt: string;
 }

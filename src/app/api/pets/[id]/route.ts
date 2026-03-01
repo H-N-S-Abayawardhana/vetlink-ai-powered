@@ -100,6 +100,8 @@ export async function PUT(
       vetClinicName,
       vetClinicPhone,
       avatarDataUrl,
+      digestiveSensitivity,
+      mealsPerDay,
     } = body;
     const updateResult = await pool.query(
       `UPDATE pets SET
@@ -107,8 +109,8 @@ export async function PUT(
          allergies=$9, preferred_diet=$10, living_environment=$11, health_notes=$12,
          microchip_number=$13, microchip_implant_date=$14, spayed_neutered=$15, spay_neuter_date=$16, blood_type=$17, date_of_birth=$18,
          owner_phone=$19, secondary_contact_name=$20, secondary_contact_phone=$21, vet_clinic_name=$22, vet_clinic_phone=$23,
-         avatar_url=$24, updated_at=CURRENT_TIMESTAMP
-       WHERE id=$25 RETURNING *`,
+         avatar_url=$24, digestive_sensitivity=$25, meals_per_day=$26, updated_at=CURRENT_TIMESTAMP
+       WHERE id=$27 RETURNING *`,
       [
         name || petRow.name,
         breed || petRow.breed,
@@ -138,6 +140,8 @@ export async function PUT(
         vetClinicName ?? petRow.vet_clinic_name,
         vetClinicPhone ?? petRow.vet_clinic_phone,
         avatarDataUrl || petRow.avatar_url,
+        digestiveSensitivity ?? petRow.digestive_sensitivity,
+        mealsPerDay ?? petRow.meals_per_day,
         id,
       ],
     );
@@ -273,6 +277,8 @@ export async function PATCH(
       secondaryContactName: "secondary_contact_name",
       secondaryContactPhone: "secondary_contact_phone",
       vetClinicName: "vet_clinic_name",
+      digestiveSensitivity: "digestive_sensitivity",
+      mealsPerDay: "meals_per_day",
       vetClinicPhone: "vet_clinic_phone",
       avatarDataUrl: "avatar_url",
     } as Record<string, string>;

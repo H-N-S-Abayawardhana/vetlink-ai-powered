@@ -102,6 +102,8 @@ export async function POST(request: NextRequest) {
       vetClinicName,
       vetClinicPhone,
       avatarDataUrl,
+      digestiveSensitivity,
+      mealsPerDay,
     } = body;
 
     if (!name || typeof name !== "string") {
@@ -117,13 +119,13 @@ export async function POST(request: NextRequest) {
          preferred_diet, living_environment, health_notes,
          microchip_number, microchip_implant_date, spayed_neutered, spay_neuter_date, blood_type, date_of_birth,
          owner_phone, secondary_contact_name, secondary_contact_phone, vet_clinic_name, vet_clinic_phone,
-         avatar_url, created_at, updated_at
+         avatar_url, digestive_sensitivity, meals_per_day, created_at, updated_at
        )
        VALUES (
          $1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
          $12,$13,$14,$15,$16,$17,
          $18,$19,$20,$21,$22,
-         $23,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+         $23,$24,$25,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
        )
        RETURNING *`,
       [
@@ -154,6 +156,8 @@ export async function POST(request: NextRequest) {
         vetClinicName || null,
         vetClinicPhone || null,
         avatarDataUrl || null,
+        digestiveSensitivity || null,
+        mealsPerDay ?? null,
       ],
     );
 
