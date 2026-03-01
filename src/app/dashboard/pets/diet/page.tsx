@@ -8,8 +8,6 @@ import {
   PawPrint,
   AlertCircle,
   TrendingUp,
-  Droplet,
-  Activity,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { listPets, type Pet } from "@/lib/pets";
@@ -65,7 +63,7 @@ export default function DietPage() {
     } catch (err) {
       console.error("Error generating diet plan", err);
       alert(
-        "Failed to generate diet plan. Make sure the pet has a BCS and you are signed in.",
+        "Failed to generate diet plan. Please ensure the pet profile is complete (age, weight, BCS, activity level, gender, meals per day, dietary preferences) and you are signed in.",
       );
     } finally {
       setLoadingPlan(false);
@@ -130,50 +128,22 @@ export default function DietPage() {
       doc.text("Plan Summary", margin, y);
       y += 16;
       doc.setFontSize(11);
-      doc.text(`Daily Calories: ${plan.dailyCalories} kcal`, margin, y);
+      doc.text(`Calorie Level: ${plan.calorieLevel || "—"}`, margin, y);
       y += 14;
       doc.text(
-        `Feeding Frequency: ${plan.feedingFrequency} per day`,
+        `Diet Type: ${plan.dietType || "—"}`,
         margin,
         y,
       );
       y += 14;
       doc.text(
-        `Per Meal: ${plan.portions?.cupsPerMeal ?? "—"} cups (~${plan.portions?.gramsPerMeal ?? "—"} g)`,
+        `Food Category: ${plan.foodCategory || "—"}`,
         margin,
         y,
       );
       y += 20;
 
-      // Recommended foods
-      doc.setFontSize(12);
-      doc.text("Recommended Foods:", margin, y);
-      y += 14;
-      doc.setFontSize(11);
-      (plan.recommendedFoodTypes || []).forEach((f: string) => {
-        doc.text(`• ${f}`, margin + 8, y);
-        y += 12;
-        if (y > 740) {
-          doc.addPage();
-          y = margin;
-        }
-      });
-      y += 6;
 
-      // Foods to avoid
-      doc.setFontSize(12);
-      doc.text("Foods to Avoid:", margin, y);
-      y += 14;
-      doc.setFontSize(11);
-      (plan.foodsToAvoid || []).forEach((f: string) => {
-        doc.text(`• ${f}`, margin + 8, y);
-        y += 12;
-        if (y > 740) {
-          doc.addPage();
-          y = margin;
-        }
-      });
-      y += 10;
 
       // Notes
       if (plan.notes && plan.notes.length) {
@@ -498,105 +468,30 @@ export default function DietPage() {
             <div className="p-6 space-y-6">
               {/* Key Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg min-h-[132px]">
                   <div className="text-sm font-semibold opacity-90 uppercase tracking-wide">
-                    Daily Calories
+                    Calorie Level
                   </div>
-                  <div className="text-4xl font-bold mt-2">
-                    {plan.dailyCalories}
+                  <div className="text-2xl md:text-3xl font-bold mt-2 break-words leading-tight">
+                    {plan.calorieLevel || "—"}
                   </div>
-                  <div className="text-sm opacity-90 mt-1">kcal per day</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg min-h-[132px]">
                   <div className="text-sm font-semibold opacity-90 uppercase tracking-wide">
-                    Feeding Times
+                    Diet Type
                   </div>
-                  <div className="text-4xl font-bold mt-2">
-                    {plan.feedingFrequency}x
+                  <div className="text-2xl md:text-3xl font-bold mt-2 break-words leading-tight">
+                    {plan.dietType || "—"}
                   </div>
-                  <div className="text-sm opacity-90 mt-1">per day</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg min-h-[132px]">
                   <div className="text-sm font-semibold opacity-90 uppercase tracking-wide">
-                    Per Meal
+                    Food Category
                   </div>
-                  <div className="text-4xl font-bold mt-2">
-                    {plan.portions.cupsPerMeal}
-                  </div>
-                  <div className="text-sm opacity-90 mt-1">
-                    cups (~{plan.portions.gramsPerMeal}g)
-                  </div>
-                </div>
-              </div>
-
-              {/* Detailed Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Food Recommendations */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
-                  <h3 className="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    Recommended Foods
-                  </h3>
-                  <ul className="space-y-2">
-                    {plan.recommendedFoodTypes.map(
-                      (food: string, i: number) => (
-                        <li
-                          key={i}
-                          className="text-gray-700 flex items-start gap-2"
-                        >
-                          <span className="text-green-500 mt-1">✓</span>
-                          <span>{food}</span>
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                </div>
-
-                {/* Foods to Avoid */}
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-5 border border-red-200">
-                  <h3 className="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    Foods to Avoid
-                  </h3>
-                  <ul className="space-y-2">
-                    {plan.foodsToAvoid.map((food: string, i: number) => (
-                      <li
-                        key={i}
-                        className="text-gray-700 flex items-start gap-2"
-                      >
-                        <span className="text-red-500 mt-1">✗</span>
-                        <span>{food}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Additional Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200 flex items-center gap-3">
-                  <Droplet className="w-8 h-8 text-blue-600" />
-                  <div>
-                    <div className="text-sm text-blue-600 font-semibold">
-                      Daily Water
-                    </div>
-                    <div className="text-2xl font-bold text-gray-800">
-                      {plan.waterMlPerDay} ml
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-orange-50 rounded-xl p-4 border border-orange-200 flex items-center gap-3">
-                  <Activity className="w-8 h-8 text-orange-600" />
-                  <div>
-                    <div className="text-sm text-orange-600 font-semibold">
-                      Daily Exercise
-                    </div>
-                    <div className="text-2xl font-bold text-gray-800">
-                      {plan.exerciseMinutesPerDay} min
-                    </div>
+                  <div className="text-2xl md:text-3xl font-bold mt-2 break-words leading-tight">
+                    {plan.foodCategory || "—"}
                   </div>
                 </div>
               </div>

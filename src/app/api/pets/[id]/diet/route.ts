@@ -4,10 +4,43 @@ import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
 import { mapRowToPet } from "@/lib/pet-utils";
 import { generateDietPlan } from "@/lib/diet";
+import {
+  predictDietRecommendation,
+  type DietPredictionInput,
+} from "@/services/dietApi";
+
+export const runtime = "nodejs";
+
+function mapActivityLevel(value?: string | null) {
+  const level = (value || "").toLowerCase();
+  if (level === "high" || level === "active" || level === "working") {
+    return "High";
+  }
+  if (level === "medium" || level === "normal") {
+    return "Medium";
+  }
+  return "Low";
+}
+
+function mapFoodType(value?: string | null) {
+  const diet = (value || "").toLowerCase();
+  if (diet.includes("home")) return "Homemade";
+  if (diet.includes("mix")) return "Mixed";
+  return "Commercial";
+}
+
+function mapYesNo(value: unknown) {
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  const normalized = String(value || "").toLowerCase().trim();
+  if (normalized === "yes" || normalized === "true" || normalized === "1") {
+    return "Yes";
+  }
+  return "No";
+}
 
 // GET /api/pets/:id/diet -> generate diet plan based on stored pet data
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -39,19 +72,50 @@ export async function GET(
       id: pet.id,
       name: pet.name,
       breed: pet.breed,
-      weightKg: pet.weightKg ?? 0,
-      ageYears: pet.ageYears ?? null,
-      bcs: pet.bcs ?? null,
+      weightKg: Number(pet.weightKg ?? 0),
+      ageYears: Number(pet.ageYears ?? 0),
+      bcs: Number(pet.bcs ?? 5),
       activityLevel: (pet.activityLevel || undefined) as any,
+      gender: pet.gender,
+      spayedNeutered: pet.spayedNeutered,
+      mealsPerDay: Number(pet.mealsPerDay ?? 2),
+      digestiveSensitivity: pet.digestiveSensitivity,
+      preferredDiet: pet.preferredDiet,
     };
 
-    const plan = generateDietPlan(input);
+    const dietInput: DietPredictionInput = {
+      age: input.ageYears,
+      weight_kg: input.weightKg,
+      body_condition_score: input.bcs,
+      meals_per_day: input.mealsPerDay,
+      breed: input.breed || "Unknown",
+      gender:
+        String(input.gender || "").toLowerCase() === "female"
+          ? "Female"
+          : "Male",
+      neutered_status: mapYesNo(input.spayedNeutered),
+      activity_level: mapActivityLevel(String(input.activityLevel || "")),
+      digestive_sensitivity: mapYesNo(input.digestiveSensitivity),
+      current_food_type: mapFoodType(input.preferredDiet),
+    };
+
+    let prediction = null;
+    try {
+      prediction = await predictDietRecommendation(dietInput);
+    } catch (predictionError) {
+      console.error("Diet prediction service error:", predictionError);
+    }
+
+    const plan = generateDietPlan(input, prediction);
     return NextResponse.json({ plan });
   } catch (error) {
     console.error("Error generating diet plan:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      {
+        error: "Failed to generate diet plan",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
     );
   }
 }

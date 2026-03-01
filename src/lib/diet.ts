@@ -15,6 +15,12 @@ export interface DietPlanInput {
   lifeStage?: LifeStage | null;
 }
 
+export interface DietPredictionResult {
+  calorie_level: string | null;
+  diet_type: string | null;
+  food_category: string | null;
+}
+
 export interface DietPlan {
   petId?: string | number;
   generatedAt: string;
@@ -24,36 +30,28 @@ export interface DietPlan {
   ageYears?: number | null;
   bcs?: number | null;
   bcsCategory?: string;
-  rerKcal: number;
-  dailyCalories: number;
-  feedingFrequency: number;
-  portions: {
-    cupsPerMeal?: number;
-    gramsPerMeal?: number;
-    kcalPerMeal?: number;
-  };
+  rerKcal?: number | null;
+  dailyCalories?: number | null;
+  feedingFrequency?: number | null;
+  portions?: {
+    cupsPerMeal?: number | null;
+    gramsPerMeal?: number | null;
+    kcalPerMeal?: number | null;
+  } | null;
   recommendedFoodTypes: string[];
   foodsToAvoid: string[];
-  treatAllowanceKcal: number;
-  exerciseMinutesPerDay: number;
-  proteinGuidance: string;
-  fatGuidance: string;
-  waterMlPerDay: number;
+  treatAllowanceKcal?: number | null;
+  exerciseMinutesPerDay?: number | null;
+  proteinGuidance?: string | null;
+  fatGuidance?: string | null;
+  waterMlPerDay?: number | null;
   notes: string[];
+  calorieLevel?: string | null;
+  dietType?: string | null;
+  foodCategory?: string | null;
 }
 
-export const TOXIC_FOODS = [
-  "chocolate",
-  "grapes",
-  "raisins",
-  "onions",
-  "garlic",
-  "xylitol",
-  "avocado",
-  "macadamia nuts",
-  "alcohol",
-  "caffeine",
-];
+export const TOXIC_FOODS: string[] = [];
 
 export function calculateRER(weightKg: number) {
   // RER = 70 * (body weight in kg)^0.75
@@ -90,112 +88,14 @@ export function estimateLifeStage(ageYears?: number | null): LifeStage {
   return "adult";
 }
 
-export function generateDietPlan(input: DietPlanInput): DietPlan {
+export function generateDietPlan(
+  input: DietPlanInput,
+  prediction?: DietPredictionResult | null
+): DietPlan {
   const now = new Date().toISOString();
-  const lifeStage = input.lifeStage || estimateLifeStage(input.ageYears);
-  const bcsCategory = bcsCategoryFromScore(input.bcs) || "Unknown";
-
-  const rer = Math.round(calculateRER(input.weightKg));
-  const multiplier = activityMultiplier(input.activityLevel);
-  let dailyCalories = Math.round(rer * multiplier);
-
-  const notes: string[] = [];
-
-  // Adjust by BCS
-  if (input.bcs == null) {
-    notes.push(
-      "BCS missing — use the BCS Calculator to assess body condition.",
-    );
-  } else if (input.bcs <= 3) {
-    // underweight - increase calories
-    dailyCalories = Math.round(dailyCalories * 1.2);
-    notes.push(
-      "Underweight: high-calorie, nutrient-dense diet; more frequent feeding; focus on protein.",
-    );
-  } else if (input.bcs <= 5) {
-    // ideal
-    notes.push("Maintain current energy intake and regular exercise.");
-  } else if (input.bcs <= 7) {
-    // overweight
-    dailyCalories = Math.round(dailyCalories * 0.85);
-    notes.push(
-      "Overweight: controlled calories, reduced fat, increased fiber, increased activity.",
-    );
-  } else {
-    // obese
-    dailyCalories = Math.round(dailyCalories * 0.75);
-    notes.push(
-      "Obese: strict calorie-deficit plan with high-fiber weight-management foods.",
-    );
-  }
-
-  // Life stage adjustments
-  let proteinGuidance = "18-25% (adult)";
-  let fatGuidance = "10-15% (adult)";
-  if (lifeStage === "puppy") {
-    dailyCalories = Math.round(dailyCalories * 1.25);
-    proteinGuidance = "22-32% (puppy growth)";
-    fatGuidance = "12-20% (puppy)";
-    notes.push("Puppy: growth-focused nutrition with higher protein and fat.");
-  } else if (lifeStage === "senior") {
-    dailyCalories = Math.round(dailyCalories * 0.95);
-    notes.push(
-      "Senior: consider lower calorie intake and joint-support nutrients.",
-    );
-  }
-
-  // Feeding frequency
-  const feedingFrequency = lifeStage === "puppy" ? 3 : 2;
-
-  // Portion estimation: assume ~350 kcal per cup dry equivalent and ~100 g per cup
-  const kcalPerCup = 350;
-  const gramsPerCup = 100;
-  const cupsPerDay = Math.max(
-    0.1,
-    Math.round((dailyCalories / kcalPerCup) * 10) / 10,
-  );
-  const cupsPerMeal = Math.round((cupsPerDay / feedingFrequency) * 10) / 10;
-  const gramsPerMeal = Math.round(cupsPerMeal * gramsPerCup);
-
-  // Treat allowance - 10% of daily calories
-  const treatAllowanceKcal = Math.round(dailyCalories * 0.1);
-
-  // Exercise guidance
-  let exerciseMinutes = 30;
-  switch (input.activityLevel) {
-    case "couch_potato":
-      exerciseMinutes = 20;
-      break;
-    case "normal":
-      exerciseMinutes = 30;
-      break;
-    case "active":
-      exerciseMinutes = 60;
-      break;
-    case "working":
-      exerciseMinutes = 90;
-      break;
-    default:
-      exerciseMinutes = 30;
-      break;
-  }
-
-  // Water: ~1 oz per lb -> convert to ml
-  const waterMl = Math.round((input.weightKg / 0.45359237) * 29.5735);
-
-  // Suggested food types
-  const recommendedFoodTypes: string[] = [];
-  if (input.bcs != null && input.bcs <= 3)
-    recommendedFoodTypes.push(
-      "High-calorie, nutrient-dense (growth/puppy style)",
-    );
-  if (input.bcs != null && input.bcs >= 6)
-    recommendedFoodTypes.push("High-fiber weight management diet");
-  recommendedFoodTypes.push(
-    "Dry kibble (measure by cup)",
-    "Wet food (as supplement)",
-    "Combination feeding",
-  );
+  const calorieLevel = prediction?.calorie_level || null;
+  const dietType = prediction?.diet_type || null;
+  const foodCategory = prediction?.food_category || null;
 
   const plan: DietPlan = {
     petId: input.id,
@@ -206,22 +106,21 @@ export function generateDietPlan(input: DietPlanInput): DietPlan {
     ageYears: input.ageYears ?? null,
     bcs: input.bcs ?? null,
     bcsCategory: bcsCategoryFromScore(input.bcs) || undefined,
-    rerKcal: rer,
-    dailyCalories,
-    feedingFrequency,
-    portions: {
-      cupsPerMeal: cupsPerMeal,
-      gramsPerMeal: gramsPerMeal,
-      kcalPerMeal: Math.round(dailyCalories / feedingFrequency),
-    },
-    recommendedFoodTypes,
-    foodsToAvoid: TOXIC_FOODS,
-    treatAllowanceKcal: treatAllowanceKcal,
-    exerciseMinutesPerDay: exerciseMinutes,
-    proteinGuidance,
-    fatGuidance,
-    waterMlPerDay: waterMl,
-    notes,
+    rerKcal: null,
+    dailyCalories: null,
+    feedingFrequency: null,
+    portions: null,
+    recommendedFoodTypes: [],
+    foodsToAvoid: [],
+    treatAllowanceKcal: null,
+    exerciseMinutesPerDay: null,
+    proteinGuidance: null,
+    fatGuidance: null,
+    waterMlPerDay: null,
+    notes: [],
+    calorieLevel,
+    dietType,
+    foodCategory,
   };
 
   return plan;
