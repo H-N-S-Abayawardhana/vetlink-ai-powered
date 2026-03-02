@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Check,
   Stethoscope,
+  X,
 } from "lucide-react";
 
 export default function BCSCalculator() {
@@ -33,6 +34,7 @@ export default function BCSCalculator() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showClinicalModal, setShowClinicalModal] = useState(false);
 
   // Clinical observation options from Hugging Face model
   const clinicalOptions = {
@@ -76,15 +78,16 @@ export default function BCSCalculator() {
       weightKg: p.weightKg ?? null,
       gender: p.gender ?? null,
       activityLevel: p.activityLevel ?? "Medium",
-      ribCondition: "Easy to feel",
-      waist: "Moderate waist",
-      abdominalTuck: "Slight belly hang",
-      spineHips: "Felt but not visible",
-      fatDeposits: "Mild",
+      ribCondition: "",
+      waist: "",
+      abdominalTuck: "",
+      spineHips: "",
+      fatDeposits: "",
     });
     setResult(null);
     setError(null);
-    setStep("details");
+    // Auto-open clinical observations modal on pet selection page
+    setShowClinicalModal(true);
   }
 
   const onDetailsChange = useCallback(
@@ -273,8 +276,8 @@ export default function BCSCalculator() {
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-12 gap-2">
-          {["Select Pet", "Enter Details", "View Results"].map((label, idx) => {
-            const stepMap = ["select", "details", "result"];
+          {["Select Pet", "View Results"].map((label, idx) => {
+            const stepMap = ["select", "result"];
             const currentIdx = stepMap.indexOf(step);
             const isActive = idx === currentIdx;
             const isCompleted = idx < currentIdx;
@@ -303,7 +306,7 @@ export default function BCSCalculator() {
                     </span>
                   </div>
                 </div>
-                {idx < 2 && (
+                {idx < 1 && (
                   <ChevronRight
                     className={`w-5 h-5 ${isCompleted ? "text-green-500" : "text-gray-300"}`}
                   />
@@ -368,170 +371,7 @@ export default function BCSCalculator() {
                       Update your pet’s age in the profile, then return here.
                     </p>
                   </div>
-                )}
-
-                {/* Clinical Observations Section */}
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                    Clinical Observations
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    These observations help provide a more accurate BCS prediction. Select the condition that best describes your pet.
-                  </p>
-
-                  {/* Physical Observations */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Rib Condition *
-                      </label>
-                      <select
-                        value={updates.ribCondition || ""}
-                        onChange={(e) =>
-                          onDetailsChange("ribCondition", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      >
-                        <option value="">Select rib condition</option>
-                        {clinicalOptions.rib_condition.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        How easily can you feel the ribs?
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Waist *
-                      </label>
-                      <select
-                        value={updates.waist || ""}
-                        onChange={(e) =>
-                          onDetailsChange("waist", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      >
-                        <option value="">Select waist condition</option>
-                        {clinicalOptions.waist.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        How prominent is the waist?
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Third Row - More Physical Observations */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Abdominal Tuck *
-                      </label>
-                      <select
-                        value={updates.abdominalTuck || ""}
-                        onChange={(e) =>
-                          onDetailsChange("abdominalTuck", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      >
-                        <option value="">Select abdominal tuck</option>
-                        {clinicalOptions.abdominal_tuck.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        How much abdominal tuck is present?
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Spine & Hips *
-                      </label>
-                      <select
-                        value={updates.spineHips || ""}
-                        onChange={(e) =>
-                          onDetailsChange("spineHips", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      >
-                        <option value="">Select spine/hips condition</option>
-                        {clinicalOptions.spine_hips.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        How prominent are spine and hip bones?
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Fourth Row - Fat Deposits */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Fat Deposits *
-                      </label>
-                      <select
-                        value={updates.fatDeposits || ""}
-                        onChange={(e) =>
-                          onDetailsChange("fatDeposits", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      >
-                        <option value="">Select fat deposit level</option>
-                        {clinicalOptions.fat_deposits.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        How much fat is deposited on the body?
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 mt-8">
-                <button
-                  onClick={() => setStep("select")}
-                  className="flex-1 py-4 rounded-xl font-semibold text-gray-700 border-2 border-gray-300 hover:bg-gray-50 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCalculate}
-                  disabled={!canCalculate || loading}
-                  className={`flex-1 py-4 rounded-xl font-semibold text-white transition-all duration-300 bcs-calc-btn ${
-                    canCalculate && !loading
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg cursor-pointer"
-                      : "bg-gray-300 cursor-not-allowed"
-                  }`}
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>
-                      Calculating BCS...
-                    </span>
-                  ) : (
-                    "Calculate Body Condition Score"
-                  )}
-                </button>
-              </div>
-            </div>
+                )}                </div>              </div>
             </div>
           )}
 
@@ -622,21 +462,6 @@ export default function BCSCalculator() {
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <button
-                  onClick={resetCalculator}
-                  className="flex-1 py-3 border-2 border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition-all"
-                >
-                  Calculate Another Pet
-                </button>
-                <button
-                  onClick={() => setStep("details")}
-                  className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl font-semibold text-white hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
-                >
-                  Adjust Details
-                </button>
-              </div>
-
               {/* Disease Prediction CTA */}
               <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border-2 border-purple-200">
                 <div className="flex items-center justify-between">
@@ -676,6 +501,223 @@ export default function BCSCalculator() {
           </p>
         </div>
       </div>
-    </div>
+      {/* Clinical Observations Modal */}
+      {showClinicalModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-700 px-8 py-6 sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Stethoscope className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      🩺 Clinical Observations
+                    </h2>
+                    <p className="text-purple-100 text-sm">
+                      {selected?.name ? `For ${selected.name}` : "Enter observations"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowClinicalModal(false);
+                    setSelected(null);
+                  }}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8">
+              <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg mb-6">
+                <p className="text-sm text-blue-900">
+                  These observations help provide a more accurate BCS prediction. Select the condition that best describes your pet.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Physical Observations */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Rib Condition *
+                    </label>
+                    <select
+                      value={updates.ribCondition || ""}
+                      onChange={(e) =>
+                        onDetailsChange("ribCondition", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select rib condition</option>
+                      {clinicalOptions.rib_condition.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How easily can you feel the ribs?
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Waist *
+                    </label>
+                    <select
+                      value={updates.waist || ""}
+                      onChange={(e) =>
+                        onDetailsChange("waist", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select waist condition</option>
+                      {clinicalOptions.waist.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How prominent is the waist?
+                    </p>
+                  </div>
+                </div>
+
+                {/* More Physical Observations */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Abdominal Tuck *
+                    </label>
+                    <select
+                      value={updates.abdominalTuck || ""}
+                      onChange={(e) =>
+                        onDetailsChange("abdominalTuck", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select abdominal tuck</option>
+                      {clinicalOptions.abdominal_tuck.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How much abdominal tuck is present?
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Spine & Hips *
+                    </label>
+                    <select
+                      value={updates.spineHips || ""}
+                      onChange={(e) =>
+                        onDetailsChange("spineHips", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select spine/hips condition</option>
+                      {clinicalOptions.spine_hips.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How prominent are spine and hip bones?
+                    </p>
+                  </div>
+                </div>
+
+                {/* Fat Deposits */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Fat Deposits *
+                    </label>
+                    <select
+                      value={updates.fatDeposits || ""}
+                      onChange={(e) =>
+                        onDetailsChange("fatDeposits", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select fat deposit level</option>
+                      {clinicalOptions.fat_deposits.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How much fat is deposited on the body?
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer Buttons */}
+              <div className="flex gap-4 mt-8">
+                <button
+                  onClick={() => {
+                    setShowClinicalModal(false);
+                    setSelected(null);
+                  }}
+                  className="flex-1 py-4 rounded-xl font-semibold text-gray-700 border-2 border-gray-300 hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowClinicalModal(false);
+                    handleCalculate();
+                  }}
+                  disabled={!canCalculate || loading}
+                  className={`flex-1 py-4 rounded-xl font-semibold text-white transition-all duration-300 ${
+                    canCalculate && !loading
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg cursor-pointer hover:from-indigo-700 hover:to-purple-700"
+                      : "bg-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>
+                      Calculating BCS...
+                    </span>
+                  ) : (
+                    "Calculate BCS"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md mx-4">
+            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              ⚖️ Calculating BCS...
+            </h3>
+            <p className="text-gray-600">
+              Our AI is analyzing your pet&apos;s body condition across multiple physical parameters.
+            </p>
+          </div>
+        </div>
+      )}    </div>
   );
 }
