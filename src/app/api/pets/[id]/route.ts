@@ -265,6 +265,7 @@ export async function PATCH(
       gender: "gender",
       allergies: "allergies",
       preferredDiet: "preferred_diet",
+      livingEnvironment: "living_environment",
       healthNotes: "health_notes",
       vaccinationStatus: "vaccination_status",
       microchipNumber: "microchip_number",

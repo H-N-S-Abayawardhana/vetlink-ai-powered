@@ -180,7 +180,14 @@ export default function BCSCalculator() {
       }
 
       const prediction = await response.json();
-      const score = prediction.bcs_score;
+      const rawScore = Number(prediction.bcs_score);
+      const score = Number.isFinite(rawScore)
+        ? Math.max(1, Math.min(9, Math.round(rawScore)))
+        : null;
+
+      if (score == null) {
+        throw new Error("Invalid BCS score received from the model");
+      }
 
       setResult(score);
 

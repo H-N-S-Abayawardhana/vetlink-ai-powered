@@ -101,14 +101,24 @@ export async function updatePet(
   id: string,
   payload: Partial<Pet>,
 ): Promise<Pet | null> {
-  const res = await fetch(`/api/pets/${id}`, {
-    method: "PUT",
+  let res = await fetch(`/api/pets/${id}`, {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
+  // Backward compatibility if PATCH is not available
+  if (res.status === 404 || res.status === 405) {
+    res = await fetch(`/api/pets/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }
+
   if (!res.ok) {
-    console.error("updatePet failed", res.status);
+    const errText = await res.text().catch(() => "");
+    console.error("updatePet failed", res.status, errText);
     return null;
   }
 
