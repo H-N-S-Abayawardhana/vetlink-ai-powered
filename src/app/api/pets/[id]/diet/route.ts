@@ -79,7 +79,7 @@ export async function GET(
       gender: pet.gender,
       spayedNeutered: pet.spayedNeutered,
       mealsPerDay: Number(pet.mealsPerDay ?? 2),
-      digestiveSensitivity: pet.digestiveSensitivity,
+      digestiveSensitivity: typeof pet.digestiveSensitivity === 'string' ? pet.digestiveSensitivity.toLowerCase() === 'true' : pet.digestiveSensitivity || null,
       preferredDiet: pet.preferredDiet,
     };
 

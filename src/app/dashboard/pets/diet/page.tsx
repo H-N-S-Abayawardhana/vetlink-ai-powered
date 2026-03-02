@@ -536,7 +536,7 @@ export default function DietPage() {
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <TrendingUp className="w-6 h-6" />
-                {plan.petName}'s Diet Plan
+                {plan.petName}&apos;s Diet Plan
               </h2>
               <p className="text-purple-100 mt-1">
                 Generated on {new Date(plan.generatedAt).toLocaleDateString()}
