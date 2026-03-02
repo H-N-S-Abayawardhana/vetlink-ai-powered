@@ -82,38 +82,54 @@ export default function DietPage() {
     try {
       const doc = new jsPDF({ unit: "pt", format: "a4" });
       const margin = 40;
+      const pageWidth = 595.28;
+      const pageHeight = 841.89;
+      const maxWidth = pageWidth - 2 * margin;
       let y = margin;
 
-      // Header
-      doc.setFontSize(18);
-      doc.text(`${pet?.name || "Pet"} — Diet Plan`, margin, y);
-      y += 24;
+      // Helper function to add new page if needed
+      const checkPageBreak = (requiredSpace: number = 40) => {
+        if (y + requiredSpace > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+          return true;
+        }
+        return false;
+      };
 
-      doc.setFontSize(11);
+      // Helper function to add wrapped text
+      const addWrappedText = (text: string, x: number, maxW: number, lineHeight: number = 14) => {
+        const lines = doc.splitTextToSize(text, maxW);
+        lines.forEach((line: string) => {
+          checkPageBreak();
+          doc.text(line, x, y);
+          y += lineHeight;
+        });
+      };
+
+      // Header
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${pet?.name || "Pet"} — Diet Plan`, margin, y);
+      y += 28;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
       doc.text(
         `Generated: ${new Date(plan.generatedAt || Date.now()).toLocaleString()}`,
         margin,
         y,
       );
-      y += 20;
+      y += 24;
 
-      // If avatar is a data URL, try to include it
-      const avatar = pet?.avatarDataUrl || pet?.avatarUrl || null;
-      if (avatar && typeof avatar === "string" && avatar.startsWith("data:")) {
-        try {
-          doc.addImage(avatar, "JPEG", 450, margin, 90, 90);
-        } catch (e) {
-          // ignore image errors
-        }
-      }
-
-      y += 6;
-
-      // Pet basic info
-      doc.setFontSize(13);
-      doc.text("Pet Info", margin, y);
-      y += 16;
+      // Pet basic info section
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Pet Information", margin, y);
+      y += 18;
+      
       doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
       doc.text(`Name: ${pet?.name || "—"}`, margin, y);
       y += 14;
       doc.text(`Breed: ${pet?.breed || "—"}`, margin, y);
@@ -121,44 +137,142 @@ export default function DietPage() {
       doc.text(`Age: ${pet?.ageYears ?? "—"} years`, margin, y);
       y += 14;
       doc.text(`Weight: ${pet?.weightKg ?? "—"} kg`, margin, y);
-      y += 20;
-
-      // Key metrics
-      doc.setFontSize(13);
-      doc.text("Plan Summary", margin, y);
-      y += 16;
-      doc.setFontSize(11);
-      doc.text(`Calorie Level: ${plan.calorieLevel || "—"}`, margin, y);
       y += 14;
-      doc.text(
-        `Diet Type: ${plan.dietType || "—"}`,
-        margin,
-        y,
-      );
-      y += 14;
-      doc.text(
-        `Food Category: ${plan.foodCategory || "—"}`,
-        margin,
-        y,
-      );
-      y += 20;
-
-
-
-      // Notes
-      if (plan.notes && plan.notes.length) {
-        doc.setFontSize(12);
-        doc.text("Notes:", margin, y);
+      if (pet?.bcs) {
+        doc.text(`Body Condition Score: ${pet.bcs}/9`, margin, y);
         y += 14;
+      }
+      y += 10;
+
+      checkPageBreak(60);
+
+      // ============ BREED-SPECIFIC DIET STRUCTURE ============
+      if (plan.Diet_Type) {
         doc.setFontSize(11);
-        plan.notes.forEach((n: string) => {
-          doc.text(`• ${n}`, margin + 8, y);
-          y += 12;
-          if (y > 740) {
-            doc.addPage();
-            y = margin;
+        doc.setFont("helvetica", "bold");
+        doc.text(`Diet Type: ${plan.Diet_Type}`, margin, y);
+        doc.setFont("helvetica", "normal");
+        y += 20;
+
+        checkPageBreak(60);
+
+        // Nutrition Profile
+        if (plan.Nutrition_Profile) {
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text("Nutrition Profile:", margin, y);
+          y += 16;
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "normal");
+          if (plan.Nutrition_Profile.Protein_Level) {
+            doc.text(`  Protein Level: ${plan.Nutrition_Profile.Protein_Level}`, margin, y);
+            y += 14;
           }
-        });
+          if (plan.Nutrition_Profile.Fat_Level) {
+            doc.text(`  Fat Level: ${plan.Nutrition_Profile.Fat_Level}`, margin, y);
+            y += 14;
+          }
+          if (plan.Nutrition_Profile.Carb_Level) {
+            doc.text(`  Carb Level: ${plan.Nutrition_Profile.Carb_Level}`, margin, y);
+            y += 14;
+          }
+          y += 8;
+          checkPageBreak(60);
+        }
+
+        // Feeding Guidelines
+        if (plan.Feeding_Guidelines) {
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text("Feeding Guidelines:", margin, y);
+          y += 16;
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "normal");
+          if (plan.Feeding_Guidelines.Meals_Per_Day) {
+            doc.text(`  Meals Per Day: ${plan.Feeding_Guidelines.Meals_Per_Day}`, margin, y);
+            y += 14;
+          }
+          if (plan.Feeding_Guidelines.Treat_Allowance) {
+            doc.text(`  Treat Allowance: ${plan.Feeding_Guidelines.Treat_Allowance}`, margin, y);
+            y += 14;
+          }
+          if (plan.Feeding_Guidelines.Portion_Control_Advice) {
+            doc.setFont("helvetica", "bold");
+            doc.text("  Portion Control Advice:", margin, y);
+            doc.setFont("helvetica", "normal");
+            y += 14;
+            addWrappedText(plan.Feeding_Guidelines.Portion_Control_Advice, margin + 16, maxWidth - 16);
+            y += 4;
+          }
+          y += 8;
+          checkPageBreak(60);
+        }
+
+        // Recommended Foods
+        if (plan.Recommended_Foods && plan.Recommended_Foods.length > 0) {
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text("Recommended Foods:", margin, y);
+          y += 16;
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "normal");
+          plan.Recommended_Foods.forEach((food: string) => {
+            checkPageBreak();
+            doc.text(`  ✓ ${food}`, margin, y);
+            y += 13;
+          });
+          y += 8;
+          checkPageBreak(60);
+        }
+
+        // Foods to Avoid
+        if (plan.Foods_to_Avoid && plan.Foods_to_Avoid.length > 0) {
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text("Foods to Avoid:", margin, y);
+          y += 16;
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "normal");
+          plan.Foods_to_Avoid.forEach((food: string) => {
+            checkPageBreak();
+            doc.text(`  ✗ ${food}`, margin, y);
+            y += 13;
+          });
+          y += 8;
+          checkPageBreak(60);
+        }
+
+        // Exercise Recommendation
+        if (plan.Exercise_Recommendation) {
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text("Exercise Recommendation:", margin, y);
+          y += 16;
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "normal");
+          addWrappedText(plan.Exercise_Recommendation, margin, maxWidth);
+          y += 12;
+          checkPageBreak(60);
+        }
+
+        // Important Notes
+        if (plan.Notes) {
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text("Important Notes:", margin, y);
+          y += 16;
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "normal");
+          addWrappedText(plan.Notes, margin, maxWidth);
+          y += 12;
+          checkPageBreak(60);
+        }
       }
 
       const filename = `${(pet?.name || "pet").replace(/\s+/g, "_")}_DietPlan_${new Date().toISOString().slice(0, 10)}.pdf`;
@@ -186,6 +300,7 @@ export default function DietPage() {
         </div>
 
         {/* Pet Selection - Carousel/Slider Design */}
+        {!plan && (
         <div
           id="pet-selection-section"
           className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
@@ -362,44 +477,6 @@ export default function DietPage() {
               </div>
             )}
 
-            {/* Pet Info Cards */}
-            {pet && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-                  <div className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-                    Breed
-                  </div>
-                  <div className="text-lg font-bold text-gray-800 mt-1">
-                    {pet.breed}
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-                  <div className="text-xs font-semibold text-purple-600 uppercase tracking-wide">
-                    Age
-                  </div>
-                  <div className="text-lg font-bold text-gray-800 mt-1">
-                    {pet.ageYears} years
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-                  <div className="text-xs font-semibold text-green-600 uppercase tracking-wide">
-                    Weight
-                  </div>
-                  <div className="text-lg font-bold text-gray-800 mt-1">
-                    {pet.weightKg} kg
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
-                  <div className="text-xs font-semibold text-orange-600 uppercase tracking-wide">
-                    BCS
-                  </div>
-                  <div className="text-lg font-bold text-gray-800 mt-1">
-                    {pet.bcs || "—"}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* BCS Warning */}
             {!pet?.bcs && pet && (
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-5 flex items-start gap-4">
@@ -448,6 +525,7 @@ export default function DietPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* Diet Plan Results */}
         {plan && (
@@ -458,7 +536,7 @@ export default function DietPage() {
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <TrendingUp className="w-6 h-6" />
-                Personalized Diet Plan
+                {plan.petName}'s Diet Plan
               </h2>
               <p className="text-purple-100 mt-1">
                 Generated on {new Date(plan.generatedAt).toLocaleDateString()}
@@ -466,53 +544,163 @@ export default function DietPage() {
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Key Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg min-h-[132px]">
-                  <div className="text-sm font-semibold opacity-90 uppercase tracking-wide">
-                    Calorie Level
-                  </div>
-                  <div className="text-2xl md:text-3xl font-bold mt-2 break-words leading-tight">
-                    {plan.calorieLevel || "—"}
-                  </div>
-                </div>
+              {/* ============ KNOWLEDGE BASE DIET STRUCTURE ============ */}
+              {plan.Diet_Type && (
+                <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-indigo-200 shadow-lg">
 
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg min-h-[132px]">
-                  <div className="text-sm font-semibold opacity-90 uppercase tracking-wide">
-                    Diet Type
-                  </div>
-                  <div className="text-2xl md:text-3xl font-bold mt-2 break-words leading-tight">
-                    {plan.dietType || "—"}
-                  </div>
-                </div>
 
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg min-h-[132px]">
-                  <div className="text-sm font-semibold opacity-90 uppercase tracking-wide">
-                    Food Category
+                  {/* Diet Type */}
+                  <div className="mb-6">
+                    <div className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold text-lg shadow-md">
+                      Diet Type: {plan.Diet_Type}
+                    </div>
                   </div>
-                  <div className="text-2xl md:text-3xl font-bold mt-2 break-words leading-tight">
-                    {plan.foodCategory || "—"}
-                  </div>
-                </div>
-              </div>
 
-              {/* Notes */}
-              {plan.notes && plan.notes.length > 0 && (
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-200 mb-6">
-                  <h3 className="font-bold text-gray-800 text-lg mb-3">
-                    Important Notes
-                  </h3>
-                  <ul className="space-y-2">
-                    {plan.notes.map((note: string, i: number) => (
-                      <li
-                        key={i}
-                        className="text-gray-700 flex items-start gap-2"
-                      >
-                        <span className="text-purple-500 mt-1">•</span>
-                        <span>{note}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Nutrition Profile */}
+                  {plan.Nutrition_Profile && (
+                    <div className="mb-6 bg-white rounded-xl p-5 border border-indigo-200">
+                      <h4 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Nutrition Profile
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {plan.Nutrition_Profile.Protein_Level && (
+                          <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+                            <div className="text-sm font-semibold text-red-600 mb-1">Protein Level</div>
+                            <div className="text-xl font-bold text-gray-800">{plan.Nutrition_Profile.Protein_Level}</div>
+                          </div>
+                        )}
+                        {plan.Nutrition_Profile.Fat_Level && (
+                          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200">
+                            <div className="text-sm font-semibold text-yellow-600 mb-1">Fat Level</div>
+                            <div className="text-xl font-bold text-gray-800">{plan.Nutrition_Profile.Fat_Level}</div>
+                          </div>
+                        )}
+                        {plan.Nutrition_Profile.Carb_Level && (
+                          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                            <div className="text-sm font-semibold text-green-600 mb-1">Carb Level</div>
+                            <div className="text-xl font-bold text-gray-800">{plan.Nutrition_Profile.Carb_Level}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Feeding Guidelines */}
+                  {plan.Feeding_Guidelines && (
+                    <div className="mb-6 bg-white rounded-xl p-5 border border-indigo-200">
+                      <h4 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Feeding Guidelines
+                      </h4>
+                      <div className="space-y-3">
+                        {plan.Feeding_Guidelines.Meals_Per_Day && (
+                          <div className="flex items-start gap-3 bg-blue-50 rounded-lg p-3 border border-blue-200">
+                            <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
+                              {plan.Feeding_Guidelines.Meals_Per_Day}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-gray-800">Meals Per Day</div>
+                              <div className="text-sm text-gray-600">Feed {plan.Feeding_Guidelines.Meals_Per_Day} times daily</div>
+                            </div>
+                          </div>
+                        )}
+                        {plan.Feeding_Guidelines.Portion_Control_Advice && (
+                          <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                            <div className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+                              <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              Portion Control Advice
+                            </div>
+                            <div className="text-gray-700">{plan.Feeding_Guidelines.Portion_Control_Advice}</div>
+                          </div>
+                        )}
+                        {plan.Feeding_Guidelines.Treat_Allowance && (
+                          <div className="flex items-center gap-3 bg-pink-50 rounded-lg p-3 border border-pink-200">
+                            <div className="bg-pink-600 text-white rounded-lg px-4 py-2 font-bold">
+                              {plan.Feeding_Guidelines.Treat_Allowance}
+                            </div>
+                            <div className="text-gray-700">Treat Allowance Level</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recommended Foods */}
+                  {plan.Recommended_Foods && plan.Recommended_Foods.length > 0 && (
+                    <div className="mb-6 bg-white rounded-xl p-5 border border-indigo-200">
+                      <h4 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Recommended Foods
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {plan.Recommended_Foods.map((food: string, i: number) => (
+                          <div key={i} className="flex items-center gap-2 bg-green-50 rounded-lg p-3 border border-green-200">
+                            <span className="text-green-600 font-bold">✓</span>
+                            <span className="text-gray-700">{food}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Foods to Avoid */}
+                  {plan.Foods_to_Avoid && plan.Foods_to_Avoid.length > 0 && (
+                    <div className="mb-6 bg-white rounded-xl p-5 border border-red-200">
+                      <h4 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Foods to Avoid
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {plan.Foods_to_Avoid.map((food: string, i: number) => (
+                          <div key={i} className="flex items-center gap-2 bg-red-50 rounded-lg p-3 border border-red-200">
+                            <span className="text-red-600 font-bold">✗</span>
+                            <span className="text-gray-700">{food}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Exercise Recommendation */}
+                  {plan.Exercise_Recommendation && (
+                    <div className="mb-6 bg-white rounded-xl p-5 border border-indigo-200">
+                      <h4 className="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Exercise Recommendation
+                      </h4>
+                      <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-4 border border-indigo-200">
+                        <div className="text-gray-800 font-medium">{plan.Exercise_Recommendation}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {plan.Notes && (
+                    <div className="bg-white rounded-xl p-5 border border-indigo-200">
+                      <h4 className="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Important Notes
+                      </h4>
+                      <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg p-4 border border-yellow-200">
+                        <p className="text-gray-700 leading-relaxed">{plan.Notes}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
