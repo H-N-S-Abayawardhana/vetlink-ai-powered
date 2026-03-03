@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { listPets, updatePet, type Pet } from "@/lib/pets";
 import { formatBCSTimestamp } from "@/lib/format-date";
@@ -13,6 +12,7 @@ import {
   ChevronRight,
   Check,
   Stethoscope,
+  X,
 } from "lucide-react";
 
 export default function BCSCalculator() {
@@ -23,9 +23,45 @@ export default function BCSCalculator() {
   const [updates, setUpdates] = useState<{
     ageYears?: number | null;
     weightKg?: number | null;
+    gender?: string | null;
+    activityLevel?: string | null;
+    ribCondition?: string | null;
+    waist?: string | null;
+    abdominalTuck?: string | null;
+    spineHips?: string | null;
+    fatDeposits?: string | null;
   }>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showClinicalModal, setShowClinicalModal] = useState(false);
+
+  // Clinical observation options from Hugging Face model
+  const clinicalOptions = {
+    activity_level: ["Low", "Medium", "High"],
+    rib_condition: [
+      "Visible/protruding",
+      "Easy to feel",
+      "Slight fat cover",
+      "Hard to feel",
+      "Cannot feel",
+    ],
+    waist: ["Severely narrowed", "Moderate waist", "Barely visible", "Oval/Round"],
+    abdominal_tuck: [
+      "Severe upward tuck",
+      "Gentle upward tuck",
+      "Slight belly hang",
+      "Sagging belly",
+    ],
+    spine_hips: [
+      "Very prominent",
+      "Easy to feel",
+      "Felt but not visible",
+      "Difficult to feel",
+    ],
+    fat_deposits: ["None", "Mild", "Moderate", "Large"],
+    gender: ["Male", "Female"],
+  };
 
   useEffect(() => {
     async function load() {
@@ -37,16 +73,40 @@ export default function BCSCalculator() {
 
   function onSelectPet(p: Pet) {
     setSelected(p);
-    setUpdates({ ageYears: p.ageYears ?? null, weightKg: p.weightKg ?? null });
+    setUpdates({
+      ageYears: p.ageYears ?? null,
+      weightKg: p.weightKg ?? null,
+      gender: p.gender ?? null,
+      activityLevel: p.activityLevel ?? "Medium",
+      ribCondition: "",
+      waist: "",
+      abdominalTuck: "",
+      spineHips: "",
+      fatDeposits: "",
+    });
     setResult(null);
-    setStep("details");
+    setError(null);
+    // Auto-open clinical observations modal on pet selection page
+    setShowClinicalModal(true);
   }
 
   const onDetailsChange = useCallback(
-    (field: "ageYears" | "weightKg", value: number | null) => {
+    (
+      field:
+        | "ageYears"
+        | "weightKg"
+        | "gender"
+        | "activityLevel"
+        | "ribCondition"
+        | "waist"
+        | "abdominalTuck"
+        | "spineHips"
+        | "fatDeposits",
+      value: string | number | null
+    ) => {
       setUpdates((prev) => ({ ...prev, [field]: value }));
     },
-    [],
+    []
   );
 
   const ageValid = useMemo(() => {
@@ -63,70 +123,102 @@ export default function BCSCalculator() {
     return typeof n === "number" && !Number.isNaN(n) && n > 0;
   }, [updates]);
 
-  const canCalculate = ageValid && weightValid;
+  const clinicalObservationsValid = useMemo(() => {
+    return (
+      updates.ribCondition &&
+      updates.waist &&
+      updates.abdominalTuck &&
+      updates.spineHips &&
+      updates.fatDeposits &&
+      updates.activityLevel &&
+      updates.gender
+    );
+  }, [updates]);
 
-  const SummaryItem = ({
-    label,
-    value,
-    hint,
-  }: {
-    label: string;
-    value: string;
-    hint?: string;
-  }) => (
-    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {label}
-      </p>
-      <p className="mt-1 text-base font-semibold text-gray-900">{value}</p>
-      {hint ? <p className="text-xs text-gray-500 mt-0.5">{hint}</p> : null}
-    </div>
-  );
+  const canCalculate = ageValid && weightValid && clinicalObservationsValid;
 
   async function handleCalculate() {
     if (!selected || !canCalculate) return;
     setLoading(true);
     setResult(null);
+    setError(null);
 
-    // Calculate BCS
-    const score = await new Promise<number>((res) => {
-      setTimeout(() => {
-        const wRaw = updates.weightKg ?? selected.weightKg ?? 0;
-        const aRaw = updates.ageYears ?? selected.ageYears ?? 0;
-        const w =
-          typeof wRaw === "string" ? parseFloat(wRaw as any) : (wRaw as number);
-        const a =
-          typeof aRaw === "string" ? parseFloat(aRaw as any) : (aRaw as number);
-        const safeW = Number.isNaN(w) ? 0 : w;
-        const safeA = Number.isNaN(a) ? 0 : a;
-        const base = Math.round(Math.min(Math.max(safeW / 10 + 1, 1), 9));
-        const ageAdj = safeA >= 8 ? 1 : 0;
-        const final = Math.min(Math.max(base + ageAdj, 1), 9);
-        res(final);
-      }, 700);
-    });
-
-    setResult(score);
-    // Persist calculated BCS and timestamp
     try {
-      const when = new Date().toISOString();
-      const updated = await updatePet(selected.id, {
-        bcs: score,
-        bcsCalculatedAt: when,
+      // Get validated values
+      const wRaw = updates.weightKg ?? selected.weightKg ?? 0;
+      const aRaw = updates.ageYears ?? selected.ageYears ?? 0;
+      const w =
+        typeof wRaw === "string" ? parseFloat(wRaw as any) : (wRaw as number);
+      const a =
+        typeof aRaw === "string" ? parseFloat(aRaw as any) : (aRaw as number);
+
+      // Call the BCS prediction API with all clinical observations
+      const response = await fetch("/api/bcs/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          breed: selected.breed || "Mixed",
+          age: a,
+          weight_kg: w,
+          gender: updates.gender || selected.gender || "Male",
+          activity_level: updates.activityLevel || selected.activityLevel || "Medium",
+          rib_condition: updates.ribCondition || "Easy to feel",
+          waist: updates.waist || "Moderate waist",
+          abdominal_tuck: updates.abdominalTuck || "Slight belly hang",
+          spine_hips: updates.spineHips || "Felt but not visible",
+          fat_deposits: updates.fatDeposits || "Mild",
+        }),
       });
-      // update local selected and pets list with returned pet when available
-      if (updated) {
-        setSelected(updated as any);
-        setPets((prev) =>
-          prev.map((p) => (p.id === updated.id ? (updated as any) : p)),
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to calculate BCS from the model"
         );
       }
-    } catch (e) {
-      console.warn("Failed to persist BCS", e);
-    }
 
-    setStep("result");
-    setLoading(false);
+      const prediction = await response.json();
+      const rawScore = Number(prediction.bcs_score);
+      const score = Number.isFinite(rawScore)
+        ? Math.max(1, Math.min(9, Math.round(rawScore)))
+        : null;
+
+      if (score == null) {
+        throw new Error("Invalid BCS score received from the model");
+      }
+
+      setResult(score);
+
+      // Persist calculated BCS and timestamp
+      try {
+        const when = new Date().toISOString();
+        const updated = await updatePet(selected.id, {
+          bcs: score,
+          bcsCalculatedAt: when,
+        });
+        // update local selected and pets list with returned pet when available
+        if (updated) {
+          setSelected(updated as any);
+          setPets((prev) =>
+            prev.map((p) => (p.id === updated.id ? (updated as any) : p)),
+          );
+        }
+      } catch (e) {
+        console.warn("Failed to persist BCS", e);
+      }
+
+      setStep("result");
+    } catch (error) {
+      console.error("BCS Calculation Error:", error);
+      const errorMsg =
+        error instanceof Error ? error.message : "Unknown error";
+      setError(errorMsg);
+      alert(`Error calculating BCS: ${errorMsg}`);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function resetCalculator() {
@@ -191,8 +283,8 @@ export default function BCSCalculator() {
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-12 gap-2">
-          {["Select Pet", "Enter Details", "View Results"].map((label, idx) => {
-            const stepMap = ["select", "details", "result"];
+          {["Select Pet", "View Results"].map((label, idx) => {
+            const stepMap = ["select", "result"];
             const currentIdx = stepMap.indexOf(step);
             const isActive = idx === currentIdx;
             const isCompleted = idx < currentIdx;
@@ -221,7 +313,7 @@ export default function BCSCalculator() {
                     </span>
                   </div>
                 </div>
-                {idx < 2 && (
+                {idx < 1 && (
                   <ChevronRight
                     className={`w-5 h-5 ${isCompleted ? "text-green-500" : "text-gray-300"}`}
                   />
@@ -264,35 +356,8 @@ export default function BCSCalculator() {
           {/* Step 2: Enter Details */}
           {step === "details" && selected && (
             <div className="p-8">
-              <button
-                onClick={() => setStep("select")}
-                className="text-sm text-gray-600 hover:text-gray-900 mb-6 flex items-center gap-1"
-              >
-                ← Back to pets
-              </button>
-
-              <div className="space-y-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Step 2
-                    </p>
-                    <h3 className="mt-1 text-xl font-semibold text-gray-900">
-                      Review auto-filled details
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-600">
-                      These details are pulled from the pet profile. To change
-                      anything, use the edit button.
-                    </p>
-                  </div>
-                  <Link
-                    href={`/dashboard/pets/${selected.id}`}
-                    className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm hover:border-blue-300 hover:bg-blue-100"
-                  >
-                    Edit pet profile
-                  </Link>
-                </div>
-
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border-2 border-purple-200 p-8">
+                <div className="space-y-6">
                 {!weightValid && (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                     <p className="text-sm font-semibold text-amber-900">
@@ -313,66 +378,7 @@ export default function BCSCalculator() {
                       Update your pet’s age in the profile, then return here.
                     </p>
                   </div>
-                )}
-
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <SummaryItem
-                    label="Name"
-                    value={selected.name}
-                    hint="From pet profile"
-                  />
-                  <SummaryItem
-                    label="Age"
-                    value={
-                      selected.ageYears != null
-                        ? `${selected.ageYears} years`
-                        : "Not set"
-                    }
-                    hint="From pet profile"
-                  />
-                  <SummaryItem
-                    label="Breed"
-                    value={selected.breed || "Not set"}
-                    hint="From pet profile"
-                  />
-                  <SummaryItem
-                    label="Weight"
-                    value={
-                      selected.weightKg != null
-                        ? `${selected.weightKg} kg`
-                        : "Not set"
-                    }
-                    hint="From pet profile"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <SummaryItem
-                    label="Activity level"
-                    value={selected.activityLevel || "Not set"}
-                    hint="From pet profile"
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={handleCalculate}
-                disabled={!canCalculate || loading}
-                className={`mt-8 w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 bcs-calc-btn ${
-                  canCalculate && !loading
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg cursor-pointer"
-                    : "bg-gray-300 cursor-not-allowed"
-                }`}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>
-                    Calculating BCS...
-                  </span>
-                ) : (
-                  "Calculate Body Condition Score"
-                )}
-              </button>
+                )}                </div>              </div>
             </div>
           )}
 
@@ -463,21 +469,6 @@ export default function BCSCalculator() {
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <button
-                  onClick={resetCalculator}
-                  className="flex-1 py-3 border-2 border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition-all"
-                >
-                  Calculate Another Pet
-                </button>
-                <button
-                  onClick={() => setStep("details")}
-                  className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl font-semibold text-white hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
-                >
-                  Adjust Details
-                </button>
-              </div>
-
               {/* Disease Prediction CTA */}
               <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border-2 border-purple-200">
                 <div className="flex items-center justify-between">
@@ -517,6 +508,223 @@ export default function BCSCalculator() {
           </p>
         </div>
       </div>
-    </div>
+      {/* Clinical Observations Modal */}
+      {showClinicalModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-700 px-8 py-6 sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Stethoscope className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      🩺 Clinical Observations
+                    </h2>
+                    <p className="text-purple-100 text-sm">
+                      {selected?.name ? `For ${selected.name}` : "Enter observations"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowClinicalModal(false);
+                    setSelected(null);
+                  }}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8">
+              <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg mb-6">
+                <p className="text-sm text-blue-900">
+                  These observations help provide a more accurate BCS prediction. Select the condition that best describes your pet.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Physical Observations */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Rib Condition *
+                    </label>
+                    <select
+                      value={updates.ribCondition || ""}
+                      onChange={(e) =>
+                        onDetailsChange("ribCondition", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select rib condition</option>
+                      {clinicalOptions.rib_condition.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How easily can you feel the ribs?
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Waist *
+                    </label>
+                    <select
+                      value={updates.waist || ""}
+                      onChange={(e) =>
+                        onDetailsChange("waist", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select waist condition</option>
+                      {clinicalOptions.waist.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How prominent is the waist?
+                    </p>
+                  </div>
+                </div>
+
+                {/* More Physical Observations */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Abdominal Tuck *
+                    </label>
+                    <select
+                      value={updates.abdominalTuck || ""}
+                      onChange={(e) =>
+                        onDetailsChange("abdominalTuck", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select abdominal tuck</option>
+                      {clinicalOptions.abdominal_tuck.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How much abdominal tuck is present?
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Spine & Hips *
+                    </label>
+                    <select
+                      value={updates.spineHips || ""}
+                      onChange={(e) =>
+                        onDetailsChange("spineHips", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select spine/hips condition</option>
+                      {clinicalOptions.spine_hips.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How prominent are spine and hip bones?
+                    </p>
+                  </div>
+                </div>
+
+                {/* Fat Deposits */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Fat Deposits *
+                    </label>
+                    <select
+                      value={updates.fatDeposits || ""}
+                      onChange={(e) =>
+                        onDetailsChange("fatDeposits", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select fat deposit level</option>
+                      {clinicalOptions.fat_deposits.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      How much fat is deposited on the body?
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer Buttons */}
+              <div className="flex gap-4 mt-8">
+                <button
+                  onClick={() => {
+                    setShowClinicalModal(false);
+                    setSelected(null);
+                  }}
+                  className="flex-1 py-4 rounded-xl font-semibold text-gray-700 border-2 border-gray-300 hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowClinicalModal(false);
+                    handleCalculate();
+                  }}
+                  disabled={!canCalculate || loading}
+                  className={`flex-1 py-4 rounded-xl font-semibold text-white transition-all duration-300 ${
+                    canCalculate && !loading
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg cursor-pointer hover:from-indigo-700 hover:to-purple-700"
+                      : "bg-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>
+                      Calculating BCS...
+                    </span>
+                  ) : (
+                    "Calculate BCS"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md mx-4">
+            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              ⚖️ Calculating BCS...
+            </h3>
+            <p className="text-gray-600">
+              Our AI is analyzing your pet&apos;s body condition across multiple physical parameters.
+            </p>
+          </div>
+        </div>
+      )}    </div>
   );
 }

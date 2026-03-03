@@ -46,6 +46,8 @@ export default function PetForm({ petId }: PetFormProps) {
     vetClinicName: "",
     vetClinicPhone: "",
     avatarDataUrl: null,
+    digestiveSensitivity: null,
+    mealsPerDay: null,
   });
 
   // Helper function to format date from ISO to YYYY-MM-DD
@@ -341,6 +343,22 @@ export default function PetForm({ petId }: PetFormProps) {
     // If spayedNeutered is true, spay/neuter date should ideally be provided
     if (form.spayedNeutered === true && !form.spayNeuterDate) {
       e.spayNeuterDate = "Spay/neuter date is required when spayed/neutered";
+    }
+
+    // Meals per day validation
+    if (form.mealsPerDay !== null && form.mealsPerDay !== undefined) {
+      if (Number(form.mealsPerDay) < 1 || Number(form.mealsPerDay) > 6) {
+        e.mealsPerDay = "Meals per day must be between 1 and 6";
+      }
+    }
+
+    // Digestive sensitivity validation
+    const validDigestiveSensitivities = ["Yes", "No"];
+    if (
+      form.digestiveSensitivity &&
+      !validDigestiveSensitivities.includes(form.digestiveSensitivity)
+    ) {
+      e.digestiveSensitivity = "Please select Yes or No";
     }
 
     setErrors(e);
@@ -749,6 +767,53 @@ export default function PetForm({ petId }: PetFormProps) {
                 )}
               </div>
               <div className="sm:col-span-1">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Digestive Sensitivity
+                </label>
+                <select
+                  value={form.digestiveSensitivity || ""}
+                  onChange={(e) =>
+                    handleChange("digestiveSensitivity", e.target.value || null)
+                  }
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.digestiveSensitivity ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select (optional)</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+                {errors.digestiveSensitivity && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.digestiveSensitivity}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+              <div className="sm:col-span-1">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Meals per Day
+                </label>
+                <input
+                  value={form.mealsPerDay ?? ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "mealsPerDay",
+                      e.target.value ? Number(e.target.value) : null,
+                    )
+                  }
+                  type="number"
+                  min="1"
+                  max="6"
+                  className={`block w-full rounded-lg bg-white px-4 py-3 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.mealsPerDay ? "border-red-500" : ""}`}
+                  placeholder="e.g., 2"
+                />
+                {errors.mealsPerDay && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.mealsPerDay}
+                  </p>
+                )}
+              </div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   Allergies (comma separated)
                 </label>

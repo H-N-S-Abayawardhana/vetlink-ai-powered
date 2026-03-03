@@ -28,6 +28,8 @@ export interface DbPetRow {
   vet_clinic_name?: string | null;
   vet_clinic_phone?: string | null;
   avatar_url?: string | null;
+  digestive_sensitivity?: string | null;
+  meals_per_day?: number | null;
   created_at?: string | null;
   updated_at?: string | null;
 }
@@ -63,6 +65,8 @@ export function mapRowToPet(row: DbPetRow) {
     avatarUrl: row.avatar_url || null,
     // Provide avatarDataUrl as an alias for frontend components that expect it
     avatarDataUrl: row.avatar_url || null,
+    digestiveSensitivity: row.digestive_sensitivity || null,
+    mealsPerDay: row.meals_per_day ?? null,
     createdAt: row.created_at || null,
     updatedAt: row.updated_at || null,
   };

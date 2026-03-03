@@ -1,21 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
+import React, { useState, useRef } from "react";
 import { X, AlertTriangle, Stethoscope } from "lucide-react";
-import type {
-  DiseasePredictionFormState,
-  BreedSize,
-  Sex,
-  TickPrevention,
-  DietType,
-  ExerciseLevel,
-  Environment,
-} from "@/types/disease-prediction";
-import {
-  initialFormState,
-  formStateToApiInput,
-} from "@/types/disease-prediction";
+import type { DiseasePredictionFormState } from "@/types/disease-prediction";
+import { initialFormState } from "@/types/disease-prediction";
 
 interface DiseasePredictionFormProps {
   onSubmit: (formData: DiseasePredictionFormState) => void;
@@ -197,16 +185,9 @@ export default function DiseasePredictionForm({
     return initial;
   });
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 2; // Step 1: Auto-filled profile data, Step 2: User observations
+  const totalSteps = 1;
+  const currentStep = 1;
   const formContainerRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to top of form when step changes
-  const scrollToTop = () => {
-    if (formContainerRef.current) {
-      formContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
 
   // Validation
   const isStep1Valid = () => {
@@ -232,62 +213,14 @@ export default function DiseasePredictionForm({
     );
   };
 
-  const canProceed = () => {
-    switch (currentStep) {
-      case 1:
-        return isStep1Valid();
-      case 2:
-        return isStep2Valid();
-      default:
-        return false;
-    }
-  };
+  const canSubmit = () => isStep1Valid() && isStep2Valid();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (hasBCS && isStep1Valid() && isStep2Valid()) {
+    if (hasBCS && canSubmit()) {
       onSubmit(formData);
     }
   };
-
-  const handleNext = () => {
-    if (currentStep < totalSteps && canProceed()) {
-      setCurrentStep(currentStep + 1);
-      setTimeout(scrollToTop, 50);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setTimeout(scrollToTop, 50);
-    }
-  };
-
-  const getBCSLabel = (score: number) => {
-    if (score <= 3) return "Underweight";
-    if (score <= 5) return "Ideal";
-    if (score <= 7) return "Overweight";
-    return "Obese";
-  };
-
-  const SummaryItem = ({
-    label,
-    value,
-    hint,
-  }: {
-    label: string;
-    value: string;
-    hint?: string;
-  }) => (
-    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {label}
-      </p>
-      <p className="mt-1 text-base font-semibold text-gray-900">{value}</p>
-      {hint ? <p className="text-xs text-gray-500 mt-0.5">{hint}</p> : null}
-    </div>
-  );
 
   // If no BCS, show error state
   if (!hasBCS) {
@@ -359,110 +292,7 @@ export default function DiseasePredictionForm({
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
-          {/* Step 1: Pet Profile (Auto-filled from Database) */}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Step 1
-                  </p>
-                  <h3 className="mt-1 text-xl font-semibold text-gray-900">
-                    Review auto-filled profile
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-600">
-                    We pulled these details from the pet profile. Confirm or
-                    adjust anything that looks off before moving on.
-                  </p>
-                </div>
-                {petId && (
-                  <Link
-                    href={`/dashboard/pets/${petId}`}
-                    className="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm hover:border-blue-300 hover:bg-blue-100"
-                  >
-                    Edit pet profile
-                  </Link>
-                )}
-              </div>
-
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Body condition score
-                    </p>
-                    <p className="mt-1 text-2xl font-semibold text-gray-900">
-                      {initialBCS}/9
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {getBCSLabel(initialBCS)}
-                    </p>
-                  </div>
-                  <div className="text-right text-xs text-gray-500">
-                    <p className="font-semibold text-gray-700">
-                      From pet profile
-                    </p>
-                    <p>BCS stays read-only in this step.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <SummaryItem
-                  label="Age"
-                  value={
-                    formData.age_years
-                      ? `${formData.age_years} years`
-                      : "Not set"
-                  }
-                  hint="Update in pet profile if this is outdated."
-                />
-                <SummaryItem
-                  label="Breed size"
-                  value={formData.breed_size || "Not set"}
-                  hint="Estimated from weight/breed where available."
-                />
-                <SummaryItem
-                  label="Sex"
-                  value={formData.sex || "Not set"}
-                  hint="Auto-detected from profile."
-                />
-                <SummaryItem
-                  label="Spayed / neutered"
-                  value={
-                    formData.is_neutered === "yes"
-                      ? "Neutered"
-                      : formData.is_neutered === "no"
-                        ? "Intact"
-                        : "Not set"
-                  }
-                  hint="Based on recorded procedure status."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <SummaryItem
-                  label="Diet type"
-                  value={formData.diet_type || "Not set"}
-                  hint="What the pet usually eats."
-                />
-                <SummaryItem
-                  label="Exercise level"
-                  value={formData.exercise_level || "Not set"}
-                  hint="Mapped from activity level."
-                />
-                <SummaryItem
-                  label="Living environment"
-                  value={formData.environment || "Not set"}
-                  hint="Urban / suburban / rural."
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Clinical Signs & Health Observations */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
+          <div className="space-y-6">
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                 🩺 Health Observations & Prevention
               </h3>
@@ -701,54 +531,28 @@ export default function DiseasePredictionForm({
                 </div>
               </div>
             </div>
-          )}
 
           {/* Navigation buttons */}
           <div className="flex gap-4 pt-8 border-t border-gray-200 mt-8">
-            {currentStep > 1 ? (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
-              >
-                ← Back
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onCancel}
-                className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
-              >
-                Cancel
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+            >
+              Cancel
+            </button>
 
-            {currentStep < totalSteps ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!canProceed()}
-                className={`flex-1 px-6 py-4 rounded-xl font-semibold transition-all ${
-                  canProceed()
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Next →
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={!canProceed()}
-                className={`flex-1 px-6 py-4 rounded-xl font-semibold transition-all ${
-                  canProceed()
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                🔬 Analyze Disease Risks
-              </button>
-            )}
+            <button
+              type="submit"
+              disabled={!canSubmit()}
+              className={`flex-1 px-6 py-4 rounded-xl font-semibold transition-all ${
+                canSubmit()
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:from-purple-700 hover:to-indigo-800 shadow-lg"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              🔬 Analyze Disease Risks
+            </button>
           </div>
         </form>
       </div>
