@@ -341,9 +341,7 @@ export default function PharmacyPage() {
               )}
 
               {/* Shopping Tab */}
-              {activeTab === "shopping" && (
-                <ShoppingModule />
-              )}
+              {activeTab === "shopping" && <ShoppingModule />}
 
               {/* Inventory Tab */}
               {activeTab === "inventory" && (
@@ -680,7 +678,16 @@ function AddInventoryItemModal({
 function ShoppingModule() {
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
-  const [cart, setCart] = useState<Array<{ id: string; name: string; price: number; quantity: number; pharmacyId: string; pharmacyName: string }>>([]);
+  const [cart, setCart] = useState<
+    Array<{
+      id: string;
+      name: string;
+      price: number;
+      quantity: number;
+      pharmacyId: string;
+      pharmacyName: string;
+    }>
+  >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
@@ -707,8 +714,8 @@ function ShoppingModule() {
           (p) =>
             p.name.toLowerCase().includes(query) ||
             p.form?.toLowerCase().includes(query) ||
-            p.strength?.toLowerCase().includes(query)
-        )
+            p.strength?.toLowerCase().includes(query),
+        ),
       );
     }
   }, [searchQuery, products]);
@@ -744,7 +751,10 @@ function ShoppingModule() {
             allProducts.push(...pharmacyProducts);
           }
         } catch (err) {
-          console.error(`Failed to fetch inventory for pharmacy ${pharmacy.id}:`, err);
+          console.error(
+            `Failed to fetch inventory for pharmacy ${pharmacy.id}:`,
+            err,
+          );
         }
       }
 
@@ -759,7 +769,8 @@ function ShoppingModule() {
 
   const addToCart = (product: any) => {
     const existingItem = cart.find(
-      (item) => item.id === product.id && item.pharmacyId === product.pharmacyId
+      (item) =>
+        item.id === product.id && item.pharmacyId === product.pharmacyId,
     );
 
     if (existingItem) {
@@ -767,8 +778,8 @@ function ShoppingModule() {
         cart.map((item) =>
           item.id === product.id && item.pharmacyId === product.pharmacyId
             ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
+            : item,
+        ),
       );
     } else {
       setCart([
@@ -786,21 +797,31 @@ function ShoppingModule() {
   };
 
   const removeFromCart = (productId: string, pharmacyId: string) => {
-    setCart(cart.filter((item) => !(item.id === productId && item.pharmacyId === pharmacyId)));
+    setCart(
+      cart.filter(
+        (item) => !(item.id === productId && item.pharmacyId === pharmacyId),
+      ),
+    );
   };
 
-  const updateQuantity = (productId: string, pharmacyId: string, delta: number) => {
+  const updateQuantity = (
+    productId: string,
+    pharmacyId: string,
+    delta: number,
+  ) => {
     setCart(
-      cart.map((item) => {
-        if (item.id === productId && item.pharmacyId === pharmacyId) {
-          const newQuantity = item.quantity + delta;
-          if (newQuantity <= 0) {
-            return null;
+      cart
+        .map((item) => {
+          if (item.id === productId && item.pharmacyId === pharmacyId) {
+            const newQuantity = item.quantity + delta;
+            if (newQuantity <= 0) {
+              return null;
+            }
+            return { ...item, quantity: newQuantity };
           }
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      }).filter(Boolean) as typeof cart
+          return item;
+        })
+        .filter(Boolean) as typeof cart,
     );
   };
 
@@ -843,7 +864,9 @@ function ShoppingModule() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Products List */}
-        <div className={`lg:col-span-2 space-y-6 ${showCart ? "hidden lg:block" : ""}`}>
+        <div
+          className={`lg:col-span-2 space-y-6 ${showCart ? "hidden lg:block" : ""}`}
+        >
           {/* Search Bar */}
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
             <div className="relative">
@@ -899,7 +922,10 @@ function ShoppingModule() {
                           </span>
                         </div>
                         <div className="text-sm text-gray-600">
-                          Stock: <span className="font-semibold">{product.stock || 0}</span>
+                          Stock:{" "}
+                          <span className="font-semibold">
+                            {product.stock || 0}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -949,11 +975,17 @@ function ShoppingModule() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <h5 className="font-semibold text-gray-900">{item.name}</h5>
-                          <p className="text-xs text-gray-500">{item.pharmacyName}</p>
+                          <h5 className="font-semibold text-gray-900">
+                            {item.name}
+                          </h5>
+                          <p className="text-xs text-gray-500">
+                            {item.pharmacyName}
+                          </p>
                         </div>
                         <button
-                          onClick={() => removeFromCart(item.id, item.pharmacyId)}
+                          onClick={() =>
+                            removeFromCart(item.id, item.pharmacyId)
+                          }
                           className="text-red-500 hover:text-red-700"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -962,14 +994,20 @@ function ShoppingModule() {
                       <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => updateQuantity(item.id, item.pharmacyId, -1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.pharmacyId, -1)
+                            }
                             className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
-                          <span className="w-12 text-center font-semibold">{item.quantity}</span>
+                          <span className="w-12 text-center font-semibold">
+                            {item.quantity}
+                          </span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.pharmacyId, 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.pharmacyId, 1)
+                            }
                             className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                           >
                             <Plus className="w-4 h-4" />
@@ -986,7 +1024,9 @@ function ShoppingModule() {
                 <div className="border-t border-gray-200 pt-4 space-y-4">
                   <div className="flex items-center justify-between text-lg font-bold">
                     <span>Total:</span>
-                    <span className="text-emerald-600">{formatLKR(getTotalPrice())}</span>
+                    <span className="text-emerald-600">
+                      {formatLKR(getTotalPrice())}
+                    </span>
                   </div>
                   <button className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
                     Proceed to Checkout

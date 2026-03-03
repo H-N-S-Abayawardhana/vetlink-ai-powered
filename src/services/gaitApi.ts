@@ -55,9 +55,9 @@ export interface DiseasePredictionResult {
   recommendations: string[];
   disease_probabilities?: {
     "Hip Dysplasia": number;
-    "Osteoarthritis": number;
-    "IVDD": number;
-    "Normal": number;
+    Osteoarthritis: number;
+    IVDD: number;
+    Normal: number;
     "Patellar Luxation": number;
   };
   error?: string;

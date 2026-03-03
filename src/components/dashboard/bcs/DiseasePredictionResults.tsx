@@ -394,7 +394,9 @@ export default function DiseasePredictionResults({
             <div className="text-right">
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <p className="text-xs text-gray-500 uppercase mb-2">Age Group</p>
+                  <p className="text-xs text-gray-500 uppercase mb-2">
+                    Age Group
+                  </p>
                   <p className="font-bold text-gray-900">
                     {result.pet_profile.age_group}
                   </p>

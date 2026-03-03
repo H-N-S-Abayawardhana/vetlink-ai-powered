@@ -31,7 +31,9 @@ function mapFoodType(value?: string | null) {
 
 function mapYesNo(value: unknown) {
   if (typeof value === "boolean") return value ? "Yes" : "No";
-  const normalized = String(value || "").toLowerCase().trim();
+  const normalized = String(value || "")
+    .toLowerCase()
+    .trim();
   if (normalized === "yes" || normalized === "true" || normalized === "1") {
     return "Yes";
   }
@@ -79,7 +81,10 @@ export async function GET(
       gender: pet.gender,
       spayedNeutered: pet.spayedNeutered,
       mealsPerDay: Number(pet.mealsPerDay ?? 2),
-      digestiveSensitivity: typeof pet.digestiveSensitivity === 'string' ? pet.digestiveSensitivity.toLowerCase() === 'true' : pet.digestiveSensitivity || null,
+      digestiveSensitivity:
+        typeof pet.digestiveSensitivity === "string"
+          ? pet.digestiveSensitivity.toLowerCase() === "true"
+          : pet.digestiveSensitivity || null,
       preferredDiet: pet.preferredDiet,
     };
 
@@ -115,7 +120,7 @@ export async function GET(
         error: "Failed to generate diet plan",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

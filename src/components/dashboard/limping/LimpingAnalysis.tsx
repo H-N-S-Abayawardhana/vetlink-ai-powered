@@ -70,9 +70,9 @@ interface AnalysisResult {
     recommendations: string[];
     disease_probabilities?: {
       "Hip Dysplasia": number;
-      "Osteoarthritis": number;
-      "IVDD": number;
-      "Normal": number;
+      Osteoarthritis: number;
+      IVDD: number;
+      Normal: number;
       "Patellar Luxation": number;
     };
   };
@@ -533,7 +533,10 @@ export default function LimpingAnalysis({
         const compressedSizeMB = videoToUpload.size / (1024 * 1024);
         console.log(`Compressed to ${compressedSizeMB.toFixed(2)} MB`);
       } catch (compressionError) {
-        console.warn("Video compression failed, using original file:", compressionError);
+        console.warn(
+          "Video compression failed, using original file:",
+          compressionError,
+        );
         // Continue with original file if compression fails
       } finally {
         setIsCompressing(false);
@@ -562,7 +565,7 @@ export default function LimpingAnalysis({
         // Try to parse error response
         let errorMessage = "Failed to analyze video";
         const contentType = response.headers.get("content-type");
-        
+
         try {
           if (contentType && contentType.includes("application/json")) {
             const errorData = await response.json();
@@ -665,8 +668,10 @@ export default function LimpingAnalysis({
           age: formData.age_years,
           weight_category: formData.weight_category,
           limping_detected: limpingDetected === "1" ? "Yes" : "No",
-          pain_while_walking: formData.pain_while_walking === "1" ? "Yes" : "No",
-          difficulty_standing: formData.difficulty_standing === "1" ? "Yes" : "No",
+          pain_while_walking:
+            formData.pain_while_walking === "1" ? "Yes" : "No",
+          difficulty_standing:
+            formData.difficulty_standing === "1" ? "Yes" : "No",
           reduced_activity: formData.reduced_activity === "1" ? "Yes" : "No",
           joint_swelling: formData.joint_swelling === "1" ? "Yes" : "No",
         },
@@ -676,7 +681,8 @@ export default function LimpingAnalysis({
           risk_profile: data.prediction.risk_profile,
           mobility_status: data.prediction.mobility_status,
           recommendations: data.prediction.recommendations,
-          disease_probabilities: data.prediction.disease_probabilities || undefined,
+          disease_probabilities:
+            data.prediction.disease_probabilities || undefined,
         },
       };
 
@@ -1047,21 +1053,51 @@ export default function LimpingAnalysis({
 
       let diseases: [string, number][];
       if (analysisResult.prediction.disease_probabilities) {
-        diseases = Object.entries(analysisResult.prediction.disease_probabilities).sort(
-          ([, a], [, b]) => (b as number) - (a as number),
-        ) as [string, number][];
+        diseases = Object.entries(
+          analysisResult.prediction.disease_probabilities,
+        ).sort(([, a], [, b]) => (b as number) - (a as number)) as [
+          string,
+          number,
+        ][];
       } else {
         // Fallback: create probabilities for all diseases
         const primaryProb = analysisResult.prediction.confidence;
         const remainingProb = (100 - primaryProb) / 4;
         const diseaseList: [string, number][] = [
-          ["Hip Dysplasia", analysisResult.prediction.primary_disease === "Hip Dysplasia" ? primaryProb : remainingProb],
-          ["Osteoarthritis", analysisResult.prediction.primary_disease === "Osteoarthritis" ? primaryProb : remainingProb],
-          ["IVDD", analysisResult.prediction.primary_disease === "IVDD" ? primaryProb : remainingProb],
-          ["Normal", analysisResult.prediction.primary_disease === "Normal" ? primaryProb : remainingProb],
-          ["Patellar Luxation", analysisResult.prediction.primary_disease === "Patellar Luxation" ? primaryProb : remainingProb],
+          [
+            "Hip Dysplasia",
+            analysisResult.prediction.primary_disease === "Hip Dysplasia"
+              ? primaryProb
+              : remainingProb,
+          ],
+          [
+            "Osteoarthritis",
+            analysisResult.prediction.primary_disease === "Osteoarthritis"
+              ? primaryProb
+              : remainingProb,
+          ],
+          [
+            "IVDD",
+            analysisResult.prediction.primary_disease === "IVDD"
+              ? primaryProb
+              : remainingProb,
+          ],
+          [
+            "Normal",
+            analysisResult.prediction.primary_disease === "Normal"
+              ? primaryProb
+              : remainingProb,
+          ],
+          [
+            "Patellar Luxation",
+            analysisResult.prediction.primary_disease === "Patellar Luxation"
+              ? primaryProb
+              : remainingProb,
+          ],
         ];
-        diseases = diseaseList.sort(([, a], [, b]) => (a as number) - (b as number)).reverse();
+        diseases = diseaseList
+          .sort(([, a], [, b]) => (a as number) - (b as number))
+          .reverse();
       }
 
       diseases.forEach(([disease, probability]) => {
@@ -1069,12 +1105,12 @@ export default function LimpingAnalysis({
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         const isPrimary = disease === analysisResult.prediction.primary_disease;
-        doc.setTextColor(isPrimary ? 29 : 55, isPrimary ? 78 : 65, isPrimary ? 216 : 81);
-        doc.text(
-          `${disease}: ${probability.toFixed(2)}%`,
-          margin + 5,
-          yPos,
+        doc.setTextColor(
+          isPrimary ? 29 : 55,
+          isPrimary ? 78 : 65,
+          isPrimary ? 216 : 81,
         );
+        doc.text(`${disease}: ${probability.toFixed(2)}%`, margin + 5, yPos);
         yPos += 8;
       });
 
@@ -1087,8 +1123,17 @@ export default function LimpingAnalysis({
       ) {
         checkNewPage(50);
         doc.setFillColor(220, 252, 231); // Light green background
-        const recHeight = 20 + analysisResult.prediction.recommendations.length * 8;
-        doc.roundedRect(margin, yPos, pageWidth - 2 * margin, recHeight, 3, 3, "F");
+        const recHeight =
+          20 + analysisResult.prediction.recommendations.length * 8;
+        doc.roundedRect(
+          margin,
+          yPos,
+          pageWidth - 2 * margin,
+          recHeight,
+          3,
+          3,
+          "F",
+        );
 
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
@@ -1512,7 +1557,9 @@ export default function LimpingAnalysis({
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-600">Difficulty Standing:</span>
+                      <span className="text-gray-600">
+                        Difficulty Standing:
+                      </span>
                       <span
                         className={`ml-2 font-medium ${
                           analysisResult.inputData.difficulty_standing === "Yes"
@@ -1562,7 +1609,9 @@ export default function LimpingAnalysis({
                       </h3>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-600 mb-1">Risk Probability</p>
+                      <p className="text-xs text-gray-600 mb-1">
+                        Risk Probability
+                      </p>
                       <p className="text-xl sm:text-2xl font-bold text-blue-600">
                         {analysisResult.prediction.confidence.toFixed(2)}%
                       </p>
@@ -1577,10 +1626,14 @@ export default function LimpingAnalysis({
                   </h3>
                   <div className="space-y-2">
                     {analysisResult.prediction.disease_probabilities
-                      ? Object.entries(analysisResult.prediction.disease_probabilities)
+                      ? Object.entries(
+                          analysisResult.prediction.disease_probabilities,
+                        )
                           .sort(([, a], [, b]) => (b as number) - (a as number))
                           .map(([disease, probability]) => {
-                            const isPrimary = disease === analysisResult.prediction.primary_disease;
+                            const isPrimary =
+                              disease ===
+                              analysisResult.prediction.primary_disease;
                             return (
                               <div
                                 key={disease}
@@ -1595,7 +1648,9 @@ export default function LimpingAnalysis({
                                 </span>
                                 <span
                                   className={`text-sm font-semibold ${
-                                    isPrimary ? "text-blue-600" : "text-gray-700"
+                                    isPrimary
+                                      ? "text-blue-600"
+                                      : "text-gray-700"
                                   }`}
                                 >
                                   {(probability as number).toFixed(2)}%
@@ -1611,7 +1666,9 @@ export default function LimpingAnalysis({
                           "Normal",
                           "Patellar Luxation",
                         ].map((disease) => {
-                          const isPrimary = disease === analysisResult.prediction.primary_disease;
+                          const isPrimary =
+                            disease ===
+                            analysisResult.prediction.primary_disease;
                           const probValue = isPrimary
                             ? analysisResult.prediction.confidence
                             : (100 - analysisResult.prediction.confidence) / 4;

@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
           error: `Missing required fields: ${missingFields.join(", ")}`,
           requiredFields: REQUIRED_FIELDS,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -36,28 +36,28 @@ export async function POST(request: NextRequest) {
     if (typeof body.age !== "number" || body.age <= 0) {
       return NextResponse.json(
         { error: "Age must be a positive number" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (typeof body.weight_kg !== "number" || body.weight_kg <= 0) {
       return NextResponse.json(
         { error: "Weight must be a positive number" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!body.breed || typeof body.breed !== "string") {
       return NextResponse.json(
         { error: "Breed must be a non-empty string" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!body.gender || typeof body.gender !== "string") {
       return NextResponse.json(
         { error: "Gender must be a non-empty string" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       if (!body[field] || typeof body[field] !== "string") {
         return NextResponse.json(
           { error: `${field} must be a non-empty string` },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -102,10 +102,9 @@ export async function POST(request: NextRequest) {
     console.error("BCS Prediction API Error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Internal server error",
+        error: error instanceof Error ? error.message : "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

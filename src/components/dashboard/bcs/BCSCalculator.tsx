@@ -46,7 +46,12 @@ export default function BCSCalculator() {
       "Hard to feel",
       "Cannot feel",
     ],
-    waist: ["Severely narrowed", "Moderate waist", "Barely visible", "Oval/Round"],
+    waist: [
+      "Severely narrowed",
+      "Moderate waist",
+      "Barely visible",
+      "Oval/Round",
+    ],
     abdominal_tuck: [
       "Severe upward tuck",
       "Gentle upward tuck",
@@ -102,11 +107,11 @@ export default function BCSCalculator() {
         | "abdominalTuck"
         | "spineHips"
         | "fatDeposits",
-      value: string | number | null
+      value: string | number | null,
     ) => {
       setUpdates((prev) => ({ ...prev, [field]: value }));
     },
-    []
+    [],
   );
 
   const ageValid = useMemo(() => {
@@ -163,7 +168,8 @@ export default function BCSCalculator() {
           age: a,
           weight_kg: w,
           gender: updates.gender || selected.gender || "Male",
-          activity_level: updates.activityLevel || selected.activityLevel || "Medium",
+          activity_level:
+            updates.activityLevel || selected.activityLevel || "Medium",
           rib_condition: updates.ribCondition || "Easy to feel",
           waist: updates.waist || "Moderate waist",
           abdominal_tuck: updates.abdominalTuck || "Slight belly hang",
@@ -175,7 +181,7 @@ export default function BCSCalculator() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error || "Failed to calculate BCS from the model"
+          errorData.error || "Failed to calculate BCS from the model",
         );
       }
 
@@ -212,8 +218,7 @@ export default function BCSCalculator() {
       setStep("result");
     } catch (error) {
       console.error("BCS Calculation Error:", error);
-      const errorMsg =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
       setError(errorMsg);
       alert(`Error calculating BCS: ${errorMsg}`);
     } finally {
@@ -358,27 +363,29 @@ export default function BCSCalculator() {
             <div className="p-8">
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border-2 border-purple-200 p-8">
                 <div className="space-y-6">
-                {!weightValid && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                    <p className="text-sm font-semibold text-amber-900">
-                      Weight is required to calculate BCS.
-                    </p>
-                    <p className="text-xs text-amber-800 mt-0.5">
-                      Update your pet’s weight in the profile, then return here.
-                    </p>
-                  </div>
-                )}
-
-                {!ageValid && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                    <p className="text-sm font-semibold text-amber-900">
-                      Age looks invalid.
-                    </p>
-                    <p className="text-xs text-amber-800 mt-0.5">
-                      Update your pet’s age in the profile, then return here.
-                    </p>
-                  </div>
-                )}                </div>              </div>
+                  {!weightValid && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                      <p className="text-sm font-semibold text-amber-900">
+                        Weight is required to calculate BCS.
+                      </p>
+                      <p className="text-xs text-amber-800 mt-0.5">
+                        Update your pet’s weight in the profile, then return
+                        here.
+                      </p>
+                    </div>
+                  )}
+                  {!ageValid && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                      <p className="text-sm font-semibold text-amber-900">
+                        Age looks invalid.
+                      </p>
+                      <p className="text-xs text-amber-800 mt-0.5">
+                        Update your pet’s age in the profile, then return here.
+                      </p>
+                    </div>
+                  )}{" "}
+                </div>{" "}
+              </div>
             </div>
           )}
 
@@ -524,7 +531,9 @@ export default function BCSCalculator() {
                       🩺 Clinical Observations
                     </h2>
                     <p className="text-purple-100 text-sm">
-                      {selected?.name ? `For ${selected.name}` : "Enter observations"}
+                      {selected?.name
+                        ? `For ${selected.name}`
+                        : "Enter observations"}
                     </p>
                   </div>
                 </div>
@@ -544,7 +553,8 @@ export default function BCSCalculator() {
             <div className="p-8">
               <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg mb-6">
                 <p className="text-sm text-blue-900">
-                  These observations help provide a more accurate BCS prediction. Select the condition that best describes your pet.
+                  These observations help provide a more accurate BCS
+                  prediction. Select the condition that best describes your pet.
                 </p>
               </div>
 
@@ -580,9 +590,7 @@ export default function BCSCalculator() {
                     </label>
                     <select
                       value={updates.waist || ""}
-                      onChange={(e) =>
-                        onDetailsChange("waist", e.target.value)
-                      }
+                      onChange={(e) => onDetailsChange("waist", e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     >
                       <option value="">Select waist condition</option>
@@ -711,7 +719,6 @@ export default function BCSCalculator() {
           </div>
         </div>
       )}
-
       {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -721,10 +728,12 @@ export default function BCSCalculator() {
               ⚖️ Calculating BCS...
             </h3>
             <p className="text-gray-600">
-              Our AI is analyzing your pet&apos;s body condition across multiple physical parameters.
+              Our AI is analyzing your pet&apos;s body condition across multiple
+              physical parameters.
             </p>
           </div>
         </div>
-      )}    </div>
+      )}{" "}
+    </div>
   );
 }

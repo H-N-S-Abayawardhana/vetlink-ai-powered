@@ -282,12 +282,10 @@ function FindFromPrescriptionModule() {
     try {
       // Use dummy data for now
       const matches: any[] = [];
-      
+
       validItems.forEach((extractedItem) => {
         const matched = dummyProducts.filter((product) =>
-          product.name
-            .toLowerCase()
-            .includes(extractedItem.name.toLowerCase()),
+          product.name.toLowerCase().includes(extractedItem.name.toLowerCase()),
         );
 
         if (matched.length > 0) {
@@ -508,7 +506,9 @@ function FindFromPrescriptionModule() {
 
               <button
                 onClick={handleFindProducts}
-                disabled={searching || extractedItems.every((i) => !i.name.trim())}
+                disabled={
+                  searching || extractedItems.every((i) => !i.name.trim())
+                }
                 className="w-full mt-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {searching ? (
@@ -537,7 +537,12 @@ function FindFromPrescriptionModule() {
                   Available Products ({matchedProducts.length})
                 </h2>
                 <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  💡 <strong>You can buy these products from these pharmacies:</strong> Products are grouped by pharmacy for easy comparison and purchase.
+                  💡{" "}
+                  <strong>
+                    You can buy these products from these pharmacies:
+                  </strong>{" "}
+                  Products are grouped by pharmacy for easy comparison and
+                  purchase.
                 </p>
               </div>
 
@@ -568,114 +573,116 @@ function FindFromPrescriptionModule() {
                     {} as Record<string, PharmacyGroup>,
                   );
 
-                  return (Object.values(groupedByPharmacy) as PharmacyGroup[]).map(
-                    (pharmacyGroup, groupIndex) => (
-                      <div
-                        key={pharmacyGroup.pharmacyId}
-                        className="border border-gray-200 rounded-xl overflow-hidden"
-                      >
-                        {/* Pharmacy Header */}
-                        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-bold text-lg mb-1">
-                                {pharmacyGroup.pharmacyName}
-                              </h3>
-                              {pharmacyGroup.pharmacyAddress && (
-                                <p className="text-purple-100 text-sm flex items-center gap-1">
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                  </svg>
-                                  {pharmacyGroup.pharmacyAddress}
-                                </p>
-                              )}
-                              <p className="text-purple-100 text-xs mt-1">
-                                {pharmacyGroup.products.length} product
-                                {pharmacyGroup.products.length > 1 ? "s" : ""}{" "}
-                                available
+                  return (
+                    Object.values(groupedByPharmacy) as PharmacyGroup[]
+                  ).map((pharmacyGroup, groupIndex) => (
+                    <div
+                      key={pharmacyGroup.pharmacyId}
+                      className="border border-gray-200 rounded-xl overflow-hidden"
+                    >
+                      {/* Pharmacy Header */}
+                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-lg mb-1">
+                              {pharmacyGroup.pharmacyName}
+                            </h3>
+                            {pharmacyGroup.pharmacyAddress && (
+                              <p className="text-purple-100 text-sm flex items-center gap-1">
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                  />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                  />
+                                </svg>
+                                {pharmacyGroup.pharmacyAddress}
                               </p>
-                            </div>
+                            )}
+                            <p className="text-purple-100 text-xs mt-1">
+                              {pharmacyGroup.products.length} product
+                              {pharmacyGroup.products.length > 1
+                                ? "s"
+                                : ""}{" "}
+                              available
+                            </p>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Products List */}
-                        <div className="p-4 space-y-3 bg-gray-50">
-                          {pharmacyGroup.products.map((product, index) => (
-                            <div
-                              key={`${product.id}-${product.pharmacyId}-${index}`}
-                              className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex items-start gap-4">
-                                {product.image && (
-                                  <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                                    <Image
-                                      src={product.image}
-                                      alt={product.name}
-                                      fill
-                                      className="object-cover"
-                                      sizes="80px"
-                                    />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-bold text-gray-900 mb-1">
-                                    {product.name}
-                                  </h4>
-                                  <p className="text-sm text-gray-600 mb-2">
-                                    {product.form}
-                                    {product.strength && ` — ${product.strength}`}
-                                  </p>
-                                  <div className="flex items-center justify-between flex-wrap gap-2">
-                                    <div className="flex items-center gap-4">
-                                      <span className="text-lg font-bold text-purple-600">
-                                        {formatLKR(product.price)}
-                                      </span>
-                                      <span
-                                        className={`text-sm px-2 py-1 rounded-full ${
-                                          (product.stock || 0) > 10
-                                            ? "bg-green-100 text-green-700"
-                                            : (product.stock || 0) > 0
-                                              ? "bg-yellow-100 text-yellow-700"
-                                              : "bg-red-100 text-red-700"
-                                        }`}
-                                      >
-                                        Stock: {product.stock || 0}
-                                      </span>
-                                    </div>
-                                    <button
-                                      onClick={() => {
-                                        window.location.href = `/dashboard/pharmacy/shopping?product=${encodeURIComponent(product.name)}&pharmacy=${encodeURIComponent(product.pharmacyId)}`;
-                                      }}
-                                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"
+                      {/* Products List */}
+                      <div className="p-4 space-y-3 bg-gray-50">
+                        {pharmacyGroup.products.map((product, index) => (
+                          <div
+                            key={`${product.id}-${product.pharmacyId}-${index}`}
+                            className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-start gap-4">
+                              {product.image && (
+                                <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                  <Image
+                                    src={product.image}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover"
+                                    sizes="80px"
+                                  />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-bold text-gray-900 mb-1">
+                                  {product.name}
+                                </h4>
+                                <p className="text-sm text-gray-600 mb-2">
+                                  {product.form}
+                                  {product.strength && ` — ${product.strength}`}
+                                </p>
+                                <div className="flex items-center justify-between flex-wrap gap-2">
+                                  <div className="flex items-center gap-4">
+                                    <span className="text-lg font-bold text-purple-600">
+                                      {formatLKR(product.price)}
+                                    </span>
+                                    <span
+                                      className={`text-sm px-2 py-1 rounded-full ${
+                                        (product.stock || 0) > 10
+                                          ? "bg-green-100 text-green-700"
+                                          : (product.stock || 0) > 0
+                                            ? "bg-yellow-100 text-yellow-700"
+                                            : "bg-red-100 text-red-700"
+                                      }`}
                                     >
-                                      <ShoppingCart className="w-4 h-4" />
-                                      Add to Cart
-                                    </button>
+                                      Stock: {product.stock || 0}
+                                    </span>
                                   </div>
+                                  <button
+                                    onClick={() => {
+                                      window.location.href = `/dashboard/pharmacy/shopping?product=${encodeURIComponent(product.name)}&pharmacy=${encodeURIComponent(product.pharmacyId)}`;
+                                    }}
+                                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"
+                                  >
+                                    <ShoppingCart className="w-4 h-4" />
+                                    Add to Cart
+                                  </button>
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
-                    ),
-                  );
+                    </div>
+                  ));
                 })()}
               </div>
             </div>
@@ -697,4 +704,3 @@ function FindFromPrescriptionModule() {
     </div>
   );
 }
-

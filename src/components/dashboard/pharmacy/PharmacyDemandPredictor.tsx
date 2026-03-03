@@ -732,8 +732,6 @@ export default function PharmacyDemandPredictor() {
                   </h3>
 
                   <div className="space-y-6">
-                    
-
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                       <h4 className="text-lg font-semibold text-gray-900 mb-3">
                         Features Used:

@@ -293,244 +293,242 @@ export default function DiseasePredictionForm({
 
         <form onSubmit={handleSubmit} className="p-8">
           <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
-                🩺 Health Observations & Prevention
-              </h3>
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+              🩺 Health Observations & Prevention
+            </h3>
 
-              <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-lg mb-6">
-                <div className="flex gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-amber-800">
-                    Please provide information about your pet&apos;s current
-                    health symptoms and preventive care.
-                  </div>
-                </div>
-              </div>
-
-              <h4 className="text-md font-semibold text-gray-800 flex items-center gap-2 mb-3">
-                📊 Clinical Signs
-              </h4>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Pale Gums <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-rose-100 rounded-full text-center leading-5 text-[10px]">
-                      ?
-                    </span>
-                    Lift lip to check. Healthy ={" "}
-                    <span className="text-green-600 font-medium">pink</span> ·
-                    Concern ={" "}
-                    <span className="text-red-600 font-medium">
-                      white/gray/yellow
-                    </span>
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, pale_gums: "yes" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.pale_gums === "yes"
-                          ? "bg-blue-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, pale_gums: "no" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.pale_gums === "no"
-                          ? "bg-red-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Skin Lesions <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-amber-100 rounded-full text-center leading-5 text-[10px]">
-                      ?
-                    </span>
-                    Any lumps, bumps, red patches, scabs, rashes, or bald spots?
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, skin_lesions: "yes" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.skin_lesions === "yes"
-                          ? "bg-blue-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, skin_lesions: "no" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.skin_lesions === "no"
-                          ? "bg-red-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Increased Thirst &amp; Urination{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-cyan-100 rounded-full text-center leading-5 text-[10px]">
-                      ?
-                    </span>
-                    Drinking more water than usual? Needing to go outside more
-                    often?
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, polyuria: "yes" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.polyuria === "yes"
-                          ? "bg-blue-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, polyuria: "no" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.polyuria === "no"
-                          ? "bg-red-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Prevention Care Section */}
-              <h4 className="text-md font-semibold text-gray-800 flex items-center gap-2 mb-3 mt-8 pt-6 border-t border-gray-200">
-                🛡️ Preventive Care
-              </h4>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Tick Prevention <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-green-100 rounded-full text-center leading-5 text-[10px]">
-                      ?
-                    </span>
-                    Uses flea/tick products? (chews, spot-on drops, or collar)
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, tick_prevention: "Regular" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.tick_prevention === "Regular"
-                          ? "bg-blue-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, tick_prevention: "None" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.tick_prevention === "None" ||
-                        formData.tick_prevention === "Irregular"
-                          ? "bg-red-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Heartworm Prevention <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                    <span className="inline-block w-5 h-5 bg-red-100 rounded-full text-center leading-5 text-[10px]">
-                      ?
-                    </span>
-                    Monthly heartworm tablets or annual injection from vet?
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({
-                          ...formData,
-                          heartworm_prevention: "yes",
-                        })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.heartworm_prevention === "yes"
-                          ? "bg-blue-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, heartworm_prevention: "no" })
-                      }
-                      className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                        formData.heartworm_prevention === "no"
-                          ? "bg-red-600 text-white shadow"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      No
-                    </button>
-                  </div>
+            <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-lg mb-6">
+              <div className="flex gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-amber-800">
+                  Please provide information about your pet&apos;s current
+                  health symptoms and preventive care.
                 </div>
               </div>
             </div>
+
+            <h4 className="text-md font-semibold text-gray-800 flex items-center gap-2 mb-3">
+              📊 Clinical Signs
+            </h4>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Pale Gums <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                  <span className="inline-block w-5 h-5 bg-rose-100 rounded-full text-center leading-5 text-[10px]">
+                    ?
+                  </span>
+                  Lift lip to check. Healthy ={" "}
+                  <span className="text-green-600 font-medium">pink</span> ·
+                  Concern ={" "}
+                  <span className="text-red-600 font-medium">
+                    white/gray/yellow
+                  </span>
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, pale_gums: "yes" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.pale_gums === "yes"
+                        ? "bg-blue-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, pale_gums: "no" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.pale_gums === "no"
+                        ? "bg-red-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Skin Lesions <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                  <span className="inline-block w-5 h-5 bg-amber-100 rounded-full text-center leading-5 text-[10px]">
+                    ?
+                  </span>
+                  Any lumps, bumps, red patches, scabs, rashes, or bald spots?
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, skin_lesions: "yes" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.skin_lesions === "yes"
+                        ? "bg-blue-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, skin_lesions: "no" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.skin_lesions === "no"
+                        ? "bg-red-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Increased Thirst &amp; Urination{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                  <span className="inline-block w-5 h-5 bg-cyan-100 rounded-full text-center leading-5 text-[10px]">
+                    ?
+                  </span>
+                  Drinking more water than usual? Needing to go outside more
+                  often?
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, polyuria: "yes" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.polyuria === "yes"
+                        ? "bg-blue-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, polyuria: "no" })}
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.polyuria === "no"
+                        ? "bg-red-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Prevention Care Section */}
+            <h4 className="text-md font-semibold text-gray-800 flex items-center gap-2 mb-3 mt-8 pt-6 border-t border-gray-200">
+              🛡️ Preventive Care
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Tick Prevention <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                  <span className="inline-block w-5 h-5 bg-green-100 rounded-full text-center leading-5 text-[10px]">
+                    ?
+                  </span>
+                  Uses flea/tick products? (chews, spot-on drops, or collar)
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, tick_prevention: "Regular" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.tick_prevention === "Regular"
+                        ? "bg-blue-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, tick_prevention: "None" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.tick_prevention === "None" ||
+                      formData.tick_prevention === "Irregular"
+                        ? "bg-red-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Heartworm Prevention <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                  <span className="inline-block w-5 h-5 bg-red-100 rounded-full text-center leading-5 text-[10px]">
+                    ?
+                  </span>
+                  Monthly heartworm tablets or annual injection from vet?
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        heartworm_prevention: "yes",
+                      })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.heartworm_prevention === "yes"
+                        ? "bg-blue-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, heartworm_prevention: "no" })
+                    }
+                    className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                      formData.heartworm_prevention === "no"
+                        ? "bg-red-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Navigation buttons */}
           <div className="flex gap-4 pt-8 border-t border-gray-200 mt-8">

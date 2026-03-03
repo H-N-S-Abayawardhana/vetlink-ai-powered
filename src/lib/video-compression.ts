@@ -73,7 +73,9 @@ export async function compressVideo(
 
       // Get video duration
       const duration = video.duration;
-      const targetDuration = maxDuration ? Math.min(duration, maxDuration) : duration;
+      const targetDuration = maxDuration
+        ? Math.min(duration, maxDuration)
+        : duration;
 
       // Create MediaRecorder to capture compressed video
       const stream = canvas.captureStream(30); // 30 FPS

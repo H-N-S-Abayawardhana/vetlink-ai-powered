@@ -52,7 +52,7 @@ function ShoppingModule() {
       form: "Capsule",
       strength: "250 mg",
       stock: 120,
-      price: 450.00,
+      price: 450.0,
       expiry: "2026-11-01",
       image: "/uploads/pharmacy/Amoxicillin.jpeg",
       pharmacyId: "11111111-1111-1111-1111-111111111111",
@@ -66,7 +66,7 @@ function ShoppingModule() {
       form: "Tablet",
       strength: "5 mg",
       stock: 40,
-      price: 650.00,
+      price: 650.0,
       expiry: "2027-02-15",
       image: "/uploads/pharmacy/Prednisone.jpeg",
       pharmacyId: "11111111-1111-1111-1111-111111111111",
@@ -80,7 +80,7 @@ function ShoppingModule() {
       form: "Oral suspension",
       strength: "1%",
       stock: 25,
-      price: 850.00,
+      price: 850.0,
       expiry: "2026-07-28",
       image: "/uploads/pharmacy/Ivermectin.jpeg",
       pharmacyId: "11111111-1111-1111-1111-111111111111",
@@ -94,7 +94,7 @@ function ShoppingModule() {
       form: "Tablet",
       strength: "500 mg",
       stock: 60,
-      price: 350.00,
+      price: 350.0,
       expiry: "2026-09-10",
       image: "/uploads/pharmacy/Metronidazole.jpeg",
       pharmacyId: "11111111-1111-1111-1111-111111111111",
@@ -108,7 +108,7 @@ function ShoppingModule() {
       form: "Capsule",
       strength: "100 mg",
       stock: 80,
-      price: 550.00,
+      price: 550.0,
       expiry: "2027-01-20",
       image: "/uploads/pharmacy/Doxycycline.jpeg",
       pharmacyId: "11111111-1111-1111-1111-111111111111",
@@ -122,7 +122,7 @@ function ShoppingModule() {
       form: "Tablet",
       strength: "75 mg",
       stock: 35,
-      price: 750.00,
+      price: 750.0,
       expiry: "2026-12-05",
       image: "/uploads/pharmacy/Carprofen.jpeg",
       pharmacyId: "11111111-1111-1111-1111-111111111111",
@@ -152,7 +152,9 @@ function ShoppingModule() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">(
+    "pickup",
+  );
   const [deliveryAddress, setDeliveryAddress] = useState("");
 
   useEffect(() => {
@@ -161,7 +163,7 @@ function ShoppingModule() {
     setProducts(hardcodedProducts);
     setFilteredProducts(hardcodedProducts);
     setLoading(false);
-    
+
     // Uncomment to fetch from database:
     // fetchPharmacies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -203,7 +205,7 @@ function ShoppingModule() {
       // Use hardcoded data for now
       setPharmacies(hardcodedPharmacies);
       console.log(`Using ${hardcodedPharmacies.length} hardcoded pharmacies`);
-      
+
       // Uncomment below to fetch from database instead:
       // const res = await fetch("/api/pharmacies");
       // const data = await res.json();
@@ -223,12 +225,12 @@ function ShoppingModule() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      
+
       // Use hardcoded products for now
       setProducts(hardcodedProducts);
       setFilteredProducts(hardcodedProducts);
       console.log(`Using ${hardcodedProducts.length} hardcoded products`);
-      
+
       // Uncomment below to fetch from database instead:
       // const allProducts: any[] = [];
       // for (const pharmacy of pharmacies) {
@@ -262,7 +264,8 @@ function ShoppingModule() {
 
   const addToCart = (product: any) => {
     const existingItem = cart.find(
-      (item) => item.id === product.id && item.pharmacyId === product.pharmacyId,
+      (item) =>
+        item.id === product.id && item.pharmacyId === product.pharmacyId,
     );
 
     if (existingItem) {
@@ -352,7 +355,8 @@ function ShoppingModule() {
         body: JSON.stringify({
           items,
           delivery_method: deliveryMethod,
-          delivery_address: deliveryMethod === "delivery" ? deliveryAddress : null,
+          delivery_address:
+            deliveryMethod === "delivery" ? deliveryAddress : null,
         }),
       });
 
@@ -366,7 +370,7 @@ function ShoppingModule() {
       setOrderSuccess(true);
       setCart([]);
       setShowCheckout(false);
-      
+
       // Refresh products to update stock from database
       setTimeout(() => {
         refreshProducts();
@@ -389,8 +393,9 @@ function ShoppingModule() {
             Pharmacy Shopping
           </h1>
           <p className="text-emerald-100 text-base leading-relaxed">
-            Discover and purchase veterinary medications from trusted pharmacies across Sri Lanka. 
-            Compare prices, check availability, and order with confidence.
+            Discover and purchase veterinary medications from trusted pharmacies
+            across Sri Lanka. Compare prices, check availability, and order with
+            confidence.
           </p>
         </div>
       </div>
@@ -477,7 +482,9 @@ function ShoppingModule() {
                       <div className="text-xs text-gray-500 mb-3">
                         <p className="font-medium">{product.pharmacyName}</p>
                         {product.pharmacyAddress && (
-                          <p className="text-gray-400">{product.pharmacyAddress}</p>
+                          <p className="text-gray-400">
+                            {product.pharmacyAddress}
+                          </p>
                         )}
                       </div>
                       <div className="flex items-center justify-between mt-3">
@@ -541,7 +548,6 @@ function ShoppingModule() {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-6">
-
               {cart.length === 0 ? (
                 <div className="text-center py-8">
                   <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -550,57 +556,57 @@ function ShoppingModule() {
               ) : (
                 <>
                   <div className="space-y-4 mb-4">
-                  {cart.map((item) => (
-                    <div
-                      key={`${item.id}-${item.pharmacyId}`}
-                      className="bg-gray-50 rounded-xl p-4 border border-gray-200"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <h5 className="font-semibold text-gray-900">
-                            {item.name}
-                          </h5>
-                          <p className="text-xs text-gray-500">
-                            {item.pharmacyName}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() =>
-                            removeFromCart(item.id, item.pharmacyId)
-                          }
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center gap-2">
+                    {cart.map((item) => (
+                      <div
+                        key={`${item.id}-${item.pharmacyId}`}
+                        className="bg-gray-50 rounded-xl p-4 border border-gray-200"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-gray-900">
+                              {item.name}
+                            </h5>
+                            <p className="text-xs text-gray-500">
+                              {item.pharmacyName}
+                            </p>
+                          </div>
                           <button
                             onClick={() =>
-                              updateQuantity(item.id, item.pharmacyId, -1)
+                              removeFromCart(item.id, item.pharmacyId)
                             }
-                            className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            className="text-red-500 hover:text-red-700"
                           >
-                            <Minus className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
-                          <span className="w-12 text-center font-semibold">
-                            {item.quantity}
+                        </div>
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                updateQuantity(item.id, item.pharmacyId, -1)
+                              }
+                              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-12 text-center font-semibold">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                updateQuantity(item.id, item.pharmacyId, 1)
+                              }
+                              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <span className="font-bold text-emerald-600">
+                            {formatLKR(item.price * item.quantity)}
                           </span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.pharmacyId, 1)
-                            }
-                            className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
                         </div>
-                        <span className="font-bold text-emerald-600">
-                          {formatLKR(item.price * item.quantity)}
-                        </span>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                   </div>
 
                   <div className="border-t border-gray-200 pt-4 space-y-4">
@@ -658,7 +664,8 @@ function ShoppingModule() {
                 Order Placed Successfully!
               </h3>
               <p className="text-gray-600 mb-6">
-                Your order has been confirmed. You will receive a confirmation email shortly.
+                Your order has been confirmed. You will receive a confirmation
+                email shortly.
               </p>
               <button
                 onClick={() => {
@@ -734,7 +741,9 @@ function CheckoutModal({
 
           {/* Order Summary */}
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Order Summary
+            </h3>
             <div className="space-y-3">
               {cart.map((item) => (
                 <div
@@ -744,7 +753,9 @@ function CheckoutModal({
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900">{item.name}</p>
                     <p className="text-xs text-gray-500">{item.pharmacyName}</p>
-                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                    <p className="text-sm text-gray-600">
+                      Qty: {item.quantity}
+                    </p>
                   </div>
                   <p className="font-bold text-emerald-600">
                     {formatLKR(item.price * item.quantity)}
@@ -756,7 +767,9 @@ function CheckoutModal({
 
           {/* Delivery Method */}
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Delivery Method</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Delivery Method
+            </h3>
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => onDeliveryMethodChange("pickup")}
@@ -768,17 +781,23 @@ function CheckoutModal({
               >
                 <MapPin
                   className={`w-6 h-6 mb-2 ${
-                    deliveryMethod === "pickup" ? "text-emerald-600" : "text-gray-400"
+                    deliveryMethod === "pickup"
+                      ? "text-emerald-600"
+                      : "text-gray-400"
                   }`}
                 />
                 <p
                   className={`font-semibold ${
-                    deliveryMethod === "pickup" ? "text-emerald-600" : "text-gray-700"
+                    deliveryMethod === "pickup"
+                      ? "text-emerald-600"
+                      : "text-gray-700"
                   }`}
                 >
                   Pickup
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Collect from pharmacy</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Collect from pharmacy
+                </p>
               </button>
               <button
                 onClick={() => onDeliveryMethodChange("delivery")}
@@ -790,12 +809,16 @@ function CheckoutModal({
               >
                 <Truck
                   className={`w-6 h-6 mb-2 ${
-                    deliveryMethod === "delivery" ? "text-emerald-600" : "text-gray-400"
+                    deliveryMethod === "delivery"
+                      ? "text-emerald-600"
+                      : "text-gray-400"
                   }`}
                 />
                 <p
                   className={`font-semibold ${
-                    deliveryMethod === "delivery" ? "text-emerald-600" : "text-gray-700"
+                    deliveryMethod === "delivery"
+                      ? "text-emerald-600"
+                      : "text-gray-700"
                   }`}
                 >
                   Delivery
@@ -841,7 +864,10 @@ function CheckoutModal({
             </button>
             <button
               onClick={onConfirm}
-              disabled={loading || (deliveryMethod === "delivery" && !deliveryAddress.trim())}
+              disabled={
+                loading ||
+                (deliveryMethod === "delivery" && !deliveryAddress.trim())
+              }
               className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
@@ -862,4 +888,3 @@ function CheckoutModal({
     </div>
   );
 }
-
