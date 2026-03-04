@@ -56,8 +56,7 @@ export default function AnalyzingPopup({ open }: AnalyzingPopupProps) {
               </h3>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
-                  Our AI is examining the skin image. This may take a few
-                  seconds.
+                  Analyzing the image… this will only take a few seconds.
                 </p>
               </div>
             </div>
