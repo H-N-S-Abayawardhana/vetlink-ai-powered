@@ -10,6 +10,7 @@ interface Props {
   onSelectPetId: (id: string) => void;
   onRefresh: () => void;
   onContinueWithoutPet: () => void;
+  onContinueWithPet: () => void;
 }
 
 function petAvatarSrc(pet: Pet): string | null {
@@ -17,7 +18,7 @@ function petAvatarSrc(pet: Pet): string | null {
   return anyPet.avatarDataUrl || anyPet.avatarUrl || null;
 }
 
-export default function PetSelector({
+export default function LimpingPetSelector({
   pets,
   loading,
   error,
@@ -25,6 +26,7 @@ export default function PetSelector({
   onSelectPetId,
   onRefresh,
   onContinueWithoutPet,
+  onContinueWithPet,
 }: Props) {
   return (
     <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 space-y-4">
@@ -63,7 +65,9 @@ export default function PetSelector({
         </div>
       ) : pets.length === 0 ? (
         <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center">
-          <p className="text-sm text-gray-700">You don’t have any pets yet.</p>
+          <p className="text-sm text-gray-700">
+            You don&apos;t have any pets yet.
+          </p>
           <p className="text-sm text-gray-600 mt-1">
             You can continue without selecting a pet.
           </p>
@@ -126,13 +130,22 @@ export default function PetSelector({
         </div>
       )}
 
-      <div className="pt-2">
+      <div className="pt-2 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={onContinueWithoutPet}
           className="px-4 py-3 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors cursor-pointer"
         >
           Continue without selecting a pet
+        </button>
+
+        <button
+          type="button"
+          onClick={onContinueWithPet}
+          disabled={!selectedPetId}
+          className="px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          Continue with selected pet
         </button>
       </div>
     </div>
