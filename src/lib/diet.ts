@@ -37,12 +37,12 @@ export interface DietPlan {
   ageYears?: number | null;
   bcs?: number | null;
   bcsCategory?: string;
-  
+
   // ML Predictions
   calorieLevel?: string | null;
   dietType?: string | null;
   foodCategory?: string | null;
-  
+
   // Knowledge Base - Exact Structure Only
   Diet_Type?: string | null;
   Nutrition_Profile?: {
@@ -104,10 +104,10 @@ export function estimateLifeStage(ageYears?: number | null): LifeStage {
 function mapCalorieLevel(calorieLevel: string | null): string | null {
   if (!calorieLevel) return null;
   const normalized = calorieLevel.toLowerCase().trim();
-  
+
   // Map variations to standard Diet_Type categories in knowledge base
   if (normalized.includes("maintenance") || normalized.includes("normal")) {
-    return "Maintenance"; 
+    return "Maintenance";
   }
   if (normalized.includes("weight loss") || normalized.includes("loss")) {
     return "Weight Loss";
@@ -121,7 +121,7 @@ function mapCalorieLevel(calorieLevel: string | null): string | null {
   if (normalized.includes("senior") || normalized.includes("elderly")) {
     return "Senior Diet";
   }
-  
+
   return calorieLevel; // Return as-is if no mapping found
 }
 
@@ -130,55 +130,67 @@ function mapCalorieLevel(calorieLevel: string | null): string | null {
  */
 function findMatchingDiet(
   breed: string | null | undefined,
-  predictions: DietPredictionResult | null | undefined
+  predictions: DietPredictionResult | null | undefined,
 ): any {
   if (!breed) return null;
-  
+
   // Find breed in knowledge base
   const breedData = (knowledgeBase as any).breeds.find(
-    (b: any) => 
+    (b: any) =>
       b.breed.toLowerCase() === breed.toLowerCase() ||
       breed.toLowerCase().includes(b.breed.toLowerCase()) ||
-      b.breed.toLowerCase().includes(breed.toLowerCase())
+      b.breed.toLowerCase().includes(breed.toLowerCase()),
   );
-  
+
   if (!breedData || !breedData.diets) return null;
-  
+
   // If no predictions, return the first diet (usually Maintenance)
   if (!predictions) {
     return breedData.diets[0] || null;
   }
-  
+
   const mappedCalorieLevel = mapCalorieLevel(predictions.calorie_level);
-  
+
   // Try to find exact match based on Diet_Type field (matches JSON structure)
   let matchedDiet = breedData.diets.find((diet: any) => {
-    return diet.Diet_Type === mappedCalorieLevel ||
-           diet.Diet_Type?.toLowerCase() === predictions.calorie_level?.toLowerCase() ||
-           // Also check legacy Calorie Level field if exists
-           diet["Calorie Level"] === mappedCalorieLevel ||
-           diet["Calorie Level"]?.toLowerCase() === predictions.calorie_level?.toLowerCase();
+    return (
+      diet.Diet_Type === mappedCalorieLevel ||
+      diet.Diet_Type?.toLowerCase() ===
+        predictions.calorie_level?.toLowerCase() ||
+      // Also check legacy Calorie Level field if exists
+      diet["Calorie Level"] === mappedCalorieLevel ||
+      diet["Calorie Level"]?.toLowerCase() ===
+        predictions.calorie_level?.toLowerCase()
+    );
   });
-  
+
   // If no exact match, try to find based on diet type or food category
   if (!matchedDiet && (predictions.diet_type || predictions.food_category)) {
     matchedDiet = breedData.diets.find((diet: any) => {
-      const dietTypeMatch = predictions.diet_type && 
-        (diet.Diet_Type?.toLowerCase().includes(predictions.diet_type.toLowerCase()) ||
-         diet["Food Type"]?.toLowerCase().includes(predictions.diet_type.toLowerCase()));
-      const foodCatMatch = predictions.food_category &&
-        diet["Food Category"]?.toLowerCase().includes(predictions.food_category.toLowerCase());
+      const dietTypeMatch =
+        predictions.diet_type &&
+        (diet.Diet_Type?.toLowerCase().includes(
+          predictions.diet_type.toLowerCase(),
+        ) ||
+          diet["Food Type"]
+            ?.toLowerCase()
+            .includes(predictions.diet_type.toLowerCase()));
+      const foodCatMatch =
+        predictions.food_category &&
+        diet["Food Category"]
+          ?.toLowerCase()
+          .includes(predictions.food_category.toLowerCase());
       return dietTypeMatch || foodCatMatch;
     });
   }
-  
+
   // Fallback to first diet (Maintenance)
   return matchedDiet || breedData.diets[0] || null;
 }
 
 export function generateDietPlan(
   input: DietPlanInput,
-  prediction?: DietPredictionResult | null
+  prediction?: DietPredictionResult | null,
 ): DietPlan {
   const now = new Date().toISOString();
   const calorieLevel = prediction?.calorie_level || null;
@@ -197,7 +209,7 @@ export function generateDietPlan(
     ageYears: input.ageYears ?? null,
     bcs: input.bcs ?? null,
     bcsCategory: bcsCategoryFromScore(input.bcs) || undefined,
-    
+
     // ML Predictions
     calorieLevel,
     dietType,
@@ -208,7 +220,7 @@ export function generateDietPlan(
   if (matchedDiet) {
     // Diet_Type
     plan.Diet_Type = matchedDiet.Diet_Type || null;
-    
+
     // Nutrition_Profile
     if (matchedDiet.Nutrition_Profile) {
       plan.Nutrition_Profile = {
@@ -217,29 +229,36 @@ export function generateDietPlan(
         Carb_Level: matchedDiet.Nutrition_Profile.Carb_Level || null,
       };
     }
-    
+
     // Feeding_Guidelines
     if (matchedDiet.Feeding_Guidelines) {
       plan.Feeding_Guidelines = {
         Meals_Per_Day: matchedDiet.Feeding_Guidelines.Meals_Per_Day || null,
-        Portion_Control_Advice: matchedDiet.Feeding_Guidelines.Portion_Control_Advice || null,
+        Portion_Control_Advice:
+          matchedDiet.Feeding_Guidelines.Portion_Control_Advice || null,
         Treat_Allowance: matchedDiet.Feeding_Guidelines.Treat_Allowance || null,
       };
     }
-    
+
     // Recommended_Foods
-    if (matchedDiet.Recommended_Foods && Array.isArray(matchedDiet.Recommended_Foods)) {
+    if (
+      matchedDiet.Recommended_Foods &&
+      Array.isArray(matchedDiet.Recommended_Foods)
+    ) {
       plan.Recommended_Foods = matchedDiet.Recommended_Foods;
     }
-    
+
     // Foods_to_Avoid
-    if (matchedDiet.Foods_to_Avoid && Array.isArray(matchedDiet.Foods_to_Avoid)) {
+    if (
+      matchedDiet.Foods_to_Avoid &&
+      Array.isArray(matchedDiet.Foods_to_Avoid)
+    ) {
       plan.Foods_to_Avoid = matchedDiet.Foods_to_Avoid;
     }
-    
+
     // Exercise_Recommendation
     plan.Exercise_Recommendation = matchedDiet.Exercise_Recommendation || null;
-    
+
     // Notes
     plan.Notes = matchedDiet.Notes || null;
   }

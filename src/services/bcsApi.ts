@@ -43,15 +43,12 @@ const API_GET_ENDPOINT_ASYNC = (eventId: string) =>
  * Requires clinical observations + breed info for accurate prediction
  */
 export async function predictBCS(
-  input: BCSPredictionInput
+  input: BCSPredictionInput,
 ): Promise<BCSPredictionResponse> {
   try {
     // Create AbortController for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      API_REQUEST_TIMEOUT
-    );
+    const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT);
 
     try {
       // Gradio API format: data array with input parameters in correct order
@@ -87,7 +84,9 @@ export async function predictBCS(
 
       // If 404, try the async pattern (/gradio_api/call/predict_bcs)
       if (submitResponse.status === 404) {
-        console.log("Endpoint /api/predict_bcs not found, trying async pattern...");
+        console.log(
+          "Endpoint /api/predict_bcs not found, trying async pattern...",
+        );
         submitResponse = await fetch(API_SUBMIT_ENDPOINT_ASYNC, {
           method: "POST",
           headers: {
@@ -102,10 +101,10 @@ export async function predictBCS(
         const errorText = await submitResponse.text();
         console.error(
           `BCS API submit error - Status: ${submitResponse.status}`,
-          errorText
+          errorText,
         );
         throw new Error(
-          `Failed to submit BCS prediction: ${submitResponse.status} - ${errorText}`
+          `Failed to submit BCS prediction: ${submitResponse.status} - ${errorText}`,
         );
       }
 
@@ -116,7 +115,9 @@ export async function predictBCS(
       if (submitResult.event_id) {
         // Async pattern - need to poll for result
         const eventId = submitResult.event_id;
-        console.log(`Async response received, polling with event_id: ${eventId}`);
+        console.log(
+          `Async response received, polling with event_id: ${eventId}`,
+        );
 
         // Step 2: Get the result using Server-Sent Events (SSE)
         const resultResponse = await fetch(API_GET_ENDPOINT_ASYNC(eventId), {
@@ -128,7 +129,7 @@ export async function predictBCS(
 
         if (!resultResponse.ok) {
           throw new Error(
-            `Failed to get BCS prediction result: ${resultResponse.status}`
+            `Failed to get BCS prediction result: ${resultResponse.status}`,
           );
         }
 
@@ -142,7 +143,7 @@ export async function predictBCS(
         console.log("Direct response received. Type:", typeof submitResult);
         console.log("Is Array:", Array.isArray(submitResult));
         console.log("Full response:", JSON.stringify(submitResult));
-        
+
         // Handle various response formats from Gradio
         // Could be: [{...}], [...], or direct object
         return normalizeBCSResponse(submitResult);
@@ -151,7 +152,7 @@ export async function predictBCS(
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === "AbortError") {
         throw new Error(
-          `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The Hugging Face Space might be starting up - please try again.`
+          `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The Hugging Face Space might be starting up - please try again.`,
         );
       }
       throw fetchError;
@@ -159,7 +160,7 @@ export async function predictBCS(
   } catch (error) {
     console.error("BCS Prediction Error:", error);
     throw new Error(
-      `Failed to get BCS prediction from Hugging Face model: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Failed to get BCS prediction from Hugging Face model: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -199,7 +200,7 @@ function parseSSEResponse(sseText: string): Record<string, unknown> {
  * - Response object with data field
  */
 function normalizeBCSResponse(
-  result: Record<string, unknown> | string | unknown[] | unknown
+  result: Record<string, unknown> | string | unknown[] | unknown,
 ): BCSPredictionResponse {
   let bcsScore: number;
   let bcsCategory: string;
@@ -222,7 +223,10 @@ function normalizeBCSResponse(
   if (Array.isArray(unwrappedResult)) {
     if (typeof unwrappedResult[0] === "string") {
       responseStr = unwrappedResult[0];
-    } else if (typeof unwrappedResult[0] === "object" && unwrappedResult[0] !== null) {
+    } else if (
+      typeof unwrappedResult[0] === "object" &&
+      unwrappedResult[0] !== null
+    ) {
       // Array of objects - try to extract from first object
       const obj = unwrappedResult[0] as Record<string, unknown>;
       if (typeof obj.data === "string") {
@@ -237,7 +241,10 @@ function normalizeBCSResponse(
     const resultObj = unwrappedResult as Record<string, unknown>;
     if (typeof resultObj.data === "string") {
       responseStr = resultObj.data;
-    } else if (Array.isArray(resultObj.data) && typeof resultObj.data[0] === "string") {
+    } else if (
+      Array.isArray(resultObj.data) &&
+      typeof resultObj.data[0] === "string"
+    ) {
       responseStr = resultObj.data[0];
     } else if (typeof resultObj.bcs_score === "number") {
       // Direct response object with bcs_score field
@@ -258,7 +265,7 @@ function normalizeBCSResponse(
       bcsScore = parseInt(match[1], 10);
     } else {
       throw new Error(
-        `Failed to extract BCS score from response: ${responseStr}`
+        `Failed to extract BCS score from response: ${responseStr}`,
       );
     }
   } else {
@@ -269,7 +276,7 @@ function normalizeBCSResponse(
       stringified: JSON.stringify(result).substring(0, 200),
     });
     throw new Error(
-      `Invalid response format from BCS model. Received: ${JSON.stringify(result).substring(0, 100)}`
+      `Invalid response format from BCS model. Received: ${JSON.stringify(result).substring(0, 100)}`,
     );
   }
 

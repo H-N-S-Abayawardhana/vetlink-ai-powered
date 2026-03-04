@@ -5,8 +5,7 @@ import {
   Activity,
   ArrowDown,
   Brain,
-  Github,
-  Globe,
+  ImageIcon,
   Sparkles,
   Zap,
 } from "lucide-react";
@@ -124,13 +123,21 @@ export default function Hero() {
                 transition: { staggerChildren: 0.1, delayChildren: 0.6 },
               },
             }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-12"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12"
           >
             {[
               {
+                icon: ImageIcon,
+                title: "Dog Skin Disease Detection",
+                description:
+                  "Image analysis for skin conditions with explainable AI guidance",
+                color: "indigo",
+              },
+              {
                 icon: Activity,
-                title: "Dog Skin & Mobility AI",
-                description: "Image + video analysis with explainable guidance",
+                title: "Mobility & Limping Analysis",
+                description:
+                  "Video analysis for gait and mobility with actionable insights",
                 color: "indigo",
               },
               {
@@ -207,40 +214,6 @@ export default function Hero() {
                 transition={{ duration: 0.3 }}
               />
             </motion.a>
-          </motion.div>
-
-          {/* Trust Indicators */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.1, duration: 0.8 }}
-            className="pt-8 border-t border-gray-200/60"
-          >
-            <p className="text-sm text-gray-500 mb-6">
-              Built on a real production stack (no placeholder metrics)
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 justify-items-center text-gray-700">
-              {[
-                "Next.js (App Router) + TypeScript",
-                "Deployed on Vercel",
-                "Models hosted on Hugging Face Spaces",
-                "Neon PostgreSQL + AWS S3 storage",
-                "PayHere payments",
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center gap-2"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.2 + index * 0.1, duration: 0.5 }}
-                >
-                  <div className="h-1.5 w-1.5 rounded-full bg-teal-500" />
-                  <span className="font-semibold text-sm sm:text-base text-center">
-                    {stat}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
           </motion.div>
         </motion.div>
       </motion.div>

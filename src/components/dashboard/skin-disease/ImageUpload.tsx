@@ -84,8 +84,12 @@ export default function ImageUpload({ onImageSelect }: ImageUploadProps) {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Upload Skin Image
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 mb-1">
               Drag and drop an image here, or click to browse
+            </p>
+            <p className="text-sm text-blue-700 mb-4 font-medium">
+              For best results: use good lighting, a close-up of the affected
+              area, and dog skin only.
             </p>
 
             <button

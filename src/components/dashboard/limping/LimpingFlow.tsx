@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Pet } from "@/lib/pets";
 import { listPets } from "@/lib/pets";
 import LimpingAnalysis from "./LimpingAnalysis";
-import PetSelector from "../skin-disease/PetSelector";
+import LimpingPetSelector from "./LimpingPetSelector";
 
 type Step = "pick" | "analyze";
 
@@ -56,7 +56,7 @@ export default function LimpingFlow() {
           </p>
         </div>
 
-        <PetSelector
+        <LimpingPetSelector
           pets={pets}
           loading={loadingPets}
           error={petsError}

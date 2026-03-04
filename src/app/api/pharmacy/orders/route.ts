@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
         item.quantity <= 0
       ) {
         return NextResponse.json(
-          { error: "Invalid item data. Each item must have pharmacyId, inventoryItemId, and quantity > 0" },
+          {
+            error:
+              "Invalid item data. Each item must have pharmacyId, inventoryItemId, and quantity > 0",
+          },
           { status: 400 },
         );
       }
@@ -269,4 +272,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

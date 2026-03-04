@@ -34,7 +34,7 @@ const API_GET_ENDPOINT_ASYNC = (eventId: string) =>
   `${HF_SPACE_URL}/gradio_api/call/recommend_diet/${eventId}`;
 
 export async function predictDietRecommendation(
-  input: DietPredictionInput
+  input: DietPredictionInput,
 ): Promise<DietPredictionResponse> {
   try {
     const controller = new AbortController();
@@ -79,7 +79,7 @@ export async function predictDietRecommendation(
       if (!submitResponse.ok) {
         const errorText = await submitResponse.text();
         throw new Error(
-          `Failed to submit diet prediction: ${submitResponse.status} - ${errorText}`
+          `Failed to submit diet prediction: ${submitResponse.status} - ${errorText}`,
         );
       }
 
@@ -96,7 +96,7 @@ export async function predictDietRecommendation(
 
         if (!resultResponse.ok) {
           throw new Error(
-            `Failed to get diet prediction result: ${resultResponse.status}`
+            `Failed to get diet prediction result: ${resultResponse.status}`,
           );
         }
 
@@ -111,7 +111,7 @@ export async function predictDietRecommendation(
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === "AbortError") {
         throw new Error(
-          `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The Hugging Face Space might be starting up - please try again.`
+          `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The Hugging Face Space might be starting up - please try again.`,
         );
       }
       throw fetchError;
@@ -119,7 +119,7 @@ export async function predictDietRecommendation(
   } catch (error) {
     console.error("Diet Prediction Error:", error);
     throw new Error(
-      `Failed to get diet recommendation from Hugging Face model: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Failed to get diet recommendation from Hugging Face model: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -201,7 +201,7 @@ function normalizeDietResponse(result: unknown): DietPredictionResponse {
   }
 
   throw new Error(
-    `Invalid response format from diet model. Received: ${JSON.stringify(result).substring(0, 120)}`
+    `Invalid response format from diet model. Received: ${JSON.stringify(result).substring(0, 120)}`,
   );
 }
 

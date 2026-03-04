@@ -61,10 +61,12 @@ export default function SkinDiseaseFlow() {
           loading={loadingPets}
           error={petsError}
           selectedPetId={selectedPetId}
-          onSelectPetId={setSelectedPetId}
+          onSelectPetId={(id) => {
+            setSelectedPetId(id);
+            setStep("analyze");
+          }}
           onRefresh={loadPets}
           onContinueWithoutPet={() => setStep("analyze")}
-          onContinueWithPet={() => setStep("analyze")}
         />
 
         {!loadingPets && pets.length === 0 && (
