@@ -44,6 +44,9 @@ export default function SkinAnalysis({
   >("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showPetDetails, setShowPetDetails] = useState(false);
+  const [xaiExplanation, setXaiExplanation] = useState<string | null>(null);
+  const [xaiLoading, setXaiLoading] = useState(false);
+  const [xaiError, setXaiError] = useState<string | null>(null);
   const guidanceCardsRef = useRef<AIGuidanceCardsRef | null>(null);
   const healthySkinCardRef = useRef<HealthySkinCardRef | null>(null);
   const detectionResultsRef = useRef<HTMLDivElement | null>(null);
@@ -66,6 +69,58 @@ export default function SkinAnalysis({
       return () => clearTimeout(t);
     }
   }, [prediction]);
+
+  // Fetch XAI "why this prediction" explanation when we have a valid result
+  useEffect(() => {
+    if (!prediction?.prediction || prediction.valid === false) {
+      setXaiExplanation(null);
+      setXaiError(null);
+      return;
+    }
+    const pred = prediction.prediction;
+    setXaiLoading(true);
+    setXaiError(null);
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch("/api/skin-disease/xai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            disease: pred.disease,
+            severity: pred.parsed?.severity ?? null,
+            confidence: pred.confidence,
+            all_probabilities: pred.all_probabilities ?? null,
+            pet: selectedPet
+              ? {
+                  name: selectedPet.name,
+                  breed: selectedPet.breed ?? undefined,
+                  ageYears: selectedPet.ageYears ?? undefined,
+                }
+              : null,
+          }),
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setXaiError(data.error || "Failed to load explanation");
+          setXaiExplanation(null);
+          return;
+        }
+        setXaiExplanation(data.explanation || null);
+        setXaiError(null);
+      } catch (e) {
+        if ((e as Error).name === "AbortError") return;
+        setXaiError(
+          e instanceof Error ? e.message : "Failed to load explanation",
+        );
+        setXaiExplanation(null);
+      } finally {
+        setXaiLoading(false);
+      }
+    })();
+    return () => controller.abort();
+  }, [prediction?.prediction, prediction?.valid, selectedPet]);
 
   const checkApiHealth = async () => {
     setApiStatus("checking");
@@ -191,6 +246,9 @@ export default function SkinAnalysis({
     setSaveStatus("idle");
     setSaveError(null);
     setShowPetDetails(false);
+    setXaiExplanation(null);
+    setXaiLoading(false);
+    setXaiError(null);
   };
 
   const generatePDFReport = async () => {
@@ -301,6 +359,30 @@ export default function SkinAnalysis({
         yPos,
       );
       yPos += 10;
+
+      // XAI: Why the AI said this
+      if (xaiExplanation && xaiExplanation.trim()) {
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text("Why the AI said this:", 14, yPos);
+        yPos += 6;
+        doc.setFontSize(9);
+        doc.setTextColor(60, 60, 60);
+        const xaiLines = doc.splitTextToSize(xaiExplanation.trim(), 180);
+        xaiLines.forEach((line: string) => {
+          if (yPos > 280) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.text(line, 20, yPos);
+          yPos += 5;
+        });
+        yPos += 6;
+      }
 
       // Affected Image
       if (selectedImage) {
@@ -1210,6 +1292,39 @@ export default function SkinAnalysis({
                     }}
                   />
                 </div>
+              </div>
+
+              {/* XAI: Why did the AI say this? */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 text-indigo-600 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
+                  </svg>
+                  Why did the AI say this?
+                </h3>
+                {xaiLoading && (
+                  <p className="text-sm text-slate-600 animate-pulse">
+                    Generating explanation…
+                  </p>
+                )}
+                {xaiError && !xaiLoading && (
+                  <p className="text-sm text-red-600">{xaiError}</p>
+                )}
+                {xaiExplanation && !xaiLoading && (
+                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                    {xaiExplanation}
+                  </p>
+                )}
               </div>
 
               {/* AI Health Assistant - Only show for diseases, not for healthy */}
