@@ -70,17 +70,25 @@ export default function SkinAnalysis({
     }
   }, [prediction]);
 
-  // Fetch XAI "why this prediction" explanation when we have a valid result
+  // Fetch XAI "why this prediction" explanation when we have a valid result.
+  // Prefer model's xaiExplanation from the predict response; fallback to /api/skin-disease/xai.
   useEffect(() => {
     if (!prediction?.prediction || prediction.valid === false) {
       setXaiExplanation(null);
       setXaiError(null);
       return;
     }
-    const pred = prediction.prediction;
+    // Use model's XAI text when the API returned it
+    if (prediction.xaiExplanation && prediction.xaiExplanation.trim()) {
+      setXaiExplanation(prediction.xaiExplanation);
+      setXaiError(null);
+      setXaiLoading(false);
+      return;
+    }
     setXaiLoading(true);
     setXaiError(null);
     const controller = new AbortController();
+    const pred = prediction.prediction;
     (async () => {
       try {
         const res = await fetch("/api/skin-disease/xai", {
@@ -120,7 +128,12 @@ export default function SkinAnalysis({
       }
     })();
     return () => controller.abort();
-  }, [prediction?.prediction, prediction?.valid, selectedPet]);
+  }, [
+    prediction?.prediction,
+    prediction?.valid,
+    prediction?.xaiExplanation,
+    selectedPet,
+  ]);
 
   const checkApiHealth = async () => {
     setApiStatus("checking");
@@ -409,6 +422,39 @@ export default function SkinAnalysis({
           });
         } catch (e) {
           console.error("Error adding image:", e);
+        }
+      }
+
+      // Saliency (XAI) heatmap when available
+      const xaiHeatmapUrl = prediction.xaiHeatmapDataUrl;
+      if (xaiHeatmapUrl) {
+        try {
+          const heatmapImg = new Image();
+          heatmapImg.src = xaiHeatmapUrl;
+          await new Promise((resolve) => {
+            heatmapImg.onload = () => {
+              const imgWidth = 80;
+              const imgHeight =
+                (heatmapImg.height * imgWidth) / heatmapImg.width;
+              if (yPos + imgHeight > 250) {
+                doc.addPage();
+                yPos = 20;
+              }
+              doc.setFontSize(10);
+              doc.setTextColor(0, 0, 0);
+              doc.text("Saliency (XAI) – where the model looked:", 14, yPos);
+              yPos += 5;
+              const fmt = xaiHeatmapUrl.startsWith("data:image/png")
+                ? "PNG"
+                : "JPEG";
+              doc.addImage(heatmapImg, fmt, 14, yPos, imgWidth, imgHeight);
+              yPos += imgHeight + 10;
+              resolve(null);
+            };
+            heatmapImg.onerror = () => resolve(null);
+          });
+        } catch (e) {
+          console.error("Error adding saliency image:", e);
         }
       }
 
@@ -1326,6 +1372,38 @@ export default function SkinAnalysis({
                   </p>
                 )}
               </div>
+
+              {/* Saliency / Heatmap (XAI) - Grad-CAM overlay */}
+              {prediction.xaiHeatmapDataUrl && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-indigo-600 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Saliency (XAI)
+                  </h3>
+                  <p className="text-sm text-slate-600 mb-3">
+                    Red and yellow areas show where the model focused to make
+                    this prediction.
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={prediction.xaiHeatmapDataUrl}
+                    alt="Grad-CAM saliency overlay showing regions the model used for prediction"
+                    className="w-full max-w-lg h-auto rounded-lg border border-slate-200 shadow-sm"
+                  />
+                </div>
+              )}
 
               {/* AI Health Assistant - Only show for diseases, not for healthy */}
               {prediction.prediction &&
