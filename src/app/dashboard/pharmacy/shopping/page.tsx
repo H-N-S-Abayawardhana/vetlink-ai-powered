@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { AuthGuard } from "@/lib/auth-guard";
 import { formatLKR } from "@/lib/currency";
 import Image from "next/image";
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   MapPin,
   Truck,
+  CreditCard,
 } from "lucide-react";
 
 export default function ShoppingPage() {
@@ -24,7 +26,15 @@ export default function ShoppingPage() {
     >
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <ShoppingModule />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin w-10 h-10 border-2 border-blue-600 border-t-transparent rounded-full" />
+              </div>
+            }
+          >
+            <ShoppingModule />
+          </Suspense>
         </div>
       </div>
     </AuthGuard>
@@ -33,6 +43,8 @@ export default function ShoppingPage() {
 
 // Shopping Module Component
 function ShoppingModule() {
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [cart, setCart] = useState<
@@ -84,6 +96,26 @@ function ShoppingModule() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Handle return from PayHere (success or cancel)
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      setOrderSuccess(true);
+      setCart([]);
+      setShowCheckout(false);
+      setError(null);
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/dashboard/pharmacy/shopping");
+      }
+    } else if (payment === "cancel") {
+      setError("Payment was cancelled. Your cart has been preserved.");
+      setShowCheckout(false);
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/dashboard/pharmacy/shopping");
+      }
+    }
+  }, [searchParams]);
 
   const refreshProducts = () => {
     fetchProducts();
@@ -183,17 +215,14 @@ function ShoppingModule() {
     setError(null);
 
     try {
-      // Get full product details for each cart item
-      const items = cart.map((item) => {
-        // Use the UUID stored in cart item (which is the inventory item UUID)
-        return {
-          pharmacyId: item.pharmacyId,
-          inventoryItemId: item.uuid, // Use UUID for database lookup
-          quantity: item.quantity,
-        };
-      });
+      const items = cart.map((item) => ({
+        pharmacyId: item.pharmacyId,
+        inventoryItemId: item.uuid,
+        quantity: item.quantity,
+      }));
 
-      const response = await fetch("/api/pharmacy/orders", {
+      // Step 1: Create order in pending_payment (no stock deduction yet)
+      const orderRes = await fetch("/api/pharmacy/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -201,28 +230,107 @@ function ShoppingModule() {
           delivery_method: deliveryMethod,
           delivery_address:
             deliveryMethod === "delivery" ? deliveryAddress : null,
+          prepareForPayment: true,
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Failed to place order");
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        setError(orderData.error || "Failed to prepare order");
         return;
       }
 
-      setOrderSuccess(true);
-      setCart([]);
-      setShowCheckout(false);
+      const orderId = orderData.order?.id;
+      const totalAmount = orderData.order?.totalAmount;
+      if (!orderId || totalAmount == null) {
+        setError("Invalid order response");
+        return;
+      }
 
-      // Refresh products to update stock from database
-      setTimeout(() => {
-        refreshProducts();
-      }, 1000);
+      // Step 2: Get PayHere payment params
+      const payRes = await fetch("/api/payhere/create-pharmacy-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          amount: totalAmount,
+          itemName: "Pharmacy Order",
+        }),
+      });
+
+      const payData = await payRes.json();
+      if (!payRes.ok) {
+        setError(payData.error || "Payment gateway error");
+        return;
+      }
+
+      const baseUrl = window.location.origin;
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = payData.checkoutUrl;
+
+      const fields: Record<string, string> = {
+        merchant_id: payData.merchantId,
+        return_url: `${baseUrl}/dashboard/pharmacy/shopping?payment=success`,
+        cancel_url: `${baseUrl}/dashboard/pharmacy/shopping?payment=cancel`,
+        notify_url: `${baseUrl}/api/payhere/notify`,
+        order_id: orderId,
+        items: payData.itemName || "Pharmacy Order",
+        amount: payData.amount,
+        currency: payData.currency,
+        custom_1: "pharmacy",
+        custom_2: orderId,
+        first_name:
+          (session?.user?.name as string)?.split(" ")[0] || "Customer",
+        last_name:
+          (session?.user?.name as string)?.split(" ").slice(1).join(" ") ||
+          "User",
+        email: (session?.user?.email as string) || "customer@example.com",
+        phone: "0771234567",
+        address:
+          deliveryMethod === "delivery" ? deliveryAddress || "N/A" : "N/A",
+        city: "Colombo",
+        country: "Sri Lanka",
+        hash: payData.hash,
+      };
+
+      const fieldOrder = [
+        "merchant_id",
+        "return_url",
+        "cancel_url",
+        "notify_url",
+        "order_id",
+        "items",
+        "amount",
+        "currency",
+        "custom_1",
+        "custom_2",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "address",
+        "city",
+        "country",
+        "hash",
+      ];
+
+      fieldOrder.forEach((key) => {
+        if (fields[key]) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = String(fields[key]);
+          form.appendChild(input);
+        }
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+      // Form submit navigates away; no need to set checkoutLoading false
     } catch (err) {
       console.error("Checkout error:", err);
       setError("An unexpected error occurred");
-    } finally {
       setCheckoutLoading(false);
     }
   };
@@ -513,7 +621,7 @@ function ShoppingModule() {
 
       {/* Success Modal */}
       {orderSuccess && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -577,7 +685,7 @@ function CheckoutModal({
   error: string | null;
 }) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
@@ -752,8 +860,8 @@ function CheckoutModal({
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-5 h-5" />
-                  Confirm Order
+                  <CreditCard className="w-5 h-5" />
+                  Confirm & Pay with PayHere
                 </>
               )}
             </button>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
+import crypto from "crypto";
 
 // POST /api/pharmacy/orders - Create a new order
 export async function POST(request: NextRequest) {
@@ -12,7 +13,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { items, delivery_address, delivery_method } = body;
+    const { items, delivery_address, delivery_method, prepareForPayment } =
+      body;
 
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -46,10 +48,18 @@ export async function POST(request: NextRequest) {
       await client.query("BEGIN");
 
       const orderId = crypto.randomUUID();
-      const userId = parseInt(session.user.id as string, 10);
+      const userId = session.user.id as string;
+      if (!userId) {
+        await client.query("ROLLBACK");
+        return NextResponse.json(
+          { error: "Invalid user session" },
+          { status: 401 },
+        );
+      }
       const orderDate = new Date();
+      const orderStatus = prepareForPayment ? "pending_payment" : "pending";
 
-      // Create order record
+      // Create order record (user_id is UUID in pharmacy_orders)
       const orderResult = await client.query(
         `INSERT INTO pharmacy_orders (
           id,
@@ -61,16 +71,16 @@ export async function POST(request: NextRequest) {
           total_amount,
           created_at,
           updated_at
-        ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ) VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *`,
         [
           orderId,
           userId,
           orderDate,
-          "pending",
+          orderStatus,
           delivery_address || null,
           delivery_method || "pickup",
-          0, // Will be calculated
+          0,
         ],
       );
 
@@ -79,7 +89,6 @@ export async function POST(request: NextRequest) {
 
       // Process each item
       for (const item of items) {
-        // Verify inventory item exists and has enough stock
         const inventoryCheck = await client.query(
           `SELECT 
             id,
@@ -102,7 +111,6 @@ export async function POST(request: NextRequest) {
 
         const inventoryItem = inventoryCheck.rows[0];
 
-        // Check stock availability
         if (inventoryItem.stock < item.quantity) {
           await client.query("ROLLBACK");
           return NextResponse.json(
@@ -113,11 +121,9 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // Calculate item total
         const itemTotal = Number(inventoryItem.price) * item.quantity;
         totalAmount += itemTotal;
 
-        // Create order item
         const orderItemResult = await client.query(
           `INSERT INTO pharmacy_order_items (
             order_id,
@@ -139,38 +145,38 @@ export async function POST(request: NextRequest) {
           ],
         );
 
-        // Update inventory stock
-        await client.query(
-          `UPDATE pharmacy_inventory_items
-          SET stock = stock - $1,
-              updated_at = CURRENT_TIMESTAMP
-          WHERE id = $2::uuid`,
-          [item.quantity, item.inventoryItemId],
-        );
+        if (!prepareForPayment) {
+          await client.query(
+            `UPDATE pharmacy_inventory_items
+            SET stock = stock - $1,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $2::uuid`,
+            [item.quantity, item.inventoryItemId],
+          );
 
-        // Record sale for demand prediction
-        await client.query(
-          `INSERT INTO pharmacy_medicine_sales (
-            pharmacy_id,
-            inventory_item_id,
-            medicine_id,
-            sale_date,
-            quantity_sold,
-            price_at_sale,
-            promotion_active,
-            created_at,
-            updated_at
-          ) VALUES ($1::uuid, $2::uuid, $3, $4::date, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-          [
-            item.pharmacyId,
-            item.inventoryItemId,
-            inventoryItem.name,
-            orderDate,
-            item.quantity,
-            inventoryItem.price,
-            false,
-          ],
-        );
+          await client.query(
+            `INSERT INTO pharmacy_medicine_sales (
+              pharmacy_id,
+              inventory_item_id,
+              medicine_id,
+              sale_date,
+              quantity_sold,
+              price_at_sale,
+              promotion_active,
+              created_at,
+              updated_at
+            ) VALUES ($1::uuid, $2::uuid, $3, $4::date, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+            [
+              item.pharmacyId,
+              item.inventoryItemId,
+              inventoryItem.name,
+              orderDate,
+              item.quantity,
+              inventoryItem.price,
+              false,
+            ],
+          );
+        }
 
         orderItems.push({
           id: orderItemResult.rows[0].id,
@@ -182,7 +188,6 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Update order total
       await client.query(
         `UPDATE pharmacy_orders
         SET total_amount = $1,
@@ -200,7 +205,7 @@ export async function POST(request: NextRequest) {
             id: orderId,
             userId,
             orderDate,
-            status: "pending",
+            status: orderStatus,
             totalAmount,
             items: orderItems,
           },
@@ -245,11 +250,11 @@ export async function GET(request: NextRequest) {
         COUNT(oi.id) as item_count
       FROM pharmacy_orders o
       LEFT JOIN pharmacy_order_items oi ON o.id = oi.order_id
-      WHERE o.user_id = $1
+      WHERE o.user_id = $1::uuid
       GROUP BY o.id
       ORDER BY o.created_at DESC
       LIMIT 50`,
-      [parseInt(session.user.id as string, 10)],
+      [session.user.id],
     );
 
     const orders = result.rows.map((row) => ({
