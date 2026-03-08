@@ -82,88 +82,64 @@ export default function PharmacyPage() {
     <AuthGuard
       allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"]}
     >
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        {/* Hero Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl">
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-2xl">
-                    💊
-                  </div>
-                  <div>
-                    <h1 className="text-4xl font-bold">Pharmacy Dashboard</h1>
-                    <p className="text-blue-100 text-sm mt-1">
-                      Welcome back, {session?.user?.name || "User"}! 👋
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="hidden md:flex items-center gap-3">
-                <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-                  <div className="text-xs text-blue-100">Today&apos;s Date</div>
-                  <div className="font-semibold">
-                    {new Date().toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Tabs */}
-            <div className="mt-6 flex gap-2 overflow-x-auto pb-2">
-              {[
-                { id: "overview", label: "📊 Overview", icon: "📊" },
-                { id: "inventory", label: "📦 Inventory", icon: "📦" },
-                { id: "demand", label: "🔮 Demand Prediction", icon: "🔮" },
-                { id: "analytics", label: "📈 Analytics", icon: "📈" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-5 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all ${
-                    activeTab === tab.id
-                      ? "bg-white text-indigo-600 shadow-lg"
-                      : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Pharmacy Dashboard
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Welcome back, {session?.user?.name || "User"}. Manage inventory,
+            view analytics, and match prescriptions.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-200 pt-4">
+            {[
+              { id: "overview", label: "Overview" },
+              { id: "inventory", label: "Inventory" },
+              { id: "demand", label: "Demand Prediction" },
+              { id: "analytics", label: "Analytics" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                  activeTab === tab.id
+                    ? "bg-blue-600 text-white"
+                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <div className="space-y-6">
           {!dashboard ? (
-            <div className="bg-white rounded-2xl p-12 border border-gray-200 shadow-lg text-center">
-              <div className="animate-spin w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading dashboard data...</p>
+            <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+              <div className="animate-spin w-10 h-10 border-2 border-gray-200 border-t-blue-600 rounded-full mx-auto mb-4" />
+              <p className="text-sm text-gray-600">Loading dashboard data...</p>
             </div>
           ) : (
             <>
               {/* Overview Tab */}
               {activeTab === "overview" && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6">
                   {/* Quick Actions */}
-                  <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 shadow-xl text-white">
-                    <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                      <span>⚡</span>
+                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                    <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
                       Quick Actions
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       <button
                         onClick={() => setActiveTab("prescriptions")}
-                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30 px-4 py-3 rounded-xl font-medium transition-all text-left"
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
                       >
-                        <div className="text-2xl mb-1">📋</div>
-                        <div>Match Prescription</div>
-                        <div className="text-xs text-emerald-100 mt-1">
+                        <div className="font-medium text-gray-900">
+                          Match Prescription
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
                           Find medications for your pet
                         </div>
                       </button>
@@ -171,31 +147,34 @@ export default function PharmacyPage() {
                         onClick={() =>
                           router.push("/dashboard/pharmacy/inventory")
                         }
-                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30 px-4 py-3 rounded-xl font-medium transition-all text-left"
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
                       >
-                        <div className="text-2xl mb-1">📦</div>
-                        <div>Browse Inventory</div>
-                        <div className="text-xs text-emerald-100 mt-1">
+                        <div className="font-medium text-gray-900">
+                          Browse Inventory
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
                           View available medications
                         </div>
                       </button>
                       <button
                         onClick={() => setActiveTab("demand")}
-                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30 px-4 py-3 rounded-xl font-medium transition-all text-left"
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
                       >
-                        <div className="text-2xl mb-1">🔮</div>
-                        <div>Predict Demand</div>
-                        <div className="text-xs text-emerald-100 mt-1">
+                        <div className="font-medium text-gray-900">
+                          Predict Demand
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
                           AI-powered demand forecasting
                         </div>
                       </button>
                       <button
                         onClick={() => setActiveTab("analytics")}
-                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30 px-4 py-3 rounded-xl font-medium transition-all text-left"
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
                       >
-                        <div className="text-2xl mb-1">📈</div>
-                        <div>View Reports</div>
-                        <div className="text-xs text-emerald-100 mt-1">
+                        <div className="font-medium text-gray-900">
+                          View Reports
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
                           Sales & performance data
                         </div>
                       </button>
@@ -363,7 +342,7 @@ export default function PharmacyPage() {
                       {pharmacyId && (
                         <button
                           onClick={() => setIsAddItemModalOpen(true)}
-                          className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                          className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
                         >
                           <Plus className="w-5 h-5" />
                           Add Item
@@ -526,7 +505,7 @@ function AddInventoryItemModal({
             <h2 className="text-2xl font-bold">Add New Inventory Item</h2>
             <button
               onClick={onClose}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer"
             >
               <XCircle className="w-6 h-6" />
             </button>
@@ -646,14 +625,14 @@ function AddInventoryItemModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -843,13 +822,13 @@ function ShoppingModule() {
               <span>🛒</span>
               Shopping
             </h3>
-            <p className="text-emerald-100 text-sm">
+            <p className="text-gray-600 text-sm">
               Browse and purchase medications from available pharmacies
             </p>
           </div>
           <button
             onClick={() => setShowCart(!showCart)}
-            className="relative px-6 py-3 bg-white text-emerald-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+            className="relative px-6 py-3 bg-white text-emerald-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
           >
             <ShoppingCart className="w-5 h-5" />
             Cart
@@ -933,7 +912,7 @@ function ShoppingModule() {
                   <button
                     onClick={() => addToCart(product)}
                     disabled={!product.stock || product.stock <= 0}
-                    className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     Add to Cart
@@ -954,7 +933,7 @@ function ShoppingModule() {
               </h3>
               <button
                 onClick={() => setShowCart(false)}
-                className="lg:hidden text-gray-400 hover:text-gray-600"
+                className="lg:hidden text-gray-400 hover:text-gray-600 cursor-pointer"
               >
                 <XCircle className="w-5 h-5" />
               </button>
@@ -986,7 +965,7 @@ function ShoppingModule() {
                           onClick={() =>
                             removeFromCart(item.id, item.pharmacyId)
                           }
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -997,7 +976,7 @@ function ShoppingModule() {
                             onClick={() =>
                               updateQuantity(item.id, item.pharmacyId, -1)
                             }
-                            className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
@@ -1008,7 +987,7 @@ function ShoppingModule() {
                             onClick={() =>
                               updateQuantity(item.id, item.pharmacyId, 1)
                             }
-                            className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
@@ -1028,7 +1007,7 @@ function ShoppingModule() {
                       {formatLKR(getTotalPrice())}
                     </span>
                   </div>
-                  <button className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
+                  <button className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer">
                     Proceed to Checkout
                   </button>
                 </div>

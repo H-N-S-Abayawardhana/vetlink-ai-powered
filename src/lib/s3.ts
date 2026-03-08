@@ -10,6 +10,8 @@ const BUCKET_NAME = process.env.S3_BUCKET_NAME || "";
 const FOLDER_PATH = process.env.SKIN_DISEASES_HISTORY_FOLDER_PATH || "";
 const LIMPING_FOLDER_PATH =
   process.env.LIMPING_DETECTION_HISTORY_FOLDER_PATH || "";
+const INVENTORY_ITEMS_FOLDER_PATH =
+  process.env.INVENTORY_ITEMS_FOLDER_PATH || "Inventory-items/";
 
 /**
  * Check if AWS credentials are configured
@@ -275,6 +277,56 @@ export async function uploadImageToS3(
       console.error("Error saving to local folder:", fallbackError);
       throw new Error(
         `Failed to upload image: S3 error (${error?.message || error?.Code || "Unknown"}) and local fallback failed (${fallbackError instanceof Error ? fallbackError.message : "Unknown"})`,
+      );
+    }
+  }
+}
+
+/**
+ * Upload an inventory item image to S3 (or fallback to local storage).
+ * Uses INVENTORY_ITEMS_FOLDER_PATH (e.g. Inventory-items/).
+ */
+export async function uploadInventoryImageToS3(
+  buffer: Buffer,
+  filename: string,
+  contentType: string,
+): Promise<string> {
+  if (!hasAwsCredentials()) {
+    if (isVercel()) {
+      console.warn(
+        "WARNING: Running on Vercel without AWS credentials. Inventory images will not persist.",
+      );
+    }
+    return saveToPublicFolder(buffer, filename, "pharmacy/inventory");
+  }
+
+  const s3Key = INVENTORY_ITEMS_FOLDER_PATH
+    ? `${INVENTORY_ITEMS_FOLDER_PATH.replace(/^\/+|\/+$/g, "")}/${filename}`
+    : filename;
+
+  const s3Client = getS3Client();
+  const region = process.env.NEXT_AWS_REGION || "ap-southeast-2";
+
+  try {
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      Body: buffer,
+      ContentType: contentType,
+    });
+    await s3Client.send(command);
+    return `https://${BUCKET_NAME}.s3.${region}.amazonaws.com/${s3Key}`;
+  } catch (error: any) {
+    console.error(
+      "Error uploading inventory image to S3, falling back to local storage:",
+      error,
+    );
+    try {
+      return saveToPublicFolder(buffer, filename, "pharmacy/inventory");
+    } catch (fallbackError) {
+      console.error("Error saving to local folder:", fallbackError);
+      throw new Error(
+        `Failed to upload inventory image: S3 error (${error?.message || error?.Code || "Unknown"}) and local fallback failed (${fallbackError instanceof Error ? fallbackError.message : "Unknown"})`,
       );
     }
   }

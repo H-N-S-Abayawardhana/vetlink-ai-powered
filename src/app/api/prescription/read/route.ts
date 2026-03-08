@@ -106,7 +106,9 @@ Extract and transcribe ALL text visible in this prescription image exactly as wr
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : "Failed to read prescription",
+          error instanceof Error
+            ? error.message
+            : "Failed to read prescription",
       },
       { status: 500 },
     );

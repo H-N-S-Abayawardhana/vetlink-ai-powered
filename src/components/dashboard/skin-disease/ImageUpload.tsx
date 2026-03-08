@@ -56,9 +56,10 @@ export default function ImageUpload({ onImageSelect }: ImageUploadProps) {
           }
         }}
         className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer select-none
-          ${isDragOver
-            ? "border-blue-500 bg-blue-50 shadow-md"
-            : "border-gray-300 bg-gray-50/80 hover:border-blue-400 hover:bg-blue-50/80 hover:shadow-sm active:scale-[0.99]"
+          ${
+            isDragOver
+              ? "border-blue-500 bg-blue-50 shadow-md"
+              : "border-gray-300 bg-gray-50/80 hover:border-blue-400 hover:bg-blue-50/80 hover:shadow-sm active:scale-[0.99]"
           }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import {
   Plus,
   Search,
@@ -13,8 +14,6 @@ import {
   XCircle,
   DollarSign,
   Calendar,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 import { formatLKR } from "@/lib/currency";
 import { AuthGuard } from "@/lib/auth-guard";
@@ -27,6 +26,7 @@ interface InventoryItem {
   stock: number;
   expiry?: string | null;
   price: number;
+  image_url?: string | null;
 }
 
 export default function PharmacyInventoryPage() {
@@ -192,38 +192,34 @@ export default function PharmacyInventoryPage() {
     <AuthGuard
       allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"]}
     >
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl">
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <Package className="w-8 h-8" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold">Inventory Management</h1>
-                  <p className="text-blue-100 text-sm mt-1">
-                    Manage your pharmacy inventory items
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleAdd}
-                className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Add Item
-              </button>
+      <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+        {/* Header - matches skin disease page */}
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                Inventory Management
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">
+                Manage your pharmacy inventory items — add, edit, and track
+                stock, expiry, and pricing.
+              </p>
             </div>
+            <button
+              onClick={handleAdd}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+            >
+              <Plus className="w-5 h-5" />
+              Add Item
+            </button>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Message Alert */}
           {message && (
             <div
-              className={`p-4 rounded-xl flex items-start gap-3 ${
+              className={`p-4 rounded-lg flex items-start gap-3 cursor-pointer ${
                 message.type === "success"
                   ? "bg-green-50 border border-green-200 text-green-800"
                   : "bg-red-50 border border-red-200 text-red-800"
@@ -237,66 +233,66 @@ export default function PharmacyInventoryPage() {
               <p className="text-sm font-medium flex-1">{message.text}</p>
               <button
                 onClick={() => setMessage(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
               >
                 <XCircle className="w-4 h-4" />
               </button>
             </div>
           )}
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+          {/* Statistics Cards - same card style as skin disease */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Package className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
               <div className="text-sm text-gray-600 mb-1">Total Items</div>
-              <div className="text-3xl font-bold text-gray-900">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {stats.totalItems}
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                   <AlertCircle className="w-6 h-6 text-red-600" />
                 </div>
               </div>
               <div className="text-sm text-gray-600 mb-1">Low Stock</div>
-              <div className="text-3xl font-bold text-red-600">
+              <div className="text-2xl sm:text-3xl font-bold text-red-600">
                 {stats.lowStock}
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
               </div>
               <div className="text-sm text-gray-600 mb-1">Total Value</div>
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">
                 {formatLKR(stats.totalValue)}
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <Calendar className="w-6 h-6 text-orange-600" />
                 </div>
               </div>
               <div className="text-sm text-gray-600 mb-1">Expiring Soon</div>
-              <div className="text-3xl font-bold text-orange-600">
+              <div className="text-2xl sm:text-3xl font-bold text-orange-600">
                 {stats.expiringSoon}
               </div>
             </div>
           </div>
 
-          {/* Search and Filters */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          {/* Search - same card style */}
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
             <div className="flex items-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -305,27 +301,27 @@ export default function PharmacyInventoryPage() {
                   placeholder="Search by name, form, or strength..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
                 />
               </div>
             </div>
           </div>
 
-          {/* Inventory Table */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          {/* Inventory Table - same card style */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-blue-600"></div>
               </div>
             ) : filteredInventory.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 px-4">
                 <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg font-medium">
+                <p className="text-gray-700 text-lg font-medium">
                   {inventory.length === 0
                     ? "No inventory items yet"
                     : "No items match your search"}
                 </p>
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-gray-600 text-sm mt-2">
                   {inventory.length === 0
                     ? "Click 'Add Item' to get started"
                     : "Try adjusting your search query"}
@@ -334,7 +330,7 @@ export default function PharmacyInventoryPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Item Name
@@ -433,14 +429,14 @@ export default function PharmacyInventoryPage() {
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => handleEdit(item)}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                                 title="Edit"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(item.id)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                 title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -491,6 +487,8 @@ function InventoryItemModal({
     expiry: "",
     price: 0,
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -504,8 +502,51 @@ function InventoryItemModal({
         expiry: item.expiry || "",
         price: item.price,
       });
+      setImageFile(null);
+      setImagePreview(item.image_url || null);
+    } else {
+      setFormData({
+        name: "",
+        form: "",
+        strength: "",
+        stock: 0,
+        expiry: "",
+        price: 0,
+      });
+      setImageFile(null);
+      setImagePreview(null);
     }
   }, [item]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Please select an image file (JPEG, PNG, WebP, or GIF)");
+        return;
+      }
+      setImagePreview((prev) => {
+        if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(file);
+      });
+      setImageFile(file);
+      setError(null);
+    } else {
+      setImagePreview((prev) => {
+        if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return null;
+      });
+      setImageFile(null);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -518,32 +559,54 @@ function InventoryItemModal({
     setLoading(true);
 
     try {
-      const payload = {
-        name: formData.name,
-        form: formData.form,
-        strength: formData.strength || null,
-        stock: Number(formData.stock),
-        expiry: formData.expiry || null,
-        price: Number(formData.price),
-      };
-
       let url = `/api/pharmacies/${pharmacyId}/inventory`;
       let method = "POST";
 
       if (item) {
         url = `/api/pharmacies/${pharmacyId}/inventory/${item.id}`;
         method = "PUT";
+        const payload = {
+          name: formData.name,
+          form: formData.form,
+          strength: formData.strength || null,
+          stock: Number(formData.stock),
+          expiry: formData.expiry || null,
+          price: Number(formData.price),
+        };
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Failed to update item");
+          return;
+        }
+        onSave();
+        return;
+      }
+
+      // Add new item: use FormData so we can send image to S3
+      const form = new FormData();
+      form.append("name", formData.name);
+      form.append("form", formData.form);
+      form.append("strength", formData.strength);
+      form.append("stock", String(formData.stock));
+      form.append("expiry", formData.expiry);
+      form.append("price", String(formData.price));
+      if (imageFile) {
+        form.append("image", imageFile);
       }
 
       const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        method: "POST",
+        body: form,
       });
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Failed to save item");
+        setError(data.error || "Failed to add item");
         return;
       }
 
@@ -557,25 +620,25 @@ function InventoryItemModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-2xl">
+    <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg z-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
               {item ? "Edit Inventory Item" : "Add New Inventory Item"}
             </h2>
             <button
               onClick={onClose}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors cursor-pointer"
             >
               <XCircle className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
               {error}
             </div>
           )}
@@ -591,7 +654,7 @@ function InventoryItemModal({
                 setFormData({ ...formData, name: e.target.value })
               }
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
               placeholder="e.g., Amoxicillin"
             />
           </div>
@@ -608,7 +671,7 @@ function InventoryItemModal({
                   setFormData({ ...formData, form: e.target.value })
                 }
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
                 placeholder="e.g., Capsule, Tablet"
               />
             </div>
@@ -622,7 +685,7 @@ function InventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, strength: e.target.value })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
                 placeholder="e.g., 250 mg"
               />
             </div>
@@ -640,7 +703,7 @@ function InventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, stock: Number(e.target.value) })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
               />
             </div>
             <div>
@@ -653,7 +716,7 @@ function InventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, expiry: e.target.value })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
               />
             </div>
             <div>
@@ -668,24 +731,49 @@ function InventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, price: Number(e.target.value) })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
               />
             </div>
           </div>
+
+          {!item && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Item Image (optional)
+              </label>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleImageChange}
+                className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-medium hover:border-blue-400 hover:bg-blue-50/80 transition-colors"
+              />
+              {imagePreview && (
+                <div className="mt-3 relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>

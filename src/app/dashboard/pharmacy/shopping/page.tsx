@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { AuthGuard } from "@/lib/auth-guard";
 import { formatLKR } from "@/lib/currency";
 import Image from "next/image";
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   MapPin,
   Truck,
+  CreditCard,
 } from "lucide-react";
 
 export default function ShoppingPage() {
@@ -24,7 +26,15 @@ export default function ShoppingPage() {
     >
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <ShoppingModule />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin w-10 h-10 border-2 border-blue-600 border-t-transparent rounded-full" />
+              </div>
+            }
+          >
+            <ShoppingModule />
+          </Suspense>
         </div>
       </div>
     </AuthGuard>
@@ -33,121 +43,25 @@ export default function ShoppingPage() {
 
 // Shopping Module Component
 function ShoppingModule() {
-  // Hardcoded pharmacy data for testing
-  const hardcodedPharmacies = [
-    {
-      id: "11111111-1111-1111-1111-111111111111",
-      name: "HealthPlus Pharmacy",
-      address: "123 Main Street, Colombo",
-      owner_id: "a4830cd9-0325-45b8-938b-cb876a54ce07",
-    },
-  ];
-
-  // Hardcoded products for testing with local images
-  const hardcodedProducts = [
-    {
-      id: "1",
-      uuid: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-      name: "Amoxicillin",
-      form: "Capsule",
-      strength: "250 mg",
-      stock: 120,
-      price: 450.0,
-      expiry: "2026-11-01",
-      image: "/uploads/pharmacy/Amoxicillin.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo",
-    },
-    {
-      id: "2",
-      uuid: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-      name: "Prednisone",
-      form: "Tablet",
-      strength: "5 mg",
-      stock: 40,
-      price: 650.0,
-      expiry: "2027-02-15",
-      image: "/uploads/pharmacy/Prednisone.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo",
-    },
-    {
-      id: "3",
-      uuid: "cccccccc-cccc-cccc-cccc-cccccccccccc",
-      name: "Ivermectin",
-      form: "Oral suspension",
-      strength: "1%",
-      stock: 25,
-      price: 850.0,
-      expiry: "2026-07-28",
-      image: "/uploads/pharmacy/Ivermectin.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo",
-    },
-    {
-      id: "4",
-      uuid: "dddddddd-dddd-dddd-dddd-dddddddddddd",
-      name: "Metronidazole",
-      form: "Tablet",
-      strength: "500 mg",
-      stock: 60,
-      price: 350.0,
-      expiry: "2026-09-10",
-      image: "/uploads/pharmacy/Metronidazole.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo",
-    },
-    {
-      id: "5",
-      uuid: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
-      name: "Doxycycline",
-      form: "Capsule",
-      strength: "100 mg",
-      stock: 80,
-      price: 550.0,
-      expiry: "2027-01-20",
-      image: "/uploads/pharmacy/Doxycycline.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo",
-    },
-    {
-      id: "6",
-      uuid: "ffffffff-ffff-ffff-ffff-ffffffffffff",
-      name: "Carprofen",
-      form: "Tablet",
-      strength: "75 mg",
-      stock: 35,
-      price: 750.0,
-      expiry: "2026-12-05",
-      image: "/uploads/pharmacy/Carprofen.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo",
-    },
-  ];
-
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [cart, setCart] = useState<
     Array<{
       id: string;
-      uuid: string; // Store UUID for API calls
+      uuid: string;
       name: string;
       price: number;
       quantity: number;
       pharmacyId: string;
       pharmacyName: string;
+      image?: string | null;
     }>
   >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
-  const [pharmacies, setPharmacies] = useState<any[]>([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -157,30 +71,54 @@ function ShoppingModule() {
   );
   const [deliveryAddress, setDeliveryAddress] = useState("");
 
-  useEffect(() => {
-    // Load hardcoded data immediately
-    setPharmacies(hardcodedPharmacies);
-    setProducts(hardcodedProducts);
-    setFilteredProducts(hardcodedProducts);
-    setLoading(false);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/pharmacy/products");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch products");
+      }
+      const list = data.products || [];
+      setProducts(list);
+      setFilteredProducts(list);
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+      setError(err instanceof Error ? err.message : "Failed to load products");
+      setProducts([]);
+      setFilteredProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Uncomment to fetch from database:
-    // fetchPharmacies();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchProducts();
   }, []);
 
+  // Handle return from PayHere (success or cancel)
   useEffect(() => {
-    // Uncomment to fetch from database when pharmacies change:
-    // if (pharmacies.length > 0) {
-    //   fetchProducts();
-    // }
-  }, [pharmacies]);
-
-  // Refresh products when needed
-  const refreshProducts = () => {
-    if (pharmacies.length > 0) {
-      fetchProducts();
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      setOrderSuccess(true);
+      setCart([]);
+      setShowCheckout(false);
+      setError(null);
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/dashboard/pharmacy/shopping");
+      }
+    } else if (payment === "cancel") {
+      setError("Payment was cancelled. Your cart has been preserved.");
+      setShowCheckout(false);
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/dashboard/pharmacy/shopping");
+      }
     }
+  }, [searchParams]);
+
+  const refreshProducts = () => {
+    fetchProducts();
   };
 
   useEffect(() => {
@@ -198,69 +136,6 @@ function ShoppingModule() {
       );
     }
   }, [searchQuery, products]);
-
-  const fetchPharmacies = async () => {
-    try {
-      setLoading(true);
-      // Use hardcoded data for now
-      setPharmacies(hardcodedPharmacies);
-      console.log(`Using ${hardcodedPharmacies.length} hardcoded pharmacies`);
-
-      // Uncomment below to fetch from database instead:
-      // const res = await fetch("/api/pharmacies");
-      // const data = await res.json();
-      // if (res.ok && data.pharmacies) {
-      //   setPharmacies(data.pharmacies || []);
-      //   console.log(`Fetched ${data.pharmacies.length} pharmacies from database`);
-      // } else {
-      //   console.error("Failed to fetch pharmacies:", data.error);
-      // }
-    } catch (err) {
-      console.error("Failed to fetch pharmacies:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-
-      // Use hardcoded products for now
-      setProducts(hardcodedProducts);
-      setFilteredProducts(hardcodedProducts);
-      console.log(`Using ${hardcodedProducts.length} hardcoded products`);
-
-      // Uncomment below to fetch from database instead:
-      // const allProducts: any[] = [];
-      // for (const pharmacy of pharmacies) {
-      //   try {
-      //     const res = await fetch(`/api/pharmacies/${pharmacy.id}/inventory`);
-      //     const data = await res.json();
-      //     if (res.ok && data.inventory) {
-      //       const pharmacyProducts = data.inventory.map((item: any) => ({
-      //         ...item,
-      //         pharmacyId: pharmacy.id,
-      //         pharmacyName: pharmacy.name,
-      //         pharmacyAddress: pharmacy.address,
-      //       }));
-      //       allProducts.push(...pharmacyProducts);
-      //     }
-      //   } catch (err) {
-      //     console.error(
-      //       `Failed to fetch inventory for pharmacy ${pharmacy.id}:`,
-      //       err,
-      //     );
-      //   }
-      // }
-      // setProducts(allProducts);
-      // setFilteredProducts(allProducts);
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const addToCart = (product: any) => {
     const existingItem = cart.find(
@@ -281,12 +156,13 @@ function ShoppingModule() {
         ...cart,
         {
           id: product.id,
-          uuid: product.uuid || product.id, // Use UUID if available
+          uuid: product.uuid || product.id,
           name: product.name,
           price: product.price,
           quantity: 1,
           pharmacyId: product.pharmacyId,
           pharmacyName: product.pharmacyName,
+          image: product.image || null,
         },
       ]);
     }
@@ -339,17 +215,14 @@ function ShoppingModule() {
     setError(null);
 
     try {
-      // Get full product details for each cart item
-      const items = cart.map((item) => {
-        // Use the UUID stored in cart item (which is the inventory item UUID)
-        return {
-          pharmacyId: item.pharmacyId,
-          inventoryItemId: item.uuid, // Use UUID for database lookup
-          quantity: item.quantity,
-        };
-      });
+      const items = cart.map((item) => ({
+        pharmacyId: item.pharmacyId,
+        inventoryItemId: item.uuid,
+        quantity: item.quantity,
+      }));
 
-      const response = await fetch("/api/pharmacy/orders", {
+      // Step 1: Create order in pending_payment (no stock deduction yet)
+      const orderRes = await fetch("/api/pharmacy/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -357,54 +230,129 @@ function ShoppingModule() {
           delivery_method: deliveryMethod,
           delivery_address:
             deliveryMethod === "delivery" ? deliveryAddress : null,
+          prepareForPayment: true,
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Failed to place order");
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        setError(orderData.error || "Failed to prepare order");
         return;
       }
 
-      setOrderSuccess(true);
-      setCart([]);
-      setShowCheckout(false);
+      const orderId = orderData.order?.id;
+      const totalAmount = orderData.order?.totalAmount;
+      if (!orderId || totalAmount == null) {
+        setError("Invalid order response");
+        return;
+      }
 
-      // Refresh products to update stock from database
-      setTimeout(() => {
-        refreshProducts();
-      }, 1000);
+      // Step 2: Get PayHere payment params
+      const payRes = await fetch("/api/payhere/create-pharmacy-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          amount: totalAmount,
+          itemName: "Pharmacy Order",
+        }),
+      });
+
+      const payData = await payRes.json();
+      if (!payRes.ok) {
+        setError(payData.error || "Payment gateway error");
+        return;
+      }
+
+      const baseUrl = window.location.origin;
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = payData.checkoutUrl;
+
+      const fields: Record<string, string> = {
+        merchant_id: payData.merchantId,
+        return_url: `${baseUrl}/dashboard/pharmacy/shopping?payment=success`,
+        cancel_url: `${baseUrl}/dashboard/pharmacy/shopping?payment=cancel`,
+        notify_url: `${baseUrl}/api/payhere/notify`,
+        order_id: orderId,
+        items: payData.itemName || "Pharmacy Order",
+        amount: payData.amount,
+        currency: payData.currency,
+        custom_1: "pharmacy",
+        custom_2: orderId,
+        first_name:
+          (session?.user?.name as string)?.split(" ")[0] || "Customer",
+        last_name:
+          (session?.user?.name as string)?.split(" ").slice(1).join(" ") ||
+          "User",
+        email: (session?.user?.email as string) || "customer@example.com",
+        phone: "0771234567",
+        address:
+          deliveryMethod === "delivery" ? deliveryAddress || "N/A" : "N/A",
+        city: "Colombo",
+        country: "Sri Lanka",
+        hash: payData.hash,
+      };
+
+      const fieldOrder = [
+        "merchant_id",
+        "return_url",
+        "cancel_url",
+        "notify_url",
+        "order_id",
+        "items",
+        "amount",
+        "currency",
+        "custom_1",
+        "custom_2",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "address",
+        "city",
+        "country",
+        "hash",
+      ];
+
+      fieldOrder.forEach((key) => {
+        if (fields[key]) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = String(fields[key]);
+          form.appendChild(input);
+        }
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+      // Form submit navigates away; no need to set checkoutLoading false
     } catch (err) {
       console.error("Checkout error:", err);
       setError("An unexpected error occurred");
-    } finally {
       setCheckoutLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 shadow-xl text-white">
-        <div>
-          <h1 className="text-3xl font-bold mb-3 flex items-center gap-3">
-            <span className="text-4xl">🛒</span>
-            Pharmacy Shopping
-          </h1>
-          <p className="text-emerald-100 text-base leading-relaxed">
-            Discover and purchase veterinary medications from trusted pharmacies
-            across Sri Lanka. Compare prices, check availability, and order with
-            confidence.
-          </p>
-        </div>
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          Pharmacy Shopping
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600">
+          Discover and purchase veterinary medications from trusted pharmacies.
+          Compare prices and check availability.
+        </p>
       </div>
 
       <div className="space-y-6">
         {/* Products List */}
         <div className="space-y-6">
           {/* Search Bar */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -412,20 +360,20 @@ function ShoppingModule() {
                 placeholder="Search medications..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
 
           {/* Products Grid */}
           {loading ? (
-            <div className="bg-white rounded-2xl p-12 border border-gray-200 shadow-lg text-center">
-              <div className="animate-spin w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading products...</p>
+            <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+              <div className="animate-spin w-10 h-10 border-2 border-gray-200 border-t-blue-600 rounded-full mx-auto mb-4" />
+              <p className="text-sm text-gray-600">Loading products...</p>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 border border-gray-200 shadow-lg text-center">
-              <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+              <ShoppingCart className="w-14 h-14 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 text-lg font-medium">
                 {products.length === 0
                   ? "No products available"
@@ -437,10 +385,10 @@ function ShoppingModule() {
               {filteredProducts.map((product) => (
                 <div
                   key={`${product.id}-${product.pharmacyId}`}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
                 >
                   {/* Product Image */}
-                  <div className="relative w-full h-48 bg-gradient-to-br from-emerald-50 to-teal-50">
+                  <div className="relative w-full h-48 bg-gray-50">
                     {product.image ? (
                       <Image
                         src={product.image}
@@ -451,14 +399,14 @@ function ShoppingModule() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-24 h-24 bg-emerald-200 rounded-full flex items-center justify-center">
+                        <div className="w-24 h-24 bg-blue-200 rounded-full flex items-center justify-center">
                           <span className="text-4xl">💊</span>
                         </div>
                       </div>
                     )}
                     {/* Stock Badge */}
                     {product.stock && product.stock > 0 && (
-                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-emerald-700">
+                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-blue-700">
                         {product.stock} in stock
                       </div>
                     )}
@@ -489,7 +437,7 @@ function ShoppingModule() {
                       </div>
                       <div className="flex items-center justify-between mt-3">
                         <div>
-                          <span className="text-2xl font-bold text-emerald-600">
+                          <span className="text-2xl font-bold text-blue-600">
                             {formatLKR(product.price)}
                           </span>
                         </div>
@@ -503,7 +451,7 @@ function ShoppingModule() {
                     <button
                       onClick={() => addToCart(product)}
                       disabled={!product.stock || product.stock <= 0}
-                      className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Add to Cart
@@ -520,7 +468,7 @@ function ShoppingModule() {
       {getCartItemCount() > 0 && (
         <button
           onClick={() => setShowCart(!showCart)}
-          className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 transition-all flex items-center justify-center"
+          className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center cursor-pointer"
         >
           <ShoppingCart className="w-6 h-6" />
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
@@ -532,8 +480,8 @@ function ShoppingModule() {
       {/* Shopping Cart Modal */}
       {showCart && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md h-[80vh] flex flex-col">
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6 rounded-t-2xl">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md h-[80vh] flex flex-col">
+            <div className="bg-blue-600 text-white p-6 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                   <ShoppingCart className="w-6 h-6" />
@@ -541,7 +489,7 @@ function ShoppingModule() {
                 </h3>
                 <button
                   onClick={() => setShowCart(false)}
-                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -559,51 +507,70 @@ function ShoppingModule() {
                     {cart.map((item) => (
                       <div
                         key={`${item.id}-${item.pharmacyId}`}
-                        className="bg-gray-50 rounded-xl p-4 border border-gray-200"
+                        className="bg-gray-50 rounded-lg p-4 border border-gray-200"
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <h5 className="font-semibold text-gray-900">
-                              {item.name}
-                            </h5>
-                            <p className="text-xs text-gray-500">
-                              {item.pharmacyName}
-                            </p>
+                        <div className="flex gap-3">
+                          <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200">
+                            {item.image ? (
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fill
+                                className="object-cover"
+                                sizes="56px"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-xl">💊</span>
+                              </div>
+                            )}
                           </div>
-                          <button
-                            onClick={() =>
-                              removeFromCart(item.id, item.pharmacyId)
-                            }
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() =>
-                                updateQuantity(item.id, item.pharmacyId, -1)
-                              }
-                              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </button>
-                            <span className="w-12 text-center font-semibold">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                updateQuantity(item.id, item.pharmacyId, 1)
-                              }
-                              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <h5 className="font-semibold text-gray-900">
+                                  {item.name}
+                                </h5>
+                                <p className="text-xs text-gray-500">
+                                  {item.pharmacyName}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  removeFromCart(item.id, item.pharmacyId)
+                                }
+                                className="text-red-500 hover:text-red-700 cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="flex items-center justify-between mt-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(item.id, item.pharmacyId, -1)
+                                  }
+                                  className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="w-12 text-center font-semibold">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(item.id, item.pharmacyId, 1)
+                                  }
+                                  className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <span className="font-bold text-blue-600">
+                                {formatLKR(item.price * item.quantity)}
+                              </span>
+                            </div>
                           </div>
-                          <span className="font-bold text-emerald-600">
-                            {formatLKR(item.price * item.quantity)}
-                          </span>
                         </div>
                       </div>
                     ))}
@@ -612,7 +579,7 @@ function ShoppingModule() {
                   <div className="border-t border-gray-200 pt-4 space-y-4">
                     <div className="flex items-center justify-between text-lg font-bold">
                       <span>Total:</span>
-                      <span className="text-emerald-600">
+                      <span className="text-blue-600">
                         {formatLKR(getTotalPrice())}
                       </span>
                     </div>
@@ -621,7 +588,7 @@ function ShoppingModule() {
                         setShowCart(false);
                         setShowCheckout(true);
                       }}
-                      className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                      className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all cursor-pointer"
                     >
                       Proceed to Checkout
                     </button>
@@ -654,8 +621,8 @@ function ShoppingModule() {
 
       {/* Success Modal */}
       {orderSuccess && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
@@ -672,7 +639,7 @@ function ShoppingModule() {
                   setOrderSuccess(false);
                   setShowCart(false);
                 }}
-                className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all"
               >
                 Continue Shopping
               </button>
@@ -705,6 +672,7 @@ function CheckoutModal({
     quantity: number;
     pharmacyId: string;
     pharmacyName: string;
+    image?: string | null;
   }>;
   totalPrice: number;
   deliveryMethod: "pickup" | "delivery";
@@ -717,14 +685,14 @@ function CheckoutModal({
   error: string | null;
 }) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6 rounded-t-2xl">
+    <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Checkout</h2>
             <button
               onClick={onClose}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer"
             >
               <XCircle className="w-6 h-6" />
             </button>
@@ -733,7 +701,7 @@ function CheckoutModal({
 
         <div className="p-6 space-y-6">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm flex items-start gap-2">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-start gap-2">
               <XCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
@@ -748,16 +716,31 @@ function CheckoutModal({
               {cart.map((item) => (
                 <div
                   key={`${item.id}-${item.pharmacyId}`}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
                 >
-                  <div className="flex-1">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200">
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-lg">💊</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900">{item.name}</p>
                     <p className="text-xs text-gray-500">{item.pharmacyName}</p>
                     <p className="text-sm text-gray-600">
                       Qty: {item.quantity}
                     </p>
                   </div>
-                  <p className="font-bold text-emerald-600">
+                  <p className="font-bold text-blue-600">
                     {formatLKR(item.price * item.quantity)}
                   </p>
                 </div>
@@ -773,23 +756,23 @@ function CheckoutModal({
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => onDeliveryMethodChange("pickup")}
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
                   deliveryMethod === "pickup"
-                    ? "border-emerald-500 bg-emerald-50"
+                    ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <MapPin
                   className={`w-6 h-6 mb-2 ${
                     deliveryMethod === "pickup"
-                      ? "text-emerald-600"
+                      ? "text-blue-600"
                       : "text-gray-400"
                   }`}
                 />
                 <p
                   className={`font-semibold ${
                     deliveryMethod === "pickup"
-                      ? "text-emerald-600"
+                      ? "text-blue-600"
                       : "text-gray-700"
                   }`}
                 >
@@ -801,23 +784,23 @@ function CheckoutModal({
               </button>
               <button
                 onClick={() => onDeliveryMethodChange("delivery")}
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
                   deliveryMethod === "delivery"
-                    ? "border-emerald-500 bg-emerald-50"
+                    ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <Truck
                   className={`w-6 h-6 mb-2 ${
                     deliveryMethod === "delivery"
-                      ? "text-emerald-600"
+                      ? "text-blue-600"
                       : "text-gray-400"
                   }`}
                 />
                 <p
                   className={`font-semibold ${
                     deliveryMethod === "delivery"
-                      ? "text-emerald-600"
+                      ? "text-blue-600"
                       : "text-gray-700"
                   }`}
                 >
@@ -839,7 +822,7 @@ function CheckoutModal({
                 onChange={(e) => onDeliveryAddressChange(e.target.value)}
                 required
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your delivery address"
               />
             </div>
@@ -849,7 +832,7 @@ function CheckoutModal({
           <div className="border-t border-gray-200 pt-4">
             <div className="flex items-center justify-between text-xl font-bold">
               <span>Total:</span>
-              <span className="text-emerald-600">{formatLKR(totalPrice)}</span>
+              <span className="text-blue-600">{formatLKR(totalPrice)}</span>
             </div>
           </div>
 
@@ -858,7 +841,7 @@ function CheckoutModal({
             <button
               onClick={onClose}
               disabled={loading}
-              className="flex-1 px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>
@@ -868,7 +851,7 @@ function CheckoutModal({
                 loading ||
                 (deliveryMethod === "delivery" && !deliveryAddress.trim())
               }
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -877,8 +860,8 @@ function CheckoutModal({
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-5 h-5" />
-                  Confirm Order
+                  <CreditCard className="w-5 h-5" />
+                  Confirm & Pay with PayHere
                 </>
               )}
             </button>

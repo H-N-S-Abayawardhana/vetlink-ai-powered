@@ -306,7 +306,7 @@ export default function PharmacyDemandPredictor() {
           <div className="border-b border-gray-200">
             <nav className="flex">
               <button
-                className={`px-6 py-4 text-sm font-medium border-b-2 ${
+                className={`px-6 py-4 text-sm font-medium border-b-2 cursor-pointer ${
                   activeTab === "single"
                     ? "border-indigo-500 text-indigo-600 bg-indigo-50"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -316,7 +316,7 @@ export default function PharmacyDemandPredictor() {
                 📊 Single Prediction
               </button>
               <button
-                className={`px-6 py-4 text-sm font-medium border-b-2 ${
+                className={`px-6 py-4 text-sm font-medium border-b-2 cursor-pointer ${
                   activeTab === "batch"
                     ? "border-indigo-500 text-indigo-600 bg-indigo-50"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -326,7 +326,7 @@ export default function PharmacyDemandPredictor() {
                 📁 Batch Prediction
               </button>
               <button
-                className={`px-6 py-4 text-sm font-medium border-b-2 ${
+                className={`px-6 py-4 text-sm font-medium border-b-2 cursor-pointer ${
                   activeTab === "info"
                     ? "border-indigo-500 text-indigo-600 bg-indigo-50"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"

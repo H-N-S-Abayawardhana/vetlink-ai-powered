@@ -152,7 +152,7 @@ export default function InventoryList() {
                 setEditing(null);
                 setModalOpen(true);
               }}
-              className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+              className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 cursor-pointer"
             >
               + Add Medication
             </button>
@@ -222,13 +222,13 @@ export default function InventoryList() {
                               setEditing(m);
                               setModalOpen(true);
                             }}
-                            className="px-2 py-1 border rounded text-sm text-gray-700 hover:bg-gray-50"
+                            className="px-2 py-1 border rounded text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(m.id)}
-                            className="px-2 py-1 border rounded text-sm text-red-700 hover:bg-red-50"
+                            className="px-2 py-1 border rounded text-sm text-red-700 hover:bg-red-50 cursor-pointer"
                           >
                             Delete
                           </button>
@@ -240,7 +240,7 @@ export default function InventoryList() {
                               "Request feature coming soon — you can request this medication via your veterinarian or the clinic.",
                             )
                           }
-                          className="px-2 py-1 border rounded text-sm text-blue-700 hover:bg-blue-50"
+                          className="px-2 py-1 border rounded text-sm text-blue-700 hover:bg-blue-50 cursor-pointer"
                         >
                           Request
                         </button>

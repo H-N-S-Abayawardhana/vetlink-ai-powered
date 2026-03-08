@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
+import { uploadInventoryImageToS3 } from "@/lib/s3";
 
 // GET - Fetch inventory items for a pharmacy
 export async function GET(
@@ -37,7 +38,7 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Get inventory items
+    // Get inventory items (image_url optional - run migration if missing)
     const result = await pool.query(
       `SELECT 
         id,
@@ -48,6 +49,7 @@ export async function GET(
         stock,
         price,
         expiry_date,
+        image_url,
         created_at,
         updated_at
       FROM pharmacy_inventory_items
@@ -68,6 +70,7 @@ export async function GET(
         ? row.expiry_date.toISOString().split("T")[0]
         : null,
       price: row.price ? Number(row.price) : 0,
+      image_url: row.image_url || null,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
@@ -85,7 +88,7 @@ export async function GET(
   }
 }
 
-// POST - Add inventory item to pharmacy
+// POST - Add inventory item to pharmacy (JSON or multipart/form-data with optional image)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -97,8 +100,46 @@ export async function POST(
     }
 
     const { id: paramId } = await params;
-    const body = await request.json();
-    const { name, form, strength, stock = 0, expiry = null, price = 0 } = body;
+    const contentType = request.headers.get("content-type") || "";
+    let name: string;
+    let form: string;
+    let strength: string | null = null;
+    let stock = 0;
+    let expiry: string | null = null;
+    let price = 0;
+    let imageUrl: string | null = null;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      name = (formData.get("name") as string)?.trim() || "";
+      form = (formData.get("form") as string)?.trim() || "";
+      strength = (formData.get("strength") as string)?.trim() || null;
+      stock = Math.max(0, Number(formData.get("stock")) || 0);
+      const expiryVal = formData.get("expiry");
+      expiry =
+        expiryVal && String(expiryVal).trim() ? String(expiryVal).trim() : null;
+      price = Math.max(0, Number(formData.get("price")) || 0);
+
+      const file = formData.get("image") as File | null;
+      if (file && file.size > 0) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const safeExt = ["jpg", "jpeg", "png", "webp", "gif"].includes(ext)
+          ? ext
+          : "jpg";
+        const filename = `inventory-${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${safeExt}`;
+        const mime = file.type || "image/jpeg";
+        imageUrl = await uploadInventoryImageToS3(buffer, filename, mime);
+      }
+    } else {
+      const body = await request.json();
+      name = body.name?.trim() || "";
+      form = body.form?.trim() || "";
+      strength = body.strength?.trim() || null;
+      stock = Number(body.stock) || 0;
+      expiry = body.expiry?.trim() || null;
+      price = Number(body.price) || 0;
+    }
 
     if (!name || !form) {
       return NextResponse.json(
@@ -127,7 +168,7 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Insert inventory item
+    // Insert inventory item (image_url column: run ALTER TABLE pharmacy_inventory_items ADD COLUMN IF NOT EXISTS image_url TEXT; if needed)
     const result = await pool.query(
       `INSERT INTO pharmacy_inventory_items (
         pharmacy_id,
@@ -137,19 +178,28 @@ export async function POST(
         stock,
         price,
         expiry_date,
+        image_url,
         created_at,
         updated_at
-      ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *`,
-      [paramId, name, form, strength || null, stock, price, expiry || null],
+      [
+        paramId,
+        name,
+        form,
+        strength || null,
+        stock,
+        price,
+        expiry || null,
+        imageUrl || null,
+      ],
     );
 
     const itemRow = result.rows[0];
 
-    // Transform to match expected format
     const newItem = {
       id: parseInt(itemRow.id.replace(/-/g, "").substring(0, 8), 16) % 1000000,
-      uuid: itemRow.id, // Store UUID for future updates
+      uuid: itemRow.id,
       name: itemRow.name,
       form: itemRow.form,
       strength: itemRow.strength || "",
@@ -158,6 +208,7 @@ export async function POST(
         ? itemRow.expiry_date.toISOString().split("T")[0]
         : null,
       price: itemRow.price ? Number(itemRow.price) : 0,
+      image_url: itemRow.image_url || null,
     };
 
     return NextResponse.json({ success: true, item: newItem }, { status: 201 });
@@ -169,6 +220,15 @@ export async function POST(
         return NextResponse.json(
           { error: "Invalid pharmacy ID" },
           { status: 400 },
+        );
+      }
+      if (error.message.includes('column "image_url" does not exist')) {
+        return NextResponse.json(
+          {
+            error:
+              "Database migration required. Run: ALTER TABLE pharmacy_inventory_items ADD COLUMN IF NOT EXISTS image_url TEXT;",
+          },
+          { status: 500 },
         );
       }
     }
