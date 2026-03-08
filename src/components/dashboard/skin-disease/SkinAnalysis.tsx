@@ -47,6 +47,7 @@ export default function SkinAnalysis({
   const [xaiExplanation, setXaiExplanation] = useState<string | null>(null);
   const [xaiLoading, setXaiLoading] = useState(false);
   const [xaiError, setXaiError] = useState<string | null>(null);
+  const [saliencyOpen, setSaliencyOpen] = useState(false);
   const guidanceCardsRef = useRef<AIGuidanceCardsRef | null>(null);
   const healthySkinCardRef = useRef<HealthySkinCardRef | null>(null);
   const detectionResultsRef = useRef<HTMLDivElement | null>(null);
@@ -262,6 +263,7 @@ export default function SkinAnalysis({
     setXaiExplanation(null);
     setXaiLoading(false);
     setXaiError(null);
+    setSaliencyOpen(false);
   };
 
   const generatePDFReport = async () => {
@@ -1341,8 +1343,8 @@ export default function SkinAnalysis({
               </div>
 
               {/* XAI: Why did the AI say this? */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+              <div className="bg-indigo-50/95 border border-indigo-100 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 shadow-sm">
+                <h3 className="text-base sm:text-lg font-semibold text-indigo-900 mb-2 flex items-center gap-2">
                   <svg
                     className="w-5 h-5 text-indigo-600 flex-shrink-0"
                     fill="none"
@@ -1359,7 +1361,7 @@ export default function SkinAnalysis({
                   Why did the AI say this?
                 </h3>
                 {xaiLoading && (
-                  <p className="text-sm text-slate-600 animate-pulse">
+                  <p className="text-sm text-indigo-700 animate-pulse">
                     Generating explanation…
                   </p>
                 )}
@@ -1367,18 +1369,41 @@ export default function SkinAnalysis({
                   <p className="text-sm text-red-600">{xaiError}</p>
                 )}
                 {xaiExplanation && !xaiLoading && (
-                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                  <p className="text-sm text-indigo-800/90 leading-relaxed whitespace-pre-line">
                     {xaiExplanation}
                   </p>
                 )}
               </div>
 
-              {/* Saliency / Heatmap (XAI) - Grad-CAM overlay */}
+              {/* Saliency / Heatmap (XAI) - collapsible, same XAI styling as above */}
               {prediction.xaiHeatmapDataUrl && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                <div className="bg-indigo-50/95 border border-indigo-100 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => setSaliencyOpen((o) => !o)}
+                    className="w-full text-left flex items-center justify-between gap-2 cursor-pointer hover:opacity-90 transition-opacity"
+                  >
+                    <h3 className="text-base sm:text-lg font-semibold text-indigo-900 flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-indigo-600 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Saliency (XAI)
+                    </h3>
+                    <span className="text-sm font-medium text-indigo-600">
+                      {saliencyOpen ? "Hide" : "View Saliency (XAI)"}
+                    </span>
                     <svg
-                      className="w-5 h-5 text-indigo-600 flex-shrink-0"
+                      className={`w-5 h-5 text-indigo-500 flex-shrink-0 transition-transform ${saliencyOpen ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1387,21 +1412,24 @@ export default function SkinAnalysis({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        d="M19 9l-7 7-7-7"
                       />
                     </svg>
-                    Saliency (XAI)
-                  </h3>
-                  <p className="text-sm text-slate-600 mb-3">
-                    Red and yellow areas show where the model focused to make
-                    this prediction.
-                  </p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={prediction.xaiHeatmapDataUrl}
-                    alt="Grad-CAM saliency overlay showing regions the model used for prediction"
-                    className="w-full max-w-lg h-auto rounded-lg border border-slate-200 shadow-sm"
-                  />
+                  </button>
+                  {saliencyOpen && (
+                    <>
+                      <p className="text-sm text-indigo-700 mt-3 mb-3">
+                        Red and yellow areas show where the model focused to make
+                        this prediction.
+                      </p>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={prediction.xaiHeatmapDataUrl}
+                        alt="Grad-CAM saliency overlay showing regions the model used for prediction"
+                        className="w-full max-w-lg h-auto rounded-lg border border-indigo-200 shadow-sm"
+                      />
+                    </>
+                  )}
                 </div>
               )}
 
