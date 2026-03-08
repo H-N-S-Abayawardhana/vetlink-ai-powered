@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { confirmPharmacyOrderPayment } from "@/lib/pharmacy-order-confirm";
 
 /**
  * PayHere Notify Endpoint
@@ -68,19 +69,16 @@ export async function POST(request: NextRequest) {
         "-3": "charged_back",
       }[statusCode] || "unknown";
 
-    // TODO: Store payment notification in your database
-    // Example: await updatePaymentStatus(orderId, { ... });
-
-    // TODO: Update your database with payment status
-    // Example:
-    // await updatePaymentStatus(orderId, {
-    //   paymentId,
-    //   status: paymentStatus,
-    //   amount: parseFloat(payhereAmount),
-    //   currency: payhereCurrency,
-    //   method,
-    //   completedAt: new Date(),
-    // });
+    if (paymentStatus === "success") {
+      const custom1 = (formData.get("custom_1") as string) || "";
+      const custom2 = (formData.get("custom_2") as string) || "";
+      if (custom1 === "pharmacy" && custom2) {
+        const result = await confirmPharmacyOrderPayment(custom2);
+        if (!result.success) {
+          console.error("Pharmacy order confirm failed:", result.error);
+        }
+      }
+    }
 
     // Return success response to PayHere
     // PayHere expects a 200 status code
