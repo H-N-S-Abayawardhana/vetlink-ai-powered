@@ -127,12 +127,6 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
   },
   {
-    name: "Upload Prescription",
-    href: "/dashboard/upload-prescriptions",
-    icon: DocumentTextIcon,
-    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
-  },
-  {
     name: "Pharmacy",
     icon: BuildingStorefrontIcon,
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],

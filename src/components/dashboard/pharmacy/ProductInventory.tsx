@@ -123,7 +123,7 @@ export default function ProductInventory() {
             </option>
           ))}
         </select>
-        <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+        <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium cursor-pointer">
           + Add Product
         </button>
       </div>
@@ -220,10 +220,10 @@ export default function ProductInventory() {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                      <button className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer">
                         Edit
                       </button>
-                      <button className="text-green-600 hover:text-green-800 text-sm font-medium">
+                      <button className="text-green-600 hover:text-green-800 text-sm font-medium cursor-pointer">
                         Restock
                       </button>
                     </div>

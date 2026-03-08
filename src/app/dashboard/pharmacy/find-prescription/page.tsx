@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { AuthGuard } from "@/lib/auth-guard";
-import { formatLKR } from "@/lib/currency";
 import Image from "next/image";
 import {
   Upload,
@@ -15,17 +14,21 @@ import {
   FileText,
   Image as ImageIcon,
   Trash2,
+  ClipboardCopy,
+  Check,
+  MapPin,
+  Package,
+  Truck,
 } from "lucide-react";
+import { formatLKR } from "@/lib/currency";
 
 export default function FindFromPrescriptionPage() {
   return (
     <AuthGuard
       allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"]}
     >
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <FindFromPrescriptionModule />
-        </div>
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        <FindFromPrescriptionModule />
       </div>
     </AuthGuard>
   );
@@ -36,6 +39,27 @@ function FindFromPrescriptionModule() {
     null,
   );
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [extractedText, setExtractedText] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [availableProducts, setAvailableProducts] = useState<
+    Array<{
+      id: string;
+      name: string;
+      form: string;
+      strength: string;
+      stock: number;
+      price: number;
+      expiry: string | null;
+      image: string | null;
+      pharmacyId: string;
+      pharmacyName: string;
+      pharmacyAddress: string;
+      pickup_available: boolean;
+      delivery_available: boolean;
+      delivery_fee: number;
+    }>
+  >([]);
+  const [loadingPharmacies, setLoadingPharmacies] = useState(false);
   const [extractedItems, setExtractedItems] = useState<
     Array<{ name: string; quantity: number }>
   >([]);
@@ -50,9 +74,9 @@ function FindFromPrescriptionModule() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
+    // Validate file type (images only for API)
     if (!file.type.startsWith("image/")) {
-      setError("Please upload an image file");
+      setError("Please upload an image file (JPG, PNG, WebP, GIF)");
       return;
     }
 
@@ -64,6 +88,8 @@ function FindFromPrescriptionModule() {
     }
 
     setError(null);
+    setExtractedText(null);
+    setAvailableProducts([]);
     setUploadedFile(file);
 
     // Preview image
@@ -74,26 +100,68 @@ function FindFromPrescriptionModule() {
     reader.readAsDataURL(file);
   };
 
-  const handleExtractItems = () => {
-    if (!prescriptionImage) {
+  const handleExtractItems = async () => {
+    if (!uploadedFile) {
       setError("Please upload a prescription image first");
       return;
     }
 
     setLoading(true);
     setError(null);
+    setExtractedText(null);
 
-    // Simulate extraction (in real app, this would call OCR API)
-    setTimeout(() => {
-      // For demo, show manual entry option
-      setExtractedItems([
-        { name: "Amoxicillin", quantity: 2 },
-        { name: "Prednisone", quantity: 1 },
-        { name: "Ivermectin", quantity: 1 },
-      ]);
+    try {
+      const formData = new FormData();
+      formData.append("image", uploadedFile);
+      const res = await fetch("/api/prescription/read", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to read prescription");
+      }
+      setExtractedText(data.text ?? "No text extracted.");
+      setSuccess(
+        "Prescription text extracted. You can copy it or add medications below to find products.",
+      );
+      // Fetch pharmacies that have inventory matching the prescription text
+      setLoadingPharmacies(true);
+      try {
+        const pharmRes = await fetch("/api/pharmacies/by-prescription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: data.text ?? "" }),
+        });
+        const pharmData = await pharmRes.json();
+        if (pharmRes.ok && pharmData.products) {
+          setAvailableProducts(pharmData.products);
+        } else {
+          setAvailableProducts([]);
+        }
+      } catch {
+        setAvailableProducts([]);
+      } finally {
+        setLoadingPharmacies(false);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to read prescription",
+      );
+    } finally {
       setLoading(false);
-      setSuccess("Items extracted from prescription!");
-    }, 1500);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    if (!extractedText) return;
+    try {
+      await navigator.clipboard.writeText(extractedText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Could not copy to clipboard");
+    }
   };
 
   const handleManualEntry = () => {
@@ -314,6 +382,8 @@ function FindFromPrescriptionModule() {
   const handleClear = () => {
     setPrescriptionImage(null);
     setUploadedFile(null);
+    setExtractedText(null);
+    setAvailableProducts([]);
     setExtractedItems([]);
     setMatchedProducts([]);
     setError(null);
@@ -324,30 +394,25 @@ function FindFromPrescriptionModule() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 shadow-xl text-white">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-            <FileText className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">Find From Prescription</h1>
-            <p className="text-purple-100 text-sm mt-1">
-              Upload your prescription and find medications quickly
-            </p>
-          </div>
-        </div>
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          Find From Prescription
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600">
+          Upload your prescription and find medications quickly
+        </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
           <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
           <p className="text-red-800 text-sm flex-1">{error}</p>
           <button
             onClick={() => setError(null)}
-            className="text-red-400 hover:text-red-600"
+            className="cursor-pointer text-red-400 hover:text-red-600"
           >
             <X className="w-4 h-4" />
           </button>
@@ -355,12 +420,12 @@ function FindFromPrescriptionModule() {
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
           <p className="text-green-800 text-sm flex-1">{success}</p>
           <button
             onClick={() => setSuccess(null)}
-            className="text-green-400 hover:text-green-600"
+            className="cursor-pointer text-green-400 hover:text-green-600"
           >
             <X className="w-4 h-4" />
           </button>
@@ -370,7 +435,7 @@ function FindFromPrescriptionModule() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upload Section */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <Upload className="w-5 h-5" />
               Upload Prescription
@@ -379,26 +444,26 @@ function FindFromPrescriptionModule() {
             {!prescriptionImage ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all"
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 sm:p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all"
               >
                 <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 font-medium mb-2">
                   Click to upload prescription
                 </p>
                 <p className="text-sm text-gray-500">
-                  Supports JPG, PNG, PDF (Max 10MB)
+                  JPG, PNG, WebP, GIF (Max 10MB)
                 </p>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*,.pdf"
+                  accept="image/*"
                   onChange={handleFileUpload}
                   className="hidden"
                 />
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                <div className="relative rounded-lg overflow-hidden border border-gray-200">
                   <Image
                     src={prescriptionImage}
                     alt="Prescription"
@@ -408,7 +473,7 @@ function FindFromPrescriptionModule() {
                   />
                   <button
                     onClick={handleClear}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -417,30 +482,30 @@ function FindFromPrescriptionModule() {
                   <button
                     onClick={handleExtractItems}
                     disabled={loading}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {loading ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Extracting...
+                        Reading...
                       </>
                     ) : (
                       <>
                         <Search className="w-5 h-5" />
-                        Extract Medications
+                        Read prescription
                       </>
                     )}
                   </button>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+                    className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     Change
                   </button>
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*,.pdf"
+                    accept="image/*"
                     onChange={handleFileUpload}
                     className="hidden"
                   />
@@ -449,9 +514,41 @@ function FindFromPrescriptionModule() {
             )}
           </div>
 
+          {/* Extracted text from prescription */}
+          {extractedText !== null && (
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Prescription text
+                </h2>
+                <button
+                  type="button"
+                  onClick={copyToClipboard}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardCopy className="w-4 h-4" />
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
+              <pre className="text-sm text-gray-800 whitespace-pre-wrap font-sans bg-gray-50 rounded-lg p-4 border border-gray-200 overflow-auto max-h-[280px]">
+                {extractedText}
+              </pre>
+            </div>
+          )}
+
           {/* Extracted Items */}
           {extractedItems.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
@@ -459,7 +556,7 @@ function FindFromPrescriptionModule() {
                 </h2>
                 <button
                   onClick={handleManualEntry}
-                  className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors flex items-center gap-1"
+                  className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Add Manually
@@ -470,7 +567,7 @@ function FindFromPrescriptionModule() {
                 {extractedItems.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200"
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
                   >
                     <input
                       type="text"
@@ -479,7 +576,7 @@ function FindFromPrescriptionModule() {
                         handleItemChange(index, "name", e.target.value)
                       }
                       placeholder="Medication name"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-purple-500"
                     />
                     <input
                       type="number"
@@ -492,11 +589,11 @@ function FindFromPrescriptionModule() {
                           parseInt(e.target.value) || 1,
                         )
                       }
-                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-purple-500"
                     />
                     <button
                       onClick={() => handleRemoveItem(index)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -509,7 +606,7 @@ function FindFromPrescriptionModule() {
                 disabled={
                   searching || extractedItems.every((i) => !i.name.trim())
                 }
-                className="w-full mt-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {searching ? (
                   <>
@@ -529,8 +626,143 @@ function FindFromPrescriptionModule() {
 
         {/* Results Section */}
         <div className="space-y-6">
+          {/* Available products (from prescription text) */}
+          {loadingPharmacies && (
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+              <div className="flex items-center gap-2 text-gray-500">
+                <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                <span>Finding products that match your prescription...</span>
+              </div>
+            </div>
+          )}
+          {!loadingPharmacies && availableProducts.length > 0 && (
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-purple-500" />
+                Products matching your prescription
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Buy from these pharmacies. Each product shows the pharmacy that
+                has it in stock.
+              </p>
+              <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                {availableProducts.map((product) => (
+                  <div
+                    key={`${product.id}-${product.pharmacyId}`}
+                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="flex gap-4">
+                      {/* Product image */}
+                      <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                        {product.image ? (
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-3xl">💊</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col gap-3">
+                        <div>
+                          <h3 className="font-bold text-gray-900">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {product.form}
+                            {product.strength && ` — ${product.strength}`}
+                          </p>
+                          <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
+                            <span className="text-lg font-bold text-purple-600">
+                              {formatLKR(product.price)}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${
+                                product.stock > 10
+                                  ? "bg-green-100 text-green-700"
+                                  : product.stock > 0
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              Stock: {product.stock}
+                            </span>
+                          </div>
+                          {product.expiry && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Exp:{" "}
+                              {new Date(product.expiry).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                        <div className="pt-3 border-t border-gray-100">
+                          <p className="text-xs font-medium text-gray-700 mb-1">
+                            Available at
+                          </p>
+                          <p className="font-medium text-gray-900 text-sm">
+                            {product.pharmacyName}
+                          </p>
+                          {product.pharmacyAddress && (
+                            <p className="text-sm text-gray-600 flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                              {product.pharmacyAddress}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {product.pickup_available && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-100 text-green-800 text-xs">
+                                <Package className="w-3 h-3" />
+                                Pickup
+                              </span>
+                            )}
+                            {product.delivery_available && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-xs">
+                                <Truck className="w-3 h-3" />
+                                Delivery
+                                {product.delivery_fee > 0 && (
+                                  <span> (LKR {product.delivery_fee})</span>
+                                )}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={`/dashboard/pharmacy/shopping?product=${encodeURIComponent(product.name)}&pharmacy=${encodeURIComponent(product.pharmacyId)}`}
+                          className="mt-2 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          Add to cart
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {!loadingPharmacies &&
+            extractedText &&
+            availableProducts.length === 0 &&
+            matchedProducts.length === 0 && (
+              <div className="bg-white rounded-lg p-6 sm:p-8 shadow-md border border-gray-100 text-center">
+                <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-600 font-medium">
+                  No matching products
+                </p>
+                <p className="text-gray-400 text-sm mt-1">
+                  No products in our system match this prescription. Try adding
+                  medications manually to search.
+                </p>
+              </div>
+            )}
+
           {matchedProducts.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
@@ -578,7 +810,7 @@ function FindFromPrescriptionModule() {
                   ).map((pharmacyGroup, groupIndex) => (
                     <div
                       key={pharmacyGroup.pharmacyId}
-                      className="border border-gray-200 rounded-xl overflow-hidden"
+                      className="border border-gray-200 rounded-lg overflow-hidden"
                     >
                       {/* Pharmacy Header */}
                       <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4">
@@ -630,7 +862,7 @@ function FindFromPrescriptionModule() {
                             className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow"
                           >
                             <div className="flex items-start gap-4">
-                              {product.image && (
+                              {product.image ? (
                                 <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                                   <Image
                                     src={product.image}
@@ -639,6 +871,10 @@ function FindFromPrescriptionModule() {
                                     className="object-cover"
                                     sizes="80px"
                                   />
+                                </div>
+                              ) : (
+                                <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-2xl">💊</span>
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
@@ -670,7 +906,7 @@ function FindFromPrescriptionModule() {
                                     onClick={() => {
                                       window.location.href = `/dashboard/pharmacy/shopping?product=${encodeURIComponent(product.name)}&pharmacy=${encodeURIComponent(product.pharmacyId)}`;
                                     }}
-                                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"
+                                    className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
                                   >
                                     <ShoppingCart className="w-4 h-4" />
                                     Add to Cart
@@ -688,17 +924,21 @@ function FindFromPrescriptionModule() {
             </div>
           )}
 
-          {extractedItems.length === 0 && matchedProducts.length === 0 && (
-            <div className="bg-white rounded-2xl p-12 shadow-lg border border-gray-100 text-center">
-              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg font-medium">
-                Upload a prescription to get started
-              </p>
-              <p className="text-gray-400 text-sm mt-2">
-                Extract medications and find available products
-              </p>
-            </div>
-          )}
+          {extractedItems.length === 0 &&
+            matchedProducts.length === 0 &&
+            !loadingPharmacies &&
+            availableProducts.length === 0 &&
+            !extractedText && (
+              <div className="bg-white rounded-lg p-8 sm:p-12 shadow-md border border-gray-100 text-center">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg font-medium">
+                  Upload a prescription to get started
+                </p>
+                <p className="text-gray-400 text-sm mt-2">
+                  Extract medications and find available products
+                </p>
+              </div>
+            )}
         </div>
       </div>
     </div>

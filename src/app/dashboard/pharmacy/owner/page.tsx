@@ -27,10 +27,12 @@ export default function OwnerDashboard() {
 
   return (
     <AuthGuard allowedRoles={["SUPER_ADMIN", "VETERINARIAN"]}>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="mb-4">
-          <h1 className="text-3xl font-bold">Pharmacy Owner Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Pharmacy Owner Dashboard
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
             View inventory health, forecasts and alerts for your pharmacy.
           </p>
         </div>
@@ -119,10 +121,10 @@ export default function OwnerDashboard() {
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <h3 className="text-sm font-semibold">Quick Actions</h3>
               <div className="mt-3 space-y-2">
-                <button className="w-full px-3 py-2 bg-blue-600 text-white rounded">
+                <button className="w-full px-3 py-2 bg-blue-600 text-white rounded cursor-pointer">
                   Create Promotional Campaign
                 </button>
-                <button className="w-full px-3 py-2 border rounded">
+                <button className="w-full px-3 py-2 border rounded cursor-pointer">
                   Export Inventory CSV
                 </button>
               </div>

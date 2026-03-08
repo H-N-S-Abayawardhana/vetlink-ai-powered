@@ -51,7 +51,7 @@ export default function PrescriptionMatcher() {
         {items.map((it, i) => (
           <div key={i} className="flex items-center space-x-2">
             <input value={it} onChange={(e) => handleItemChange(i, e.target.value)} placeholder="Medication name" className="flex-1 border px-2 py-1 rounded" />
-            {items.length > 1 && <button onClick={() => removeItem(i)} className="px-2 py-1 bg-red-50 text-red-700 rounded">Remove</button>}
+            {items.length > 1 && <button onClick={() => removeItem(i)} className="px-2 py-1 bg-red-50 text-red-700 rounded cursor-pointer">Remove</button>}
           </div>
         ))}
       </div>
@@ -62,8 +62,8 @@ export default function PrescriptionMatcher() {
       </div>
 
       <div className="flex items-center justify-end space-x-3 mt-3">
-        <button onClick={addItem} className="px-3 py-2 border rounded text-sm">+ Add item</button>
-        <button onClick={search} className="px-3 py-2 bg-blue-600 text-white rounded text-sm">{loading ? 'Searching…' : 'Find pharmacies'}</button>
+        <button onClick={addItem} className="px-3 py-2 border rounded text-sm cursor-pointer">+ Add item</button>
+        <button onClick={search} className="px-3 py-2 bg-blue-600 text-white rounded text-sm cursor-pointer">{loading ? 'Searching…' : 'Find pharmacies'}</button>
       </div> */}
 
       {results.length > 0 && (

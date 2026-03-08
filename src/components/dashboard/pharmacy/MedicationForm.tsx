@@ -114,7 +114,7 @@ export default function MedicationForm({
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 cursor-pointer"
           >
             ✕
           </button>
@@ -224,14 +224,14 @@ export default function MedicationForm({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 border rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="px-4 py-2 border rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
             >
               {loading ? "Saving..." : "Save"}
             </button>

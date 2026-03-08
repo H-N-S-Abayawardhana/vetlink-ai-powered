@@ -1419,8 +1419,8 @@ export default function SkinAnalysis({
                   {saliencyOpen && (
                     <>
                       <p className="text-sm text-indigo-700 mt-3 mb-3">
-                        Red and yellow areas show where the model focused to make
-                        this prediction.
+                        Red and yellow areas show where the model focused to
+                        make this prediction.
                       </p>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
