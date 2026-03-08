@@ -342,24 +342,26 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
 
     return (
       <div className="mt-6 space-y-4">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center">
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-indigo-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-            />
-          </svg>
+        <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-4 flex items-center">
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-teal-100 mr-3">
+            <svg
+              className="w-5 h-5 sm:w-5 sm:h-5 text-teal-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </span>
           AI Health Assistant
         </h3>
 
-        {/* Clickable Cards Row */}
+        {/* Clickable Cards Row - guidance action cards, distinct from XAI */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {(["disease_info", "stage_meaning", "care_tips"] as CardType[]).map(
             (cardType) => {
@@ -374,16 +376,13 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
                   onClick={() => handleCardClick(cardType)}
                   disabled={disabled || content.isLoading}
                   className={`
-                  bg-white rounded-lg shadow-md p-4 sm:p-6 
-                  hover:shadow-lg transition-all 
-                  border-2 ${
-                    hasContent
-                      ? `${colors.border}`
-                      : "border-transparent hover:border-gray-300"
-                  }
+                  bg-white rounded-xl shadow-md hover:shadow-lg
+                  border border-slate-200
+                  p-4 sm:p-6 transition-all duration-200
                   text-left w-full
                   ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                   ${content.isLoading ? "cursor-wait" : ""}
+                  ${hasContent ? "ring-1 ring-slate-200/80" : ""}
                 `}
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -455,7 +454,7 @@ const AIGuidanceCards = forwardRef<AIGuidanceCardsRef, AIGuidanceCardsProps>(
               return (
                 <div
                   key={cardType}
-                  className={`bg-white rounded-lg shadow-md border-l-4 ${colors.border} transition-all`}
+                  className={`bg-white rounded-xl shadow-md border border-slate-200 transition-all`}
                 >
                   <div className="p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-3">

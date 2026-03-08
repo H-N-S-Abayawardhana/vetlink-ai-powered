@@ -28,43 +28,42 @@ export async function POST(request: NextRequest) {
 
     switch (card_type) {
       case "disease_info":
-        prompt = `You are a helpful assistant providing clear information about dog skin diseases for pet owners.
+        prompt = `You are a helpful assistant providing clear, detailed information about dog skin diseases for pet owners.
 
-Provide a concise but complete explanation about "${formattedDiseaseName}" in ONE well-developed paragraph. 
+Provide a thorough, detailed explanation about "${formattedDiseaseName}" for someone who wants to understand it well.
 
 CRITICAL REQUIREMENTS:
-- Write exactly ONE paragraph (5-8 sentences)
-- Provide a COMPLETE explanation - do not truncate or cut off your response
-- Use simple, easy-to-understand language (no medical jargon)
-- Explain what this disease is, its main causes, and basic understanding
-- Make it relevant to the ${stage} stage if applicable
+- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
+- Be comprehensive: cover what the disease is, common causes, how it typically presents, and how it differs at ${stage} stage
+- Use simple, easy-to-understand language (avoid heavy medical jargon; if you use a term, briefly explain it)
+- Explain what this disease means for the dog and what owners might notice
+- Make it relevant to the ${stage} stage where applicable
 - Do NOT provide medical diagnosis or specific medicine names
 - Keep the tone calm, informative, and supportive
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write exactly one complete paragraph (5-8 sentences). Provide a full explanation without any truncation.`;
+Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
 
         break;
 
       case "stage_meaning":
         prompt = `You are a helpful assistant explaining disease stages to pet owners.
 
-Explain what "${stage}" severity means for "${formattedDiseaseName}" in ONE well-developed paragraph.
+Explain in detail what "${stage}" severity means for "${formattedDiseaseName}".
 
 CRITICAL REQUIREMENTS:
-- Write exactly ONE paragraph (5-8 sentences)
-- Provide a COMPLETE explanation - do not truncate or cut off your response
+- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
+- Be thorough: explain what this stage means in practical terms, typical symptoms or signs at this stage, and how it differs from milder or more severe stages
 - Use simple, easy-to-understand language
-- Explain what this stage means in practical terms
-- Describe what symptoms or characteristics are typical for this stage
-- If the stage is "Severe", include a gentle recommendation to consult a veterinarian
+- Describe what owners might observe and when to be concerned
+- If the stage is "Severe", include a clear but gentle recommendation to consult a veterinarian
 - Do NOT provide medical diagnosis or specific medicine names
 - Keep the tone calm, informative, and supportive
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write exactly one complete paragraph (5-8 sentences). Provide a full explanation without any truncation.`;
+Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
 
         break;
 
@@ -73,40 +72,37 @@ Format: Write exactly one complete paragraph (5-8 sentences). Provide a full exp
         if (formattedDiseaseName.toLowerCase() === "healthy") {
           prompt = `You are a helpful assistant providing tips for maintaining healthy dog skin for pet owners.
 
-Provide practical tips on how to keep a dog's skin healthy and maintain good skin condition in ONE well-developed paragraph.
+Provide detailed, practical tips on how to keep a dog's skin healthy and maintain good skin condition.
 
 CRITICAL REQUIREMENTS:
-- Write exactly ONE paragraph (5-8 sentences)
-- Provide a COMPLETE explanation - do not truncate or cut off your response
+- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
+- Be comprehensive: cover preventive care, grooming, nutrition, environment, and general wellness
+- Include specific, actionable tips (e.g. bathing frequency, diet, checking for parasites, when to see a vet for a check-up)
 - Use simple, easy-to-understand language
-- Focus on preventive care, grooming, nutrition, and general wellness practices
-- Include tips about regular check-ups, proper bathing, diet, and environmental factors
 - Emphasize maintaining the current healthy state
 - Do NOT provide medical diagnosis or specific medicine names
 - Keep the tone positive, informative, and supportive
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write exactly one complete paragraph (5-8 sentences). Provide a full explanation without any truncation.`;
+Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
         } else {
           prompt = `You are a helpful assistant providing basic care tips for pet owners.
 
-Provide practical care tips for a dog with "${formattedDiseaseName}" at the ${stage} stage in ONE well-developed paragraph.
+Provide detailed, practical care tips for a dog with "${formattedDiseaseName}" at the ${stage} stage.
 
 CRITICAL REQUIREMENTS:
-- Write exactly ONE paragraph (5-8 sentences)
-- Provide a COMPLETE explanation - do not truncate or cut off your response
+- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
+- Be comprehensive: cover hygiene, comfort, what to do at home, when to see a vet, and what to avoid
+- Include specific, actionable tips relevant to both the disease and the ${stage} stage
 - Use simple, easy-to-understand language
-- Focus on practical, actionable care tips
-- Include general hygiene and comfort measures
-- Make tips relevant to both the disease and the ${stage} stage
-- If the stage is "Severe", include a gentle recommendation to consult a veterinarian
+- If the stage is "Severe", include a clear recommendation to consult a veterinarian and what to do in the meantime
 - Do NOT provide medical diagnosis or specific medicine names
 - Keep the tone calm, informative, and supportive
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write exactly one complete paragraph (5-8 sentences). Provide a full explanation without any truncation.`;
+Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
         }
 
         break;
@@ -165,7 +161,7 @@ Format: Write exactly one complete paragraph (5-8 sentences). Provide a full exp
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 900, // Sufficient for one paragraph (5-8 sentences)
+          maxOutputTokens: 2048,
         },
       }),
     });
@@ -195,7 +191,7 @@ Format: Write exactly one complete paragraph (5-8 sentences). Provide a full exp
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 900,
+            maxOutputTokens: 2048,
           },
         }),
       });
@@ -297,7 +293,7 @@ Continue and complete the explanation:`;
               temperature: 0.7,
               topK: 40,
               topP: 0.95,
-              maxOutputTokens: 300, // Enough to complete the thought
+              maxOutputTokens: 600,
             },
           }),
         });
@@ -324,7 +320,7 @@ Continue and complete the explanation:`;
                 temperature: 0.7,
                 topK: 40,
                 topP: 0.95,
-                maxOutputTokens: 300,
+                maxOutputTokens: 600,
               },
             }),
           });

@@ -46,11 +46,20 @@ export default function ImageUpload({ onImageSelect }: ImageUploadProps) {
   return (
     <div className="space-y-4">
       <div
-        className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragOver
-            ? "border-blue-400 bg-blue-50"
-            : "border-gray-300 hover:border-gray-400"
-        }`}
+        role="button"
+        tabIndex={0}
+        onClick={() => fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer select-none
+          ${isDragOver
+            ? "border-blue-500 bg-blue-50 shadow-md"
+            : "border-gray-300 bg-gray-50/80 hover:border-blue-400 hover:bg-blue-50/80 hover:shadow-sm active:scale-[0.99]"
+          }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -63,10 +72,10 @@ export default function ImageUpload({ onImageSelect }: ImageUploadProps) {
           className="hidden"
         />
 
-        <div className="space-y-4">
-          <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+        <div className="space-y-4 pointer-events-none">
+          <div className="mx-auto w-16 h-16 bg-white/80 rounded-full flex items-center justify-center shadow-inner border border-gray-200/80">
             <svg
-              className="w-8 h-8 text-gray-400"
+              className="w-8 h-8 text-blue-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -81,36 +90,17 @@ export default function ImageUpload({ onImageSelect }: ImageUploadProps) {
           </div>
 
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Upload Skin Image
             </h3>
             <p className="text-sm text-gray-600 mb-1">
-              Drag and drop an image here, or click to browse
+              <span className="text-blue-600 font-medium">Click anywhere</span>
+              {" or drag and drop an image here"}
             </p>
-            <p className="text-sm text-blue-700 mb-4 font-medium">
+            <p className="text-sm text-blue-700 font-medium">
               For best results: use good lighting, a close-up of the affected
               area, and dog skin only.
             </p>
-
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
-            >
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-              Choose File
-            </button>
           </div>
         </div>
       </div>

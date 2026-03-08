@@ -1,6 +1,5 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_DOG_SKIN_DISEASE_ML_API_URL ||
-  "https://niwazzz-severity-based-detection-api.hf.space";
+const PREDICT_API_PATH = "/api/skin-disease/predict";
+const HEALTH_API_PATH = "/api/skin-disease/health";
 
 export interface ParsedDisease {
   disease: string;
@@ -20,6 +19,10 @@ export interface PredictionResult {
     all_probabilities: Record<string, number>;
     parsed?: ParsedDisease;
   };
+  /** Textual XAI explanation from the model (Why did the AI say this?). */
+  xaiExplanation?: string | null;
+  /** Data URL or URL of the Grad-CAM saliency/heatmap image. */
+  xaiHeatmapDataUrl?: string | null;
   model_type?: string;
 }
 
@@ -92,7 +95,7 @@ export class MLApiService {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(`${API_BASE_URL}/api/predict`, {
+      const response = await fetch(PREDICT_API_PATH, {
         method: "POST",
         body: formData,
       });
@@ -101,7 +104,7 @@ export class MLApiService {
         let errorMessage = `HTTP error! status: ${response.status}`;
         try {
           const errorData = await response.json();
-          errorMessage = errorData.detail || errorData.error || errorMessage;
+          errorMessage = errorData.error || errorData.detail || errorMessage;
         } catch {
           try {
             const errorText = await response.text();
@@ -117,15 +120,17 @@ export class MLApiService {
 
       const data = await response.json();
 
-      // Parse disease and severity if prediction exists
-      if (data.prediction?.disease) {
+      // Parse disease and severity if prediction exists and server didn't send parsed
+      if (data.prediction?.disease && !data.prediction.parsed) {
         data.prediction.parsed = parseDiseaseName(data.prediction.disease);
       }
 
-      // Ensure success flag is set
+      // Ensure success flag and pass through XAI fields from our API
       if (data.success === undefined) {
         data.success = true;
       }
+      data.xaiExplanation = data.xaiExplanation ?? null;
+      data.xaiHeatmapDataUrl = data.xaiHeatmapDataUrl ?? null;
 
       return data;
     } catch (error) {
@@ -168,7 +173,7 @@ export class MLApiService {
 
   static async healthCheck(): Promise<HealthCheckResult> {
     try {
-      const response = await fetch(`${API_BASE_URL}/health`, {
+      const response = await fetch(HEALTH_API_PATH, {
         method: "GET",
       });
 
