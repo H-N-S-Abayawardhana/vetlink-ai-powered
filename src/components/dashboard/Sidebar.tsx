@@ -150,7 +150,7 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
         roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
       },
       {
-        name: "Find From Prescription",
+        name: "Find Pet Medicines From Prescription",
         href: "/dashboard/pharmacy/find-prescription",
         icon: DocumentTextIcon,
         roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],
