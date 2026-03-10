@@ -85,7 +85,7 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
   },
   {
-    name: "Disease Prediction",
+    name: "Disease Risk Prediction",
     href: "/dashboard/pets/disease-prediction",
     icon: Stethoscope,
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],

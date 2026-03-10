@@ -896,6 +896,22 @@ export default function DietPage() {
           </div>
         )}
       </div>
+
+      {/* Loading Overlay */}
+      {loadingPlan && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md mx-4">
+            <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Generating Diet Recommendation...
+            </h3>
+            <p className="text-gray-600">
+              Our AI is analyzing your pet&apos;s profile to prepare a
+              personalized nutrition and feeding plan.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
