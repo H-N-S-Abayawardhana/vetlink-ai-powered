@@ -76,7 +76,7 @@ export class PharmacyDemandApiService {
         1, // pickup_available
         1.15, // price_markup_factor
         input.sales_lag_1, // total_prescribed_qty
-        0.7 // avg_urgency
+        0.7, // avg_urgency
       ];
 
       // Try Gradio Space (primary method for this model)

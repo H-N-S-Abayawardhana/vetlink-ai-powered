@@ -94,7 +94,9 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     value: string | number | null | undefined,
   ) => {
     const displayValue =
-      value === null || value === undefined || value === "" ? "-" : String(value);
+      value === null || value === undefined || value === ""
+        ? "-"
+        : String(value);
     const valueLines = doc.splitTextToSize(displayValue, maxWidth - 150);
     const rowHeight = Math.max(16, valueLines.length * 19);
     ensureSpace(rowHeight + 10);
@@ -137,10 +139,7 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   drawField("Name", pet?.name);
   drawField("Breed", pet?.breed);
   drawField("Age", pet?.ageYears !== undefined ? `${pet.ageYears} years` : "-");
-  drawField(
-    "Weight",
-    pet?.weightKg !== undefined ? `${pet.weightKg} kg` : "-",
-  );
+  drawField("Weight", pet?.weightKg !== undefined ? `${pet.weightKg} kg` : "-");
   drawField("Body Condition Score", pet?.bcs ? `${pet.bcs}/9` : "-");
   y += 2;
 
@@ -171,7 +170,10 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     y += 2;
   }
 
-  if (Array.isArray(plan.Recommended_Foods) && plan.Recommended_Foods.length > 0) {
+  if (
+    Array.isArray(plan.Recommended_Foods) &&
+    plan.Recommended_Foods.length > 0
+  ) {
     drawSectionHeader("Recommended Foods");
     drawBulletList(plan.Recommended_Foods, "+");
   }
@@ -186,7 +188,12 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     doc.setTextColor(...mutedText);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    drawWrappedText(plan.Exercise_Recommendation, margin + 10, maxWidth - 16, 20);
+    drawWrappedText(
+      plan.Exercise_Recommendation,
+      margin + 10,
+      maxWidth - 16,
+      20,
+    );
     y += 2;
   }
 
@@ -206,9 +213,14 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     doc.setFontSize(9);
     doc.line(margin, pageHeight - 42, pageWidth - margin, pageHeight - 42);
     doc.text("VetLink Smart Pet Healthcare", margin, pageHeight - 26);
-    doc.text(`Page ${page} of ${totalPages}`, pageWidth - margin, pageHeight - 26, {
-      align: "right",
-    });
+    doc.text(
+      `Page ${page} of ${totalPages}`,
+      pageWidth - margin,
+      pageHeight - 26,
+      {
+        align: "right",
+      },
+    );
   }
 
   const filename = `${(pet?.name || "pet").replace(/\s+/g, "_")}_DietPlan_${new Date().toISOString().slice(0, 10)}.pdf`;
