@@ -12,6 +12,7 @@ import {
   HeartIcon,
   DocumentTextIcon,
   CalendarIcon,
+  CalculatorIcon,
   LightBulbIcon,
   EyeIcon,
   CogIcon,
@@ -24,7 +25,7 @@ import {
   UserPlusIcon,
   ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
-import { ScanFace } from "lucide-react";
+import { Dog, ScanFace, Stethoscope } from "lucide-react";
 
 // ============================================================================
 // Types and Interfaces
@@ -62,7 +63,7 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
   {
     name: "My Pets",
     href: "/dashboard/pets",
-    icon: HeartIcon,
+    icon: Dog,
     roles: ["USER"],
   },
   {
@@ -80,13 +81,13 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
   {
     name: "BCS Calculator",
     href: "/dashboard/pets/bcs",
-    icon: LightBulbIcon,
+    icon: CalculatorIcon,
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
   },
   {
     name: "Disease Prediction",
     href: "/dashboard/pets/disease-prediction",
-    icon: LightBulbIcon,
+    icon: Stethoscope,
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
   },
   {
