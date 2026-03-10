@@ -12,6 +12,7 @@ import {
   HeartIcon,
   DocumentTextIcon,
   CalendarIcon,
+  CalculatorIcon,
   LightBulbIcon,
   EyeIcon,
   CogIcon,
@@ -24,7 +25,7 @@ import {
   UserPlusIcon,
   ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
-import { ScanFace } from "lucide-react";
+import { Dog, ScanFace, Stethoscope } from "lucide-react";
 
 // ============================================================================
 // Types and Interfaces
@@ -62,7 +63,13 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
   {
     name: "My Pets",
     href: "/dashboard/pets",
-    icon: HeartIcon,
+    icon: Dog,
+    roles: ["USER"],
+  },
+  {
+    name: "Schedule Appointment",
+    href: "/dashboard/appointment-schedule",
+    icon: CalendarIcon,
     roles: ["USER"],
   },
   {
@@ -72,35 +79,22 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     roles: ["SUPER_ADMIN", "VETERINARIAN"],
   },
   {
-    name: "Health Assessment",
-    icon: LightBulbIcon,
+    name: "BCS Calculator",
+    href: "/dashboard/pets/bcs",
+    icon: CalculatorIcon,
     roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
-    children: [
-      {
-        name: "BCS Calculator",
-        href: "/dashboard/pets/bcs",
-        icon: LightBulbIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
-      },
-      {
-        name: "Disease Prediction",
-        href: "/dashboard/pets/disease-prediction",
-        icon: LightBulbIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
-      },
-      {
-        name: "Diet Recommendation",
-        href: "/dashboard/pets/diet",
-        icon: DocumentTextIcon,
-        roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
-      },
-    ],
   },
   {
-    name: "Schedule Appointment",
-    href: "/dashboard/appointment-schedule",
-    icon: CalendarIcon,
-    roles: ["USER"],
+    name: "Disease Risk Prediction",
+    href: "/dashboard/pets/disease-prediction",
+    icon: Stethoscope,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
+  },
+  {
+    name: "Diet Recommendation",
+    href: "/dashboard/pets/diet",
+    icon: DocumentTextIcon,
+    roles: ["SUPER_ADMIN", "VETERINARIAN", "USER"],
   },
   {
     name: "Appointments",
