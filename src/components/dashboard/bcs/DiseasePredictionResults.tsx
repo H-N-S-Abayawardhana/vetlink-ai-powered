@@ -2,12 +2,9 @@
 
 import React from "react";
 import {
-  Activity,
   CheckCircle,
   AlertTriangle,
   AlertCircle,
-  Download,
-  Share2,
   RefreshCw,
   ChevronDown,
   ChevronUp,
@@ -15,7 +12,6 @@ import {
   Heart,
   Shield,
 } from "lucide-react";
-import { jsPDF } from "jspdf";
 import type {
   DiseasePredictionResult,
   SingleDiseasePrediction,
@@ -64,273 +60,6 @@ export default function DiseasePredictionResults({
 
   const toggleExpand = (disease: string) => {
     setExpandedDisease(expandedDisease === disease ? null : disease);
-  };
-
-  const handleDownloadReport = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    let yPos = margin;
-
-    // Helper function to add text with word wrap
-    const addWrappedText = (
-      text: string,
-      x: number,
-      y: number,
-      maxWidth: number,
-      lineHeight: number = 6,
-    ): number => {
-      const lines = doc.splitTextToSize(text, maxWidth);
-      doc.text(lines, x, y);
-      return y + lines.length * lineHeight;
-    };
-
-    // Helper to check if we need a new page
-    const checkNewPage = (requiredSpace: number) => {
-      if (yPos + requiredSpace > pageHeight - margin) {
-        doc.addPage();
-        yPos = margin;
-        return true;
-      }
-      return false;
-    };
-
-    // Header background
-    doc.setFillColor(124, 58, 237); // Purple
-    doc.rect(0, 0, pageWidth, 45, "F");
-
-    // Header text
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
-    doc.text("VetLink Disease Risk Report", margin, 20);
-
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      `${petName ? `Pet: ${petName}` : "Multi-Disease Risk Assessment"}`,
-      margin,
-      30,
-    );
-    doc.text(
-      `Generated: ${new Date(result.analyzed_at).toLocaleString()}`,
-      margin,
-      38,
-    );
-
-    yPos = 55;
-
-    // Reset text color
-    doc.setTextColor(0, 0, 0);
-
-    // Pet Profile Section
-    doc.setFillColor(245, 243, 255); // Light purple background
-    doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 35, 3, 3, "F");
-
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(88, 28, 135); // Purple text
-    doc.text("Pet Profile", margin + 5, yPos + 10);
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(60, 60, 60);
-    doc.text(
-      `Age Group: ${result.pet_profile.age_group}`,
-      margin + 5,
-      yPos + 20,
-    );
-    doc.text(
-      `Weight Status: ${result.pet_profile.weight_status}`,
-      margin + 70,
-      yPos + 20,
-    );
-    doc.text(
-      `Risk Factors: ${result.pet_profile.risk_factors_count}`,
-      margin + 140,
-      yPos + 20,
-    );
-
-    yPos += 45;
-
-    // Overall Assessment Section
-    const hasHighRisk = result.has_risk && result.highest_risk_disease;
-    const assessmentBgColor = hasHighRisk ? [254, 226, 226] : [220, 252, 231];
-    doc.setFillColor(
-      assessmentBgColor[0],
-      assessmentBgColor[1],
-      assessmentBgColor[2],
-    ); // Red or green background
-    doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 30, 3, 3, "F");
-
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    const assessmentTextColor = hasHighRisk ? [153, 27, 27] : [21, 128, 61];
-    doc.setTextColor(
-      assessmentTextColor[0],
-      assessmentTextColor[1],
-      assessmentTextColor[2],
-    );
-    doc.text("Overall Assessment", margin + 5, yPos + 10);
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    const assessmentText = hasHighRisk
-      ? `⚠️ Risk Detected - Highest Risk: ${result.highest_risk_disease}`
-      : "✓ No Significant Disease Risks Detected";
-    doc.text(assessmentText, margin + 5, yPos + 22);
-
-    yPos += 40;
-
-    // Disease Predictions Section
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(31, 41, 55);
-    doc.text("Disease Risk Analysis", margin, yPos);
-    yPos += 10;
-
-    result.predictions.forEach((prediction) => {
-      checkNewPage(35);
-
-      // Disease box
-      const isHealthy = prediction.disease === "Healthy";
-      const isPositive = prediction.is_positive && !isHealthy;
-      const bgColor = isHealthy
-        ? [220, 252, 231] // Green for Healthy
-        : isPositive
-          ? prediction.risk_level === "High"
-            ? [254, 226, 226]
-            : [254, 243, 199]
-          : [240, 253, 244];
-
-      doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-      doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 28, 2, 2, "F");
-
-      // Disease name
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(31, 41, 55);
-      doc.text(prediction.disease, margin + 5, yPos + 8);
-
-      // Risk level badge - show "Healthy" instead of risk level for Healthy
-      const riskColors: Record<RiskLevel, number[]> = {
-        High: [220, 38, 38],
-        Moderate: [202, 138, 4],
-        Low: [22, 163, 74],
-      };
-      const riskColor = isHealthy
-        ? [22, 163, 74]
-        : riskColors[prediction.risk_level];
-      doc.setTextColor(riskColor[0], riskColor[1], riskColor[2]);
-      doc.setFontSize(10);
-      doc.text(
-        isHealthy ? "✓ Healthy" : `${prediction.risk_level} Risk`,
-        margin + 100,
-        yPos + 8,
-      );
-
-      // Probability
-      doc.setTextColor(107, 114, 128);
-      doc.setFont("helvetica", "normal");
-      doc.text(
-        isHealthy
-          ? `Wellness: ${prediction.probability.toFixed(1)}%`
-          : `Probability: ${prediction.probability.toFixed(1)}%`,
-        margin + 5,
-        yPos + 18,
-      );
-
-      // Status
-      doc.setTextColor(
-        isPositive ? 220 : 22,
-        isPositive ? 38 : 163,
-        isPositive ? 38 : 74,
-      );
-      doc.text(
-        `Status: ${isPositive ? "POSITIVE" : "Negative"}`,
-        margin + 70,
-        yPos + 18,
-      );
-
-      // Progress bar background
-      doc.setFillColor(229, 231, 235);
-      doc.roundedRect(margin + 130, yPos + 14, 40, 5, 1, 1, "F");
-
-      // Progress bar fill
-      const barWidth = (prediction.probability / 100) * 40;
-      doc.setFillColor(riskColor[0], riskColor[1], riskColor[2]);
-      doc.roundedRect(margin + 130, yPos + 14, barWidth, 5, 1, 1, "F");
-
-      yPos += 32;
-    });
-
-    // Recommendations Section
-    checkNewPage(50);
-    yPos += 5;
-
-    doc.setFillColor(239, 246, 255); // Light blue background
-    doc.roundedRect(
-      margin,
-      yPos,
-      pageWidth - 2 * margin,
-      10 + result.recommendations.length * 8,
-      3,
-      3,
-      "F",
-    );
-
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(29, 78, 216);
-    doc.text("Recommendations", margin + 5, yPos + 8);
-
-    yPos += 14;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(55, 65, 81);
-
-    result.recommendations.forEach((rec, index) => {
-      checkNewPage(10);
-      const bulletText = `${index + 1}. ${rec}`;
-      yPos = addWrappedText(
-        bulletText,
-        margin + 5,
-        yPos,
-        pageWidth - 2 * margin - 10,
-        5,
-      );
-      yPos += 2;
-    });
-
-    // Footer
-    yPos = pageHeight - 25;
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, yPos, pageWidth - margin, yPos);
-
-    doc.setFontSize(9);
-    doc.setTextColor(107, 114, 128);
-    doc.setFont("helvetica", "italic");
-    doc.text(
-      "This report is generated by VetLink AI Disease Prediction System.",
-      margin,
-      yPos + 8,
-    );
-    doc.text(
-      "Please consult a veterinarian for professional medical advice.",
-      margin,
-      yPos + 14,
-    );
-
-    // VetLink branding
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(124, 58, 237);
-    doc.text("VetLink", pageWidth - margin - 20, yPos + 11);
-
-    // Save the PDF
-    doc.save(
-      `disease-report-${petName || "pet"}-${new Date().toISOString().split("T")[0]}.pdf`,
-    );
   };
 
   return (
@@ -629,17 +358,10 @@ export default function DiseasePredictionResults({
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-          <button
-            onClick={handleDownloadReport}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <Download className="w-5 h-5" />
-            Download Report
-          </button>
+        <div className="flex justify-center pt-4 border-t border-gray-200">
           <button
             onClick={onNewAnalysis}
-            className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+            className="px-8 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
           >
             <RefreshCw className="w-5 h-5" />
             New Analysis
