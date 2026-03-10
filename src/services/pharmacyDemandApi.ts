@@ -7,11 +7,29 @@ import { Client } from "@gradio/client";
 // Hugging Face Model ID or Space URL
 // Can be either:
 // - Model ID: "username/model-name" (uses Inference API)
-// - Space URL: "https://username-space-name.hf.space" (uses Gradio)
+// - Space URL: "https://username-space-name.hf.space" or "https://huggingface.co/spaces/username/space"
 const PHARMACY_DEMAND_MODEL_ID =
   process.env.NEXT_PUBLIC_PHARMACY_DEMAND_MODEL_ID ||
   process.env.NEXT_PUBLIC_PHARMACY_DEMAND_MODEL_URL ||
   "";
+
+// Normalize HF Space URL: convert huggingface.co/spaces/user/space to https://user-space.hf.space
+function normalizeSpaceUrl(url: string): string {
+  if (!url) return "";
+  const trimmed = url.trim();
+  const match = trimmed.match(
+    /^https?:\/\/huggingface\.co\/spaces\/([^/]+)\/([^/?#]+)/i,
+  );
+  if (match) {
+    const user = match[1];
+    const space = match[2];
+    return `https://${user}-${space}.hf.space`;
+  }
+  return trimmed;
+}
+
+const RESOLVED_SPACE_URL =
+  normalizeSpaceUrl(PHARMACY_DEMAND_MODEL_ID) || PHARMACY_DEMAND_MODEL_ID;
 
 // Hugging Face API Token (optional, but recommended for private models)
 const HF_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || "";
@@ -19,7 +37,10 @@ const HF_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || "";
 const API_REQUEST_TIMEOUT = 30000; // 30 seconds
 
 // Determine if we're using Inference API or Gradio Space
-const isGradioSpace = PHARMACY_DEMAND_MODEL_ID.startsWith("http");
+const isGradioSpace =
+  PHARMACY_DEMAND_MODEL_ID.startsWith("http") ||
+  RESOLVED_SPACE_URL.startsWith("http");
+
 const INFERENCE_API_BASE = "https://api-inference.huggingface.co/models";
 
 export interface PharmacyDemandInput {
@@ -56,26 +77,27 @@ export class PharmacyDemandApiService {
     input: PharmacyDemandInput,
   ): Promise<PharmacyDemandResult> {
     try {
-      // Prepare inputs as array in the order expected by the Gradio model
-      const inputs: (string | number)[] = [
+      // Prepare inputs as array in the order expected by the Gradio model (app.py predict_demand)
+      // All values sent as numbers so the Space receives correct types for sklearn/pandas
+      const inputs: number[] = [
         1, // pharmacy_id
         Number(input.medicine_id), // medicine_id
-        input.price,
-        input.inventory_level,
-        input.expiry_days,
-        input.location_lat,
-        input.location_long,
-        input.promotion_flag,
+        Number(input.price),
+        Number(input.inventory_level),
+        Number(input.expiry_days),
+        Number(input.location_lat),
+        Number(input.location_long),
+        Number(input.promotion_flag),
         101, // inventory_id
-        input.inventory_level, // current_stock
+        Number(input.inventory_level), // current_stock
         25, // reorder_level
         7, // supplier_lead_time_days
-        input.location_lat,
-        input.location_long,
+        Number(input.location_lat), // location_lat_y
+        Number(input.location_long), // location_long_y
         1, // delivery_available
         1, // pickup_available
         1.15, // price_markup_factor
-        input.sales_lag_1, // total_prescribed_qty
+        Number(input.sales_lag_1), // total_prescribed_qty
         0.7, // avg_urgency
       ];
 
@@ -84,12 +106,13 @@ export class PharmacyDemandApiService {
         try {
           return await this.predictWithGradio(input, inputs);
         } catch (gradioError) {
-          console.warn(
-            "Gradio failed:",
+          const errMsg =
             gradioError instanceof Error
               ? gradioError.message
-              : String(gradioError),
-          );
+              : typeof gradioError === "object"
+                ? JSON.stringify(gradioError)
+                : String(gradioError);
+          console.warn("Gradio failed:", errMsg);
           // Fall through to direct API
         }
       }
@@ -119,9 +142,13 @@ export class PharmacyDemandApiService {
         if (
           error.message.includes("fetch") ||
           error.message.includes("connect") ||
-          error.message.includes("404")
+          error.message.includes("404") ||
+          error.message.includes("405") ||
+          error.message.includes("500") ||
+          error.message.includes("503") ||
+          error.message.includes("Method Not Allowed")
         ) {
-          // Return a mock prediction when the model is not available
+          // Return a mock prediction when the model is not available or errors
           console.warn(
             "Hugging Face model not available, returning mock prediction",
           );
@@ -183,7 +210,7 @@ export class PharmacyDemandApiService {
     inputs: (string | number)[],
   ): Promise<PharmacyDemandResult> {
     const spaceUrl = isGradioSpace
-      ? PHARMACY_DEMAND_MODEL_ID
+      ? RESOLVED_SPACE_URL
       : `https://${PHARMACY_DEMAND_MODEL_ID.replace("/", "-")}.hf.space`;
 
     // Create an AbortController for timeout
@@ -207,74 +234,91 @@ export class PharmacyDemandApiService {
   }
 
   /**
-   * Fallback method using direct API call (for custom endpoints)
+   * Fallback method using Gradio's /call/predict API (POST then GET event_id)
+   * See: https://gradio.app/guides/querying-gradio-apps-with-curl
    */
   private static async predictDemandDirectAPI(
     fullInput: any,
     inputs: (string | number)[],
   ): Promise<PharmacyDemandResult> {
-    if (!PHARMACY_DEMAND_MODEL_ID) {
+    if (!RESOLVED_SPACE_URL && !PHARMACY_DEMAND_MODEL_ID) {
       throw new Error(
         "Pharmacy demand model URL or ID is not configured. Please set NEXT_PUBLIC_PHARMACY_DEMAND_MODEL_ID or NEXT_PUBLIC_PHARMACY_DEMAND_MODEL_URL environment variable.",
       );
     }
 
     const baseUrl = isGradioSpace
-      ? PHARMACY_DEMAND_MODEL_ID
+      ? RESOLVED_SPACE_URL
       : `https://${PHARMACY_DEMAND_MODEL_ID.replace("/", "-")}.hf.space`;
 
-    // Try different API endpoint formats
-    const endpoints = [
-      "/api/predict",
-      "/api/predict/",
-      "/predict",
-      "/run/predict",
-    ];
-
-    const errors: string[] = [];
-
-    for (const endpoint of endpoints) {
-      try {
-        const url = `${baseUrl}${endpoint}`;
-
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            data: inputs,
-            fn_index: 0,
-          }),
-          signal: AbortSignal.timeout(API_REQUEST_TIMEOUT),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          return this.parsePredictionResult(data);
-        } else {
-          const errorText = await response.text();
-          errors.push(
-            `${endpoint}: ${response.status} - ${errorText.substring(0, 100)}`,
-          );
-          console.warn(
-            `Endpoint ${endpoint} failed:`,
-            response.status,
-            errorText.substring(0, 200),
-          );
-        }
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        errors.push(`${endpoint}: ${errorMsg}`);
-        console.warn(`Endpoint ${endpoint} error:`, errorMsg);
-        // Try next endpoint
-        continue;
-      }
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (HF_API_TOKEN) {
+      headers["Authorization"] = `Bearer ${HF_API_TOKEN}`;
     }
 
-    throw new Error(
-      `Failed to connect to API using all available endpoints. Errors: ${errors.join("; ")}`,
-    );
+    // Step 1: POST to /gradio_api/call/predict (HF Spaces use /gradio_api/ prefix)
+    const postUrl = `${baseUrl}/gradio_api/call/predict`;
+    const postRes = await fetch(postUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ data: inputs }),
+      signal: AbortSignal.timeout(API_REQUEST_TIMEOUT),
+    });
+
+    if (!postRes.ok) {
+      const errorText = await postRes.text();
+      // Log full error so we can see Python traceback from the Space
+      console.warn(
+        "Gradio API error (full response):",
+        errorText.substring(0, 2000),
+      );
+      throw new Error(
+        `Gradio API error: ${postRes.status} - ${errorText.substring(0, 300)}`,
+      );
+    }
+
+    const postData = (await postRes.json()) as { event_id?: string };
+    const eventId = postData?.event_id;
+    if (!eventId) {
+      throw new Error(
+        `Gradio API did not return event_id: ${JSON.stringify(postData).substring(0, 200)}`,
+      );
+    }
+
+    // Step 2: GET result via SSE stream
+    const getUrl = `${baseUrl}/gradio_api/call/predict/${eventId}`;
+    const getRes = await fetch(getUrl, {
+      method: "GET",
+      headers: HF_API_TOKEN ? { Authorization: `Bearer ${HF_API_TOKEN}` } : {},
+      signal: AbortSignal.timeout(API_REQUEST_TIMEOUT),
+    });
+
+    if (!getRes.ok) {
+      throw new Error(
+        `Gradio result fetch error: ${getRes.status} - ${await getRes.text()}`,
+      );
+    }
+
+    const text = await getRes.text();
+    // Parse SSE: last "data: ..." line is usually the final result
+    let dataStr: string | null = null;
+    const lines = text.split(/\r?\n/);
+    for (const line of lines) {
+      if (line.startsWith("data:")) {
+        dataStr = line.replace(/^data:\s*/, "").trim();
+      }
+    }
+    if (!dataStr) dataStr = text.trim();
+    try {
+      const data = JSON.parse(dataStr) as unknown;
+      return this.parsePredictionResult(data);
+    } catch {
+      throw new Error(
+        `Could not parse Gradio response: ${text.substring(0, 300)}`,
+      );
+    }
   }
 
   /**
@@ -553,7 +597,7 @@ export class PharmacyDemandApiService {
 
       // Try Gradio Space health check
       const spaceUrl = isGradioSpace
-        ? PHARMACY_DEMAND_MODEL_ID
+        ? RESOLVED_SPACE_URL
         : `https://${PHARMACY_DEMAND_MODEL_ID.replace("/", "-")}.hf.space`;
 
       const response = await fetch(`${spaceUrl}/`, {
