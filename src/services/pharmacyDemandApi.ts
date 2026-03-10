@@ -58,19 +58,25 @@ export class PharmacyDemandApiService {
     try {
       // Prepare inputs as array in the order expected by the Gradio model
       const inputs: (string | number)[] = [
-        input.medicine_id, // medicine_id
-        input.price, // price
-        input.inventory_level, // inventory_level
-        input.expiry_days, // expiry_days
-        input.location_lat, // location_lat
-        input.location_long, // location_long
-        input.promotion_flag, // promotion_flag
-        input.sales_lag_1, // sales_lag_1
-        input.sales_lag_3, // sales_lag_3
-        input.sales_lag_7, // sales_lag_7
-        input.sales_lag_14, // sales_lag_14
-        input.sales_rolling_mean_7, // sales_rolling_mean_7
-        input.sales_rolling_mean_14, // sales_rolling_mean_14
+        1, // pharmacy_id
+        Number(input.medicine_id), // medicine_id
+        input.price,
+        input.inventory_level,
+        input.expiry_days,
+        input.location_lat,
+        input.location_long,
+        input.promotion_flag,
+        101, // inventory_id
+        input.inventory_level, // current_stock
+        25, // reorder_level
+        7, // supplier_lead_time_days
+        input.location_lat,
+        input.location_long,
+        1, // delivery_available
+        1, // pickup_available
+        1.15, // price_markup_factor
+        input.sales_lag_1, // total_prescribed_qty
+        0.7 // avg_urgency
       ];
 
       // Try Gradio Space (primary method for this model)

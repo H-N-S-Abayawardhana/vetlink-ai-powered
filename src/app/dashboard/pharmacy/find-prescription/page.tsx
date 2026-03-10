@@ -398,7 +398,7 @@ function FindFromPrescriptionModule() {
       {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-          Find From Prescription
+          Find Pet Medicines From Prescription
         </h1>
         <p className="text-sm sm:text-base text-gray-600">
           Upload your prescription and find medications quickly
