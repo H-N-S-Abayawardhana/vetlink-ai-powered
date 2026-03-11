@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AuthGuard } from "@/lib/auth-guard";
 import Image from "next/image";
 import {
@@ -19,8 +19,17 @@ import {
   MapPin,
   Package,
   Truck,
+  Minus,
 } from "lucide-react";
 import { formatLKR } from "@/lib/currency";
+import {
+  addItemToPharmacyCart,
+  loadPharmacyCart,
+  removeItemFromPharmacyCart,
+  savePharmacyCart,
+  updatePharmacyCartQuantity,
+  type PharmacyCartItem,
+} from "@/lib/pharmacyCart";
 
 export default function FindFromPrescriptionPage() {
   return (
@@ -68,36 +77,95 @@ function FindFromPrescriptionModule() {
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const [cart, setCart] = useState<PharmacyCartItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadZoneRef = useRef<HTMLDivElement>(null);
+  const uploadSectionRef = useRef<HTMLDivElement>(null);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // Load shared cart from storage on mount
+  useEffect(() => {
+    setCart(loadPharmacyCart());
+  }, []);
+
+  // Persist shared cart
+  useEffect(() => {
+    savePharmacyCart(cart);
+  }, [cart]);
+
+  const addToCart = (product: any) => {
+    setCart((prev) => addItemToPharmacyCart(prev, product));
+    setShowCart(true);
+  };
+
+  const removeFromCart = (productId: string, pharmacyId: string) => {
+    setCart((prev) => removeItemFromPharmacyCart(prev, productId, pharmacyId));
+  };
+
+  const updateQuantity = (
+    productId: string,
+    pharmacyId: string,
+    delta: number,
+  ) => {
+    setCart((prev) =>
+      updatePharmacyCartQuantity(prev, productId, pharmacyId, delta),
+    );
+  };
+
+  const getCartItemCount = () => {
+    return cart.reduce((count, item) => count + item.quantity, 0);
+  };
+
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const processFile = (file: File) => {
     if (!file) return;
-
-    // Validate file type (images only for API)
     if (!file.type.startsWith("image/")) {
       setError("Please upload an image file (JPG, PNG, WebP, GIF)");
       return;
     }
-
-    // Validate file size (10MB limit)
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     if (file.size > MAX_FILE_SIZE) {
       setError("File size must be less than 10MB");
       return;
     }
-
     setError(null);
     setExtractedText(null);
     setAvailableProducts([]);
     setUploadedFile(file);
-
-    // Preview image
     const reader = new FileReader();
     reader.onload = (event) => {
       setPrescriptionImage(event.target?.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
   };
 
   const handleExtractItems = async () => {
@@ -388,6 +456,9 @@ function FindFromPrescriptionModule() {
     setMatchedProducts([]);
     setError(null);
     setSuccess(null);
+    setShowCart(false);
+    setCart([]);
+    savePharmacyCart([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -396,23 +467,25 @@ function FindFromPrescriptionModule() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-xl shadow-sm border border-emerald-100 p-5 sm:p-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           Find Pet Medicines From Prescription
         </h1>
-        <p className="text-sm sm:text-base text-gray-600">
-          Upload your prescription and find medications quickly
+        <p className="text-sm sm:text-base text-gray-600 max-w-2xl">
+          Upload a photo of the prescription—we’ll extract the medications and show you which pharmacies have them in stock.
         </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 shadow-sm">
           <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
           <p className="text-red-800 text-sm flex-1">{error}</p>
           <button
+            type="button"
             onClick={() => setError(null)}
-            className="cursor-pointer text-red-400 hover:text-red-600"
+            className="cursor-pointer text-red-400 hover:text-red-600 p-1 rounded"
+            aria-label="Dismiss"
           >
             <X className="w-4 h-4" />
           </button>
@@ -420,12 +493,14 @@ function FindFromPrescriptionModule() {
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-          <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-          <p className="text-green-800 text-sm flex-1">{success}</p>
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3 shadow-sm">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+          <p className="text-emerald-800 text-sm flex-1">{success}</p>
           <button
+            type="button"
             onClick={() => setSuccess(null)}
-            className="cursor-pointer text-green-400 hover:text-green-600"
+            className="cursor-pointer text-emerald-400 hover:text-emerald-600 p-1 rounded"
+            aria-label="Dismiss"
           >
             <X className="w-4 h-4" />
           </button>
@@ -434,24 +509,46 @@ function FindFromPrescriptionModule() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upload Section */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Upload Prescription
-            </h2>
-
+        <div className="space-y-6" ref={uploadSectionRef}>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-gray-50/80 border-b border-gray-100 px-4 sm:px-6 py-3">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700">
+                  <Upload className="w-4 h-4" />
+                </span>
+                Upload Prescription
+              </h2>
+              <p className="text-sm text-gray-500 mt-1 ml-10">
+                Photo or scan of the prescription
+              </p>
+            </div>
+            <div className="p-4 sm:p-6">
             {!prescriptionImage ? (
               <div
+                ref={uploadZoneRef}
+                role="button"
+                tabIndex={0}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 sm:p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+                className={`
+                  border-2 border-dashed rounded-xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-200
+                  ${isDragging
+                    ? "border-emerald-500 bg-emerald-50/70 scale-[1.01]"
+                    : "border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/30"
+                  }
+                `}
               >
-                <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 font-medium mb-2">
-                  Click to upload prescription
+                <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 transition-colors ${isDragging ? "bg-emerald-100" : "bg-gray-100"}`}>
+                  <ImageIcon className={`w-10 h-10 ${isDragging ? "text-emerald-600" : "text-gray-400"}`} />
+                </div>
+                <p className="text-gray-700 font-medium mb-1">
+                  {isDragging ? "Drop your file here" : "Click or drag a file here"}
                 </p>
                 <p className="text-sm text-gray-500">
-                  JPG, PNG, WebP, GIF (Max 10MB)
+                  JPG, PNG, WebP, GIF · Max 10MB
                 </p>
                 <input
                   ref={fileInputRef}
@@ -482,7 +579,7 @@ function FindFromPrescriptionModule() {
                   <button
                     onClick={handleExtractItems}
                     disabled={loading}
-                    className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                   >
                     {loading ? (
                       <>
@@ -498,7 +595,7 @@ function FindFromPrescriptionModule() {
                   </button>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="px-4 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     Change
                   </button>
@@ -512,20 +609,21 @@ function FindFromPrescriptionModule() {
                 </div>
               </div>
             )}
+            </div>
           </div>
 
           {/* Extracted text from prescription */}
           {extractedText !== null && (
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-emerald-600" />
                   Prescription text
                 </h2>
                 <button
                   type="button"
                   onClick={copyToClipboard}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -548,15 +646,16 @@ function FindFromPrescriptionModule() {
 
           {/* Extracted Items */}
           {extractedItems.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-emerald-600" />
                   Extracted Medications
                 </h2>
                 <button
+                  type="button"
                   onClick={handleManualEntry}
-                  className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 text-sm bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Add Manually
@@ -576,7 +675,7 @@ function FindFromPrescriptionModule() {
                         handleItemChange(index, "name", e.target.value)
                       }
                       placeholder="Medication name"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-purple-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                     <input
                       type="number"
@@ -589,7 +688,7 @@ function FindFromPrescriptionModule() {
                           parseInt(e.target.value) || 1,
                         )
                       }
-                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-purple-500"
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                     <button
                       onClick={() => handleRemoveItem(index)}
@@ -602,11 +701,12 @@ function FindFromPrescriptionModule() {
               </div>
 
               <button
+                type="button"
                 onClick={handleFindProducts}
                 disabled={
                   searching || extractedItems.every((i) => !i.name.trim())
                 }
-                className="w-full mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full mt-4 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 {searching ? (
                   <>
@@ -628,17 +728,17 @@ function FindFromPrescriptionModule() {
         <div className="space-y-6">
           {/* Available products (from prescription text) */}
           {loadingPharmacies && (
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
-              <div className="flex items-center gap-2 text-gray-500">
-                <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                 <span>Finding products that match your prescription...</span>
               </div>
             </div>
           )}
           {!loadingPharmacies && availableProducts.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-purple-500" />
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-emerald-600" />
                 Products matching your prescription
               </h2>
               <p className="text-sm text-gray-600 mb-4">
@@ -731,13 +831,15 @@ function FindFromPrescriptionModule() {
                             )}
                           </div>
                         </div>
-                        <a
-                          href={`/dashboard/pharmacy/shopping?product=${encodeURIComponent(product.name)}&pharmacy=${encodeURIComponent(product.pharmacyId)}`}
-                          className="mt-2 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
+                        <button
+                          type="button"
+                          onClick={() => addToCart(product)}
+                          disabled={product.stock <= 0}
+                          className="mt-2 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors text-sm cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <ShoppingCart className="w-4 h-4" />
                           Add to cart
-                        </a>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -749,12 +851,14 @@ function FindFromPrescriptionModule() {
             extractedText &&
             availableProducts.length === 0 &&
             matchedProducts.length === 0 && (
-              <div className="bg-white rounded-lg p-6 sm:p-8 shadow-md border border-gray-100 text-center">
-                <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-600 font-medium">
+              <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200 text-center">
+                <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 mb-4">
+                  <ShoppingCart className="w-7 h-7" />
+                </span>
+                <p className="text-gray-700 font-medium">
                   No matching products
                 </p>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="text-gray-500 text-sm mt-1 max-w-sm mx-auto">
                   No products in our system match this prescription. Try adding
                   medications manually to search.
                 </p>
@@ -762,13 +866,13 @@ function FindFromPrescriptionModule() {
             )}
 
           {matchedProducts.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5" />
+                <h2 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <ShoppingCart className="w-5 h-5 text-emerald-600" />
                   Available Products ({matchedProducts.length})
                 </h2>
-                <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-gray-600 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
                   💡{" "}
                   <strong>
                     You can buy these products from these pharmacies:
@@ -813,14 +917,14 @@ function FindFromPrescriptionModule() {
                       className="border border-gray-200 rounded-lg overflow-hidden"
                     >
                       {/* Pharmacy Header */}
-                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4">
+                      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h3 className="font-bold text-lg mb-1">
                               {pharmacyGroup.pharmacyName}
                             </h3>
                             {pharmacyGroup.pharmacyAddress && (
-                              <p className="text-purple-100 text-sm flex items-center gap-1">
+                              <p className="text-emerald-100 text-sm flex items-center gap-1">
                                 <svg
                                   className="w-4 h-4"
                                   fill="none"
@@ -843,7 +947,7 @@ function FindFromPrescriptionModule() {
                                 {pharmacyGroup.pharmacyAddress}
                               </p>
                             )}
-                            <p className="text-purple-100 text-xs mt-1">
+                            <p className="text-emerald-100 text-xs mt-1">
                               {pharmacyGroup.products.length} product
                               {pharmacyGroup.products.length > 1
                                 ? "s"
@@ -903,10 +1007,10 @@ function FindFromPrescriptionModule() {
                                     </span>
                                   </div>
                                   <button
-                                    onClick={() => {
-                                      window.location.href = `/dashboard/pharmacy/shopping?product=${encodeURIComponent(product.name)}&pharmacy=${encodeURIComponent(product.pharmacyId)}`;
-                                    }}
-                                    className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                                    type="button"
+                                    onClick={() => addToCart(product)}
+                                    disabled={!product.stock || product.stock <= 0}
+                                    className="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     <ShoppingCart className="w-4 h-4" />
                                     Add to Cart
@@ -929,18 +1033,197 @@ function FindFromPrescriptionModule() {
             !loadingPharmacies &&
             availableProducts.length === 0 &&
             !extractedText && (
-              <div className="bg-white rounded-lg p-8 sm:p-12 shadow-md border border-gray-100 text-center">
-                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg font-medium">
-                  Upload a prescription to get started
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  Extract medications and find available products
-                </p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-gradient-to-br from-gray-50 to-slate-50/80 px-6 py-8 sm:py-10">
+                  <div className="flex justify-center mb-6">
+                    <span className="flex items-center justify-center w-20 h-20 rounded-2xl bg-emerald-100 text-emerald-600">
+                      <FileText className="w-10 h-10" />
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+                    Upload a prescription to get started
+                  </h3>
+                  <p className="text-gray-500 text-sm text-center max-w-sm mx-auto mb-8">
+                    We’ll extract the medications and show you which pharmacies have them in stock.
+                  </p>
+                  <ol className="space-y-4 text-left max-w-xs mx-auto">
+                    {[
+                      { step: 1, label: "Upload a photo or scan of the prescription" },
+                      { step: 2, label: "We read the text and detect medications" },
+                      { step: 3, label: "See matching products and add to cart" },
+                    ].map(({ step, label }) => (
+                      <li key={step} className="flex items-start gap-3">
+                        <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm">
+                          {step}
+                        </span>
+                        <span className="text-sm text-gray-600 pt-1">{label}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  {/* <button
+                    type="button"
+                    onClick={() => uploadSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                    className="mt-8 w-full max-w-xs mx-auto flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Go to upload area
+                  </button> */}
+                </div>
               </div>
             )}
         </div>
       </div>
+
+      {/* Floating Cart Button */}
+      {getCartItemCount() > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowCart(!showCart)}
+          className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-lg hover:bg-emerald-700 transition-colors flex items-center justify-center cursor-pointer"
+        >
+          <ShoppingCart className="w-6 h-6" />
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            {getCartItemCount()}
+          </span>
+        </button>
+      )}
+
+      {/* Cart Modal */}
+      {showCart && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md h-[80vh] flex flex-col overflow-hidden">
+            <div className="bg-emerald-600 text-white p-5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <ShoppingCart className="w-5 h-5" />
+                  Cart
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowCart(false)}
+                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Close cart"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-emerald-100 text-xs mt-1">
+                Items added from prescription results
+              </p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5">
+              {cart.length === 0 ? (
+                <div className="text-center py-10">
+                  <ShoppingCart className="w-14 h-14 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">Your cart is empty</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {cart.map((item) => (
+                    <div
+                      key={`${item.id}-${item.pharmacyId}`}
+                      className="bg-gray-50 rounded-xl p-4 border border-gray-200"
+                    >
+                      <div className="flex gap-3">
+                        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200">
+                          {item.image ? (
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fill
+                              className="object-cover"
+                              sizes="56px"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-xl">💊</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-semibold text-gray-900 truncate">
+                                {item.name}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">
+                                {item.pharmacyName}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeFromCart(item.id, item.pharmacyId)
+                              }
+                              className="text-red-500 hover:text-red-700 cursor-pointer p-1"
+                              aria-label="Remove item"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateQuantity(item.id, item.pharmacyId, -1)
+                                }
+                                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                                aria-label="Decrease quantity"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <span className="w-10 text-center font-semibold">
+                                {item.quantity}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateQuantity(item.id, item.pharmacyId, 1)
+                                }
+                                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                                aria-label="Increase quantity"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <span className="font-bold text-emerald-700">
+                              {formatLKR(item.price * item.quantity)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {cart.length > 0 && (
+              <div className="border-t border-gray-200 p-5 space-y-3">
+                <div className="flex items-center justify-between font-semibold">
+                  <span className="text-gray-700">Total</span>
+                  <span className="text-emerald-700">
+                    {formatLKR(getTotalPrice())}
+                  </span>
+                </div>
+                <a
+                  href="/dashboard/pharmacy/shopping"
+                  className="w-full inline-flex items-center justify-center px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm transition-colors"
+                >
+                  Proceed to checkout
+                </a>
+                <p className="text-xs text-gray-500">
+                  Checkout happens on the Shopping page.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
