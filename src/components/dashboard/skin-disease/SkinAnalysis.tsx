@@ -1342,48 +1342,24 @@ export default function SkinAnalysis({
                 </div>
               </div>
 
-              {/* XAI: Why did the AI say this? */}
-              <div className="bg-indigo-50/95 border border-indigo-100 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 shadow-sm">
-                <h3 className="text-base sm:text-lg font-semibold text-indigo-900 mb-2 flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5 text-indigo-600 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                    />
-                  </svg>
-                  Why did the AI say this?
-                </h3>
-                {xaiLoading && (
-                  <p className="text-sm text-indigo-700 animate-pulse">
-                    Generating explanation…
+              {/* Explainable AI (XAI) */}
+              <div className="mb-6 sm:mb-8 rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-4 sm:p-6 shadow-sm">
+                <div className="mb-4 sm:mb-5">
+                  <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
+                    Explainable AI (XAI)
+                  </span>
+                  <h3 className="mt-3 text-lg sm:text-xl font-bold text-slate-900">
+                    How the model reached this result
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    This section shows the model&apos;s reasoning in words and
+                    the image regions it focused on.
                   </p>
-                )}
-                {xaiError && !xaiLoading && (
-                  <p className="text-sm text-red-600">{xaiError}</p>
-                )}
-                {xaiExplanation && !xaiLoading && (
-                  <p className="text-sm text-indigo-800/90 leading-relaxed whitespace-pre-line">
-                    {xaiExplanation}
-                  </p>
-                )}
-              </div>
+                </div>
 
-              {/* Saliency / Heatmap (XAI) - collapsible, same XAI styling as above */}
-              {prediction.xaiHeatmapDataUrl && (
-                <div className="bg-indigo-50/95 border border-indigo-100 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => setSaliencyOpen((o) => !o)}
-                    className="w-full text-left flex items-center justify-between gap-2 cursor-pointer hover:opacity-90 transition-opacity"
-                  >
-                    <h3 className="text-base sm:text-lg font-semibold text-indigo-900 flex items-center gap-2">
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-indigo-200 bg-white/90 p-4 sm:p-5 shadow-sm">
+                    <h4 className="text-base sm:text-lg font-semibold text-indigo-900 mb-2 flex items-center gap-2">
                       <svg
                         className="w-5 h-5 text-indigo-600 flex-shrink-0"
                         fill="none"
@@ -1394,66 +1370,132 @@ export default function SkinAnalysis({
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                         />
                       </svg>
-                      Saliency (XAI)
-                    </h3>
-                    <span className="text-sm font-medium text-indigo-600">
-                      {saliencyOpen ? "Hide" : "View Saliency (XAI)"}
-                    </span>
-                    <svg
-                      className={`w-5 h-5 text-indigo-500 flex-shrink-0 transition-transform ${saliencyOpen ? "rotate-180" : ""}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-                  {saliencyOpen && (
-                    <>
-                      <p className="text-sm text-indigo-700 mt-3 mb-3">
-                        Red and yellow areas show where the model focused to
-                        make this prediction.
+                      Text explanation
+                    </h4>
+                    <p className="text-xs sm:text-sm font-medium text-indigo-700 mb-3">
+                      Why the model predicted this condition
+                    </p>
+                    {xaiLoading && (
+                      <p className="text-sm text-indigo-700 animate-pulse">
+                        Generating explanation…
                       </p>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={prediction.xaiHeatmapDataUrl}
-                        alt="Grad-CAM saliency overlay showing regions the model used for prediction"
-                        className="w-full max-w-lg h-auto rounded-lg border border-indigo-200 shadow-sm"
-                      />
-                    </>
+                    )}
+                    {xaiError && !xaiLoading && (
+                      <p className="text-sm text-red-600">{xaiError}</p>
+                    )}
+                    {xaiExplanation && !xaiLoading && (
+                      <p className="text-sm sm:text-[15px] text-slate-700 leading-7 whitespace-pre-line">
+                        {xaiExplanation}
+                      </p>
+                    )}
+                  </div>
+
+                  {prediction.xaiHeatmapDataUrl && (
+                    <div className="rounded-2xl border border-indigo-200 bg-white/90 p-4 sm:p-5 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => setSaliencyOpen((o) => !o)}
+                        className="w-full text-left flex items-center justify-between gap-3 cursor-pointer hover:opacity-90 transition-opacity"
+                      >
+                        <div>
+                          <h4 className="text-base sm:text-lg font-semibold text-indigo-900 flex items-center gap-2">
+                            <svg
+                              className="w-5 h-5 text-indigo-600 flex-shrink-0"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                            Saliency map
+                          </h4>
+                          <p className="mt-1 text-xs sm:text-sm text-slate-600">
+                            Visual proof of where the model looked in the image
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs sm:text-sm font-medium text-indigo-700">
+                            {saliencyOpen ? "Hide map" : "View map"}
+                          </span>
+                          <svg
+                            className={`w-5 h-5 text-indigo-500 transition-transform ${saliencyOpen ? "rotate-180" : ""}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                      </button>
+                      {saliencyOpen && (
+                        <>
+                          <p className="text-sm text-slate-600 mt-3 mb-3">
+                            Red and yellow areas show where the model focused
+                            most strongly to make this prediction.
+                          </p>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={prediction.xaiHeatmapDataUrl}
+                            alt="Grad-CAM saliency overlay showing regions the model used for prediction"
+                            className="w-full max-w-lg h-auto rounded-xl border border-indigo-200 shadow-sm"
+                          />
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
+              </div>
 
-              {/* AI Health Assistant - Only show for diseases, not for healthy */}
-              {prediction.prediction &&
-                prediction.prediction.parsed?.disease?.toLowerCase() !==
-                  "healthy" && (
-                  <AIGuidanceCards
-                    ref={guidanceCardsRef}
-                    diseaseName={prediction.prediction.disease}
-                    diseaseStage={
-                      prediction.prediction.parsed?.severity === "severe"
-                        ? "Severe"
-                        : prediction.prediction.parsed?.severity === "mild"
-                          ? "Mild"
-                          : null
-                    }
-                  />
-                )}
+              {/* Guidance section kept visually separate from XAI */}
+              <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-slate-200">
+                <div className="mb-4 sm:mb-5">
+                  <span className="inline-flex items-center rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-teal-700">
+                    Owner Guidance
+                  </span>
+                  <h3 className="mt-3 text-lg sm:text-xl font-bold text-slate-900">
+                    Care guidance and next steps
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    This section is separate from XAI and focuses on practical
+                    pet-care guidance for the owner.
+                  </p>
+                </div>
 
-              {/* Healthy Skin Care Card - Only show for healthy detection */}
-              {prediction.prediction &&
-                prediction.prediction.parsed?.disease?.toLowerCase() ===
-                  "healthy" && <HealthySkinCard ref={healthySkinCardRef} />}
+                {/* AI Health Assistant - Only show for diseases, not for healthy */}
+                {prediction.prediction &&
+                  prediction.prediction.parsed?.disease?.toLowerCase() !==
+                    "healthy" && (
+                    <AIGuidanceCards
+                      ref={guidanceCardsRef}
+                      diseaseName={prediction.prediction.disease}
+                      diseaseStage={
+                        prediction.prediction.parsed?.severity === "severe"
+                          ? "Severe"
+                          : prediction.prediction.parsed?.severity === "mild"
+                            ? "Mild"
+                            : null
+                      }
+                    />
+                  )}
+
+                {/* Healthy Skin Care Card - Only show for healthy detection */}
+                {prediction.prediction &&
+                  prediction.prediction.parsed?.disease?.toLowerCase() ===
+                    "healthy" && <HealthySkinCard ref={healthySkinCardRef} />}
+              </div>
 
               {/* Disclaimer */}
               <div className="mt-4 sm:mt-6 p-3 sm:p-4 md:p-5 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
