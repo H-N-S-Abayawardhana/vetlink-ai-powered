@@ -169,6 +169,7 @@ export async function POST(
 
     const formData = await request.formData();
     const video = formData.get("video");
+    const existingVideoUrl = String(formData.get("videoUrl") || "").trim();
 
     // Limping detection results
     const limpingClass = String(formData.get("limpingClass") || "").trim();
@@ -287,8 +288,8 @@ export async function POST(
         : safeJsonParse(String(recommendationsRaw || ""));
 
     // Upload video to S3 if provided
-    let videoUrl: string | null = null;
-    if (video instanceof File) {
+    let videoUrl: string | null = existingVideoUrl || null;
+    if (!videoUrl && video instanceof File) {
       const mime = video.type || "video/mp4";
       const ext = extFromMime(mime);
       const filename = `limping-${id}-${Date.now()}.${ext}`;

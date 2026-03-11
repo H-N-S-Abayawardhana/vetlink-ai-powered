@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import GaitApiService, { LimpingDetectionResult } from "@/services/gaitApi";
+import { getS3ObjectFileByUrl } from "@/lib/s3";
 
 // Configure route for longer execution time (video processing can take time)
 export const maxDuration = 300; // 5 minutes
@@ -16,17 +17,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const formData = await request.formData();
-    const videoFile = formData.get("video") as File;
+    const contentType = request.headers.get("content-type") || "";
+    let videoFile: File | null = null;
 
-    if (!videoFile) {
-      return NextResponse.json(
-        { error: "Video file is required" },
-        { status: 400 },
-      );
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
+      const videoUrl = String(body?.videoUrl || "").trim();
+
+      if (!videoUrl) {
+        return NextResponse.json(
+          { error: "Video URL is required" },
+          { status: 400 },
+        );
+      }
+
+      videoFile = await getS3ObjectFileByUrl(videoUrl);
+    } else {
+      const formData = await request.formData();
+      const uploadedVideo = formData.get("video");
+
+      if (!(uploadedVideo instanceof File)) {
+        return NextResponse.json(
+          { error: "Video file is required" },
+          { status: 400 },
+        );
+      }
+
+      videoFile = uploadedVideo;
     }
 
-    // Validate file type
     if (!videoFile.type.startsWith("video/")) {
       return NextResponse.json(
         { error: "File must be a video" },
