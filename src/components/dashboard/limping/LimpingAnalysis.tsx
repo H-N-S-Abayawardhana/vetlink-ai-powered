@@ -486,6 +486,43 @@ export default function LimpingAnalysis({
   >("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isUploadingToS3, setIsUploadingToS3] = useState(false);
+  const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
+
+  const uploadVideoToStorage = async (file: File): Promise<string> => {
+    const presignResponse = await fetch("/api/uploads/limping/presign", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type || "video/mp4",
+      }),
+    });
+
+    if (!presignResponse.ok) {
+      const errorData = await presignResponse.json().catch(() => null);
+      throw new Error(
+        errorData?.error || "Failed to prepare limping video upload",
+      );
+    }
+
+    const uploadData = await presignResponse.json();
+    const uploadResponse = await fetch(uploadData.uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type || "video/mp4",
+      },
+      body: file,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error("Failed to upload limping video to storage");
+    }
+
+    return uploadData.videoUrl;
+  };
 
   const handleVideoSelect = async (file: File) => {
     const url = URL.createObjectURL(file);
@@ -493,6 +530,7 @@ export default function LimpingAnalysis({
     setAnalysisResult(null);
     setError(null);
     setLimpingResult(null);
+    setUploadedVideoUrl(null);
 
     let videoToUpload = file;
     const fileSizeMB = file.size / (1024 * 1024);
@@ -518,20 +556,26 @@ export default function LimpingAnalysis({
 
     setSelectedVideo(videoToUpload);
 
-    setIsAnalyzingVideo(true);
     try {
-      const formData = new FormData();
-      formData.append("video", videoToUpload);
+      setIsUploadingToS3(true);
+      const videoUrl = await uploadVideoToStorage(videoToUpload);
+      setUploadedVideoUrl(videoUrl);
+      setIsUploadingToS3(false);
+
+      setIsAnalyzingVideo(true);
 
       const response = await fetch("/api/limping/analyze", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ videoUrl }),
       });
 
       if (!response.ok) {
         if (response.status === 413) {
           throw new Error(
-            "The analysis server rejected this upload because the request payload was too large. The app no longer applies a video size limit, but the upstream server may still reject unusually large uploads.",
+            "The analysis request was still rejected as too large by the upstream service.",
           );
         }
 
@@ -577,6 +621,7 @@ export default function LimpingAnalysis({
       setError(err instanceof Error ? err.message : "Failed to analyze video");
       setShowHealthForm(true);
     } finally {
+      setIsUploadingToS3(false);
       setIsAnalyzingVideo(false);
     }
   };
@@ -661,11 +706,15 @@ export default function LimpingAnalysis({
       setAnalysisResult(result);
 
       // Save to pets table if pet is selected
-      if (selectedPet?.id && selectedVideo) {
+      if (selectedPet?.id && (selectedVideo || uploadedVideoUrl)) {
         setSaveStatus("saving");
         try {
           const saveFormData = new FormData();
-          saveFormData.append("video", selectedVideo);
+          if (uploadedVideoUrl) {
+            saveFormData.append("videoUrl", uploadedVideoUrl);
+          } else if (selectedVideo) {
+            saveFormData.append("video", selectedVideo);
+          }
           // ✅ FIXED: Use correct field names
           saveFormData.append("limpingClass", limpingResult?.prediction || "");
           saveFormData.append(
@@ -760,6 +809,8 @@ export default function LimpingAnalysis({
     setIsAnalyzingVideo(false);
     setSaveStatus("idle");
     setSaveError(null);
+    setIsUploadingToS3(false);
+    setUploadedVideoUrl(null);
   };
 
   const generatePDFReport = () => {
@@ -1365,14 +1416,16 @@ export default function LimpingAnalysis({
                   className="w-full h-auto max-h-64 sm:max-h-80 md:max-h-96 rounded-lg"
                 />
 
-                {(isCompressing || isAnalyzingVideo) && (
+                {(isCompressing || isUploadingToS3 || isAnalyzingVideo) && (
                   <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       <span className="text-sm text-blue-800">
                         {isCompressing
                           ? "Compressing video to reduce file size..."
-                          : "Analyzing video for limping detection..."}
+                          : isUploadingToS3
+                            ? "Uploading video to secure storage..."
+                            : "Analyzing video for limping detection..."}
                       </span>
                     </div>
                   </div>
