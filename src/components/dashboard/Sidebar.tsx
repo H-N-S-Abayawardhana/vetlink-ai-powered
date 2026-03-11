@@ -144,7 +144,7 @@ const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
         roles: ["SUPER_ADMIN", "VETERINARIAN", "PHARMACIST"],
       },
       {
-        name: "Shopping",
+        name: "Pharmacy Shopping",
         href: "/dashboard/pharmacy/shopping",
         icon: ShoppingCartIcon,
         roles: ["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"],

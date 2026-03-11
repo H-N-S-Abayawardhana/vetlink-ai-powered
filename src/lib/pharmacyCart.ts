@@ -10,9 +10,15 @@ export type PharmacyCartItem = {
 };
 
 const STORAGE_KEY = "vetlink:pharmacyCart:v1";
+const CART_UPDATED_EVENT = "vetlink:pharmacy-cart-updated";
 
 function isBrowser() {
   return typeof window !== "undefined" && typeof localStorage !== "undefined";
+}
+
+function emitCartUpdated() {
+  if (!isBrowser()) return;
+  window.dispatchEvent(new CustomEvent(CART_UPDATED_EVENT));
 }
 
 export function loadPharmacyCart(): PharmacyCartItem[] {
@@ -32,6 +38,7 @@ export function savePharmacyCart(cart: PharmacyCartItem[]) {
   if (!isBrowser()) return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    emitCartUpdated();
   } catch {
     // ignore quota/serialization issues
   }
@@ -41,9 +48,35 @@ export function clearPharmacyCart() {
   if (!isBrowser()) return;
   try {
     localStorage.removeItem(STORAGE_KEY);
+    emitCartUpdated();
   } catch {
     // ignore
   }
+}
+
+export function subscribeToPharmacyCart(
+  onChange: (cart: PharmacyCartItem[]) => void,
+) {
+  if (!isBrowser()) {
+    return () => {};
+  }
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key && event.key !== STORAGE_KEY) return;
+    onChange(loadPharmacyCart());
+  };
+
+  const handleCustom = () => {
+    onChange(loadPharmacyCart());
+  };
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(CART_UPDATED_EVENT, handleCustom);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(CART_UPDATED_EVENT, handleCustom);
+  };
 }
 
 export function addItemToPharmacyCart(
