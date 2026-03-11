@@ -3,14 +3,11 @@
 import { AuthGuard } from "@/lib/auth-guard";
 import { useSession } from "next-auth/react";
 import InventoryList from "@/components/dashboard/pharmacy/InventoryList";
-import PrescriptionMatcher from "@/components/dashboard/pharmacy/PrescriptionMatcher";
-import StatsCards from "@/components/dashboard/pharmacy/StatsCards";
 import SalesChart from "@/components/dashboard/pharmacy/SalesChart";
 import TopProducts from "@/components/dashboard/pharmacy/TopProducts";
 import RecentSales from "@/components/dashboard/pharmacy/RecentSales";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import ProductInventory from "@/components/dashboard/pharmacy/ProductInventory";
 import PharmacyDemandPredictor from "@/components/dashboard/pharmacy/PharmacyDemandPredictor";
 import { formatLKR } from "@/lib/currency";
 import {
@@ -83,15 +80,27 @@ export default function PharmacyPage() {
       allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"]}
     >
       <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Pharmacy Dashboard
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            Welcome back, {session?.user?.name || "User"}. Manage inventory,
-            view analytics, and match prescriptions.
-          </p>
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-xl shadow-sm border border-emerald-100 p-5 sm:p-6">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-medium text-emerald-700">
+                Pharmacy operations
+              </div>
+              <h1 className="mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                Pharmacy Dashboard
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-gray-600">
+                Welcome back, {session?.user?.name || "User"}. Manage inventory,
+                review analytics, and forecast medication demand from one place.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-600 lg:max-w-sm">
+              Monitor revenue, keep stock levels healthy, and make faster
+              replenishment decisions with a simpler pharmacy workflow.
+            </div>
+          </div>
+
           <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-200 pt-4">
             {[
               { id: "overview", label: "Overview" },
@@ -104,7 +113,7 @@ export default function PharmacyPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   activeTab === tab.id
-                    ? "bg-blue-600 text-white"
+                    ? "bg-emerald-600 text-white"
                     : "border border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -118,7 +127,7 @@ export default function PharmacyPage() {
         <div className="space-y-6">
           {!dashboard ? (
             <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
-              <div className="animate-spin w-10 h-10 border-2 border-gray-200 border-t-blue-600 rounded-full mx-auto mb-4" />
+              <div className="animate-spin w-10 h-10 border-2 border-gray-200 border-t-emerald-600 rounded-full mx-auto mb-4" />
               <p className="text-sm text-gray-600">Loading dashboard data...</p>
             </div>
           ) : (
@@ -133,8 +142,10 @@ export default function PharmacyPage() {
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       <button
-                        onClick={() => setActiveTab("prescriptions")}
-                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
+                        onClick={() =>
+                          router.push("/dashboard/pharmacy/find-prescription")
+                        }
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/60 transition-colors cursor-pointer"
                       >
                         <div className="font-medium text-gray-900">
                           Match Prescription
@@ -147,7 +158,7 @@ export default function PharmacyPage() {
                         onClick={() =>
                           router.push("/dashboard/pharmacy/inventory")
                         }
-                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/60 transition-colors cursor-pointer"
                       >
                         <div className="font-medium text-gray-900">
                           Browse Inventory
@@ -158,7 +169,7 @@ export default function PharmacyPage() {
                       </button>
                       <button
                         onClick={() => setActiveTab("demand")}
-                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/60 transition-colors cursor-pointer"
                       >
                         <div className="font-medium text-gray-900">
                           Predict Demand
@@ -169,7 +180,7 @@ export default function PharmacyPage() {
                       </button>
                       <button
                         onClick={() => setActiveTab("analytics")}
-                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer"
+                        className="text-left p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/60 transition-colors cursor-pointer"
                       >
                         <div className="font-medium text-gray-900">
                           View Reports
@@ -188,7 +199,6 @@ export default function PharmacyPage() {
                         title: "Total Revenue",
                         value: formatLKR(dashboard.totalRevenue),
                         change: "+8%",
-                        color: "from-green-500 to-emerald-500",
                         icon: "💰",
                         bgColor: "bg-green-50",
                       },
@@ -196,34 +206,31 @@ export default function PharmacyPage() {
                         title: "Total Orders",
                         value: dashboard.totalOrders,
                         change: "+2%",
-                        color: "from-blue-500 to-indigo-500",
                         icon: "🛒",
-                        bgColor: "bg-blue-50",
+                        bgColor: "bg-emerald-50",
                       },
                       {
                         title: "Medications",
                         value: dashboard.top.length,
                         change: "Available",
-                        color: "from-purple-500 to-pink-500",
                         icon: "💊",
-                        bgColor: "bg-purple-50",
+                        bgColor: "bg-teal-50",
                       },
                       {
                         title: "Stock Items",
                         value: `${dashboard.totalStock ?? 0}`,
                         change: "Low stock: 3",
-                        color: "from-orange-500 to-red-500",
                         icon: "📦",
                         bgColor: "bg-orange-50",
                       },
                     ].map((stat, idx) => (
                       <div
                         key={idx}
-                        className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow"
+                        className="bg-white rounded-lg p-5 shadow-md border border-gray-200"
                       >
                         <div className="flex items-start justify-between mb-4">
                           <div
-                            className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center text-2xl`}
+                            className={`w-12 h-12 rounded-lg ${stat.bgColor} flex items-center justify-center text-2xl`}
                           >
                             {stat.icon}
                           </div>
@@ -251,13 +258,13 @@ export default function PharmacyPage() {
 
                   {/* Charts Section */}
                   <div className="grid gap-6 lg:grid-cols-3">
-                    <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <div className="lg:col-span-2 bg-white rounded-lg p-6 shadow-md border border-gray-200">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                           <span>📊</span>
                           Sales Overview
                         </h3>
-                        <select className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <select className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                           <option>Last 7 days</option>
                           <option>Last 30 days</option>
                           <option>Last 3 months</option>
@@ -269,7 +276,7 @@ export default function PharmacyPage() {
                       />
 
                       {/* Business improvement suggestions (placeholder) */}
-                      <div className="mt-6 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                      <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="text-md font-semibold text-gray-900 flex items-center gap-2">
                             💡 Business improvement suggestions
@@ -297,7 +304,7 @@ export default function PharmacyPage() {
                     </div>
 
                     <div className="lg:col-span-1 space-y-6">
-                      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                      <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
                         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                           <span>🏆</span>
                           Top Products
@@ -305,7 +312,7 @@ export default function PharmacyPage() {
                         <TopProducts products={dashboard.top || []} />
                       </div>
 
-                      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                      <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
                         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                           <span>🕒</span>
                           Recent Sales
@@ -328,21 +335,21 @@ export default function PharmacyPage() {
                   className="space-y-6 animate-fadeIn"
                   id="pharmacy-inventory"
                 >
-                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl p-6 shadow-xl text-white">
-                    <div className="flex items-center justify-between">
+                  <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
-                        <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
                           <span>📦</span>
                           Inventory Management
                         </h3>
-                        <p className="text-blue-100 text-sm">
+                        <p className="text-gray-600 text-sm">
                           Browse, search, and manage all pharmacy products
                         </p>
                       </div>
                       {pharmacyId && (
                         <button
                           onClick={() => setIsAddItemModalOpen(true)}
-                          className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
+                          className="px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <Plus className="w-5 h-5" />
                           Add Item
@@ -364,14 +371,14 @@ export default function PharmacyPage() {
               {/* Analytics Tab */}
               {activeTab === "analytics" && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                    <h3 className="text- xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                       <span>📈</span>
                       Detailed Analytics
                     </h3>
                     <div className="grid gap-6 lg:grid-cols-2">
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-                        <h4 className="font-semibold text-blue-900 mb-3">
+                      <div className="bg-emerald-50 rounded-lg p-6 border border-emerald-200">
+                        <h4 className="font-semibold text-emerald-900 mb-3">
                           Revenue Breakdown
                         </h4>
                         <SalesChart
@@ -379,8 +386,8 @@ export default function PharmacyPage() {
                           labels={dashboard.chart?.labels || []}
                         />
                       </div>
-                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
-                        <h4 className="font-semibold text-purple-900 mb-3">
+                      <div className="bg-teal-50 rounded-lg p-6 border border-teal-200">
+                        <h4 className="font-semibold text-teal-900 mb-3">
                           Top Performing Items
                         </h4>
                         <TopProducts products={dashboard.top || []} />
@@ -498,14 +505,21 @@ function AddInventoryItemModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-200 p-5 sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Add New Inventory Item</h2>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+                Inventory
+              </p>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                Add New Inventory Item
+              </h2>
+            </div>
             <button
               onClick={onClose}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer"
+              className="text-gray-500 hover:bg-gray-100 p-2 rounded-lg transition-colors cursor-pointer"
             >
               <XCircle className="w-6 h-6" />
             </button>
@@ -538,7 +552,7 @@ function AddInventoryItemModal({
                 setFormData({ ...formData, name: e.target.value })
               }
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               placeholder="e.g., Amoxicillin"
             />
           </div>
@@ -555,7 +569,7 @@ function AddInventoryItemModal({
                   setFormData({ ...formData, form: e.target.value })
                 }
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="e.g., Capsule, Tablet"
               />
             </div>
@@ -569,7 +583,7 @@ function AddInventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, strength: e.target.value })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="e.g., 250 mg"
               />
             </div>
@@ -587,7 +601,7 @@ function AddInventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, stock: Number(e.target.value) })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
             <div>
@@ -600,7 +614,7 @@ function AddInventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, expiry: e.target.value })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
             <div>
@@ -615,7 +629,7 @@ function AddInventoryItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, price: Number(e.target.value) })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
           </div>
@@ -632,7 +646,7 @@ function AddInventoryItemModal({
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+              className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>
