@@ -24,22 +24,28 @@ export default function PharmacyDemandPredictor() {
   const [medicineOptions, setMedicineOptions] = useState<string[]>([]);
   const [loadingMedicineData, setLoadingMedicineData] = useState(false);
 
+  const emptyField = "";
+
   // Form state
   const [medicineId, setMedicineId] = useState<string>("");
-  const [price, setPrice] = useState<number>(1000.0);
-  const [inventoryLevel, setInventoryLevel] = useState<number>(100);
-  const [expiryDays, setExpiryDays] = useState<number>(180);
-  const [locationLat, setLocationLat] = useState<number>(7.2906);
-  const [locationLong, setLocationLong] = useState<number>(80.6337);
-  const [promotionFlag, setPromotionFlag] = useState<number>(0);
+  const [price, setPrice] = useState<number | "">(emptyField);
+  const [inventoryLevel, setInventoryLevel] = useState<number | "">(emptyField);
+  const [expiryDays, setExpiryDays] = useState<number | "">(emptyField);
+  const [locationLat, setLocationLat] = useState<number | "">(emptyField);
+  const [locationLong, setLocationLong] = useState<number | "">(emptyField);
+  const [promotionFlag, setPromotionFlag] = useState<number | "">(emptyField);
 
   // Historical sales data
-  const [salesLag1, setSalesLag1] = useState<number>(15);
-  const [salesLag3, setSalesLag3] = useState<number>(12);
-  const [salesLag7, setSalesLag7] = useState<number>(18);
-  const [salesLag14, setSalesLag14] = useState<number>(14);
-  const [salesRollingMean7, setSalesRollingMean7] = useState<number>(15.5);
-  const [salesRollingMean14, setSalesRollingMean14] = useState<number>(14.8);
+  const [salesLag1, setSalesLag1] = useState<number | "">(emptyField);
+  const [salesLag3, setSalesLag3] = useState<number | "">(emptyField);
+  const [salesLag7, setSalesLag7] = useState<number | "">(emptyField);
+  const [salesLag14, setSalesLag14] = useState<number | "">(emptyField);
+  const [salesRollingMean7, setSalesRollingMean7] = useState<number | "">(
+    emptyField,
+  );
+  const [salesRollingMean14, setSalesRollingMean14] = useState<number | "">(
+    emptyField,
+  );
 
   // Batch prediction state
   const [batchFile, setBatchFile] = useState<File | null>(null);
@@ -50,6 +56,42 @@ export default function PharmacyDemandPredictor() {
   const [activeTab, setActiveTab] = useState<"single" | "batch" | "info">(
     "single",
   );
+  const inputClassName =
+    "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20";
+  const sectionClassName = "rounded-lg border border-gray-200 bg-white p-5";
+
+  const parseNumberInput = (value: string): number | "" =>
+    value === "" ? "" : Number(value);
+
+  const clearFormFields = () => {
+    setPrice("");
+    setInventoryLevel("");
+    setExpiryDays("");
+    setLocationLat("");
+    setLocationLong("");
+    setPromotionFlag("");
+    setSalesLag1("");
+    setSalesLag3("");
+    setSalesLag7("");
+    setSalesLag14("");
+    setSalesRollingMean7("");
+    setSalesRollingMean14("");
+  };
+
+  const hasIncompleteFields =
+    !medicineId ||
+    price === "" ||
+    inventoryLevel === "" ||
+    expiryDays === "" ||
+    locationLat === "" ||
+    locationLong === "" ||
+    promotionFlag === "" ||
+    salesLag1 === "" ||
+    salesLag3 === "" ||
+    salesLag7 === "" ||
+    salesLag14 === "" ||
+    salesRollingMean7 === "" ||
+    salesRollingMean14 === "";
 
   // Fetch pharmacy data and medicine options
   useEffect(() => {
@@ -69,11 +111,6 @@ export default function PharmacyDemandPredictor() {
 
           if (userPharmacy) {
             setPharmacy(userPharmacy);
-            // Set location from pharmacy
-            if (userPharmacy.location?.lat && userPharmacy.location?.lng) {
-              setLocationLat(userPharmacy.location.lat);
-              setLocationLong(userPharmacy.location.lng);
-            }
 
             // Fetch inventory to get medicine options
             try {
@@ -107,8 +144,11 @@ export default function PharmacyDemandPredictor() {
   // Fetch medicine data when Medicine ID is selected
   const handleMedicineIdChange = async (selectedMedicineId: string) => {
     setMedicineId(selectedMedicineId);
+    setError(null);
+    setPrediction(null);
 
     if (!selectedMedicineId || !pharmacy?.id) {
+      clearFormFields();
       return;
     }
 
@@ -124,36 +164,36 @@ export default function PharmacyDemandPredictor() {
         // Auto-populate form fields with fetched data
         if (data.calculated_fields) {
           const fields = data.calculated_fields;
-          if (fields.price) setPrice(fields.price);
-          if (fields.inventory_level) setInventoryLevel(fields.inventory_level);
-          if (fields.expiry_days) setExpiryDays(fields.expiry_days);
+          setPrice(fields.price ?? "");
+          setInventoryLevel(fields.inventory_level ?? "");
+          setExpiryDays(fields.expiry_days ?? "");
           if (fields.promotion_flag !== undefined)
             setPromotionFlag(fields.promotion_flag);
+          else setPromotionFlag("");
         }
 
         if (data.location) {
-          if (data.location.lat) setLocationLat(data.location.lat);
-          if (data.location.lng) setLocationLong(data.location.lng);
+          setLocationLat(data.location.lat ?? "");
+          setLocationLong(data.location.lng ?? "");
         }
 
         if (data.sales_data) {
           const sales = data.sales_data;
-          if (sales.sales_lag_1 !== undefined) setSalesLag1(sales.sales_lag_1);
-          if (sales.sales_lag_3 !== undefined) setSalesLag3(sales.sales_lag_3);
-          if (sales.sales_lag_7 !== undefined) setSalesLag7(sales.sales_lag_7);
-          if (sales.sales_lag_14 !== undefined)
-            setSalesLag14(sales.sales_lag_14);
-          if (sales.sales_rolling_mean_7 !== undefined)
-            setSalesRollingMean7(sales.sales_rolling_mean_7);
-          if (sales.sales_rolling_mean_14 !== undefined)
-            setSalesRollingMean14(sales.sales_rolling_mean_14);
+          setSalesLag1(sales.sales_lag_1 ?? "");
+          setSalesLag3(sales.sales_lag_3 ?? "");
+          setSalesLag7(sales.sales_lag_7 ?? "");
+          setSalesLag14(sales.sales_lag_14 ?? "");
+          setSalesRollingMean7(sales.sales_rolling_mean_7 ?? "");
+          setSalesRollingMean14(sales.sales_rolling_mean_14 ?? "");
         }
       } else {
         console.warn("Failed to fetch medicine data:", data.error);
+        clearFormFields();
         // Don't show error to user, just log it
       }
     } catch (err) {
       console.error("Error fetching medicine data:", err);
+      clearFormFields();
       // Don't show error to user, just log it
     } finally {
       setLoadingMedicineData(false);
@@ -161,6 +201,13 @@ export default function PharmacyDemandPredictor() {
   };
 
   const handlePredict = async () => {
+    if (hasIncompleteFields) {
+      setError(
+        "Select a Medicine ID and complete all fields before predicting.",
+      );
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setPrediction(null);
@@ -173,18 +220,18 @@ export default function PharmacyDemandPredictor() {
         },
         body: JSON.stringify({
           medicine_id: medicineId,
-          price: price,
-          inventory_level: inventoryLevel,
-          expiry_days: expiryDays,
-          location_lat: locationLat,
-          location_long: locationLong,
-          promotion_flag: promotionFlag,
-          sales_lag_1: salesLag1,
-          sales_lag_3: salesLag3,
-          sales_lag_7: salesLag7,
-          sales_lag_14: salesLag14,
-          sales_rolling_mean_7: salesRollingMean7,
-          sales_rolling_mean_14: salesRollingMean14,
+          price: Number(price),
+          inventory_level: Number(inventoryLevel),
+          expiry_days: Number(expiryDays),
+          location_lat: Number(locationLat),
+          location_long: Number(locationLong),
+          promotion_flag: Number(promotionFlag),
+          sales_lag_1: Number(salesLag1),
+          sales_lag_3: Number(salesLag3),
+          sales_lag_7: Number(salesLag7),
+          sales_lag_14: Number(salesLag14),
+          sales_rolling_mean_7: Number(salesRollingMean7),
+          sales_rolling_mean_14: Number(salesRollingMean14),
         }),
       });
 
@@ -258,98 +305,81 @@ export default function PharmacyDemandPredictor() {
 
   const handleReset = () => {
     setMedicineId("");
-    setPrice(1000.0);
-    setInventoryLevel(100);
-    setExpiryDays(180);
-    setLocationLat(7.2906);
-    setLocationLong(80.6337);
-    setPromotionFlag(0);
-    setSalesLag1(15);
-    setSalesLag3(12);
-    setSalesLag7(18);
-    setSalesLag14(14);
-    setSalesRollingMean7(15.5);
-    setSalesRollingMean14(14.8);
+    clearFormFields();
     setError(null);
     setPrediction(null);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2">
-            <span>🏥</span>
-            Pharmacy Sales Prediction & Inventory Optimization
-          </h2>
-          <p className="text-blue-100 text-sm">
-            Powered by XGBoost Machine Learning Model
-          </p>
-          <p className="text-blue-100 text-xs mt-2">
-            This application predicts pharmaceutical sales demand and provides
-            intelligent inventory management recommendations.
-          </p>
+      <div className="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-5 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-medium text-emerald-700">
+              Demand prediction
+            </div>
+            <h2 className="mt-3 text-2xl font-semibold text-gray-900">
+              Pharmacy Sales Prediction
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Predict medicine demand and review inventory risk signals using
+              your pharmacy data and recent sales patterns.
+            </p>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600 lg:max-w-sm">
+            Powered by the XGBoost forecasting model with inventory-aware
+            recommendations for restocking and expiry planning.
+          </div>
         </div>
       </div>
 
       {loadingData && (
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+        <div className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm">
+          <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
           <p className="text-gray-600">Loading pharmacy data...</p>
         </div>
       )}
 
       {!loadingData && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+          <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4">
+            {[
+              { id: "single", label: "Single Prediction" },
+              { id: "batch", label: "Batch Prediction" },
+              { id: "info", label: "Model Information" },
+            ].map((tab) => (
               <button
-                className={`px-6 py-4 text-sm font-medium border-b-2 cursor-pointer ${
-                  activeTab === "single"
-                    ? "border-indigo-500 text-indigo-600 bg-indigo-50"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                key={tab.id}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                  activeTab === tab.id
+                    ? "bg-emerald-600 text-white"
+                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}
-                onClick={() => setActiveTab("single")}
+                onClick={() =>
+                  setActiveTab(tab.id as "single" | "batch" | "info")
+                }
               >
-                📊 Single Prediction
+                {tab.label}
               </button>
-              <button
-                className={`px-6 py-4 text-sm font-medium border-b-2 cursor-pointer ${
-                  activeTab === "batch"
-                    ? "border-indigo-500 text-indigo-600 bg-indigo-50"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-                onClick={() => setActiveTab("batch")}
-              >
-                📁 Batch Prediction
-              </button>
-              <button
-                className={`px-6 py-4 text-sm font-medium border-b-2 cursor-pointer ${
-                  activeTab === "info"
-                    ? "border-indigo-500 text-indigo-600 bg-indigo-50"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-                onClick={() => setActiveTab("info")}
-              >
-                ℹ️ Model Information
-              </button>
-            </nav>
+            ))}
           </div>
 
-          {/* Tab Content */}
-          <div className="p-6">
+          <div className="pt-6">
             {/* Single Prediction Tab */}
             {activeTab === "single" && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Enter medicine details for sales prediction
-                  </h3>
+                <div className={sectionClassName}>
+                  <div className="mb-5">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Enter medicine details for sales prediction
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Choose a medicine to auto-fill available data, then adjust
+                      inputs before generating the forecast.
+                    </p>
+                  </div>
 
-                  {/* Medicine Details Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -361,7 +391,7 @@ export default function PharmacyDemandPredictor() {
                             onChange={(e) =>
                               handleMedicineIdChange(e.target.value)
                             }
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            className={inputClassName}
                             required
                             disabled={loadingMedicineData}
                           >
@@ -374,15 +404,15 @@ export default function PharmacyDemandPredictor() {
                           </select>
                           {loadingMedicineData && (
                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <div className="animate-spin w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
                             </div>
                           )}
                         </div>
                         {medicineId && (
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="mt-1 text-xs text-gray-500">
                             {loadingMedicineData
                               ? "Loading medicine data..."
-                              : "✓ Data auto-populated from database"}
+                              : "Data auto-populated from inventory records"}
                           </p>
                         )}
                       </div>
@@ -394,8 +424,10 @@ export default function PharmacyDemandPredictor() {
                           type="number"
                           step="0.01"
                           value={price}
-                          onChange={(e) => setPrice(Number(e.target.value))}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          onChange={(e) =>
+                            setPrice(parseNumberInput(e.target.value))
+                          }
+                          className={inputClassName}
                           placeholder="Price per unit"
                           required
                         />
@@ -408,9 +440,9 @@ export default function PharmacyDemandPredictor() {
                           type="number"
                           value={inventoryLevel}
                           onChange={(e) =>
-                            setInventoryLevel(Number(e.target.value))
+                            setInventoryLevel(parseNumberInput(e.target.value))
                           }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className={inputClassName}
                           placeholder="Current stock level"
                           required
                         />
@@ -423,9 +455,9 @@ export default function PharmacyDemandPredictor() {
                           type="number"
                           value={expiryDays}
                           onChange={(e) =>
-                            setExpiryDays(Number(e.target.value))
+                            setExpiryDays(parseNumberInput(e.target.value))
                           }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className={inputClassName}
                           placeholder="Days until expiration"
                           required
                         />
@@ -442,9 +474,9 @@ export default function PharmacyDemandPredictor() {
                           step="0.0001"
                           value={locationLat}
                           onChange={(e) =>
-                            setLocationLat(Number(e.target.value))
+                            setLocationLat(parseNumberInput(e.target.value))
                           }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className={inputClassName}
                           placeholder="Pharmacy latitude"
                           required
                         />
@@ -458,9 +490,9 @@ export default function PharmacyDemandPredictor() {
                           step="0.0001"
                           value={locationLong}
                           onChange={(e) =>
-                            setLocationLong(Number(e.target.value))
+                            setLocationLong(parseNumberInput(e.target.value))
                           }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className={inputClassName}
                           placeholder="Pharmacy longitude"
                           required
                         />
@@ -469,199 +501,218 @@ export default function PharmacyDemandPredictor() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Promotion Active? *
                         </label>
-                        <div className="space-y-2">
-                          <label className="flex items-center">
+                        <div className="flex gap-3">
+                          <label
+                            className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors ${
+                              promotionFlag === 0
+                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                : "border-gray-300 bg-white text-gray-700"
+                            }`}
+                          >
                             <input
                               type="radio"
                               value={0}
                               checked={promotionFlag === 0}
                               onChange={(e) =>
-                                setPromotionFlag(Number(e.target.value))
+                                setPromotionFlag(
+                                  parseNumberInput(e.target.value),
+                                )
                               }
-                              className="mr-2"
+                              className="sr-only"
                             />
-                            No (0)
+                            No
                           </label>
-                          <label className="flex items-center">
+                          <label
+                            className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors ${
+                              promotionFlag === 1
+                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                : "border-gray-300 bg-white text-gray-700"
+                            }`}
+                          >
                             <input
                               type="radio"
                               value={1}
                               checked={promotionFlag === 1}
                               onChange={(e) =>
-                                setPromotionFlag(Number(e.target.value))
+                                setPromotionFlag(
+                                  parseNumberInput(e.target.value),
+                                )
                               }
-                              className="mr-2"
+                              className="sr-only"
                             />
-                            Yes (1)
+                            Yes
                           </label>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Historical Sales Data Section */}
-                  <div className="mb-6">
-                    <h4 className="text-md font-semibold text-gray-900 mb-4">
-                      Historical Sales Data (for trend analysis)
-                    </h4>
+                <div className={sectionClassName}>
+                  <h4 className="mb-4 text-base font-semibold text-gray-900">
+                    Historical Sales Data (for trend analysis)
+                  </h4>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Sales (1 day ago) *
-                        </label>
-                        <input
-                          type="number"
-                          value={salesLag1}
-                          onChange={(e) => setSalesLag1(Number(e.target.value))}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Previous day sales"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Sales (3 days ago) *
-                        </label>
-                        <input
-                          type="number"
-                          value={salesLag3}
-                          onChange={(e) => setSalesLag3(Number(e.target.value))}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Sales 3 days prior"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Sales (7 days ago) *
-                        </label>
-                        <input
-                          type="number"
-                          value={salesLag7}
-                          onChange={(e) => setSalesLag7(Number(e.target.value))}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Sales 7 days prior"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Sales (14 days ago) *
-                        </label>
-                        <input
-                          type="number"
-                          value={salesLag14}
-                          onChange={(e) =>
-                            setSalesLag14(Number(e.target.value))
-                          }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Sales 14 days prior"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          7-Day Average Sales *
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={salesRollingMean7}
-                          onChange={(e) =>
-                            setSalesRollingMean7(Number(e.target.value))
-                          }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Rolling 7-day average"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          14-Day Average Sales *
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={salesRollingMean14}
-                          onChange={(e) =>
-                            setSalesRollingMean14(Number(e.target.value))
-                          }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Rolling 14-day average"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-3 mb-6">
-                    <button
-                      onClick={handlePredict}
-                      disabled={loading || !medicineId}
-                      className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-lg"
-                    >
-                      {loading ? (
-                        <>
-                          <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                          Predicting...
-                        </>
-                      ) : (
-                        <>
-                          <span>🔮</span>
-                          Predict Sales & Generate Recommendations
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={handleReset}
-                      disabled={loading}
-                      className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      Reset
-                    </button>
-                  </div>
-
-                  {/* Error Display */}
-                  {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-red-800 text-sm flex items-center gap-2">
-                        <span>❌</span>
-                        {error}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Prediction Results */}
-                  {prediction && (
-                    <div className="mb-6">
-                      <div
-                        className="border rounded-lg overflow-hidden"
-                        dangerouslySetInnerHTML={{ __html: prediction }}
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sales (1 day ago) *
+                      </label>
+                      <input
+                        type="number"
+                        value={salesLag1}
+                        onChange={(e) =>
+                          setSalesLag1(parseNumberInput(e.target.value))
+                        }
+                        className={inputClassName}
+                        placeholder="Previous day sales"
+                        required
                       />
                     </div>
-                  )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sales (3 days ago) *
+                      </label>
+                      <input
+                        type="number"
+                        value={salesLag3}
+                        onChange={(e) =>
+                          setSalesLag3(parseNumberInput(e.target.value))
+                        }
+                        className={inputClassName}
+                        placeholder="Sales 3 days prior"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sales (7 days ago) *
+                      </label>
+                      <input
+                        type="number"
+                        value={salesLag7}
+                        onChange={(e) =>
+                          setSalesLag7(parseNumberInput(e.target.value))
+                        }
+                        className={inputClassName}
+                        placeholder="Sales 7 days prior"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sales (14 days ago) *
+                      </label>
+                      <input
+                        type="number"
+                        value={salesLag14}
+                        onChange={(e) =>
+                          setSalesLag14(parseNumberInput(e.target.value))
+                        }
+                        className={inputClassName}
+                        placeholder="Sales 14 days prior"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        7-Day Average Sales *
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={salesRollingMean7}
+                        onChange={(e) =>
+                          setSalesRollingMean7(parseNumberInput(e.target.value))
+                        }
+                        className={inputClassName}
+                        placeholder="Rolling 7-day average"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        14-Day Average Sales *
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={salesRollingMean14}
+                        onChange={(e) =>
+                          setSalesRollingMean14(
+                            parseNumberInput(e.target.value),
+                          )
+                        }
+                        className={inputClassName}
+                        placeholder="Rolling 14-day average"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    onClick={handlePredict}
+                    disabled={loading || hasIncompleteFields}
+                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer hover:bg-emerald-700 sm:flex-1"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        Predicting...
+                      </>
+                    ) : (
+                      <>Predict Sales</>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleReset}
+                    disabled={loading}
+                    className="rounded-lg border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer hover:bg-gray-50"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                {error && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                    <p className="text-red-800 text-sm flex items-center gap-2">
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                {prediction && (
+                  <div className={sectionClassName}>
+                    <h4 className="mb-4 text-base font-semibold text-gray-900">
+                      Prediction Result
+                    </h4>
+                    <div
+                      className="overflow-hidden rounded-lg border border-gray-200"
+                      dangerouslySetInnerHTML={{ __html: prediction }}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
             {/* Batch Prediction Tab */}
             {activeTab === "batch" && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <div className={sectionClassName}>
+                  <h3 className="mb-4 text-lg font-semibold text-gray-900">
                     Upload CSV file for batch predictions
                   </h3>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <h4 className="font-semibold text-blue-900 mb-2">
+                  <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                    <h4 className="mb-2 font-semibold text-emerald-900">
                       Required columns:
                     </h4>
-                    <ul className="text-sm text-blue-800 space-y-1">
+                    <ul className="space-y-1 text-sm text-emerald-800">
                       <li>
                         • medicine_id, price, inventory_level, expiry_days
                       </li>
@@ -684,21 +735,20 @@ export default function PharmacyDemandPredictor() {
                         onChange={(e) =>
                           setBatchFile(e.target.files?.[0] || null)
                         }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className={inputClassName}
                       />
                     </div>
 
                     <button
                       onClick={handleBatchPredict}
                       disabled={!batchFile}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer text-lg"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer hover:bg-emerald-700"
                     >
-                      <span>📊</span>
                       Process Batch Predictions
                     </button>
 
                     {batchStatus && (
-                      <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                         <p className="text-gray-800 text-sm">{batchStatus}</p>
                       </div>
                     )}
@@ -711,9 +761,8 @@ export default function PharmacyDemandPredictor() {
                         <a
                           href={batchResult}
                           download="predictions_output.csv"
-                          className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
                         >
-                          <span>📥</span>
                           Download CSV Results
                         </a>
                       </div>
@@ -727,12 +776,12 @@ export default function PharmacyDemandPredictor() {
             {activeTab === "info" && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                  <h3 className="mb-6 text-lg font-semibold text-gray-900">
                     About This Model
                   </h3>
 
                   <div className="space-y-6">
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
                       <h4 className="text-lg font-semibold text-gray-900 mb-3">
                         Features Used:
                       </h4>
@@ -801,8 +850,8 @@ export default function PharmacyDemandPredictor() {
                       </div>
                     </div>
 
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-yellow-900 mb-3">
+                    <div className="rounded-lg border border-orange-200 bg-orange-50 p-6">
+                      <h4 className="text-lg font-semibold text-orange-900 mb-3">
                         Priority Levels:
                       </h4>
                       <div className="space-y-3">
@@ -860,11 +909,11 @@ export default function PharmacyDemandPredictor() {
                       </div>
                     </div>
 
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-green-900 mb-3">
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-6">
+                      <h4 className="text-lg font-semibold text-emerald-900 mb-3">
                         Use Cases:
                       </h4>
-                      <ul className="space-y-2 text-green-800">
+                      <ul className="space-y-2 text-emerald-800">
                         <li>• Daily inventory management</li>
                         <li>• Demand forecasting</li>
                         <li>• Procurement planning</li>
@@ -874,10 +923,10 @@ export default function PharmacyDemandPredictor() {
                     </div>
                   </div>
 
-                  <div className="mt-8 pt-6 border-t border-gray-200 text-center text-gray-600">
+                  <div className="mt-8 border-t border-gray-200 pt-6 text-center text-gray-600">
                     <p className="text-sm">
-                      <strong>🏥 Pharmacy Sales Optimizer</strong> | Powered by
-                      XGBoost & Gradio
+                      <strong>Pharmacy Sales Optimizer</strong> | Powered by
+                      XGBoost and Gradio
                     </p>
                     <p className="text-xs mt-1">
                       For support or questions, please contact your system
