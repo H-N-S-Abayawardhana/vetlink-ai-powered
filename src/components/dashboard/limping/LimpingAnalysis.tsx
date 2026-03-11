@@ -97,22 +97,12 @@ const VideoUpload = ({
   onVideoSelect: (file: File) => void;
   onError?: (error: string) => void;
 }) => {
-  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("video/")) {
       onError?.("Please select a valid video file (MP4, MOV, or WebM)");
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      onError?.(
-        `Video file is too large (${fileSizeMB} MB). Maximum file size is 50 MB.`,
-      );
       return;
     }
 
@@ -136,12 +126,12 @@ const VideoUpload = ({
           <p className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
             Click to upload video
           </p>
-          <p className="text-sm text-gray-600">MP4, MOV or WebM (Max 50MB)</p>
+          <p className="text-sm text-gray-600">MP4, MOV or WebM</p>
           <p className="text-xs text-gray-500 mt-1">
             Record 30-60 seconds of natural walking
           </p>
           <p className="text-xs text-amber-600 mt-2 font-medium">
-            Large videos will be automatically compressed before upload
+            Large videos are allowed and may be compressed before upload
           </p>
         </div>
       </label>
@@ -160,6 +150,37 @@ const HealthInfoForm = ({
   limpingResult?: LimpingResult | null;
   selectedPet?: Pet | null;
 }) => {
+  const ChoiceButton = ({
+    label,
+    selected,
+    tone,
+    onClick,
+  }: {
+    label: string;
+    selected: boolean;
+    tone: "blue" | "red";
+    onClick: () => void;
+  }) => {
+    const selectedClasses =
+      tone === "blue"
+        ? "border-blue-300 bg-blue-50/80 text-blue-700"
+        : "border-red-300 bg-red-50/80 text-red-700";
+
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`h-10 rounded-lg border px-4 text-sm font-medium transition-colors ${
+          selected
+            ? selectedClasses
+            : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+        }`}
+      >
+        {label}
+      </button>
+    );
+  };
+
   const calculateWeightCategory = (
     weightKg: number | null | undefined,
   ): string => {
@@ -216,11 +237,14 @@ const HealthInfoForm = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
-        <div className="bg-gray-50 border-b border-gray-200 px-4 sm:px-6 py-4 sticky top-0 z-10">
-          <div className="flex items-center justify-between">
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-5 sm:px-6 py-4">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+              <p className="text-xs font-medium uppercase tracking-wide text-blue-700">
+                Health screening
+              </p>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                 Dog Health Information
                 {selectedPet && (
                   <span className="text-base sm:text-lg font-normal text-gray-600 ml-2">
@@ -239,7 +263,7 @@ const HealthInfoForm = ({
             </div>
             <button
               onClick={onCancel}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+              className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
             >
               <X className="w-5 h-5 text-gray-600" />
             </button>
@@ -261,7 +285,7 @@ const HealthInfoForm = ({
                 onChange={(e) =>
                   setFormData({ ...formData, age_years: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
                 placeholder="Enter age in years (1-15)"
               />
             </div>
@@ -276,7 +300,7 @@ const HealthInfoForm = ({
                 onChange={(e) =>
                   setFormData({ ...formData, weight_category: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
               >
                 <option value="">Select weight category</option>
                 <option value="Light">Light (Small dogs, &lt;10kg)</option>
@@ -302,32 +326,22 @@ const HealthInfoForm = ({
                 )}
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
+                <ChoiceButton
+                  label="Yes"
+                  selected={formData.limping_detected === "1"}
+                  tone="blue"
                   onClick={() =>
                     setFormData({ ...formData, limping_detected: "1" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.limping_detected === "1"
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
+                />
+                <ChoiceButton
+                  label="No"
+                  selected={formData.limping_detected === "0"}
+                  tone="red"
                   onClick={() =>
                     setFormData({ ...formData, limping_detected: "0" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.limping_detected === "0"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  No
-                </button>
+                />
               </div>
             </div>
 
@@ -336,32 +350,22 @@ const HealthInfoForm = ({
                 Pain While Walking *
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
+                <ChoiceButton
+                  label="Yes"
+                  selected={formData.pain_while_walking === "1"}
+                  tone="blue"
                   onClick={() =>
                     setFormData({ ...formData, pain_while_walking: "1" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.pain_while_walking === "1"
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
+                />
+                <ChoiceButton
+                  label="No"
+                  selected={formData.pain_while_walking === "0"}
+                  tone="red"
                   onClick={() =>
                     setFormData({ ...formData, pain_while_walking: "0" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.pain_while_walking === "0"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  No
-                </button>
+                />
               </div>
             </div>
 
@@ -370,32 +374,22 @@ const HealthInfoForm = ({
                 Difficulty Standing *
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
+                <ChoiceButton
+                  label="Yes"
+                  selected={formData.difficulty_standing === "1"}
+                  tone="blue"
                   onClick={() =>
                     setFormData({ ...formData, difficulty_standing: "1" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.difficulty_standing === "1"
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
+                />
+                <ChoiceButton
+                  label="No"
+                  selected={formData.difficulty_standing === "0"}
+                  tone="red"
                   onClick={() =>
                     setFormData({ ...formData, difficulty_standing: "0" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.difficulty_standing === "0"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  No
-                </button>
+                />
               </div>
             </div>
 
@@ -404,32 +398,22 @@ const HealthInfoForm = ({
                 Reduced Activity *
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
+                <ChoiceButton
+                  label="Yes"
+                  selected={formData.reduced_activity === "1"}
+                  tone="blue"
                   onClick={() =>
                     setFormData({ ...formData, reduced_activity: "1" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.reduced_activity === "1"
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
+                />
+                <ChoiceButton
+                  label="No"
+                  selected={formData.reduced_activity === "0"}
+                  tone="red"
                   onClick={() =>
                     setFormData({ ...formData, reduced_activity: "0" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.reduced_activity === "0"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  No
-                </button>
+                />
               </div>
             </div>
 
@@ -438,32 +422,22 @@ const HealthInfoForm = ({
                 Joint Swelling *
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
+                <ChoiceButton
+                  label="Yes"
+                  selected={formData.joint_swelling === "1"}
+                  tone="blue"
                   onClick={() =>
                     setFormData({ ...formData, joint_swelling: "1" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.joint_swelling === "1"
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
+                />
+                <ChoiceButton
+                  label="No"
+                  selected={formData.joint_swelling === "0"}
+                  tone="red"
                   onClick={() =>
                     setFormData({ ...formData, joint_swelling: "0" })
                   }
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    formData.joint_swelling === "0"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  No
-                </button>
+                />
               </div>
             </div>
           </div>
@@ -472,13 +446,13 @@ const HealthInfoForm = ({
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               Analyze & Predict Disease
             </button>
@@ -514,7 +488,6 @@ export default function LimpingAnalysis({
   const [isCompressing, setIsCompressing] = useState(false);
 
   const handleVideoSelect = async (file: File) => {
-    setSelectedVideo(file);
     const url = URL.createObjectURL(file);
     setVideoPreview(url);
     setAnalysisResult(null);
@@ -524,7 +497,7 @@ export default function LimpingAnalysis({
     let videoToUpload = file;
     const fileSizeMB = file.size / (1024 * 1024);
 
-    // Compress video if it's larger than 30MB
+    // Try to reduce upload size for large videos, without blocking the upload.
     if (fileSizeMB > 30) {
       setIsCompressing(true);
       try {
@@ -543,6 +516,8 @@ export default function LimpingAnalysis({
       }
     }
 
+    setSelectedVideo(videoToUpload);
+
     setIsAnalyzingVideo(true);
     try {
       const formData = new FormData();
@@ -554,11 +529,9 @@ export default function LimpingAnalysis({
       });
 
       if (!response.ok) {
-        // Handle 413 error specifically (Payload Too Large)
         if (response.status === 413) {
-          const fileSizeMB = videoToUpload.size / (1024 * 1024);
           throw new Error(
-            `Video file is too large (${fileSizeMB.toFixed(2)} MB). The server cannot accept files this large. Please try:\n\n1. Compress the video using a video compression tool\n2. Record a shorter video (30-60 seconds)\n3. Reduce the video quality/resolution\n\nMaximum recommended file size is 30 MB.`,
+            "The analysis server rejected this upload because the request payload was too large. The app no longer applies a video size limit, but the upstream server may still reject unusually large uploads.",
           );
         }
 
@@ -574,14 +547,13 @@ export default function LimpingAnalysis({
             // Try to get text response
             const errorText = await response.text();
             if (errorText && errorText.trim().length > 0) {
-              // Check if it looks like HTML (common for 413 errors)
               if (errorText.trim().startsWith("<")) {
-                errorMessage = `Server error (${response.status}): Request entity too large. Please use a smaller video file.`;
+                errorMessage = `Server error (${response.status}): The analysis request was rejected by the server.`;
               } else {
                 errorMessage = errorText.substring(0, 500);
               }
             } else {
-              errorMessage = `Server error (${response.status}). Please try again with a smaller video file.`;
+              errorMessage = `Server error (${response.status}). Please try again.`;
             }
           }
         } catch (parseError) {
