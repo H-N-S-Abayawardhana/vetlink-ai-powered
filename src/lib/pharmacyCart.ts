@@ -107,4 +107,3 @@ export function updatePharmacyCartQuantity(
     })
     .filter(Boolean) as PharmacyCartItem[];
 }
-
