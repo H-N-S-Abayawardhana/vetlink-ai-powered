@@ -2,7 +2,9 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import fs from "fs";
 import path from "path";
 
@@ -93,6 +95,86 @@ function getS3Client() {
   });
 }
 
+function buildS3Key(folderPath: string, filename: string): string {
+  const normalizedFolder = folderPath.replace(/^\/+|\/+$/g, "");
+  return normalizedFolder ? `${normalizedFolder}/${filename}` : filename;
+}
+
+export function buildLimpingVideoS3Key(filename: string): string {
+  return buildS3Key(LIMPING_FOLDER_PATH, filename);
+}
+
+export async function createLimpingVideoPresignedUpload(
+  filename: string,
+  contentType: string,
+): Promise<{ uploadUrl: string; videoUrl: string; s3Key: string }> {
+  if (!hasAwsCredentials()) {
+    throw new Error(
+      "AWS credentials are not configured for limping video uploads.",
+    );
+  }
+
+  if (!BUCKET_NAME) {
+    throw new Error("S3_BUCKET_NAME is not configured");
+  }
+
+  const s3Key = buildLimpingVideoS3Key(filename);
+  const region = process.env.NEXT_AWS_REGION || "ap-southeast-2";
+  const s3Client = getS3Client();
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: s3Key,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3Client, command, {
+    expiresIn: 60 * 10,
+  });
+
+  return {
+    uploadUrl,
+    videoUrl: getS3Url(s3Key, region),
+    s3Key,
+  };
+}
+
+export async function getS3ObjectFileByUrl(s3Url: string): Promise<File> {
+  const s3Key = extractS3KeyFromUrl(s3Url);
+  if (!s3Key) {
+    throw new Error("Invalid S3 URL");
+  }
+
+  if (!BUCKET_NAME) {
+    throw new Error("S3_BUCKET_NAME is not configured");
+  }
+
+  const s3Client = getS3Client();
+  const response = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+    }),
+  );
+
+  const body = response.Body as
+    | { transformToByteArray?: () => Promise<Uint8Array> }
+    | undefined;
+
+  if (!body?.transformToByteArray) {
+    throw new Error("Could not read video from S3");
+  }
+
+  const fileBytes = await body.transformToByteArray();
+  const filename = s3Key.split("/").pop() || `limping-${Date.now()}.mp4`;
+  const contentType = response.ContentType || "video/mp4";
+
+  return new File([Buffer.from(fileBytes)], filename, {
+    type: contentType,
+    lastModified: Date.now(),
+  });
+}
+
 /**
  * Upload a video buffer to S3 (or fallback to local storage)
  * @param buffer - The video file buffer
@@ -122,9 +204,7 @@ export async function uploadVideoToS3(
   }
 
   // Construct the S3 key (path) for the video using limping folder path
-  const s3Key = LIMPING_FOLDER_PATH
-    ? `${LIMPING_FOLDER_PATH.replace(/^\/+|\/+$/g, "")}/${filename}`
-    : filename;
+  const s3Key = buildLimpingVideoS3Key(filename);
 
   const s3Client = getS3Client();
   const region = process.env.NEXT_AWS_REGION || "ap-southeast-2";
@@ -239,9 +319,7 @@ export async function uploadImageToS3(
   }
 
   // Construct the S3 key (path) for the image
-  const s3Key = FOLDER_PATH
-    ? `${FOLDER_PATH.replace(/^\/+|\/+$/g, "")}/${filename}`
-    : filename;
+  const s3Key = buildS3Key(FOLDER_PATH, filename);
 
   const s3Client = getS3Client();
   const region = process.env.NEXT_AWS_REGION || "ap-southeast-2";
@@ -300,9 +378,7 @@ export async function uploadInventoryImageToS3(
     return saveToPublicFolder(buffer, filename, "pharmacy/inventory");
   }
 
-  const s3Key = INVENTORY_ITEMS_FOLDER_PATH
-    ? `${INVENTORY_ITEMS_FOLDER_PATH.replace(/^\/+|\/+$/g, "")}/${filename}`
-    : filename;
+  const s3Key = buildS3Key(INVENTORY_ITEMS_FOLDER_PATH, filename);
 
   const s3Client = getS3Client();
   const region = process.env.NEXT_AWS_REGION || "ap-southeast-2";
