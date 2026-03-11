@@ -7,6 +7,14 @@ import { AuthGuard } from "@/lib/auth-guard";
 import { formatLKR } from "@/lib/currency";
 import Image from "next/image";
 import {
+  addItemToPharmacyCart,
+  loadPharmacyCart,
+  removeItemFromPharmacyCart,
+  savePharmacyCart,
+  updatePharmacyCartQuantity,
+  type PharmacyCartItem,
+} from "@/lib/pharmacyCart";
+import {
   ShoppingCart,
   Search,
   Trash2,
@@ -47,18 +55,7 @@ function ShoppingModule() {
   const { data: session } = useSession();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
-  const [cart, setCart] = useState<
-    Array<{
-      id: string;
-      uuid: string;
-      name: string;
-      price: number;
-      quantity: number;
-      pharmacyId: string;
-      pharmacyName: string;
-      image?: string | null;
-    }>
-  >([]);
+  const [cart, setCart] = useState<PharmacyCartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
@@ -70,6 +67,20 @@ function ShoppingModule() {
     "pickup",
   );
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [pendingAdd, setPendingAdd] = useState<{
+    productName: string;
+    pharmacyId: string;
+  } | null>(null);
+
+  // Load shared cart from storage on mount
+  useEffect(() => {
+    setCart(loadPharmacyCart());
+  }, []);
+
+  // Persist shared cart
+  useEffect(() => {
+    savePharmacyCart(cart);
+  }, [cart]);
 
   const fetchProducts = async () => {
     try {
@@ -97,6 +108,18 @@ function ShoppingModule() {
     fetchProducts();
   }, []);
 
+  // Handle deep-link from prescription page (?product=&pharmacy=)
+  useEffect(() => {
+    const productName = searchParams.get("product");
+    const pharmacyId = searchParams.get("pharmacy");
+    if (productName && pharmacyId) {
+      setPendingAdd({
+        productName,
+        pharmacyId,
+      });
+    }
+  }, [searchParams]);
+
   // Handle return from PayHere (success or cancel)
   useEffect(() => {
     const payment = searchParams.get("payment");
@@ -105,6 +128,11 @@ function ShoppingModule() {
       setCart([]);
       setShowCheckout(false);
       setError(null);
+      try {
+        savePharmacyCart([]);
+      } catch {
+        // ignore
+      }
       if (typeof window !== "undefined") {
         window.history.replaceState({}, "", "/dashboard/pharmacy/shopping");
       }
@@ -138,42 +166,28 @@ function ShoppingModule() {
   }, [searchQuery, products]);
 
   const addToCart = (product: any) => {
-    const existingItem = cart.find(
-      (item) =>
-        item.id === product.id && item.pharmacyId === product.pharmacyId,
-    );
-
-    if (existingItem) {
-      setCart(
-        cart.map((item) =>
-          item.id === product.id && item.pharmacyId === product.pharmacyId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        ),
-      );
-    } else {
-      setCart([
-        ...cart,
-        {
-          id: product.id,
-          uuid: product.uuid || product.id,
-          name: product.name,
-          price: product.price,
-          quantity: 1,
-          pharmacyId: product.pharmacyId,
-          pharmacyName: product.pharmacyName,
-          image: product.image || null,
-        },
-      ]);
-    }
+    setCart((prev) => addItemToPharmacyCart(prev, product));
   };
 
-  const removeFromCart = (productId: string, pharmacyId: string) => {
-    setCart(
-      cart.filter(
-        (item) => !(item.id === productId && item.pharmacyId === pharmacyId),
-      ),
+  // Once products are loaded, add any deep-linked item to the cart
+  useEffect(() => {
+    if (!pendingAdd || products.length === 0) return;
+
+    const match = products.find(
+      (p) =>
+        p.name === pendingAdd.productName &&
+        String(p.pharmacyId) === pendingAdd.pharmacyId,
     );
+
+    if (match) {
+      addToCart(match);
+      setShowCart(true);
+      setPendingAdd(null);
+    }
+  }, [pendingAdd, products]);
+
+  const removeFromCart = (productId: string, pharmacyId: string) => {
+    setCart((prev) => removeItemFromPharmacyCart(prev, productId, pharmacyId));
   };
 
   const updateQuantity = (
@@ -181,19 +195,8 @@ function ShoppingModule() {
     pharmacyId: string,
     delta: number,
   ) => {
-    setCart(
-      cart
-        .map((item) => {
-          if (item.id === productId && item.pharmacyId === pharmacyId) {
-            const newQuantity = item.quantity + delta;
-            if (newQuantity <= 0) {
-              return null;
-            }
-            return { ...item, quantity: newQuantity };
-          }
-          return item;
-        })
-        .filter(Boolean) as typeof cart,
+    setCart((prev) =>
+      updatePharmacyCartQuantity(prev, productId, pharmacyId, delta),
     );
   };
 
