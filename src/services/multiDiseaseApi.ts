@@ -9,8 +9,7 @@ import type {
 // -----------------------------------------------------------------------------
 // Section: Configuration
 // -----------------------------------------------------------------------------
-const MULTI_DISEASE_API_URL =
-  process.env.NEXT_PUBLIC_MULTI_DISEASE_API_URL;
+const MULTI_DISEASE_API_URL = process.env.NEXT_PUBLIC_MULTI_DISEASE_API_URL;
 
 const API_REQUEST_TIMEOUT = 120000;
 
@@ -36,9 +35,7 @@ export class MultiDiseaseApiService {
   ): Promise<DiseasePredictionResult> {
     try {
       const endpoint = this.getApiEndpoint();
-      console.log(
-        `Calling Gradio disease prediction API: ${endpoint}`,
-      );
+      console.log(`Calling Gradio disease prediction API: ${endpoint}`);
 
       // Create AbortController for timeout
       const controller = new AbortController();
@@ -92,13 +89,10 @@ export class MultiDiseaseApiService {
           throw new Error("No event_id received from Gradio API");
         }
 
-        const resultResponse = await fetch(
-          `${endpoint}/${eventId}`,
-          {
-            method: "GET",
-            signal: controller.signal,
-          },
-        );
+        const resultResponse = await fetch(`${endpoint}/${eventId}`, {
+          method: "GET",
+          signal: controller.signal,
+        });
 
         if (!resultResponse.ok) {
           throw new Error(

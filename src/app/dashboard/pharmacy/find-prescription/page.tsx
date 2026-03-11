@@ -472,7 +472,8 @@ function FindFromPrescriptionModule() {
           Find Pet Medicines From Prescription
         </h1>
         <p className="text-sm sm:text-base text-gray-600 max-w-2xl">
-          Upload a photo of the prescription—we’ll extract the medications and show you which pharmacies have them in stock.
+          Upload a photo of the prescription—we’ll extract the medications and
+          show you which pharmacies have them in stock.
         </p>
       </div>
 
@@ -523,82 +524,42 @@ function FindFromPrescriptionModule() {
               </p>
             </div>
             <div className="p-4 sm:p-6">
-            {!prescriptionImage ? (
-              <div
-                ref={uploadZoneRef}
-                role="button"
-                tabIndex={0}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
-                className={`
+              {!prescriptionImage ? (
+                <div
+                  ref={uploadZoneRef}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && fileInputRef.current?.click()
+                  }
+                  className={`
                   border-2 border-dashed rounded-xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-200
-                  ${isDragging
-                    ? "border-emerald-500 bg-emerald-50/70 scale-[1.01]"
-                    : "border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/30"
+                  ${
+                    isDragging
+                      ? "border-emerald-500 bg-emerald-50/70 scale-[1.01]"
+                      : "border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/30"
                   }
                 `}
-              >
-                <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 transition-colors ${isDragging ? "bg-emerald-100" : "bg-gray-100"}`}>
-                  <ImageIcon className={`w-10 h-10 ${isDragging ? "text-emerald-600" : "text-gray-400"}`} />
-                </div>
-                <p className="text-gray-700 font-medium mb-1">
-                  {isDragging ? "Drop your file here" : "Click or drag a file here"}
-                </p>
-                <p className="text-sm text-gray-500">
-                  JPG, PNG, WebP, GIF · Max 10MB
-                </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                  <Image
-                    src={prescriptionImage}
-                    alt="Prescription"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto object-contain bg-gray-50"
-                  />
-                  <button
-                    onClick={handleClear}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
+                >
+                  <div
+                    className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 transition-colors ${isDragging ? "bg-emerald-100" : "bg-gray-100"}`}
                   >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleExtractItems}
-                    disabled={loading}
-                    className="flex-1 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Reading...
-                      </>
-                    ) : (
-                      <>
-                        <Search className="w-5 h-5" />
-                        Read prescription
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    Change
-                  </button>
+                    <ImageIcon
+                      className={`w-10 h-10 ${isDragging ? "text-emerald-600" : "text-gray-400"}`}
+                    />
+                  </div>
+                  <p className="text-gray-700 font-medium mb-1">
+                    {isDragging
+                      ? "Drop your file here"
+                      : "Click or drag a file here"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    JPG, PNG, WebP, GIF · Max 10MB
+                  </p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -607,8 +568,57 @@ function FindFromPrescriptionModule() {
                     className="hidden"
                   />
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="space-y-4">
+                  <div className="relative rounded-lg overflow-hidden border border-gray-200">
+                    <Image
+                      src={prescriptionImage}
+                      alt="Prescription"
+                      width={600}
+                      height={400}
+                      className="w-full h-auto object-contain bg-gray-50"
+                    />
+                    <button
+                      onClick={handleClear}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleExtractItems}
+                      disabled={loading}
+                      className="flex-1 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    >
+                      {loading ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Reading...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-5 h-5" />
+                          Read prescription
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      Change
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -1009,7 +1019,9 @@ function FindFromPrescriptionModule() {
                                   <button
                                     type="button"
                                     onClick={() => addToCart(product)}
-                                    disabled={!product.stock || product.stock <= 0}
+                                    disabled={
+                                      !product.stock || product.stock <= 0
+                                    }
                                     className="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     <ShoppingCart className="w-4 h-4" />
@@ -1044,19 +1056,31 @@ function FindFromPrescriptionModule() {
                     Upload a prescription to get started
                   </h3>
                   <p className="text-gray-500 text-sm text-center max-w-sm mx-auto mb-8">
-                    We’ll extract the medications and show you which pharmacies have them in stock.
+                    We’ll extract the medications and show you which pharmacies
+                    have them in stock.
                   </p>
                   <ol className="space-y-4 text-left max-w-xs mx-auto">
                     {[
-                      { step: 1, label: "Upload a photo or scan of the prescription" },
-                      { step: 2, label: "We read the text and detect medications" },
-                      { step: 3, label: "See matching products and add to cart" },
+                      {
+                        step: 1,
+                        label: "Upload a photo or scan of the prescription",
+                      },
+                      {
+                        step: 2,
+                        label: "We read the text and detect medications",
+                      },
+                      {
+                        step: 3,
+                        label: "See matching products and add to cart",
+                      },
                     ].map(({ step, label }) => (
                       <li key={step} className="flex items-start gap-3">
                         <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm">
                           {step}
                         </span>
-                        <span className="text-sm text-gray-600 pt-1">{label}</span>
+                        <span className="text-sm text-gray-600 pt-1">
+                          {label}
+                        </span>
                       </li>
                     ))}
                   </ol>

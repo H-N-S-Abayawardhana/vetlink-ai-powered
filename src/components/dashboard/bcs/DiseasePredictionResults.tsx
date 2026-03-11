@@ -14,15 +14,9 @@ import {
 } from "lucide-react";
 import type {
   DiseasePredictionResult,
-  SingleDiseasePrediction,
   RiskLevel,
-  DiseaseType,
 } from "@/types/disease-prediction";
-import {
-  DISEASE_INFO,
-  RISK_LEVEL_STYLES,
-  RISK_LEVEL_EMOJI,
-} from "@/types/disease-prediction";
+import { DISEASE_INFO } from "@/types/disease-prediction";
 
 interface DiseasePredictionResultsProps {
   result: DiseasePredictionResult;
@@ -41,14 +35,32 @@ export default function DiseasePredictionResults({
     null,
   );
 
+  const riskCount = result.predictions.filter(
+    (prediction) =>
+      prediction.disease !== "Healthy" &&
+      (prediction.risk_level === "High" ||
+        prediction.risk_level === "Moderate"),
+  ).length;
+
   const getRiskIcon = (riskLevel: RiskLevel) => {
     switch (riskLevel) {
       case "High":
-        return <AlertCircle className="w-5 h-5 text-red-600" />;
+        return <AlertCircle className="w-4 h-4 text-red-600" />;
       case "Moderate":
-        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+        return <AlertTriangle className="w-4 h-4 text-amber-600" />;
       case "Low":
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+    }
+  };
+
+  const getRiskBadgeClasses = (riskLevel: RiskLevel) => {
+    switch (riskLevel) {
+      case "High":
+        return "border-red-200 bg-red-50 text-red-700";
+      case "Moderate":
+        return "border-amber-200 bg-amber-50 text-amber-700";
+      case "Low":
+        return "border-green-200 bg-green-50 text-green-700";
     }
   };
 
@@ -63,258 +75,236 @@ export default function DiseasePredictionResults({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-700 px-6 py-6">
-        <div className="flex items-center justify-between">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+      <div className="border-b border-gray-200 px-5 sm:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <Stethoscope className="w-7 h-7 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <Stethoscope className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">
-                🔬 Disease Risk Analysis Complete
+              <p className="text-xs font-medium uppercase tracking-wide text-blue-700">
+                Assessment results
+              </p>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                Disease Risk Analysis Complete
               </h2>
-              <p className="text-purple-100 text-sm">
+              <p className="text-sm text-gray-500">
                 {petName
                   ? `Results for ${petName}`
                   : "Multi-disease risk assessment results"}
               </p>
             </div>
           </div>
-          <p className="text-white/80 text-sm">
+          <p className="text-sm text-gray-500">
             {new Date(result.analyzed_at).toLocaleString()}
           </p>
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Overall Summary */}
+      <div className="p-5 sm:p-6 space-y-6">
         <div
-          className={`p-6 rounded-xl border-2 ${
+          className={`rounded-lg border p-5 ${
             result.has_risk
-              ? "bg-gradient-to-br from-red-50 to-orange-50 border-red-200"
-              : "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
+              ? "border-red-200 bg-red-50/70"
+              : "border-green-200 bg-green-50/70"
           }`}
         >
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
                 {result.has_risk ? (
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
                 ) : (
-                  <Heart className="w-6 h-6 text-green-600" />
+                  <Heart className="w-5 h-5 text-green-600" />
                 )}
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900">
                   {result.has_risk
                     ? "Health Risks Detected"
                     : "No Significant Risks"}
                 </h3>
               </div>
               {result.highest_risk_disease && result.has_risk && (
-                <p className="text-gray-700">
-                  <span className="font-semibold">Highest concern:</span>{" "}
-                  <span className="text-red-700 font-bold">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Highest concern:</span>{" "}
+                  <span className="font-semibold text-red-700">
                     {result.highest_risk_disease}
                   </span>
                 </p>
               )}
             </div>
-            <div className="text-right">
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <p className="text-xs text-gray-500 uppercase mb-2">
-                    Age Group
-                  </p>
-                  <p className="font-bold text-gray-900">
-                    {result.pet_profile.age_group}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-gray-500 uppercase mb-2">
-                    Weight Status
-                  </p>
-                  <p className="font-bold text-gray-900">
-                    {result.pet_profile.weight_status}
-                  </p>
-                </div>
-                {result.has_risk ? (
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 uppercase mb-2">
-                      Diseases at Risk
-                    </p>
-                    {(() => {
-                      const riskCount = result.predictions.filter(
-                        (p) =>
-                          p.disease !== "Healthy" &&
-                          (p.risk_level === "High" ||
-                            p.risk_level === "Moderate"),
-                      ).length;
-                      return (
-                        <p
-                          className={`font-bold ${
-                            riskCount >= 3
-                              ? "text-red-600"
-                              : riskCount >= 2
-                                ? "text-yellow-600"
-                                : "text-orange-600"
-                          }`}
-                        >
-                          {riskCount}
-                        </p>
-                      );
-                    })()}
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 uppercase">Status</p>
-                    <p className="font-bold text-green-600">✓ Good</p>
-                  </div>
-                )}
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:min-w-[320px]">
+              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+                <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                  Age group
+                </p>
+                <p className="mt-1 text-sm font-semibold text-gray-900">
+                  {result.pet_profile.age_group}
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+                <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                  Weight status
+                </p>
+                <p className="mt-1 text-sm font-semibold text-gray-900">
+                  {result.pet_profile.weight_status}
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 col-span-2 sm:col-span-1">
+                <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                  {result.has_risk ? "Diseases at risk" : "Status"}
+                </p>
+                <p
+                  className={`mt-1 text-sm font-semibold ${
+                    result.has_risk ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {result.has_risk ? riskCount : "Good"}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Disease Predictions Grid */}
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            📊 Disease Risk Assessment ({result.predictions.length} conditions
-            analyzed)
-          </h3>
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-base font-semibold text-gray-900">
+              Disease risk assessment
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {result.predictions.length} conditions analyzed.
+            </p>
+          </div>
 
           <div className="space-y-3">
             {result.predictions.map((prediction) => {
               const diseaseInfo = DISEASE_INFO[prediction.disease];
-              const riskStyles = RISK_LEVEL_STYLES[prediction.risk_level];
               const isExpanded = expandedDisease === prediction.disease;
+              const isHealthy = prediction.disease === "Healthy";
+              const isPositive = prediction.is_positive && !isHealthy;
 
               return (
                 <div
                   key={prediction.disease}
-                  className={`border-2 rounded-xl overflow-hidden transition-all ${
-                    prediction.is_positive && prediction.disease !== "Healthy"
-                      ? riskStyles.border
-                      : "border-gray-200"
+                  className={`rounded-lg border overflow-hidden transition-colors ${
+                    isPositive
+                      ? "border-red-200"
+                      : isHealthy
+                        ? "border-green-200"
+                        : "border-gray-200"
                   }`}
                 >
-                  {/* Disease Header */}
                   <button
                     type="button"
                     onClick={() => toggleExpand(prediction.disease)}
-                    className={`w-full p-4 flex items-center justify-between ${
-                      prediction.is_positive && prediction.disease !== "Healthy"
-                        ? riskStyles.bg
-                        : "bg-gray-50 hover:bg-gray-100"
-                    } transition-colors`}
+                    className={`w-full px-4 py-4 text-left transition-colors ${
+                      isPositive
+                        ? "bg-red-50/60 hover:bg-red-50"
+                        : isHealthy
+                          ? "bg-green-50/60 hover:bg-green-50"
+                          : "bg-white hover:bg-gray-50"
+                    }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
-                        {diseaseInfo?.icon || "🔬"}
-                      </span>
-                      <div className="text-left">
-                        <p className="font-bold text-gray-900">
-                          {prediction.disease}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {diseaseInfo?.description || ""}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      {/* Probability - show as "wellness score" for Healthy */}
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-gray-900">
-                          {prediction.probability.toFixed(0)}%
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {prediction.disease === "Healthy"
-                            ? "wellness score"
-                            : "probability"}
-                        </p>
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl leading-none">
+                          {diseaseInfo?.icon || "🔬"}
+                        </span>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {prediction.disease}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-600">
+                            {diseaseInfo?.description || ""}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Risk Badge - show "Healthy" badge instead of risk level for Healthy */}
-                      {prediction.disease === "Healthy" ? (
-                        <div className="px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 bg-green-100 text-green-700">
-                          <span>✅</span>
-                          <span>Healthy</span>
+                      <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+                        <div className="min-w-[84px] text-left lg:text-right">
+                          <p className="text-2xl font-semibold text-gray-900">
+                            {prediction.probability.toFixed(0)}%
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {isHealthy ? "wellness score" : "probability"}
+                          </p>
                         </div>
-                      ) : (
-                        <div
-                          className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 ${
-                            riskStyles.bg
-                          } ${riskStyles.text}`}
-                        >
-                          <span>{RISK_LEVEL_EMOJI[prediction.risk_level]}</span>
-                          <span>{prediction.risk_level}</span>
-                        </div>
-                      )}
 
-                      {/* Status Badge */}
-                      {prediction.is_positive &&
-                        prediction.disease !== "Healthy" && (
-                          <span className="px-3 py-1.5 bg-red-600 text-white rounded-lg font-bold text-sm">
-                            POSITIVE
+                        {isHealthy ? (
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700">
+                            <CheckCircle className="w-4 h-4" />
+                            Healthy
+                          </div>
+                        ) : (
+                          <div
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${getRiskBadgeClasses(prediction.risk_level)}`}
+                          >
+                            {getRiskIcon(prediction.risk_level)}
+                            {prediction.risk_level}
+                          </div>
+                        )}
+
+                        {isPositive && (
+                          <span className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700">
+                            Positive
                           </span>
                         )}
 
-                      {/* Expand Icon */}
-                      {isExpanded ? (
-                        <ChevronUp className="w-5 h-5 text-gray-500" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-500" />
-                      )}
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4 text-gray-500" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-gray-500" />
+                        )}
+                      </div>
                     </div>
                   </button>
 
-                  {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="p-4 border-t border-gray-200 bg-white">
-                      {/* Progress Bar */}
+                    <div className="border-t border-gray-200 bg-white p-4">
                       <div className="mb-4">
-                        <div className="flex justify-between text-sm mb-1">
+                        <div className="mb-1 flex items-center justify-between text-sm">
                           <span className="text-gray-600">
-                            {prediction.disease === "Healthy"
-                              ? "Wellness Score"
-                              : "Risk Probability"}
+                            {isHealthy ? "Wellness score" : "Risk probability"}
                           </span>
-                          <span className="font-semibold">
+                          <span className="font-medium text-gray-900">
                             {prediction.probability.toFixed(1)}%
                           </span>
                         </div>
-                        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
                           <div
-                            className={`h-full transition-all duration-500 ${prediction.disease === "Healthy" ? "bg-green-500" : getProgressBarColor(prediction.probability)}`}
+                            className={`h-full transition-all duration-500 ${
+                              isHealthy
+                                ? "bg-green-500"
+                                : getProgressBarColor(prediction.probability)
+                            }`}
                             style={{ width: `${prediction.probability}%` }}
                           />
                         </div>
-                        {prediction.disease !== "Healthy" && (
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>Low (0-30%)</span>
-                            <span>Moderate (30-60%)</span>
-                            <span>High (60-100%)</span>
+                        {!isHealthy && (
+                          <div className="mt-2 flex justify-between text-[11px] text-gray-500">
+                            <span>Low</span>
+                            <span>Moderate</span>
+                            <span>High</span>
                           </div>
                         )}
                       </div>
 
-                      {/* Key Indicators */}
                       {prediction.key_indicators.length > 0 && (
                         <div>
-                          <p className="text-sm font-semibold text-gray-700 mb-2">
-                            {prediction.disease === "Healthy"
-                              ? "Positive Health Indicators:"
-                              : "Key Risk Indicators:"}
+                          <p className="mb-2 text-sm font-medium text-gray-800">
+                            {isHealthy
+                              ? "Positive health indicators"
+                              : "Key risk indicators"}
                           </p>
-                          <ul className="space-y-1">
+                          <ul className="space-y-2">
                             {prediction.key_indicators.map((indicator, idx) => (
                               <li
                                 key={idx}
-                                className="flex items-center gap-2 text-sm text-gray-600"
+                                className="flex items-start gap-2 text-sm text-gray-600"
                               >
-                                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                                {indicator}
+                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-gray-400" />
+                                <span>{indicator}</span>
                               </li>
                             ))}
                           </ul>
@@ -328,43 +318,49 @@ export default function DiseasePredictionResults({
           </div>
         </div>
 
-        {/* Recommendations */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-600" />
-            💡 Veterinary Recommendations
+        <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-5">
+          <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900">
+            <Shield className="w-4 h-4 text-blue-600" />
+            Veterinary recommendations
           </h3>
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {result.recommendations.map((rec, idx) => (
-              <li key={idx} className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700">{rec}</span>
+              <li
+                key={idx}
+                className="flex items-start gap-3 text-sm text-gray-700"
+              >
+                <CheckCircle className="mt-0.5 w-4 h-4 text-blue-600 flex-shrink-0" />
+                <span>{rec}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Disclaimer */}
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-800">
-              <strong>Important Disclaimer:</strong> This AI-powered analysis is
-              for informational purposes only and should not replace
+              <span className="font-medium">Important:</span> This AI analysis
+              is for informational purposes only and should not replace
               professional veterinary diagnosis. Please consult a licensed
               veterinarian for proper medical evaluation and treatment.
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center pt-4 border-t border-gray-200">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 border-t border-gray-200 pt-5">
+          <button
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Back to pet selection
+          </button>
           <button
             onClick={onNewAnalysis}
-            className="px-8 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
           >
-            <RefreshCw className="w-5 h-5" />
-            New Analysis
+            <RefreshCw className="w-4 h-4" />
+            New analysis
           </button>
         </div>
       </div>
