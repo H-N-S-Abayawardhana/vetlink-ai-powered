@@ -1,8 +1,3 @@
-/**
- * BCS Prediction API Service
- * Calls the Hugging Face BCS Prediction Model
- */
-
 export interface BCSPredictionInput {
   breed: string;
   age: number;
@@ -21,38 +16,34 @@ export interface BCSPredictionResponse {
   bcs_category: string;
 }
 
-// Hugging Face Spaces URL
+// Base URL for the BCS model space.
 const HF_SPACE_URL =
   process.env.NEXT_PUBLIC_BCS_API_URL ||
   "https://maleesha29-bcs-prediction-model.hf.space";
 
-// Timeout configuration (Gradio cold start can take time)
+// HF spaces can take time on cold start.
 const API_REQUEST_TIMEOUT = 120000; // 2 minutes
 
-// Split API endpoint into base and path for flexibility
-// Try newer Gradio endpoint format first: /api/{function_name}
+// Primary sync endpoint.
 const API_ENDPOINT_BASE = `${HF_SPACE_URL}/api/predict_bcs`;
 
-// Fallback Gradio async pattern if needed
+// Async endpoint fallback.
 const API_SUBMIT_ENDPOINT_ASYNC = `${HF_SPACE_URL}/gradio_api/call/predict_bcs`;
 const API_GET_ENDPOINT_ASYNC = (eventId: string) =>
   `${HF_SPACE_URL}/gradio_api/call/predict_bcs/${eventId}`;
 
 /**
  * Predict BCS (Body Condition Score) using the Hugging Face model
- * Requires clinical observations + breed info for accurate prediction
  */
 export async function predictBCS(
   input: BCSPredictionInput,
 ): Promise<BCSPredictionResponse> {
   try {
-    // Create AbortController for timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT);
 
     try {
-      // Gradio API format: data array with input parameters in correct order
-      // Order: Breed, Age, Weight_kg, Gender, Activity_Level, Rib_Condition, Waist, Abdominal_Tuck, Spine_Hips, Fat_Deposits
+      // Gradio expects ordered inputs in a `data` array.
       const payload = {
         data: [
           input.breed,
@@ -68,11 +59,7 @@ export async function predictBCS(
         ],
       };
 
-      // Log the request payload for debugging
-      console.log(`Submitting BCS prediction to: ${API_ENDPOINT_BASE}`);
-      console.log("Payload:", JSON.stringify(payload, null, 2));
-
-      // Try the simpler endpoint format first (/api/predict_bcs)
+      // Try sync endpoint first.
       let submitResponse = await fetch(API_ENDPOINT_BASE, {
         method: "POST",
         headers: {
@@ -82,11 +69,8 @@ export async function predictBCS(
         signal: controller.signal,
       });
 
-      // If 404, try the async pattern (/gradio_api/call/predict_bcs)
+      // Fallback to async endpoint if sync route is not available.
       if (submitResponse.status === 404) {
-        console.log(
-          "Endpoint /api/predict_bcs not found, trying async pattern...",
-        );
         submitResponse = await fetch(API_SUBMIT_ENDPOINT_ASYNC, {
           method: "POST",
           headers: {
@@ -109,17 +93,11 @@ export async function predictBCS(
       }
 
       const submitResult = await submitResponse.json();
-      console.log("Submit response:", submitResult);
 
-      // Check if this is an async response (has event_id) or direct response
+      // Async flow: submit returns event_id; result comes from a follow-up GET.
       if (submitResult.event_id) {
-        // Async pattern - need to poll for result
         const eventId = submitResult.event_id;
-        console.log(
-          `Async response received, polling with event_id: ${eventId}`,
-        );
 
-        // Step 2: Get the result using Server-Sent Events (SSE)
         const resultResponse = await fetch(API_GET_ENDPOINT_ASYNC(eventId), {
           method: "GET",
           signal: controller.signal,
@@ -133,19 +111,11 @@ export async function predictBCS(
           );
         }
 
-        // Parse SSE response
         const resultText = await resultResponse.text();
         const result = parseSSEResponse(resultText);
         return normalizeBCSResponse(result);
       } else {
-        // Direct response pattern - result is in the response
         clearTimeout(timeoutId);
-        console.log("Direct response received. Type:", typeof submitResult);
-        console.log("Is Array:", Array.isArray(submitResult));
-        console.log("Full response:", JSON.stringify(submitResult));
-
-        // Handle various response formats from Gradio
-        // Could be: [{...}], [...], or direct object
         return normalizeBCSResponse(submitResult);
       }
     } catch (fetchError: unknown) {
@@ -165,9 +135,7 @@ export async function predictBCS(
   }
 }
 
-/**
- * Parse Server-Sent Events (SSE) response from Gradio
- */
+// Extract first parseable `data:` payload from Gradio SSE text.
 function parseSSEResponse(sseText: string): Record<string, unknown> {
   const lines = sseText.split("\n");
   for (const line of lines) {
@@ -175,7 +143,6 @@ function parseSSEResponse(sseText: string): Record<string, unknown> {
       const jsonStr = line.substring(6);
       try {
         const parsed = JSON.parse(jsonStr);
-        // The API returns data array with predictions
         if (parsed && Array.isArray(parsed.data)) {
           return {
             score: parsed.data[0],
@@ -191,24 +158,15 @@ function parseSSEResponse(sseText: string): Record<string, unknown> {
   throw new Error("No valid data found in SSE response");
 }
 
-/**
- * Normalize the BCS response to our format
- * Handles:
- * - Array response: ["Predicted Body Condition Score (BCS): X"]
- * - Direct string response: "Predicted Body Condition Score (BCS): X"
- * - SSE response with data array
- * - Response object with data field
- */
+// Normalize different Gradio payload shapes to the BCS response contract.
 function normalizeBCSResponse(
   result: Record<string, unknown> | string | unknown[] | unknown,
 ): BCSPredictionResponse {
   let bcsScore: number;
   let bcsCategory: string;
 
-  // Extract response string from various formats
   let responseStr = "";
 
-  // First, unwrap if this is a response object with a "data" field
   let unwrappedResult = result;
   if (
     typeof result === "object" &&
@@ -219,7 +177,6 @@ function normalizeBCSResponse(
     unwrappedResult = (result as Record<string, unknown>).data;
   }
 
-  // Handle array format: ["Predicted Body Condition Score (BCS): X"]
   if (Array.isArray(unwrappedResult)) {
     if (typeof unwrappedResult[0] === "string") {
       responseStr = unwrappedResult[0];
@@ -227,7 +184,6 @@ function normalizeBCSResponse(
       typeof unwrappedResult[0] === "object" &&
       unwrappedResult[0] !== null
     ) {
-      // Array of objects - try to extract from first object
       const obj = unwrappedResult[0] as Record<string, unknown>;
       if (typeof obj.data === "string") {
         responseStr = obj.data;
@@ -247,7 +203,6 @@ function normalizeBCSResponse(
     ) {
       responseStr = resultObj.data[0];
     } else if (typeof resultObj.bcs_score === "number") {
-      // Direct response object with bcs_score field
       bcsScore = resultObj.bcs_score;
       bcsCategory = categorizeScore(bcsScore);
       return {
@@ -257,9 +212,7 @@ function normalizeBCSResponse(
     }
   }
 
-  // Parse string response with format: "Predicted Body Condition Score (BCS): X"
   if (responseStr) {
-    // Try to extract number after "BCS):"
     const match = responseStr.match(/BCS\):\s*(\d+)/i);
     if (match && match[1]) {
       bcsScore = parseInt(match[1], 10);
@@ -280,7 +233,6 @@ function normalizeBCSResponse(
     );
   }
 
-  // Ensure BCS score is in valid range (1-9 scale)
   const normalizedScore = Math.max(1, Math.min(9, bcsScore));
   bcsCategory = categorizeScore(normalizedScore);
 
@@ -290,10 +242,7 @@ function normalizeBCSResponse(
   };
 }
 
-/**
- * Categorize BCS score into health categories
- * Handles both 1-9 and 0-10 scale
- */
+// Map score bands to user-facing weight category.
 function categorizeScore(score: number): string {
   const normalizedScore = Math.max(1, Math.min(9, score));
 

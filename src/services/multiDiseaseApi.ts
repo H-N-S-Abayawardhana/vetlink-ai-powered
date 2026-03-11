@@ -6,18 +6,13 @@ import type {
   RiskLevel,
 } from "@/types/disease-prediction";
 
-// -----------------------------------------------------------------------------
-// Section: Configuration
-// -----------------------------------------------------------------------------
+// Base URL for the multi-disease model space.
 const MULTI_DISEASE_API_URL = process.env.NEXT_PUBLIC_MULTI_DISEASE_API_URL;
 
 const API_REQUEST_TIMEOUT = 120000;
 
 export class MultiDiseaseApiService {
-  // ---------------------------------------------------------------------------
-  // Section: Public API
-  // ---------------------------------------------------------------------------
-
+  // Returns the Gradio async endpoint for predictions.
   private static getApiEndpoint(): string {
     if (!MULTI_DISEASE_API_URL) {
       throw new Error(
@@ -63,6 +58,7 @@ export class MultiDiseaseApiService {
           ],
         };
 
+        // Submit prediction request and receive event_id.
         const submitResponse = await fetch(endpoint, {
           method: "POST",
           headers: {
@@ -89,6 +85,7 @@ export class MultiDiseaseApiService {
           throw new Error("No event_id received from Gradio API");
         }
 
+        // Fetch generated result for the submitted event.
         const resultResponse = await fetch(`${endpoint}/${eventId}`, {
           method: "GET",
           signal: controller.signal,
@@ -163,6 +160,7 @@ export class MultiDiseaseApiService {
         const jsonStr = line.substring(6);
         try {
           const parsed = JSON.parse(jsonStr);
+          // Expected payload shape is either an array with HTML at index 0, or plain HTML.
           if (parsed && Array.isArray(parsed) && parsed.length > 0) {
             return String(parsed[0]);
           }
