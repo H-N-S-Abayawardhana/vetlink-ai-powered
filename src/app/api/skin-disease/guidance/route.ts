@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
       case "disease_info":
         prompt = `You are a helpful assistant providing clear, detailed information about dog skin diseases for pet owners.
 
-Provide a thorough, detailed explanation about "${formattedDiseaseName}" for someone who wants to understand it well.
+Provide a concise but still helpful explanation about "${formattedDiseaseName}" for someone who wants to understand it well.
 
 CRITICAL REQUIREMENTS:
-- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
-- Be comprehensive: cover what the disease is, common causes, how it typically presents, and how it differs at ${stage} stage
+- Write 2 short paragraphs (about 6-9 sentences in total)
+- Be informative but not overly long: cover what the disease is, common causes, how it typically presents, and how it differs at ${stage} stage
 - Use simple, easy-to-understand language (avoid heavy medical jargon; if you use a term, briefly explain it)
 - Explain what this disease means for the dog and what owners might notice
 - Make it relevant to the ${stage} stage where applicable
@@ -43,7 +43,7 @@ CRITICAL REQUIREMENTS:
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
+Format: Write 2 concise paragraphs with enough detail to be useful, without becoming too long.`;
 
         break;
 
@@ -53,8 +53,8 @@ Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation with
 Explain in detail what "${stage}" severity means for "${formattedDiseaseName}".
 
 CRITICAL REQUIREMENTS:
-- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
-- Be thorough: explain what this stage means in practical terms, typical symptoms or signs at this stage, and how it differs from milder or more severe stages
+- Write 2 short paragraphs (about 6-9 sentences in total)
+- Be thorough but concise: explain what this stage means in practical terms, typical symptoms or signs at this stage, and how it differs from milder or more severe stages
 - Use simple, easy-to-understand language
 - Describe what owners might observe and when to be concerned
 - If the stage is "Severe", include a clear but gentle recommendation to consult a veterinarian
@@ -63,7 +63,7 @@ CRITICAL REQUIREMENTS:
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
+Format: Write 2 concise paragraphs that stay practical and easy to read.`;
 
         break;
 
@@ -75,8 +75,8 @@ Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation with
 Provide detailed, practical tips on how to keep a dog's skin healthy and maintain good skin condition.
 
 CRITICAL REQUIREMENTS:
-- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
-- Be comprehensive: cover preventive care, grooming, nutrition, environment, and general wellness
+- Write 2 short paragraphs (about 6-9 sentences in total)
+- Be practical and balanced: cover preventive care, grooming, nutrition, environment, and general wellness
 - Include specific, actionable tips (e.g. bathing frequency, diet, checking for parasites, when to see a vet for a check-up)
 - Use simple, easy-to-understand language
 - Emphasize maintaining the current healthy state
@@ -85,15 +85,15 @@ CRITICAL REQUIREMENTS:
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
+Format: Write 2 concise paragraphs with actionable advice that do not feel too long.`;
         } else {
           prompt = `You are a helpful assistant providing basic care tips for pet owners.
 
 Provide detailed, practical care tips for a dog with "${formattedDiseaseName}" at the ${stage} stage.
 
 CRITICAL REQUIREMENTS:
-- Write 2 to 3 well-developed paragraphs (about 10-18 sentences in total)
-- Be comprehensive: cover hygiene, comfort, what to do at home, when to see a vet, and what to avoid
+- Write 2 short paragraphs (about 6-9 sentences in total)
+- Be practical and concise: cover hygiene, comfort, what to do at home, when to see a vet, and what to avoid
 - Include specific, actionable tips relevant to both the disease and the ${stage} stage
 - Use simple, easy-to-understand language
 - If the stage is "Severe", include a clear recommendation to consult a veterinarian and what to do in the meantime
@@ -102,7 +102,7 @@ CRITICAL REQUIREMENTS:
 - Write in plain text format (no markdown, no bullet points, no numbering)
 - ALWAYS complete your full response - never cut off mid-sentence or mid-thought
 
-Format: Write 2-3 complete paragraphs. Provide a full, detailed explanation without any truncation.`;
+Format: Write 2 concise paragraphs with useful home-care guidance, without becoming too long.`;
         }
 
         break;
