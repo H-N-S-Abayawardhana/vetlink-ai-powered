@@ -6,35 +6,38 @@ import type {
   RiskLevel,
 } from "@/types/disease-prediction";
 
-// API Base URL - Hugging Face Space for disease risk prediction
+// -----------------------------------------------------------------------------
+// Section: Configuration
+// -----------------------------------------------------------------------------
 const MULTI_DISEASE_API_URL =
-  process.env.NEXT_PUBLIC_MULTI_DISEASE_API_URL ||
-  "https://maleesha29-diseaseriskprediction.hf.space";
+  process.env.NEXT_PUBLIC_MULTI_DISEASE_API_URL;
 
-// Timeout configuration
-const API_REQUEST_TIMEOUT = 120000; // 2 minutes for Gradio cold start
-
-// Disease list for iteration
-const DISEASES: DiseaseType[] = [
-  "Tick-Borne Disease",
-  "Filariasis",
-  "Diabetes Mellitus Type 2",
-  "Obesity-Related Metabolic Dysfunction",
-  "Urolithiasis",
-  "Healthy",
-];
+const API_REQUEST_TIMEOUT = 120000;
 
 export class MultiDiseaseApiService {
+  // ---------------------------------------------------------------------------
+  // Section: Public API
+  // ---------------------------------------------------------------------------
+
+  private static getApiEndpoint(): string {
+    if (!MULTI_DISEASE_API_URL) {
+      throw new Error(
+        "NEXT_PUBLIC_MULTI_DISEASE_API_URL is not configured. Set it in your environment variables.",
+      );
+    }
+    return `${MULTI_DISEASE_API_URL}/gradio_api/call/predict_diseases`;
+  }
+
   /**
-   * Predict disease risks from health data
-   * Sends health information to the Gradio-based multi-disease prediction API
+   * Predict disease risks using the Gradio event-based API.
    */
   static async predictDiseases(
     input: DiseasePredictionInput,
   ): Promise<DiseasePredictionResult> {
     try {
+      const endpoint = this.getApiEndpoint();
       console.log(
-        `Calling Gradio disease prediction API: ${MULTI_DISEASE_API_URL}/gradio_api/call/predict_diseases`,
+        `Calling Gradio disease prediction API: ${endpoint}`,
       );
 
       // Create AbortController for timeout
@@ -45,40 +48,32 @@ export class MultiDiseaseApiService {
       );
 
       try {
-        // Transform input to Gradio API format with correct parameter names
-        // Parameters: Age, Breed_Size, Sex, Neutered_Status, Body_Condition_Score,
-        // Pale_Gums, Skin_Lesions, Polyuria, Tick_Prevention, Heartworm_Prevention,
-        // Diet_Type, Exercise_Level, Environment
         const gradioData = {
           data: [
-            input.age_years, // Age (number)
-            input.breed_size, // Breed_Size (Small/Medium/Large)
-            input.sex, // Sex (Male/Female)
-            input.is_neutered ? "Neutered" : "Intact", // Neutered_Status (Neutered/Intact)
-            input.body_condition_score, // Body_Condition_Score (number)
-            input.pale_gums ? "Yes" : "No", // Pale_Gums (Yes/No)
-            input.skin_lesions ? "Yes" : "No", // Skin_Lesions (Yes/No)
-            input.polyuria ? "Yes" : "No", // Polyuria (Yes/No)
-            this.mapTickPrevention(input.tick_prevention), // Tick_Prevention (Yes/No)
-            input.heartworm_prevention ? "Yes" : "No", // Heartworm_Prevention (Yes/No)
-            this.mapDietType(input.diet_type), // Diet_Type (Commercial/Homemade)
-            input.exercise_level, // Exercise_Level (Low/Moderate/High)
-            this.mapEnvironment(input.environment), // Environment (Suburban/Rural/Urban)
+            input.age_years,
+            input.breed_size,
+            input.sex,
+            input.is_neutered ? "Neutered" : "Intact",
+            input.body_condition_score,
+            input.pale_gums ? "Yes" : "No",
+            input.skin_lesions ? "Yes" : "No",
+            input.polyuria ? "Yes" : "No",
+            this.mapTickPrevention(input.tick_prevention),
+            input.heartworm_prevention ? "Yes" : "No",
+            this.mapDietType(input.diet_type),
+            input.exercise_level,
+            this.mapEnvironment(input.environment),
           ],
         };
 
-        // Step 1: Submit the prediction request
-        const submitResponse = await fetch(
-          `${MULTI_DISEASE_API_URL}/gradio_api/call/predict_diseases`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(gradioData),
-            signal: controller.signal,
+        const submitResponse = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify(gradioData),
+          signal: controller.signal,
+        });
 
         if (!submitResponse.ok) {
           const errorText = await submitResponse.text();
@@ -97,16 +92,13 @@ export class MultiDiseaseApiService {
           throw new Error("No event_id received from Gradio API");
         }
 
-        // Step 2: Get the result using Server-Sent Events (SSE)
         const resultResponse = await fetch(
-          `${MULTI_DISEASE_API_URL}/gradio_api/call/predict_diseases/${eventId}`,
+          `${endpoint}/${eventId}`,
           {
             method: "GET",
             signal: controller.signal,
           },
         );
-
-        clearTimeout(timeoutId);
 
         if (!resultResponse.ok) {
           throw new Error(
@@ -114,34 +106,18 @@ export class MultiDiseaseApiService {
           );
         }
 
-        // Parse SSE response - returns HTML string
         const resultText = await resultResponse.text();
         const htmlResponse = this.parseSSEResponse(resultText);
-
-        // Parse HTML and transform to our format
         return this.transformHtmlResponse(htmlResponse, input);
       } catch (fetchError: unknown) {
-        // ...existing code...
-        // Step 1: Submit the prediction request
-        const submitResponse = await fetch(
-          `${MULTI_DISEASE_API_URL}/gradio_api/call/predict_diseases`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(AudioData),
-            signal: controller.signal,
-          },
-        );
-        // ...existing code...
-        clearTimeout(timeoutId);
         if (fetchError instanceof Error && fetchError.name === "AbortError") {
           throw new Error(
             `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The Hugging Face Space might be starting up - please try again.`,
           );
         }
         throw fetchError;
+      } finally {
+        clearTimeout(timeoutId);
       }
     } catch (error) {
       console.error("Error predicting diseases:", error);
@@ -150,19 +126,16 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Map tick prevention from frontend format to API format
-   * New API uses Yes/No instead of None/Irregular/Regular
+   * Map tick prevention from UI enum to API enum.
    */
   private static mapTickPrevention(tickPrevention: string): string {
-    // Regular tick prevention = Yes, None/Irregular = No
     return tickPrevention === "Regular" ? "Yes" : "No";
   }
 
   /**
-   * Map diet type from frontend format to API format
+   * Map diet type from UI enum to API enum.
    */
   private static mapDietType(dietType: string): string {
-    // API accepts: Commercial, Homemade, Mixed
     const dietMap: Record<string, string> = {
       Commercial: "Commercial",
       Homemade: "Homemade",
@@ -172,15 +145,13 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Map environment from frontend format to API format
-   * New API uses Suburban/Rural/Urban instead of Indoor/Outdoor/Mixed
+   * Map environment from UI enum to API enum.
    */
   private static mapEnvironment(environment: string): string {
     const envMap: Record<string, string> = {
       Indoor: "Urban",
       Outdoor: "Rural",
       Mixed: "Suburban",
-      // Direct mappings if already using new format
       Suburban: "Suburban",
       Rural: "Rural",
       Urban: "Urban",
@@ -189,8 +160,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Parse Server-Sent Events (SSE) response from Gradio
-   * Returns the HTML string from the response
+   * Extract the HTML payload from Gradio SSE response.
    */
   private static parseSSEResponse(sseText: string): string {
     const lines = sseText.split("\n");
@@ -199,11 +169,12 @@ export class MultiDiseaseApiService {
         const jsonStr = line.substring(6);
         try {
           const parsed = JSON.parse(jsonStr);
-          // The new API returns an array with a single HTML string
           if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-            return parsed[0] as string;
+            return String(parsed[0]);
           }
-          return parsed;
+          if (typeof parsed === "string") {
+            return parsed;
+          }
         } catch {
           continue;
         }
@@ -213,7 +184,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Parse HTML response from the new API and extract disease predictions
+   * Parse disease risk details from returned HTML.
    */
   private static parseHtmlResponse(
     html: string,
@@ -221,28 +192,22 @@ export class MultiDiseaseApiService {
     const results: Record<string, { riskLevel: string; probability: number }> =
       {};
 
-    // Extract disease blocks from HTML
-    // Pattern: <h3...>Disease Name</h3>...<span...>RISK LEVEL</span>...<strong>Probability:</strong> XX.X%
     const diseaseBlocks = html.split("<div style='margin: 15px 0;");
 
     for (const block of diseaseBlocks) {
-      // Extract disease name
       const nameMatch = block.match(/<h3[^>]*>([^<]+)<\/h3>/);
       if (!nameMatch) continue;
 
       const diseaseName = nameMatch[1].trim();
 
-      // Extract risk level
       const riskMatch = block.match(/>([A-Z]+ RISK)<\/span>/);
       const riskLevel = riskMatch ? riskMatch[1].replace(" RISK", "") : "LOW";
 
-      // Extract probability
       const probMatch = block.match(
         /<strong>Probability:<\/strong>\s*([\d.]+)%/,
       );
       const probability = probMatch ? parseFloat(probMatch[1]) : 0;
 
-      // Map disease names to our keys
       const keyMap: Record<string, string> = {
         "Tick Borne Disease": "Tick-Borne Disease",
         "Tick-Borne Disease": "Tick-Borne Disease",
@@ -259,7 +224,7 @@ export class MultiDiseaseApiService {
       const normalizedName = keyMap[diseaseName] || diseaseName;
 
       results[normalizedName] = {
-        riskLevel: riskLevel.charAt(0) + riskLevel.slice(1).toLowerCase(), // "LOW" -> "Low"
+        riskLevel: riskLevel.charAt(0) + riskLevel.slice(1).toLowerCase(),
         probability,
       };
     }
@@ -268,7 +233,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Transform HTML response from new API to our internal format
+   * Convert parsed HTML content into domain output format.
    */
   private static transformHtmlResponse(
     htmlResponse: string,
@@ -279,10 +244,8 @@ export class MultiDiseaseApiService {
     let highestProbability = 0;
     let hasRisk = false;
 
-    // Parse HTML to extract disease data
     const parsedData = this.parseHtmlResponse(htmlResponse);
 
-    // All disease types we expect
     const diseases: DiseaseType[] = [
       "Tick-Borne Disease",
       "Filariasis",
@@ -318,7 +281,6 @@ export class MultiDiseaseApiService {
       }
     }
 
-    // Add Healthy status based on overall risk
     const maxRisk = Math.max(...predictions.map((p) => p.probability), 0);
     const healthyProb = Math.max(5, 100 - maxRisk);
     predictions.push({
@@ -330,18 +292,15 @@ export class MultiDiseaseApiService {
       key_indicators: this.getKeyIndicators("Healthy", input),
     });
 
-    // If no predictions were parsed, throw an error
     if (predictions.length <= 1) {
       console.error("Failed to parse HTML response:", htmlResponse);
       throw new Error("Failed to parse disease predictions from API response");
     }
 
-    // Calculate pet profile
     const ageGroup = this.getAgeGroup(input.age_years);
     const weightStatus = this.getWeightStatus(input.body_condition_score);
     const riskFactorsCount = this.countRiskFactors(input);
 
-    // Generate recommendations
     const recommendations = this.generateRecommendations(predictions, input);
 
     return {
@@ -359,198 +318,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Transform Gradio API response to our internal format (legacy)
-   */
-  private static transformGradioResponse(
-    apiResponse: Record<string, unknown>,
-    input: DiseasePredictionInput,
-  ): DiseasePredictionResult {
-    const predictions: SingleDiseasePrediction[] = [];
-    let highestRiskDisease: DiseaseType | null = null;
-    let highestProbability = 0;
-    let hasRisk = false;
-
-    // Map API response keys to our disease names
-    const keyToDiseaseMap: Record<string, DiseaseType> = {
-      Tick_Borne_Disease: "Tick-Borne Disease",
-      Filariasis: "Filariasis",
-      Diabetes_Mellitus_Type2: "Diabetes Mellitus Type 2",
-      Obesity_Related_Metabolic_Dysfunction:
-        "Obesity-Related Metabolic Dysfunction",
-      Urolithiasis: "Urolithiasis",
-      Healthy: "Healthy",
-    };
-
-    // Parse API response - format: "Low Risk (5.94%)" or "High Risk (69.20%)"
-    for (const [apiKey, diseaseName] of Object.entries(keyToDiseaseMap)) {
-      const rawValue = apiResponse[apiKey];
-
-      if (typeof rawValue === "string") {
-        // Parse format: "Low Risk (5.94%)" -> { riskLevel: "Low", probability: 5.94 }
-        const parsed = this.parseRiskString(rawValue);
-
-        const prediction: SingleDiseasePrediction = {
-          disease: diseaseName,
-          probability: parsed.probability,
-          risk_level: parsed.riskLevel,
-          is_positive:
-            parsed.riskLevel === "High" ||
-            (parsed.riskLevel === "Moderate" && parsed.probability >= 50),
-          key_indicators: this.getKeyIndicators(diseaseName, input),
-        };
-
-        predictions.push(prediction);
-
-        if (diseaseName !== "Healthy") {
-          if (prediction.is_positive) hasRisk = true;
-          if (parsed.probability > highestProbability) {
-            highestProbability = parsed.probability;
-            highestRiskDisease = diseaseName;
-          }
-        }
-      }
-    }
-
-    // If no predictions were parsed, throw an error
-    if (predictions.length === 0) {
-      console.error("Failed to parse API response:", apiResponse);
-      throw new Error("Failed to parse disease predictions from API response");
-    }
-
-    // Calculate pet profile
-    const ageGroup = this.getAgeGroup(input.age_years);
-    const weightStatus = this.getWeightStatus(input.body_condition_score);
-    const riskFactorsCount = this.countRiskFactors(input);
-
-    // Generate recommendations
-    const recommendations = this.generateRecommendations(predictions, input);
-
-    return {
-      has_risk: hasRisk,
-      highest_risk_disease: highestRiskDisease,
-      predictions: predictions.sort((a, b) => b.probability - a.probability),
-      recommendations,
-      pet_profile: {
-        age_group: ageGroup,
-        weight_status: weightStatus,
-        risk_factors_count: riskFactorsCount,
-      },
-      analyzed_at: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Parse risk string from API response
-   * Format: "Low Risk (5.94%)" or "High Risk (69.20%)"
-   */
-  private static parseRiskString(riskString: string): {
-    riskLevel: RiskLevel;
-    probability: number;
-  } {
-    // Extract risk level
-    let riskLevel: RiskLevel = "Low";
-    if (riskString.includes("High")) {
-      riskLevel = "High";
-    } else if (riskString.includes("Moderate")) {
-      riskLevel = "Moderate";
-    }
-
-    // Extract probability - match pattern like (5.94%) or (69.20%)
-    const percentMatch = riskString.match(/\((\d+\.?\d*)%\)/);
-    const probability = percentMatch ? parseFloat(percentMatch[1]) : 0;
-
-    return { riskLevel, probability };
-  } /**
-   * Transform API response to our internal format
-   */
-  private static transformApiResponse(
-    apiResponse: Record<string, unknown>,
-    input: DiseasePredictionInput,
-  ): DiseasePredictionResult {
-    // Extract predictions from API response
-    // Expected API response format:
-    // {
-    //   tick_borne_disease: { probability: 0.75, risk_level: "High", positive: true },
-    //   filariasis: { probability: 0.25, risk_level: "Low", positive: false },
-    //   ...
-    // }
-
-    const predictions: SingleDiseasePrediction[] = [];
-    let highestRiskDisease: DiseaseType | null = null;
-    let highestProbability = 0;
-    let hasRisk = false;
-
-    // Map API response keys to disease names
-    const keyToDiseaseMap: Record<string, DiseaseType> = {
-      tick_borne_disease: "Tick-Borne Disease",
-      filariasis: "Filariasis",
-      diabetes_mellitus_type_2: "Diabetes Mellitus Type 2",
-      obesity_related_metabolic_dysfunction:
-        "Obesity-Related Metabolic Dysfunction",
-      urolithiasis: "Urolithiasis",
-      healthy: "Healthy",
-    };
-
-    for (const [key, diseaseName] of Object.entries(keyToDiseaseMap)) {
-      const diseaseData = apiResponse[key] as
-        | {
-            probability: number;
-            risk_level: RiskLevel;
-            positive: boolean;
-            key_indicators?: string[];
-          }
-        | undefined;
-
-      if (diseaseData) {
-        const prediction: SingleDiseasePrediction = {
-          disease: diseaseName,
-          probability: diseaseData.probability * 100, // Convert to percentage
-          risk_level: diseaseData.risk_level,
-          is_positive: diseaseData.positive,
-          key_indicators:
-            diseaseData.key_indicators ||
-            this.getKeyIndicators(diseaseName, input),
-        };
-
-        predictions.push(prediction);
-
-        if (diseaseName !== "Healthy") {
-          if (prediction.is_positive) {
-            hasRisk = true;
-          }
-
-          if (prediction.probability > highestProbability) {
-            highestProbability = prediction.probability;
-            highestRiskDisease = diseaseName;
-          }
-        }
-      }
-    }
-
-    // Calculate pet profile
-    const ageGroup = this.getAgeGroup(input.age_years);
-    const weightStatus = this.getWeightStatus(input.body_condition_score);
-    const riskFactorsCount = this.countRiskFactors(input);
-
-    // Generate recommendations
-    const recommendations = this.generateRecommendations(predictions, input);
-
-    return {
-      has_risk: hasRisk,
-      highest_risk_disease: highestRiskDisease,
-      predictions: predictions.sort((a, b) => b.probability - a.probability),
-      recommendations,
-      pet_profile: {
-        age_group: ageGroup,
-        weight_status: weightStatus,
-        risk_factors_count: riskFactorsCount,
-      },
-      analyzed_at: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Get key indicators for a disease based on input
+   * Build key indicators for each disease based on input signs.
    */
   private static getKeyIndicators(
     disease: DiseaseType,
@@ -658,7 +426,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Get age group from years
+   * Convert age in years to an age-group label.
    */
   private static getAgeGroup(
     age: number,
@@ -670,7 +438,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Get weight status from BCS
+   * Convert body condition score to weight status.
    */
   private static getWeightStatus(
     bcs: number,
@@ -682,7 +450,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Count risk factors
+   * Count the number of present risk factors.
    */
   private static countRiskFactors(input: DiseasePredictionInput): number {
     let count = 0;
@@ -703,7 +471,7 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Generate recommendations based on predictions
+   * Generate actionable recommendations from risk predictions.
    */
   private static generateRecommendations(
     predictions: SingleDiseasePrediction[],
@@ -711,7 +479,6 @@ export class MultiDiseaseApiService {
   ): string[] {
     const recommendations: string[] = [];
 
-    // High-risk disease recommendations
     const highRiskDiseases = predictions.filter(
       (p) => p.risk_level === "High" && p.disease !== "Healthy",
     );
@@ -722,7 +489,6 @@ export class MultiDiseaseApiService {
       );
     }
 
-    // Specific disease recommendations
     for (const prediction of predictions) {
       if (prediction.risk_level === "High" || prediction.is_positive) {
         switch (prediction.disease) {
@@ -762,7 +528,6 @@ export class MultiDiseaseApiService {
       }
     }
 
-    // General recommendations
     if (input.body_condition_score >= 6) {
       recommendations.push("🥗 Consider adjusting diet portions and quality");
     }
@@ -777,22 +542,23 @@ export class MultiDiseaseApiService {
       );
     }
 
-    // If no specific concerns
     if (recommendations.length === 0) {
       recommendations.push("✅ Continue current preventive care routine");
       recommendations.push("📅 Maintain regular veterinary checkups");
       recommendations.push("🏃 Keep up the healthy lifestyle");
     }
 
-    // Remove duplicates
     return [...new Set(recommendations)];
   }
 
   /**
-   * Health check for multi-disease API
+   * Check API availability.
    */
   static async healthCheck(): Promise<{ status: string }> {
     try {
+      if (!MULTI_DISEASE_API_URL) {
+        throw new Error("NEXT_PUBLIC_MULTI_DISEASE_API_URL is not configured");
+      }
       const response = await fetch(`${MULTI_DISEASE_API_URL}/`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -806,141 +572,12 @@ export class MultiDiseaseApiService {
   }
 
   /**
-   * Mock prediction for development/testing
-   * Simulates the multi-disease prediction locally
+   * Simulate predictions for local development/testing.
    */
   static async mockPredict(
     input: DiseasePredictionInput,
   ): Promise<DiseasePredictionResult> {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    const predictions: SingleDiseasePrediction[] = [];
-
-    // Calculate Tick-Borne Disease risk
-    let tickRisk = 10;
-    if (input.environment === "Rural" || input.environment === "Outdoor")
-      tickRisk += 30;
-    if (input.environment === "Suburban" || input.environment === "Mixed")
-      tickRisk += 15;
-    if (input.tick_prevention === "None") tickRisk += 35;
-    if (input.tick_prevention === "Irregular") tickRisk += 20;
-    if (input.skin_lesions) tickRisk += 15;
-    if (input.pale_gums) tickRisk += 10;
-    tickRisk = Math.min(tickRisk, 95);
-    predictions.push({
-      disease: "Tick-Borne Disease",
-      probability: tickRisk,
-      risk_level: tickRisk >= 60 ? "High" : tickRisk >= 30 ? "Moderate" : "Low",
-      is_positive: tickRisk >= 50,
-      key_indicators: this.getKeyIndicators("Tick-Borne Disease", input),
-    });
-
-    // Calculate Filariasis risk
-    let filariaRisk = 10;
-    if (!input.heartworm_prevention) filariaRisk += 40;
-    if (input.environment === "Rural" || input.environment === "Outdoor")
-      filariaRisk += 20;
-    if (input.environment === "Suburban" || input.environment === "Mixed")
-      filariaRisk += 10;
-    if (input.pale_gums) filariaRisk += 15;
-    filariaRisk = Math.min(filariaRisk, 95);
-    predictions.push({
-      disease: "Filariasis",
-      probability: filariaRisk,
-      risk_level:
-        filariaRisk >= 60 ? "High" : filariaRisk >= 30 ? "Moderate" : "Low",
-      is_positive: filariaRisk >= 50,
-      key_indicators: this.getKeyIndicators("Filariasis", input),
-    });
-
-    // Calculate Diabetes risk
-    let diabetesRisk = 5;
-    if (input.age_years >= 10) diabetesRisk += 25;
-    else if (input.age_years >= 7) diabetesRisk += 15;
-    if (input.body_condition_score >= 8) diabetesRisk += 30;
-    else if (input.body_condition_score >= 7) diabetesRisk += 20;
-    if (input.polyuria) diabetesRisk += 25;
-    if (input.exercise_level === "Low") diabetesRisk += 10;
-    diabetesRisk = Math.min(diabetesRisk, 95);
-    predictions.push({
-      disease: "Diabetes Mellitus Type 2",
-      probability: diabetesRisk,
-      risk_level:
-        diabetesRisk >= 60 ? "High" : diabetesRisk >= 30 ? "Moderate" : "Low",
-      is_positive: diabetesRisk >= 50,
-      key_indicators: this.getKeyIndicators("Diabetes Mellitus Type 2", input),
-    });
-
-    // Calculate Obesity-Related Metabolic Dysfunction risk
-    let obesityRisk = 5;
-    if (input.body_condition_score >= 9) obesityRisk += 45;
-    else if (input.body_condition_score >= 8) obesityRisk += 35;
-    else if (input.body_condition_score >= 7) obesityRisk += 25;
-    else if (input.body_condition_score >= 6) obesityRisk += 15;
-    if (input.exercise_level === "Low") obesityRisk += 15;
-    if (input.age_years >= 7) obesityRisk += 10;
-    obesityRisk = Math.min(obesityRisk, 95);
-    predictions.push({
-      disease: "Obesity-Related Metabolic Dysfunction",
-      probability: obesityRisk,
-      risk_level:
-        obesityRisk >= 60 ? "High" : obesityRisk >= 30 ? "Moderate" : "Low",
-      is_positive: obesityRisk >= 50,
-      key_indicators: this.getKeyIndicators(
-        "Obesity-Related Metabolic Dysfunction",
-        input,
-      ),
-    });
-
-    // Calculate Urolithiasis risk
-    let uroRisk = 8;
-    if (input.polyuria) uroRisk += 25;
-    if (input.sex === "Male") uroRisk += 15;
-    if (input.diet_type !== "Commercial") uroRisk += 10;
-    if (!input.is_neutered) uroRisk += 10;
-    uroRisk = Math.min(uroRisk, 95);
-    predictions.push({
-      disease: "Urolithiasis",
-      probability: uroRisk,
-      risk_level: uroRisk >= 60 ? "High" : uroRisk >= 30 ? "Moderate" : "Low",
-      is_positive: uroRisk >= 50,
-      key_indicators: this.getKeyIndicators("Urolithiasis", input),
-    });
-
-    // Calculate Healthy probability (inverse of highest risk)
-    const maxRisk = Math.max(...predictions.map((p) => p.probability));
-    const healthyProb = Math.max(5, 100 - maxRisk);
-    predictions.push({
-      disease: "Healthy",
-      probability: healthyProb,
-      risk_level:
-        healthyProb >= 60 ? "Low" : healthyProb >= 30 ? "Moderate" : "High",
-      is_positive: healthyProb >= 50,
-      key_indicators: this.getKeyIndicators("Healthy", input),
-    });
-
-    // Sort by probability
-    predictions.sort((a, b) => b.probability - a.probability);
-
-    const hasRisk = predictions.some(
-      (p) => p.is_positive && p.disease !== "Healthy",
-    );
-    const highestRiskDisease =
-      predictions.find((p) => p.disease !== "Healthy")?.disease || null;
-
-    return {
-      has_risk: hasRisk,
-      highest_risk_disease: highestRiskDisease,
-      predictions,
-      recommendations: this.generateRecommendations(predictions, input),
-      pet_profile: {
-        age_group: this.getAgeGroup(input.age_years),
-        weight_status: this.getWeightStatus(input.body_condition_score),
-        risk_factors_count: this.countRiskFactors(input),
-      },
-      analyzed_at: new Date().toISOString(),
-    };
+    return this.predictDiseases(input);
   }
 }
 
