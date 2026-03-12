@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { listPets, type Pet } from "@/lib/pets";
 import DiseasePredictionForm from "@/components/dashboard/bcs/DiseasePredictionForm";
 import DiseasePredictionResults from "@/components/dashboard/bcs/DiseasePredictionResults";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import type {
   DiseasePredictionFormState,
   DiseasePredictionResult,
@@ -423,17 +424,10 @@ export default function DiseasePredictionPage() {
       )}
 
       {loading && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md mx-4">
-            <div className="w-14 h-14 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-5" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Analyzing disease risks
-            </h3>
-            <p className="text-sm text-gray-600">
-              Reviewing your pet&apos;s profile across six health conditions.
-            </p>
-          </div>
-        </div>
+        <LoadingOverlay
+          title="Analyzing disease risks"
+          description="Reviewing your pet's profile across six health conditions."
+        />
       )}
 
       <p className="text-center text-sm text-gray-500">
