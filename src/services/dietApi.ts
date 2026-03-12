@@ -1,8 +1,3 @@
-/**
- * Diet Recommendation API Service
- * Calls the Hugging Face Diet Recommendation Model
- */
-
 export interface DietPredictionInput {
   age: number;
   weight_kg: number;
@@ -33,6 +28,7 @@ const API_SUBMIT_ENDPOINT_ASYNC = `${HF_SPACE_URL}/gradio_api/call/recommend_die
 const API_GET_ENDPOINT_ASYNC = (eventId: string) =>
   `${HF_SPACE_URL}/gradio_api/call/recommend_diet/${eventId}`;
 
+// Calls the HF Gradio model and supports both sync and async endpoint patterns.
 export async function predictDietRecommendation(
   input: DietPredictionInput,
 ): Promise<DietPredictionResponse> {
@@ -65,6 +61,7 @@ export async function predictDietRecommendation(
         signal: controller.signal,
       });
 
+      // Fallback for spaces that expose only Gradio async call endpoints.
       if (submitResponse.status === 404) {
         submitResponse = await fetch(API_SUBMIT_ENDPOINT_ASYNC, {
           method: "POST",
@@ -85,6 +82,7 @@ export async function predictDietRecommendation(
 
       const submitResult = await submitResponse.json();
 
+      // Async Gradio flow: submit returns event_id, then fetch result stream.
       if (submitResult.event_id) {
         const eventId = submitResult.event_id;
         const resultResponse = await fetch(API_GET_ENDPOINT_ASYNC(eventId), {
@@ -124,6 +122,7 @@ export async function predictDietRecommendation(
   }
 }
 
+// Extracts the first parseable JSON payload from SSE lines formatted as `data: ...`.
 function parseSSEResponse(sseText: string): unknown {
   const lines = sseText.split("\n");
   for (const line of lines) {
@@ -139,6 +138,7 @@ function parseSSEResponse(sseText: string): unknown {
   throw new Error("No valid data found in SSE response");
 }
 
+// Normalizes multiple Gradio response shapes into a consistent API contract.
 function normalizeDietResponse(result: unknown): DietPredictionResponse {
   let unwrapped: unknown = result;
 
@@ -205,6 +205,7 @@ function normalizeDietResponse(result: unknown): DietPredictionResponse {
   );
 }
 
+// Parses text output like: "Calorie Level: ... | Diet Type: ... | Food Category: ...".
 function parseDietString(text: string): DietPredictionResponse {
   const calorieMatch = text.match(/Calorie\s*Level\s*:\s*(.+)/i);
   const dietMatch = text.match(/Diet\s*Type\s*:\s*(.+)/i);
