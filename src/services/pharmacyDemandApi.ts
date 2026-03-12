@@ -1,6 +1,4 @@
-
 import { Client } from "@gradio/client";
-
 
 const PHARMACY_DEMAND_MODEL_ID =
   process.env.NEXT_PUBLIC_PHARMACY_DEMAND_MODEL_ID ||
@@ -46,7 +44,7 @@ export interface PharmacyDemandInput {
   location_long: number;
   promotion_flag: number; // 0 or 1
 
-  // Historical sales data 
+  // Historical sales data
   sales_lag_1: number; // Sales 1 day ago
   sales_lag_3: number; // Sales 3 days ago
   sales_lag_7: number; // Sales 7 days ago
@@ -62,12 +60,10 @@ export interface PharmacyDemandResult {
 }
 
 export class PharmacyDemandApiService {
-  
   static async predictDemand(
     input: PharmacyDemandInput,
   ): Promise<PharmacyDemandResult> {
     try {
-      
       const inputs: number[] = [
         1, // pharmacy_id
         Number(input.medicine_id), // medicine_id
@@ -90,7 +86,6 @@ export class PharmacyDemandApiService {
         0.7, // avg_urgency
       ];
 
-      
       if (isGradioSpace || PHARMACY_DEMAND_MODEL_ID) {
         try {
           return await this.predictWithGradio(input, inputs);
@@ -102,11 +97,9 @@ export class PharmacyDemandApiService {
                 ? JSON.stringify(gradioError)
                 : String(gradioError);
           console.warn("Gradio failed:", errMsg);
-          
         }
       }
 
-      
       if (!isGradioSpace && PHARMACY_DEMAND_MODEL_ID) {
         try {
           return await this.predictWithInferenceAPI(input, inputs);
@@ -117,16 +110,13 @@ export class PharmacyDemandApiService {
               ? inferenceError.message
               : String(inferenceError),
           );
-        
         }
       }
 
-      
       return await this.predictDemandDirectAPI(input, inputs);
     } catch (error) {
       console.error("Error predicting pharmacy demand:", error);
 
-      
       if (error instanceof Error) {
         if (
           error.message.includes("fetch") ||
@@ -152,7 +142,6 @@ export class PharmacyDemandApiService {
     }
   }
 
-  
   private static async predictWithInferenceAPI(
     fullInput: any,
     inputs: (string | number)[],
@@ -188,7 +177,6 @@ export class PharmacyDemandApiService {
     return this.parseInferenceAPIResult(data);
   }
 
-  
   private static async predictWithGradio(
     fullInput: any,
     inputs: (string | number)[],
@@ -217,7 +205,6 @@ export class PharmacyDemandApiService {
     }
   }
 
- 
   private static async predictDemandDirectAPI(
     fullInput: any,
     inputs: (string | number)[],
@@ -300,10 +287,7 @@ export class PharmacyDemandApiService {
     }
   }
 
- 
   private static parseInferenceAPIResult(result: any): PharmacyDemandResult {
-    
-
     if (typeof result === "number") {
       return {
         prediction: Math.round(result),
@@ -339,7 +323,6 @@ export class PharmacyDemandApiService {
       }
     }
 
-    
     if (result && typeof result === "object") {
       if (typeof result.prediction === "number") {
         return {
@@ -366,7 +349,6 @@ export class PharmacyDemandApiService {
     );
   }
 
- 
   private static parsePredictionResult(result: any): PharmacyDemandResult {
     let outputText: string;
 
@@ -423,15 +405,14 @@ export class PharmacyDemandApiService {
     };
   }
 
- 
   private static generateMockPrediction(
     input: PharmacyDemandInput,
   ): PharmacyDemandResult {
     const basePrediction = Math.max(
       1,
       Math.round(
-        input.inventory_level * 0.1 + // 10% of inventory 
-          input.sales_lag_1 * 0.8 + // Recent sales 
+        input.inventory_level * 0.1 + // 10% of inventory
+          input.sales_lag_1 * 0.8 + // Recent sales
           input.sales_lag_3 * 0.15 + // 3-day trend
           input.sales_lag_7 * 0.05, // 7-day trend
       ),
@@ -519,7 +500,6 @@ export class PharmacyDemandApiService {
     };
   }
 
- 
   static async healthCheck(): Promise<{ status: string; model?: string }> {
     try {
       if (!PHARMACY_DEMAND_MODEL_ID) {
@@ -550,8 +530,7 @@ export class PharmacyDemandApiService {
               model: PHARMACY_DEMAND_MODEL_ID,
             };
           }
-        } catch (err) {
-        }
+        } catch (err) {}
       }
 
       const spaceUrl = isGradioSpace
