@@ -1011,7 +1011,7 @@ export default function SkinAnalysis({
             />
             <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
               {apiStatus === "online"
-                ? "API Online"
+                ? "Service Available"
                 : apiStatus === "offline"
                   ? "API Offline"
                   : "Checking..."}
