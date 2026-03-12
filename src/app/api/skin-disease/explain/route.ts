@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  formatSkinDiseaseAiError,
+  generateSkinDiseaseText,
+} from "@/lib/skin-disease-ai";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,10 +17,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
+    if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: "Gemini API key not configured" },
+        { error: "Neither Gemini nor OpenAI API key is configured" },
         { status: 500 },
       );
     }
@@ -76,165 +79,7 @@ Important: Clearly emphasize that professional veterinary diagnosis and treatmen
         );
     }
 
-    // First, get available models to find the right one
-    let modelName = "gemini-1.5-flash"; // Default fallback
-
-    // List available models from Gemini API
-    try {
-      const modelsUrl = `https://generativelanguage.googleapis.com/v1/models?key=${geminiApiKey}`;
-      const modelsResponse = await fetch(modelsUrl);
-
-      if (modelsResponse.ok) {
-        const modelsData = await modelsResponse.json();
-        console.log("Available models:", JSON.stringify(modelsData, null, 2));
-
-        // Find a model that supports generateContent
-        const availableModel = modelsData.models?.find((m: any) =>
-          m.supportedGenerationMethods?.includes("generateContent"),
-        );
-
-        if (availableModel) {
-          // Extract model name (format: models/gemini-1.5-flash or just the name)
-          // The API might return "models/gemini-1.5-flash" or just "gemini-1.5-flash"
-          modelName = availableModel.name.replace(/^models\//, "");
-          console.log(
-            "Found working model:",
-            modelName,
-            "from:",
-            availableModel.name,
-          );
-        } else {
-          console.log(
-            "No model with generateContent found. Available models:",
-            modelsData.models
-              ?.map(
-                (m: any) =>
-                  `${m.name} (methods: ${m.supportedGenerationMethods?.join(", ")})`,
-              )
-              .join(", "),
-          );
-          // If no model found, try to use the first available model name
-          if (modelsData.models && modelsData.models.length > 0) {
-            const firstModel = modelsData.models[0];
-            modelName = firstModel.name.replace(/^models\//, "");
-            console.log("Trying first available model:", modelName);
-          }
-        }
-      } else {
-        const errorText = await modelsResponse.text();
-        console.error("Failed to list models:", errorText);
-      }
-    } catch (err) {
-      console.error("Error listing models:", err);
-      // Continue with default model
-    }
-
-    // Call Gemini API with the determined model
-    // Try v1beta first (older API that might work with free tier)
-    let geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-    let response = await fetch(geminiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024, // Increased for 2-3 well-developed paragraphs (300-400 words)
-        },
-      }),
-    });
-
-    // If v1beta fails, try v1
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error with v1beta:", errorText);
-
-      // Try v1 API as fallback
-      geminiUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${geminiApiKey}`;
-      console.log("Trying v1 API instead...");
-      response = await fetch(geminiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024, // Increased for 2-3 well-developed paragraphs (300-400 words)
-          },
-        }),
-      });
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error:", errorText);
-
-      // Try to parse error for better message
-      let errorMessage = "Failed to generate explanation";
-      try {
-        const errorData = JSON.parse(errorText);
-        if (errorData.error?.message) {
-          errorMessage = errorData.error.message;
-          // If model not found, suggest checking available models
-          if (errorData.error.message.includes("not found")) {
-            errorMessage +=
-              "\n\nPlease check:\n1. Your API key is valid in Google AI Studio\n2. The model name matches what's available for your API key\n3. Check the console logs above for available models";
-          }
-        }
-      } catch {
-        // If parsing fails, use the raw error text if it's short
-        if (errorText && errorText.length < 200) {
-          errorMessage = errorText;
-        }
-      }
-
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: response.status },
-      );
-    }
-
-    const data = await response.json();
-
-    // Check for API errors in response
-    if (data.error) {
-      console.error("Gemini API error in response:", data.error);
-      return NextResponse.json(
-        {
-          error: data.error.message || "Failed to generate explanation",
-        },
-        { status: 500 },
-      );
-    }
-
-    // Extract the generated text
-    const explanation =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Unable to generate explanation at this time.";
+    const { text: explanation } = await generateSkinDiseaseText(prompt, 1024);
 
     // Check if explanation is empty or just the fallback message
     if (
@@ -256,14 +101,15 @@ Important: Clearly emphasize that professional veterinary diagnosis and treatmen
     });
   } catch (error) {
     console.error("Error generating explanation:", error);
+    const { message, status } = formatSkinDiseaseAiError(
+      error,
+      "Failed to generate explanation",
+    );
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to generate explanation",
+        error: message,
       },
-      { status: 500 },
+      { status },
     );
   }
 }

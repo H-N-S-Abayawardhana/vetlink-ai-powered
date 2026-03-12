@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  formatSkinDiseaseAiError,
+  generateSkinDiseaseText,
+} from "@/lib/skin-disease-ai";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,10 +17,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
+    if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: "Gemini API key not configured" },
+        { error: "Neither Gemini nor OpenAI API key is configured" },
         { status: 500 },
       );
     }
@@ -114,130 +117,10 @@ Format: Write 2 concise paragraphs with useful home-care guidance, without becom
         );
     }
 
-    // Determine model name
-    let modelName = "gemini-1.5-flash"; // Default fallback
-
-    // Try to get available models
-    try {
-      const modelsUrl = `https://generativelanguage.googleapis.com/v1/models?key=${geminiApiKey}`;
-      const modelsResponse = await fetch(modelsUrl);
-
-      if (modelsResponse.ok) {
-        const modelsData = await modelsResponse.json();
-        const availableModel = modelsData.models?.find((m: any) =>
-          m.supportedGenerationMethods?.includes("generateContent"),
-        );
-
-        if (availableModel) {
-          modelName = availableModel.name.replace(/^models\//, "");
-        } else if (modelsData.models && modelsData.models.length > 0) {
-          const firstModel = modelsData.models[0];
-          modelName = firstModel.name.replace(/^models\//, "");
-        }
-      }
-    } catch (err) {
-      console.error("Error listing models:", err);
-      // Continue with default model
-    }
-
-    // Call Gemini API
-    let geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-    let response = await fetch(geminiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        },
-      }),
-    });
-
-    // If v1beta fails, try v1
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error with v1beta:", errorText);
-
-      geminiUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${geminiApiKey}`;
-      response = await fetch(geminiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          },
-        }),
-      });
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error:", errorText);
-
-      let errorMessage = "Failed to generate guidance";
-      try {
-        const errorData = JSON.parse(errorText);
-        if (errorData.error?.message) {
-          errorMessage = errorData.error.message;
-        }
-      } catch {
-        if (errorText && errorText.length < 200) {
-          errorMessage = errorText;
-        }
-      }
-
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: response.status },
-      );
-    }
-
-    const data = await response.json();
-
-    // Check for API errors in response
-    if (data.error) {
-      console.error("Gemini API error in response:", data.error);
-      return NextResponse.json(
-        {
-          error: data.error.message || "Failed to generate guidance",
-        },
-        { status: 500 },
-      );
-    }
-
-    // Extract the generated text and check finish reason
-    const candidate = data.candidates?.[0];
+    const initialResult = await generateSkinDiseaseText(prompt, 2048);
     let guidance =
-      candidate?.content?.parts?.[0]?.text ||
-      "Unable to generate guidance at this time.";
-    const finishReason = candidate?.finishReason;
+      initialResult.text || "Unable to generate guidance at this time.";
+    const finishReason = initialResult.finishReason;
 
     // Check if guidance is empty
     if (!guidance || guidance === "Unable to generate guidance at this time.") {
@@ -253,7 +136,8 @@ Format: Write 2 concise paragraphs with useful home-care guidance, without becom
     // finishReason can be: STOP (normal), MAX_TOKENS (truncated), or other reasons
     const trimmedGuidance = guidance.trim();
     const endsWithPunctuation = /[.!?]$/.test(trimmedGuidance);
-    const wasTruncatedByTokens = finishReason === "MAX_TOKENS";
+    const wasTruncatedByTokens =
+      finishReason === "MAX_TOKENS" || finishReason === "length";
     const isLikelyTruncated =
       wasTruncatedByTokens ||
       (!endsWithPunctuation && trimmedGuidance.length > 50);
@@ -261,87 +145,27 @@ Format: Write 2 concise paragraphs with useful home-care guidance, without becom
     // If truncated, request completion
     if (isLikelyTruncated) {
       try {
-        // Get the last sentence or phrase to provide context
-        const lastSentence =
-          trimmedGuidance.split(/[.!?]/).filter(Boolean).pop() ||
-          trimmedGuidance.slice(-100);
-
         const completionPrompt = `Complete the following explanation about "${formattedDiseaseName}". The explanation was cut off. Continue from where it left off and finish the thought naturally with proper punctuation. Do not repeat what was already said, just complete the current thought.
 
 ${trimmedGuidance}
 
 Continue and complete the explanation:`;
 
-        // Try v1beta first, then v1
-        let completionUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-        let completionResponse = await fetch(completionUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: completionPrompt,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 600,
-            },
-          }),
-        });
+        const { text: completion } = await generateSkinDiseaseText(
+          completionPrompt,
+          600,
+        );
+        if (completion.trim()) {
+          // Append completion, ensuring proper spacing and no duplication
+          const completionText = completion.trim();
+          // Remove any potential duplicate text at the start of completion
+          const cleanCompletion = completionText.startsWith(
+            trimmedGuidance.slice(-20),
+          )
+            ? completionText.slice(trimmedGuidance.slice(-20).length).trim()
+            : completionText;
 
-        // If v1beta fails, try v1
-        if (!completionResponse.ok) {
-          completionUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${geminiApiKey}`;
-          completionResponse = await fetch(completionUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    {
-                      text: completionPrompt,
-                    },
-                  ],
-                },
-              ],
-              generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 600,
-              },
-            }),
-          });
-        }
-
-        if (completionResponse.ok) {
-          const completionData = await completionResponse.json();
-          const completion =
-            completionData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          if (completion.trim()) {
-            // Append completion, ensuring proper spacing and no duplication
-            const completionText = completion.trim();
-            // Remove any potential duplicate text at the start of completion
-            const cleanCompletion = completionText.startsWith(
-              trimmedGuidance.slice(-20),
-            )
-              ? completionText.slice(trimmedGuidance.slice(-20).length).trim()
-              : completionText;
-
-            guidance = trimmedGuidance + " " + cleanCompletion;
-          }
+          guidance = trimmedGuidance + " " + cleanCompletion;
         }
       } catch (completionError) {
         console.error("Error completing truncated response:", completionError);
@@ -357,14 +181,15 @@ Continue and complete the explanation:`;
     });
   } catch (error) {
     console.error("Error generating guidance:", error);
+    const { message, status } = formatSkinDiseaseAiError(
+      error,
+      "Failed to generate guidance",
+    );
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to generate guidance",
+        error: message,
       },
-      { status: 500 },
+      { status },
     );
   }
 }
