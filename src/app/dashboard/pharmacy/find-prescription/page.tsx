@@ -30,6 +30,7 @@ import {
   updatePharmacyCartQuantity,
   type PharmacyCartItem,
 } from "@/lib/pharmacyCart";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 export default function FindFromPrescriptionPage() {
   return (
@@ -1088,6 +1089,13 @@ function FindFromPrescriptionModule() {
         proceedLabel="Proceed to checkout"
         subtitle="Items added from prescription results"
       />
+
+      {loading && (
+        <LoadingOverlay
+          title="Reading prescription"
+          description="Extracting medications and checking which pharmacies have them in stock."
+        />
+      )}
     </div>
   );
 }

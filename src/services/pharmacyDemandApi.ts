@@ -1,19 +1,10 @@
-// src/services/pharmacyDemandApi.ts
-// Service for Pharmacy Demand Prediction API (Hugging Face Model)
-// Supports both Hugging Face Inference API and Gradio Spaces
-
 import { Client } from "@gradio/client";
 
-// Hugging Face Model ID or Space URL
-// Can be either:
-// - Model ID: "username/model-name" (uses Inference API)
-// - Space URL: "https://username-space-name.hf.space" or "https://huggingface.co/spaces/username/space"
 const PHARMACY_DEMAND_MODEL_ID =
   process.env.NEXT_PUBLIC_PHARMACY_DEMAND_MODEL_ID ||
   process.env.NEXT_PUBLIC_PHARMACY_DEMAND_MODEL_URL ||
   "";
 
-// Normalize HF Space URL: convert huggingface.co/spaces/user/space to https://user-space.hf.space
 function normalizeSpaceUrl(url: string): string {
   if (!url) return "";
   const trimmed = url.trim();
@@ -44,7 +35,7 @@ const isGradioSpace =
 const INFERENCE_API_BASE = "https://api-inference.huggingface.co/models";
 
 export interface PharmacyDemandInput {
-  // Core features (required by model)
+  // features
   medicine_id: string; // Medicine identifier (from dropdown)
   price: number;
   inventory_level: number;
@@ -53,7 +44,7 @@ export interface PharmacyDemandInput {
   location_long: number;
   promotion_flag: number; // 0 or 1
 
-  // Historical sales data (required for prediction)
+  // Historical sales data
   sales_lag_1: number; // Sales 1 day ago
   sales_lag_3: number; // Sales 3 days ago
   sales_lag_7: number; // Sales 7 days ago
@@ -69,16 +60,10 @@ export interface PharmacyDemandResult {
 }
 
 export class PharmacyDemandApiService {
-  /**
-   * Predict pharmacy demand using Hugging Face Model
-   * Supports both Inference API and Gradio Spaces
-   */
   static async predictDemand(
     input: PharmacyDemandInput,
   ): Promise<PharmacyDemandResult> {
     try {
-      // Prepare inputs as array in the order expected by the Gradio model (app.py predict_demand)
-      // All values sent as numbers so the Space receives correct types for sklearn/pandas
       const inputs: number[] = [
         1, // pharmacy_id
         Number(input.medicine_id), // medicine_id
@@ -101,7 +86,6 @@ export class PharmacyDemandApiService {
         0.7, // avg_urgency
       ];
 
-      // Try Gradio Space (primary method for this model)
       if (isGradioSpace || PHARMACY_DEMAND_MODEL_ID) {
         try {
           return await this.predictWithGradio(input, inputs);
@@ -113,11 +97,9 @@ export class PharmacyDemandApiService {
                 ? JSON.stringify(gradioError)
                 : String(gradioError);
           console.warn("Gradio failed:", errMsg);
-          // Fall through to direct API
         }
       }
 
-      // Try Inference API as fallback
       if (!isGradioSpace && PHARMACY_DEMAND_MODEL_ID) {
         try {
           return await this.predictWithInferenceAPI(input, inputs);
@@ -128,16 +110,13 @@ export class PharmacyDemandApiService {
               ? inferenceError.message
               : String(inferenceError),
           );
-          // Fall through to direct API
         }
       }
 
-      // Fallback to direct API call
       return await this.predictDemandDirectAPI(input, inputs);
     } catch (error) {
       console.error("Error predicting pharmacy demand:", error);
 
-      // Provide more helpful error messages
       if (error instanceof Error) {
         if (
           error.message.includes("fetch") ||
@@ -163,9 +142,6 @@ export class PharmacyDemandApiService {
     }
   }
 
-  /**
-   * Predict using Hugging Face Inference API
-   */
   private static async predictWithInferenceAPI(
     fullInput: any,
     inputs: (string | number)[],
@@ -198,13 +174,9 @@ export class PharmacyDemandApiService {
 
     const data = await response.json();
 
-    // Handle different response formats from Inference API
     return this.parseInferenceAPIResult(data);
   }
 
-  /**
-   * Predict using Gradio Client
-   */
   private static async predictWithGradio(
     fullInput: any,
     inputs: (string | number)[],
@@ -233,10 +205,6 @@ export class PharmacyDemandApiService {
     }
   }
 
-  /**
-   * Fallback method using Gradio's /call/predict API (POST then GET event_id)
-   * See: https://gradio.app/guides/querying-gradio-apps-with-curl
-   */
   private static async predictDemandDirectAPI(
     fullInput: any,
     inputs: (string | number)[],
@@ -258,7 +226,6 @@ export class PharmacyDemandApiService {
       headers["Authorization"] = `Bearer ${HF_API_TOKEN}`;
     }
 
-    // Step 1: POST to /gradio_api/call/predict (HF Spaces use /gradio_api/ prefix)
     const postUrl = `${baseUrl}/gradio_api/call/predict`;
     const postRes = await fetch(postUrl, {
       method: "POST",
@@ -287,7 +254,6 @@ export class PharmacyDemandApiService {
       );
     }
 
-    // Step 2: GET result via SSE stream
     const getUrl = `${baseUrl}/gradio_api/call/predict/${eventId}`;
     const getRes = await fetch(getUrl, {
       method: "GET",
@@ -321,16 +287,7 @@ export class PharmacyDemandApiService {
     }
   }
 
-  /**
-   * Parse prediction result from Inference API
-   */
   private static parseInferenceAPIResult(result: any): PharmacyDemandResult {
-    // Inference API can return different formats:
-    // 1. Direct number: 123
-    // 2. Array: [123]
-    // 3. Object with prediction: { prediction: 123 }
-    // 4. Array of objects: [{ label: "...", score: 0.9 }]
-
     if (typeof result === "number") {
       return {
         prediction: Math.round(result),
@@ -366,7 +323,6 @@ export class PharmacyDemandApiService {
       }
     }
 
-    // If object with prediction field
     if (result && typeof result === "object") {
       if (typeof result.prediction === "number") {
         return {
@@ -393,9 +349,6 @@ export class PharmacyDemandApiService {
     );
   }
 
-  /**
-   * Parse prediction result from Gradio or direct API
-   */
   private static parsePredictionResult(result: any): PharmacyDemandResult {
     let outputText: string;
 
@@ -447,39 +400,31 @@ export class PharmacyDemandApiService {
       };
     }
 
-    // If still no match, return the raw output as HTML
     return {
       html: outputText,
     };
   }
 
-  /**
-   * Generate a mock prediction when the Hugging Face model is not available
-   */
   private static generateMockPrediction(
     input: PharmacyDemandInput,
   ): PharmacyDemandResult {
-    // Simple mock prediction based on input parameters
     const basePrediction = Math.max(
       1,
       Math.round(
-        input.inventory_level * 0.1 + // 10% of inventory as base
-          input.sales_lag_1 * 0.8 + // Recent sales trend
+        input.inventory_level * 0.1 + // 10% of inventory
+          input.sales_lag_1 * 0.8 + // Recent sales
           input.sales_lag_3 * 0.15 + // 3-day trend
           input.sales_lag_7 * 0.05, // 7-day trend
       ),
     );
 
-    // Adjust for price (higher price might reduce demand)
     const priceAdjustment = input.price > 1500 ? 0.8 : 1.1;
     const adjustedPrediction = Math.round(basePrediction * priceAdjustment);
 
-    // Adjust for expiry (closer expiry increases urgency)
     const expiryAdjustment =
       input.expiry_days < 60 ? 1.3 : input.expiry_days < 120 ? 1.1 : 0.9;
     const finalPrediction = Math.round(adjustedPrediction * expiryAdjustment);
 
-    // Calculate days to stockout
     const daysToStockout = Math.max(
       1,
       Math.round(input.inventory_level / Math.max(1, finalPrediction)),
@@ -513,7 +458,6 @@ export class PharmacyDemandApiService {
       color = "#44ff44";
     }
 
-    // Generate HTML response similar to the Hugging Face model
     const html = `
       <div style="padding: 20px; border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <h2 style="color: white; text-align: center;">📊 Sales Prediction Results</h2>
@@ -556,9 +500,6 @@ export class PharmacyDemandApiService {
     };
   }
 
-  /**
-   * Health check for pharmacy demand API
-   */
   static async healthCheck(): Promise<{ status: string; model?: string }> {
     try {
       if (!PHARMACY_DEMAND_MODEL_ID) {
@@ -568,7 +509,6 @@ export class PharmacyDemandApiService {
         };
       }
 
-      // Try Inference API health check
       if (!isGradioSpace) {
         try {
           const modelUrl = `${INFERENCE_API_BASE}/${PHARMACY_DEMAND_MODEL_ID}`;
@@ -590,12 +530,9 @@ export class PharmacyDemandApiService {
               model: PHARMACY_DEMAND_MODEL_ID,
             };
           }
-        } catch (err) {
-          // Fall through to try Gradio
-        }
+        } catch (err) {}
       }
 
-      // Try Gradio Space health check
       const spaceUrl = isGradioSpace
         ? RESOLVED_SPACE_URL
         : `https://${PHARMACY_DEMAND_MODEL_ID.replace("/", "-")}.hf.space`;
