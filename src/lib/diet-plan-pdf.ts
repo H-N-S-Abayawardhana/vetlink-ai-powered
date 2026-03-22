@@ -22,6 +22,25 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   const mutedText: [number, number, number] = [75, 85, 99];
   let y = contentTop;
 
+  const cleanKbText = (value?: string | null) => {
+    if (!value) return value || "";
+    return value
+      .replace(/â\u20ac\u201c/g, "-")
+      .replace(/â\u20ac\u201d/g, "-")
+      .replace(/â\u20ac\u2019/g, "'")
+      .replace(/â\u20ac\u2018/g, "'")
+      .replace(/â\u20ac\u0153/g, '"')
+      .replace(/â\u20ac\u009d/g, '"')
+      .replace(/â\u20ac\u00a6/g, "...");
+  };
+
+  const formatKeyLabel = (key: string) =>
+    key
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
   const ensureSpace = (requiredSpace = 24) => {
     if (y + requiredSpace <= contentBottom) return;
     doc.addPage();
@@ -156,13 +175,42 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     drawField("Carbohydrate Level", plan.Nutrition_Profile.Carb_Level);
   }
 
+  if (plan.Nutrition_Profile_Percent) {
+    drawSectionHeader("Nutrition Profile (Percent)");
+    drawField("Protein", plan.Nutrition_Profile_Percent.Protein);
+    drawField("Fat", plan.Nutrition_Profile_Percent.Fat);
+    drawField("Carbohydrate", plan.Nutrition_Profile_Percent.Carbohydrate);
+  }
+
+  if (plan.Nutrition_Profile_g_per_kg) {
+    drawSectionHeader("Nutrition Profile (g per kg feed)");
+    drawField(
+      "Protein",
+      typeof plan.Nutrition_Profile_g_per_kg.Protein_g_per_kg === "number"
+        ? `${plan.Nutrition_Profile_g_per_kg.Protein_g_per_kg} g/kg`
+        : "-",
+    );
+    drawField(
+      "Fat",
+      typeof plan.Nutrition_Profile_g_per_kg.Fat_g_per_kg === "number"
+        ? `${plan.Nutrition_Profile_g_per_kg.Fat_g_per_kg} g/kg`
+        : "-",
+    );
+    drawField(
+      "Carbohydrate",
+      typeof plan.Nutrition_Profile_g_per_kg.Carb_g_per_kg === "number"
+        ? `${plan.Nutrition_Profile_g_per_kg.Carb_g_per_kg} g/kg`
+        : "-",
+    );
+  }
+
   if (plan.Feeding_Guidelines?.Portion_Control_Advice) {
     drawSectionHeader("Feeding Guidelines");
     doc.setTextColor(...mutedText);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     drawWrappedText(
-      plan.Feeding_Guidelines.Portion_Control_Advice,
+      cleanKbText(plan.Feeding_Guidelines.Portion_Control_Advice),
       margin + 10,
       maxWidth - 16,
       20,
@@ -175,12 +223,34 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     plan.Recommended_Foods.length > 0
   ) {
     drawSectionHeader("Recommended Foods");
-    drawBulletList(plan.Recommended_Foods, "+");
+    drawBulletList(plan.Recommended_Foods.map((item: string) => cleanKbText(item)), "+");
   }
 
   if (Array.isArray(plan.Foods_to_Avoid) && plan.Foods_to_Avoid.length > 0) {
     drawSectionHeader("Foods to Avoid");
-    drawBulletList(plan.Foods_to_Avoid, "x");
+    drawBulletList(plan.Foods_to_Avoid.map((item: string) => cleanKbText(item)), "x");
+  }
+
+  if (
+    plan.Feeding_g_per_kg_bodyweight_day &&
+    Object.keys(plan.Feeding_g_per_kg_bodyweight_day).length > 0
+  ) {
+    drawSectionHeader("Daily Feeding Amount (g per kg body weight)");
+    Object.entries(plan.Feeding_g_per_kg_bodyweight_day).forEach(
+      ([key, value]) => {
+        drawField(formatKeyLabel(key), `${value ?? "-"} g/kg/day`);
+      },
+    );
+  }
+
+  if (
+    plan.Mineral_spec_per_1000kcal &&
+    Object.keys(plan.Mineral_spec_per_1000kcal).length > 0
+  ) {
+    drawSectionHeader("Mineral Specification (per 1000 kcal)");
+    Object.entries(plan.Mineral_spec_per_1000kcal).forEach(([key, value]) => {
+      drawField(formatKeyLabel(key), cleanKbText(String(value ?? "-")));
+    });
   }
 
   if (plan.Exercise_Recommendation) {
@@ -189,7 +259,7 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     drawWrappedText(
-      plan.Exercise_Recommendation,
+      cleanKbText(plan.Exercise_Recommendation),
       margin + 10,
       maxWidth - 16,
       20,
@@ -202,7 +272,7 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     doc.setTextColor(...mutedText);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    drawWrappedText(plan.Notes, margin + 10, maxWidth - 16, 20);
+    drawWrappedText(cleanKbText(plan.Notes), margin + 10, maxWidth - 16, 20);
   }
 
   const totalPages = doc.getNumberOfPages();

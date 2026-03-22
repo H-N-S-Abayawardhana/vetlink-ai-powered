@@ -52,7 +52,7 @@ function nowIso() {
 export async function listPets(): Promise<Pet[]> {
   // API-only: fetch pets or return empty array on error
   try {
-    const res = await fetch("/api/pets");
+    const res = await fetch("/api/pets", { cache: "no-store" });
     if (!res.ok) {
       console.error("listPets: API responded with", res.status);
       return [];
@@ -67,7 +67,7 @@ export async function listPets(): Promise<Pet[]> {
 
 export async function getPet(id: string): Promise<Pet | null> {
   try {
-    const res = await fetch(`/api/pets/${id}`);
+    const res = await fetch(`/api/pets/${id}`, { cache: "no-store" });
     if (!res.ok) {
       console.error("getPet: API responded with", res.status);
       return null;
