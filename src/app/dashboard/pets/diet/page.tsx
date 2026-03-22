@@ -417,41 +417,6 @@ export default function DietPage() {
                     {cleanKbText(plan.kb.dietary_recommendations)}
                   </div>
                 )}
-
-                {plan.Nutrition_Profile && (
-                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {plan.Nutrition_Profile.Protein_Level && (
-                      <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wide text-red-600">
-                          Protein
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-gray-900">
-                          {plan.Nutrition_Profile.Protein_Level}
-                        </p>
-                      </div>
-                    )}
-                    {plan.Nutrition_Profile.Fat_Level && (
-                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wide text-amber-600">
-                          Fat
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-gray-900">
-                          {plan.Nutrition_Profile.Fat_Level}
-                        </p>
-                      </div>
-                    )}
-                    {plan.Nutrition_Profile.Carb_Level && (
-                      <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wide text-green-600">
-                          Carbs
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-gray-900">
-                          {plan.Nutrition_Profile.Carb_Level}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
               {plan.Feeding_Guidelines && (
@@ -522,9 +487,28 @@ export default function DietPage() {
                   <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-gray-700 space-y-2">
                     <div>{cleanKbText(plan.kb.feeding_amount_g_per_kg)}</div>
 
-                    {typeof plan.weightKg === "number" &&
-                      Number.isFinite(plan.weightKg) &&
-                      plan.weightKg > 0 && (() => {
+                    {(() => {
+                      const weightFromPet =
+                        typeof pet?.weightKg === "number"
+                          ? pet.weightKg
+                          : typeof pet?.weightKg === "string"
+                            ? Number.parseFloat(pet.weightKg)
+                            : undefined;
+                      const weightFromPlan =
+                        typeof plan.weightKg === "number" ? plan.weightKg : undefined;
+                      const actualWeightKg =
+                        typeof weightFromPet === "number" &&
+                        Number.isFinite(weightFromPet) &&
+                        weightFromPet > 0
+                          ? weightFromPet
+                          : typeof weightFromPlan === "number" &&
+                              Number.isFinite(weightFromPlan) &&
+                              weightFromPlan > 0
+                            ? weightFromPlan
+                            : null;
+
+                      if (!actualWeightKg) return null;
+
                         const parsed = parseFeedingAmountKb(
                           String(plan.kb?.feeding_amount_g_per_kg || ""),
                         );
@@ -534,12 +518,12 @@ export default function DietPage() {
                         let maxG = 0;
 
                         if (parsed.mode === "g_per_kg") {
-                          minG = plan.weightKg * parsed.min;
-                          maxG = plan.weightKg * parsed.max;
+                          minG = actualWeightKg * parsed.min;
+                          maxG = actualWeightKg * parsed.max;
                         } else {
                           // percent of body weight per day
-                          minG = plan.weightKg * 1000 * (parsed.min / 100);
-                          maxG = plan.weightKg * 1000 * (parsed.max / 100);
+                          minG = actualWeightKg * 1000 * (parsed.min / 100);
+                          maxG = actualWeightKg * 1000 * (parsed.max / 100);
                         }
 
                         const minRounded = Math.round(minG);
@@ -551,7 +535,7 @@ export default function DietPage() {
 
                         return (
                           <div className="text-xs text-indigo-800">
-                            For {plan.weightKg} kg: <span className="font-semibold">{rangeText}</span>
+                            For {actualWeightKg} kg: <span className="font-semibold">{rangeText}</span>
                           </div>
                         );
                       })()}
@@ -744,43 +728,6 @@ export default function DietPage() {
                         <span>{cleanKbText(food)}</span>
                       </div>
                     ))}
-                  </div>
-                </SectionCard>
-              )}
-
-              {plan.Nutrition_Profile_Percent && (
-                <SectionCard title="Nutrition Profile (Percent)">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {plan.Nutrition_Profile_Percent.Protein && (
-                      <div className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wide text-sky-700">
-                          Protein
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-gray-900">
-                          {plan.Nutrition_Profile_Percent.Protein}
-                        </p>
-                      </div>
-                    )}
-                    {plan.Nutrition_Profile_Percent.Fat && (
-                      <div className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wide text-orange-700">
-                          Fat
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-gray-900">
-                          {plan.Nutrition_Profile_Percent.Fat}
-                        </p>
-                      </div>
-                    )}
-                    {plan.Nutrition_Profile_Percent.Carbohydrate && (
-                      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wide text-emerald-700">
-                          Carbohydrate
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-gray-900">
-                          {plan.Nutrition_Profile_Percent.Carbohydrate}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </SectionCard>
               )}
