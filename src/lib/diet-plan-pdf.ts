@@ -144,20 +144,25 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   y += 2;
 
   drawSectionHeader("Plan Summary");
-  drawField("Diet Type", plan.Diet_Type);
-  drawField("Meals Per Day", plan.Feeding_Guidelines?.Meals_Per_Day);
-  drawField("Treat Allowance", plan.Feeding_Guidelines?.Treat_Allowance);
+  drawField("Diet Type", plan.dietCategory || plan.Diet_Type);
+  drawField(
+    "Meals Per Day",
+    plan.meals_per_day || plan.Feeding_Guidelines?.Meals_Per_Day,
+  );
+  drawField("Hydration", plan.hydration);
+  drawField("Energy Guidance", plan.energy_kcal);
   y += 2;
 
-  if (plan.Nutrition_Profile) {
-    drawSectionHeader("Nutrition Profile");
-    drawField("Protein Level", plan.Nutrition_Profile.Protein_Level);
-    drawField("Fat Level", plan.Nutrition_Profile.Fat_Level);
-    drawField("Carbohydrate Level", plan.Nutrition_Profile.Carb_Level);
-  }
-
-  if (plan.Feeding_Guidelines?.Portion_Control_Advice) {
-    drawSectionHeader("Feeding Guidelines");
+  if (plan.dietary_recommendations) {
+    drawSectionHeader("Dietary Recommendations");
+    doc.setTextColor(...mutedText);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    drawWrappedText(plan.dietary_recommendations, margin + 10, maxWidth - 16);
+    y += 2;
+  } else if (plan.Feeding_Guidelines?.Portion_Control_Advice) {
+    // Legacy fallback
+    drawSectionHeader("Dietary Recommendations");
     doc.setTextColor(...mutedText);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
@@ -171,20 +176,73 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   }
 
   if (
-    Array.isArray(plan.Recommended_Foods) &&
-    plan.Recommended_Foods.length > 0
+    plan.nutrition_targets &&
+    typeof plan.nutrition_targets === "object" &&
+    !Array.isArray(plan.nutrition_targets) &&
+    Object.keys(plan.nutrition_targets).length > 0
   ) {
-    drawSectionHeader("Recommended Foods");
+    drawSectionHeader("Nutrition Targets");
+    Object.entries(plan.nutrition_targets).forEach(([key, value]) => {
+      drawField(key.replace(/_/g, " "), String(value));
+    });
+  }
+
+  if (Array.isArray(plan.feeding_plan) && plan.feeding_plan.length > 0) {
+    drawSectionHeader("Feeding Plan");
+    const items = plan.feeding_plan
+      .map((row: any) => {
+        const parts = [row?.food_item].filter(Boolean);
+        if (row?.amount_g !== undefined && row?.amount_g !== null) {
+          parts.push(`${row.amount_g} g`);
+        }
+        if (row?.calories !== undefined && row?.calories !== null) {
+          parts.push(`${row.calories} kcal`);
+        }
+        return parts.join(" — ");
+      })
+      .filter((x: any) => typeof x === "string" && x.trim().length > 0);
+    if (items.length > 0) drawBulletList(items, "-");
+  }
+
+  if (
+    plan.micronutrient_profile &&
+    typeof plan.micronutrient_profile === "object" &&
+    !Array.isArray(plan.micronutrient_profile) &&
+    Object.keys(plan.micronutrient_profile).length > 0
+  ) {
+    drawSectionHeader("Micronutrient Profile");
+    Object.entries(plan.micronutrient_profile).forEach(([key, value]) => {
+      drawField(key.replace(/_/g, " "), String(value));
+    });
+  }
+
+  if (Array.isArray(plan.commercial_food_options) && plan.commercial_food_options.length > 0) {
+    drawSectionHeader("Commercial Food Options");
+    drawBulletList(plan.commercial_food_options, "+");
+  } else if (Array.isArray(plan.Recommended_Foods) && plan.Recommended_Foods.length > 0) {
+    // Legacy fallback
+    drawSectionHeader("Commercial Food Options");
     drawBulletList(plan.Recommended_Foods, "+");
   }
 
-  if (Array.isArray(plan.Foods_to_Avoid) && plan.Foods_to_Avoid.length > 0) {
-    drawSectionHeader("Foods to Avoid");
-    drawBulletList(plan.Foods_to_Avoid, "x");
+  if (Array.isArray(plan.homemade_food_options) && plan.homemade_food_options.length > 0) {
+    drawSectionHeader("Homemade Food Options");
+    drawBulletList(plan.homemade_food_options, "+");
   }
 
+  // Legacy-only sections (if present)
+  if (plan.Nutrition_Profile) {
+    drawSectionHeader("Nutrition Profile (Legacy)");
+    drawField("Protein Level", plan.Nutrition_Profile.Protein_Level);
+    drawField("Fat Level", plan.Nutrition_Profile.Fat_Level);
+    drawField("Carbohydrate Level", plan.Nutrition_Profile.Carb_Level);
+  }
+  if (Array.isArray(plan.Foods_to_Avoid) && plan.Foods_to_Avoid.length > 0) {
+    drawSectionHeader("Foods to Avoid (Legacy)");
+    drawBulletList(plan.Foods_to_Avoid, "x");
+  }
   if (plan.Exercise_Recommendation) {
-    drawSectionHeader("Exercise Recommendation");
+    drawSectionHeader("Exercise Recommendation (Legacy)");
     doc.setTextColor(...mutedText);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
@@ -196,9 +254,8 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     );
     y += 2;
   }
-
   if (plan.Notes) {
-    drawSectionHeader("Important Notes");
+    drawSectionHeader("Important Notes (Legacy)");
     doc.setTextColor(...mutedText);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
