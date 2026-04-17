@@ -83,11 +83,6 @@ export default function PetForm({ petId }: PetFormProps) {
       (async () => {
         const pet = await getPet(petId);
         if (pet) {
-          console.log("Loaded pet data:", pet);
-          console.log("Date of Birth raw:", pet.dateOfBirth);
-          console.log("Spay Neuter Date raw:", pet.spayNeuterDate);
-          console.log("Microchip Implant Date raw:", pet.microchipImplantDate);
-
           // Normalize backend `avatarUrl` -> frontend `avatarDataUrl` so ImageUpload shows the image
           // Format date fields for input type="date"
           const formattedDOB = formatDateForInput(pet.dateOfBirth);
@@ -95,10 +90,6 @@ export default function PetForm({ petId }: PetFormProps) {
           const formattedMicrochip = formatDateForInput(
             pet.microchipImplantDate,
           );
-
-          console.log("Date of Birth formatted:", formattedDOB);
-          console.log("Spay Neuter Date formatted:", formattedSpay);
-          console.log("Microchip Implant Date formatted:", formattedMicrochip);
 
           const normalized = {
             ...pet,
@@ -131,8 +122,7 @@ export default function PetForm({ petId }: PetFormProps) {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.dateOfBirth]);
+  }, [form.dateOfBirth, form.ageYears]);
 
   const handleChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));

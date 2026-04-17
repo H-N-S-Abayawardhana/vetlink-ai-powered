@@ -10,10 +10,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 20-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -41,11 +38,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -67,10 +59,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -98,11 +87,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER (obesity-prone)",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -121,10 +105,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -152,11 +133,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER (higher activity or puppy)",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -179,10 +155,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -210,11 +183,6 @@
           ],
           "hydration": "Fresh water always available",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -238,10 +206,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -269,11 +234,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement to drink",
           "energy_kcal": "MER ~1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "High/Moderate (18–25% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -300,10 +260,7 @@
           "nutrition_targets": {
             "protein": "≥18% DM",
             "fat": "≥8.5% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 25-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -331,11 +288,6 @@
           ],
           "hydration": "Fresh water ad lib; may need encouragement to drink due to snub nose",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥18% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -357,10 +309,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -388,11 +337,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -413,10 +357,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -444,11 +385,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -471,10 +407,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -502,11 +435,6 @@
           ],
           "hydration": "Fresh water available; ensure puppies hydrate especially after play",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -530,10 +458,7 @@
             "fat": "8–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 20-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -561,11 +486,6 @@
           ],
           "hydration": "Fresh water ad lib; keep bowls accessible due to short snout",
           "energy_kcal": "MER ~1.2×RER (lower activity)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (8–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -592,10 +512,7 @@
           "nutrition_targets": {
             "protein": "≥18% DM",
             "fat": "≥8.5% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 20-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -623,11 +540,6 @@
           ],
           "hydration": "Fresh water ad lib; monitor water intake due to tendency for obesity",
           "energy_kcal": "MER ≈1.6×RER",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -649,10 +561,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -680,11 +589,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -705,10 +609,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -736,11 +637,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -763,10 +659,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -794,11 +687,6 @@
           ],
           "hydration": "Fresh water available; ensure puppies hydrate especially after play",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -822,10 +710,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -853,11 +738,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement to drink",
           "energy_kcal": "MER ~1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "High/Moderate (18–25% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -884,10 +764,7 @@
           "nutrition_targets": {
             "protein": "≥18% DM",
             "fat": "≥8.5% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 25-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -915,11 +792,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -941,10 +813,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -972,11 +841,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -997,10 +861,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1028,11 +889,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1055,10 +911,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -1086,11 +939,6 @@
           ],
           "hydration": "Fresh water available",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -1114,10 +962,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1145,11 +990,6 @@
           ],
           "hydration": "Fresh water ad lib; may need encouragement",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "High/Moderate (18–25% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1176,10 +1016,7 @@
           "nutrition_targets": {
             "protein": "≥18% DM",
             "fat": "≥8.5% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 25-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1207,11 +1044,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER ≈1.6×RER",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -1233,10 +1065,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1264,11 +1093,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1289,10 +1113,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1320,11 +1141,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1347,10 +1163,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -1378,11 +1191,6 @@
           ],
           "hydration": "Fresh water available; ensure puppies hydrate after exercise",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -1406,10 +1214,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1437,11 +1242,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "High/Moderate (18–25% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1468,10 +1268,7 @@
           "nutrition_targets": {
             "protein": "≥18% DM",
             "fat": "≥8.5% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 20-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1499,11 +1296,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -1525,10 +1317,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1556,11 +1345,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain at least adult levels",
             "vitamin_D": "Maintain at least adult levels",
@@ -1581,10 +1365,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1612,11 +1393,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1639,10 +1415,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -1670,11 +1443,6 @@
           ],
           "hydration": "Fresh water available; ensure puppies hydrate especially after exercise",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -1698,10 +1466,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1729,11 +1494,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement to drink",
           "energy_kcal": "MER ~1.2×RER for neutered adults",
-          "macronutrient_profile": {
-            "protein": "High/Moderate (18–25% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1760,10 +1520,7 @@
           "nutrition_targets": {
             "protein": "≥18% DM",
             "fat": "≥8.5% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 25-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1791,11 +1548,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER ≈1.6×RER",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -1817,10 +1569,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1848,11 +1597,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1873,10 +1617,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -1904,11 +1645,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -1931,10 +1667,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -1962,11 +1695,6 @@
           ],
           "hydration": "Fresh water available; ensure hydration, especially after activity",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -1990,10 +1718,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 20-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -2021,11 +1746,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "High/Moderate (18–25% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -2052,10 +1772,7 @@
           "nutrition_targets": {
             "protein": "≥18% DM",
             "fat": "≥12% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 25-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -2083,11 +1800,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER ≈1.6×RER (active)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–25% DM)",
-            "fat": "High (≥12% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -2109,10 +1821,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -2140,11 +1849,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -2165,10 +1869,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥12-15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -2196,11 +1897,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -2223,10 +1919,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -2254,11 +1947,6 @@
           ],
           "hydration": "Fresh water available",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -2282,10 +1970,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -2313,11 +1998,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement",
           "energy_kcal": "MER ~1.2×RER (lower activity)",
-          "macronutrient_profile": {
-            "protein": "High/Moderate (18–25% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -2346,15 +2026,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": "≥18% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Moderate (8–15% DM)",
-            "protein": "High (18–25% DM)"
+            "protein": "≥18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2410,15 +2082,7 @@
             "fat": "<5% DM",
             "fiber": "5-10%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": ">18% DM",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Low (5-10% DM)",
-            "protein": "High (18–30% DM)"
+            "protein": ">18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2469,15 +2133,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": "≥18% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "High (≥15% DM)",
-            "protein": "High (18–30% DM)"
+            "protein": "≥18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2527,15 +2183,7 @@
             "calcium": "1-2% DM",
             "fat": "≥8% DM",
             "phosphorus": "0.8-1.6% DM",
-            "protein": "≥22% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Moderate (10-20% DM)",
-            "protein": "High (22–32% DM)"
+            "protein": "≥22% DM"
           },
           "micronutrient_profile": {
             "calcium": "1.0-2.0% DM",
@@ -2586,15 +2234,7 @@
             "fat": "5-8% DM",
             "fiber": "5-10%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": "≥18% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Moderate (5-8% DM)",
-            "protein": "High (18–25% DM)"
+            "protein": "≥18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2650,15 +2290,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": "≥18% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Moderate (8–15% DM)",
-            "protein": "High (18–25% DM)"
+            "protein": "≥18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2714,15 +2346,7 @@
             "fat": "<5% DM",
             "fiber": "5-10%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": ">18% DM",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Low (5-10% DM)",
-            "protein": "High (22–30% DM)"
+            "protein": ">18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2773,15 +2397,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": "≥18% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "High (≥15% DM)",
-            "protein": "High (18–30% DM)"
+            "protein": "≥18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2831,15 +2447,7 @@
             "calcium": "1-2% DM",
             "fat": "≥8% DM",
             "phosphorus": "0.8-1.6% DM",
-            "protein": "≥22% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Moderate (10-20% DM)",
-            "protein": "High (22–32% DM)"
+            "protein": "≥22% DM"
           },
           "micronutrient_profile": {
             "calcium": "1.0-2.0% DM",
@@ -2890,15 +2498,7 @@
             "fat": "5-8% DM",
             "fiber": "5-10%",
             "phosphorus": "0.4-1.0% DM",
-            "protein": "≥18% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
-          },
-          "macronutrient_profile": {
-            "carbohydrates": "Remaining energy",
-            "fat": "Moderate (5-8% DM)",
-            "protein": "High (18–25% DM)"
+            "protein": "≥18% DM"
           },
           "micronutrient_profile": {
             "calcium": "0.5–1.2% DM",
@@ -2949,9 +2549,6 @@
         "Maintenance": {
           "dietary_recommendations": "Active, high-protein diet for this hunting breed; lean meats with moderate fat and whole grains or vegetables for fiber.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25%",
             "fat_%DM": "8-12%",
             "fiber_%DM": "3-5%",
@@ -2968,11 +2565,6 @@
           ],
           "hydration": "Fresh water ad lib; monitor intake in tropical heat (~50 mL/kg/day)",
           "energy_kcal": "MER ~1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Moderate (8-12% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -2992,9 +2584,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Calorie-restricted diet with high protein to preserve lean mass; include fiber to promote satiety.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "5-10%",
@@ -3010,11 +2599,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber diet may increase thirst",
           "energy_kcal": "MER for weight loss ~1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Moderate (for energy)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3034,9 +2618,6 @@
         "Weight Gain": {
           "dietary_recommendations": "Energy-dense diet with increased fat and protein to support healthy weight gain, ensuring muscle maintenance.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "≥22% DM",
             "fat_%DM": "12-15% DM",
             "fiber_%DM": "3-5%",
@@ -3053,11 +2634,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ~1.8-2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22-30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate-high (for calories)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3077,9 +2653,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "High-energy, high-protein diet for growth; use puppy-specific formulas, feed 3-4 times a day, and monitor growth.",
           "nutrition_targets": {
-            "protein_g_per_kg": 6.0,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -3096,11 +2669,6 @@
           ],
           "hydration": "Fresh water available; ensure puppies hydrate especially after exercise",
           "energy_kcal": "MER ~2-3×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -3120,9 +2688,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Reduced-calorie diet for aging dog; moderate protein for muscle, joint support (omega-3), and higher fiber.",
           "nutrition_targets": {
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-22% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "5-8%",
@@ -3139,11 +2704,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement to drink",
           "energy_kcal": "MER ~1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18-22% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjust to maintain weight"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3168,9 +2728,6 @@
         "Maintenance": {
           "dietary_recommendations": "Healthy adult diet with emphasis on high-quality protein (meat or fish) and moderate fat; include whole grains and veggies for fiber.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25%",
             "fat_%DM": "8-12%",
             "fiber_%DM": "3-5%",
@@ -3187,11 +2744,6 @@
           ],
           "hydration": "Fresh water ad lib; important in warm climate (~50 mL/kg/day)",
           "energy_kcal": "MER ~1.6×RER (moderate activity)",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Moderate (8-12% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -3211,9 +2763,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Reduced-calorie diet with higher protein to maintain muscle and added fiber; limit fats and carbohydrates.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "5-10%",
@@ -3229,11 +2778,6 @@
           ],
           "hydration": "Fresh water ad lib; ensure water intake along with high-fiber diet",
           "energy_kcal": "MER ~1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3253,9 +2797,6 @@
         "Weight Gain": {
           "dietary_recommendations": "High-calorie, higher-fat diet; increase feeding portion and frequency to gain weight while monitoring body condition.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "≥22% DM",
             "fat_%DM": "12-15% DM",
             "fiber_%DM": "3-5%",
@@ -3272,11 +2813,6 @@
           ],
           "hydration": "Fresh water ad lib; regular water supply especially in hotter weather",
           "energy_kcal": "MER ~1.8-2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22-30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "High (for energy)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3296,9 +2832,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "Nutrient-dense puppy formula for growth; feed multiple times daily and adjust to avoid rapid overgrowth (large-breed rate).",
           "nutrition_targets": {
-            "protein_g_per_kg": 6.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -3315,11 +2848,6 @@
           ],
           "hydration": "Fresh water always; encourage drinking especially after meals and play",
           "energy_kcal": "MER ~2-3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balanced for growth"
-          },
           "micronutrient_profile": {
             "vitamin_A": "High end for growth",
             "vitamin_D": "High end for bone development",
@@ -3339,9 +2867,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Lower-calorie diet for older dogs; moderate high-quality protein and joint supplements; higher fiber to aid digestion.",
           "nutrition_targets": {
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-22% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "5-8%",
@@ -3358,11 +2883,6 @@
           ],
           "hydration": "Fresh water ad lib; elderly dogs need constant access",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (18-22% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjusted to maintain healthy weight"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3387,9 +2907,6 @@
         "Maintenance": {
           "dietary_recommendations": "Balanced diet for this muscular breed; high-quality animal proteins with moderate fat; avoid excessive legumes/grains to protect heart health.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 2.5,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-25% DM",
             "fat_%DM": "8-12% DM",
             "fiber_%DM": "3-5%",
@@ -3406,11 +2923,6 @@
           ],
           "hydration": "Fresh water ad lib; boxers can overheat easily so ensure water is available",
           "energy_kcal": "MER ~1.6×RER (depending on activity)",
-          "macronutrient_profile": {
-            "protein": "High (18-25% DM)",
-            "fat": "Moderate (8-12% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -3430,9 +2942,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Controlled-calorie diet with higher protein to preserve muscle; focus on lean meats, increase fiber to aid fullness.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "5-10%",
@@ -3448,11 +2957,6 @@
           ],
           "hydration": "Fresh water ad lib",
           "energy_kcal": "MER ~1.2-1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3472,9 +2976,6 @@
         "Weight Gain": {
           "dietary_recommendations": "Energy-dense diet; higher fat and protein to safely increase weight; offer extra healthy snacks.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "≥22% DM",
             "fat_%DM": "12-15% DM",
             "fiber_%DM": "3-5%",
@@ -3491,11 +2992,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ~1.8-2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22-30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "High (caloric boost)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3515,9 +3011,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "Large-breed puppy formula to control growth rate; protein moderate (22-26%), lower calcium to avoid joint issues.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "22-26% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -3534,11 +3027,6 @@
           ],
           "hydration": "Fresh water always; ensure hydration especially post-play",
           "energy_kcal": "MER ~2-3×RER (for growth)",
-          "macronutrient_profile": {
-            "protein": "High (22-26% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balanced to meet energy needs"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher for growth",
             "vitamin_D": "Higher end",
@@ -3558,9 +3046,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Senior/maintenance diet with controlled calories and joint support; maintain lean protein and add fiber.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 2.5,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-22% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "5-8%",
@@ -3577,11 +3062,6 @@
           ],
           "hydration": "Fresh water ad lib; older boxers need regular water intake",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (18-22% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjusted to maintain weight"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3606,9 +3086,6 @@
         "Maintenance": {
           "dietary_recommendations": "Small, active toy breed requiring nutrient-dense food; high-quality proteins and moderate fats, with some carbs for energy; support skin and coat with omega-3s.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "20-25% DM",
             "fat_%DM": "10-12% DM",
             "fiber_%DM": "3-5%",
@@ -3625,11 +3102,6 @@
           ],
           "hydration": "Fresh water ad lib; small dogs need constant access to water",
           "energy_kcal": "MER ~1.6×RER (lower activity due to small size)",
-          "macronutrient_profile": {
-            "protein": "High (20-25% DM)",
-            "fat": "Moderate (10-12% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -3649,9 +3121,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Low-calorie diet to trim excess weight; feed lean proteins, add vegetables and fiber, limit fats and carbs.",
           "nutrition_targets": {
-            "protein_g_per_kg": 6.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "5-10%",
@@ -3667,11 +3136,6 @@
           ],
           "hydration": "Fresh water ad lib; ensure water to help fiber digestion",
           "energy_kcal": "MER ~1.2-1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3691,9 +3155,6 @@
         "Weight Gain": {
           "dietary_recommendations": "Increased-calorie diet for healthy weight gain; add a bit more fat and meals, but avoid unhealthy snacks.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "20-22% DM",
             "fat_%DM": "12-15% DM",
             "fiber_%DM": "3-5%",
@@ -3710,11 +3171,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day); ensure hydration in warm weather",
           "energy_kcal": "MER ~1.8-2.0×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (20-22% DM)",
-            "fat": "High (≥12% DM)",
-            "carbohydrates": "High"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3734,9 +3190,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "Small-breed puppy formula; feed multiple small meals (3-4 per day) to support growth, with high protein and fat.",
           "nutrition_targets": {
-            "protein_g_per_kg": 6.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "22-26% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -3753,11 +3206,6 @@
           ],
           "hydration": "Frequent water intake encouraged; fresh water available at all times",
           "energy_kcal": "MER ~2-3×RER (higher for growth)",
-          "macronutrient_profile": {
-            "protein": "High (22-26% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balanced with complex carbs"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end",
@@ -3777,9 +3225,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Lower-calorie diet for elderly dog; moderate high-quality protein, extra fiber, omega-3 for coat and joints.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "20-25% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "5-8%",
@@ -3796,11 +3241,6 @@
           ],
           "hydration": "Fresh water ad lib; small seniors especially must drink enough",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (20-25% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjusted to maintain weight"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3825,9 +3265,6 @@
         "Maintenance": {
           "dietary_recommendations": "Moderately active toy breed; needs balanced diet with moderate protein and fat; high fiber to satisfy appetite and prevent weight gain.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 2.5,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-22% DM",
             "fat_%DM": "8-10% DM",
             "fiber_%DM": "5-8%",
@@ -3844,11 +3281,6 @@
           ],
           "hydration": "Fresh water ad lib; ensure cool water in warm weather",
           "energy_kcal": "MER ~1.6×RER (adjust if neutered and less active)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18-22% DM)",
-            "fat": "Moderate (8-10% DM)",
-            "carbohydrates": "Balanced carbohydrates"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -3868,9 +3300,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Low-calorie, high-fiber diet to help shed pounds; use lean protein and veggies, limit carbs and fats.",
           "nutrition_targets": {
-            "protein_g_per_kg": 6.0,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "8-12%",
@@ -3886,11 +3315,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage water to aid weight loss",
           "energy_kcal": "MER ~1.2-1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Lowered"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3910,9 +3334,6 @@
         "Weight Gain": {
           "dietary_recommendations": "Energy-rich diet to promote weight gain; moderate protein with increased healthy fats and portion size.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "≥20% DM",
             "fat_%DM": "12-15% DM",
             "fiber_%DM": "3-5%",
@@ -3929,11 +3350,6 @@
           ],
           "hydration": "Fresh water ad lib; adequate hydration supports metabolism",
           "energy_kcal": "MER ~1.8-2.0×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (20-25% DM)",
-            "fat": "High (≥12% DM)",
-            "carbohydrates": "High"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -3953,9 +3369,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "High-quality small-breed puppy formula; feed multiple small meals (3-4/day); controlled calcium to ensure healthy bone development.",
           "nutrition_targets": {
-            "protein_g_per_kg": 6.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "22-26% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -3972,11 +3385,6 @@
           ],
           "hydration": "Fresh water always available; small meals help prevent hypo/hyperglycemia",
           "energy_kcal": "MER ~2-3×RER (growth)",
-          "macronutrient_profile": {
-            "protein": "High (22-26% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balanced with healthy carbs"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher for growth",
             "vitamin_D": "Higher end",
@@ -3996,9 +3404,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Calorie-controlled diet for aging pugs; maintain lean protein and add fiber; support skin and joints with omega-3.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "20-25% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "8-12%",
@@ -4015,11 +3420,6 @@
           ],
           "hydration": "Fresh water ad lib; important to prevent bladder issues common in small breeds",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (20-25% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjusted to maintain weight"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4044,9 +3444,6 @@
         "Maintenance": {
           "dietary_recommendations": "Active large breed needing high-quality protein to maintain muscle; moderate fat and carbs; include joint-support nutrients (glucosamine, omega-3).",
           "nutrition_targets": {
-            "protein_g_per_kg": 3.5,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "22-25% DM",
             "fat_%DM": "10-15% DM",
             "fiber_%DM": "3-5%",
@@ -4063,11 +3460,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day), essential for high-energy dogs",
           "energy_kcal": "MER ~1.8×RER (active adult)",
-          "macronutrient_profile": {
-            "protein": "High (22-25% DM)",
-            "fat": "Moderate (10-15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -4087,9 +3479,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Weight reduction diet; high protein to preserve muscle, low fat and carbs, increased fiber for satiety.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "5-10%",
@@ -4105,11 +3494,6 @@
           ],
           "hydration": "Fresh water ad lib; essential to combat high fiber intake",
           "energy_kcal": "MER ~1.2-1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Moderate-low"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4129,9 +3513,6 @@
         "Weight Gain": {
           "dietary_recommendations": "High-calorie diet; increase meal portions and add healthy fats to gain weight gradually.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 5.0,
-            "carbohydrates_g_per_kg": 25.0,
             "protein_%DM": "≥22% DM",
             "fat_%DM": "15-18% DM",
             "fiber_%DM": "3-5%",
@@ -4147,11 +3528,6 @@
           ],
           "hydration": "Fresh water ad lib; promote hydration after meals",
           "energy_kcal": "MER ~2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22-30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "High"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4171,9 +3547,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "Large-breed puppy formula; controlled growth with balanced protein and fat; feed 3-4 meals to prevent overloading growth plates.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 4.5,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "22-26% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -4189,11 +3562,6 @@
           ],
           "hydration": "Fresh water always available; multiple meals help digestion",
           "energy_kcal": "MER ~2-3×RER (for growth)",
-          "macronutrient_profile": {
-            "protein": "High (22-26% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balanced to support energy needs"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end (for growth)",
             "vitamin_D": "Higher end",
@@ -4213,9 +3581,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Senior large-breed formula; moderate protein and fat with added joint supplements; increased fiber for gut health.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 2.5,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "20-25% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "5-8%",
@@ -4232,11 +3597,6 @@
           ],
           "hydration": "Fresh water ad lib; crucial for health as dogs age",
           "energy_kcal": "MER ~1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (20-25% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjusted to maintain weight"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4261,9 +3621,6 @@
         "Maintenance": {
           "dietary_recommendations": "Active, medium breed prone to urate stones; diet should be moderate in protein (especially avoid high-purine meats) and high in water.",
           "nutrition_targets": {
-            "protein_g_per_kg": 3.5,
-            "fat_g_per_kg": 2.5,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-22% DM (moderate)",
             "fat_%DM": "8-12% DM",
             "fiber_%DM": "3-5%",
@@ -4280,11 +3637,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage frequent drinking to prevent stone formation",
           "energy_kcal": "MER ~1.6×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (18-22% DM)",
-            "fat": "Moderate (8-12% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -4304,9 +3656,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Restricted-calorie diet to reach healthy weight; lean proteins, low purine sources, increased fiber; ensure hydration.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "5-10%",
@@ -4322,11 +3671,6 @@
           ],
           "hydration": "Fresh water ad lib; add water to food if needed",
           "energy_kcal": "MER ~1.2-1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4346,9 +3690,6 @@
         "Weight Gain": {
           "dietary_recommendations": "Calorie-dense diet; gradually increase intake with safe proteins and healthy fats; still emphasize hydration.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "≥20% DM",
             "fat_%DM": "12-15% DM",
             "fiber_%DM": "3-5%",
@@ -4364,11 +3705,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day); consider wet food to boost fluids",
           "energy_kcal": "MER ~1.8-2.0×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (≥20% DM)",
-            "fat": "High (≥12% DM)",
-            "carbohydrates": "High"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4388,9 +3724,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "Large-breed puppy diet; feed high quality protein moderate fat; control calcium to support bone growth, 3-4 meals per day.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 4.0,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "22-26% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -4407,11 +3740,6 @@
           ],
           "hydration": "Fresh water at all times; small frequent meals for growth",
           "energy_kcal": "MER ~2-3×RER (growth)",
-          "macronutrient_profile": {
-            "protein": "High (22-26% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balanced"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end",
             "vitamin_D": "Higher end",
@@ -4431,9 +3759,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Senior formula with controlled calories; moderate protein and fat with additional joint support and hydration.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-22% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "5-8%",
@@ -4450,11 +3775,6 @@
           ],
           "hydration": "Fresh water ad lib; consider adding broth or wet food for fluid intake",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (18-22% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjusted for weight management"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4479,9 +3799,6 @@
         "Maintenance": {
           "dietary_recommendations": "Large, athletic breed; needs protein-rich diet (novel or lean proteins) to maintain muscle, moderate fat, joint-supporting nutrients (glucosamine, omega-3).",
           "nutrition_targets": {
-            "protein_g_per_kg": 3.5,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "22-25% DM",
             "fat_%DM": "8-12% DM",
             "fiber_%DM": "3-5%",
@@ -4498,11 +3815,6 @@
           ],
           "hydration": "Fresh water ad lib; generous supply important (bone broth can boost fluids)",
           "energy_kcal": "MER ~1.6×RER (active adult)",
-          "macronutrient_profile": {
-            "protein": "High (22-25% DM)",
-            "fat": "Moderate (8-12% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000-9000 IU/kg DM",
             "vitamin_D": "500-3000 IU/kg DM",
@@ -4522,9 +3834,6 @@
         "Weight Loss": {
           "dietary_recommendations": "Reduced-calorie diet; high protein and fiber, low fat and carbs; include weight-bearing exercise.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 15.0,
             "protein_%DM": "≥25% DM",
             "fat_%DM": "≤8% DM",
             "fiber_%DM": "5-10%",
@@ -4540,11 +3849,6 @@
           ],
           "hydration": "Fresh water ad lib; hydration important with high protein",
           "energy_kcal": "MER ~1.2-1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4564,9 +3868,6 @@
         "Weight Gain": {
           "dietary_recommendations": "Calorie-rich diet for slow, healthy weight gain; extra meals and healthy fats, maintain exercise.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 4.5,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "≥20% DM",
             "fat_%DM": "12-15% DM",
             "fiber_%DM": "3-5%",
@@ -4582,11 +3883,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ~1.8×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (20-25% DM)",
-            "fat": "High (≥12% DM)",
-            "carbohydrates": "High"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4606,9 +3902,6 @@
         "Puppy Diet": {
           "dietary_recommendations": "Large-breed puppy diet; controlled-calcium formula to prevent growth issues; multiple meals to meet energy needs.",
           "nutrition_targets": {
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 4.5,
-            "carbohydrates_g_per_kg": 30.0,
             "protein_%DM": "22-26% DM",
             "fat_%DM": "≥8.5% DM",
             "fiber_%DM": "3-5%",
@@ -4625,11 +3918,6 @@
           ],
           "hydration": "Fresh water available at all times; frequent small meals",
           "energy_kcal": "MER ~2-3×RER",
-          "macronutrient_profile": {
-            "protein": "High (22-26% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balanced for growth"
-          },
           "micronutrient_profile": {
             "vitamin_A": "High end for growth",
             "vitamin_D": "High end",
@@ -4649,9 +3937,6 @@
         "Senior Diet": {
           "dietary_recommendations": "Lower-calorie diet for senior dogs; moderate protein, increased fiber and joint supplements, omega-3 for coat and joints.",
           "nutrition_targets": {
-            "protein_g_per_kg": 4.0,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 20.0,
             "protein_%DM": "18-22% DM",
             "fat_%DM": "5.5-10% DM",
             "fiber_%DM": "5-8%",
@@ -4668,11 +3953,6 @@
           ],
           "hydration": "Fresh water ad lib; bone broth can be offered to encourage drinking",
           "energy_kcal": "MER ~1.2×RER",
-          "macronutrient_profile": {
-            "protein": "Moderate (18-22% DM)",
-            "fat": "Moderate (5.5-10% DM)",
-            "carbohydrates": "Adjusted for weight maintenance"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4701,10 +3981,7 @@
             "fat": "≥7% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 25-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -4732,11 +4009,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥18% DM)",
-            "fat": "Moderate (7–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -4758,10 +4030,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -4789,11 +4058,6 @@
           ],
           "hydration": "Fresh water ad lib; small dogs may need water encouraged during weight loss",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4815,10 +4079,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 6.5
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-40 g/kg body weight/day",
           "meals_per_day": "2",
@@ -4846,11 +4107,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥22% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4874,10 +4130,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -4905,11 +4158,6 @@
           ],
           "hydration": "Fresh water always available; ensure hydration after play",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -4933,10 +4181,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -4964,11 +4209,6 @@
           ],
           "hydration": "Fresh water ad lib; senior dogs may need encouragement to drink",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate to high (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -4997,10 +4237,7 @@
             "fat": "≥7% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 30-40 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5028,11 +4265,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥18% DM)",
-            "fat": "Moderate (7–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -5054,10 +4286,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5085,11 +4314,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5111,10 +4335,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 6.5
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 35-40 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5142,11 +4363,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥22% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5170,10 +4386,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -5201,11 +4414,6 @@
           ],
           "hydration": "Fresh water always available; ensure hydration after play",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -5229,10 +4437,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5260,11 +4465,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement to drink",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5293,10 +4493,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 20-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5324,11 +4521,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -5350,10 +4542,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5381,11 +4570,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5407,10 +4591,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5438,11 +4619,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5466,10 +4642,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -5497,11 +4670,6 @@
           ],
           "hydration": "Fresh water available; ensure puppies hydrate especially after exercise",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -5525,10 +4693,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5556,11 +4721,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement to drink",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5589,10 +4749,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 2.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5620,11 +4777,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥18% DM)",
-            "fat": "Moderate (≥5.5% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -5646,10 +4798,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 10-15 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5677,11 +4826,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5703,10 +4847,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 25-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5734,11 +4875,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5762,10 +4898,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -5793,11 +4926,6 @@
           ],
           "hydration": "Fresh water available; ensure hydration after exercise",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -5821,10 +4949,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5852,11 +4977,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking due to age",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5885,10 +5005,7 @@
             "fat": "≥8% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 20-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5916,11 +5033,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate to high (10–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -5942,10 +5054,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -5973,11 +5082,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -5999,10 +5103,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6030,11 +5131,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to provide extra calories"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6058,10 +5154,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -6089,11 +5182,6 @@
           ],
           "hydration": "Fresh water always available; ensure puppies hydrate after exercise",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -6117,10 +5205,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6148,11 +5233,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking in older dogs",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6181,10 +5261,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 20-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6212,11 +5289,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥18% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -6238,10 +5310,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6269,11 +5338,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6295,10 +5359,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6326,11 +5387,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate to high"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6354,10 +5410,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -6385,11 +5438,6 @@
           ],
           "hydration": "Fresh water available; ensure hydration during exercise",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -6413,10 +5461,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6444,11 +5489,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6477,10 +5517,7 @@
             "fat": "≥5.5% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.5,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 20-30 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6508,11 +5545,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (18–25% DM)",
-            "fat": "Moderate (8–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -6534,10 +5566,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 4.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6565,11 +5594,6 @@
           ],
           "hydration": "Fresh water ad lib; high-fiber foods may increase thirst",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6591,10 +5615,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 6.0
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6622,11 +5643,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (22–30% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6650,10 +5666,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -6681,11 +5694,6 @@
           ],
           "hydration": "Fresh water available; ensure hydration after play",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -6709,10 +5717,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6740,11 +5745,6 @@
           ],
           "hydration": "Fresh water ad lib; older dogs may need encouragement",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6773,10 +5773,7 @@
             "fat": "≥7% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 25-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6804,11 +5801,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥18% DM)",
-            "fat": "Moderate (7–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -6830,10 +5822,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6861,11 +5850,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low to moderate (5–10% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6887,10 +5871,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 6.5
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -6918,11 +5899,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥22% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -6946,10 +5922,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -6977,11 +5950,6 @@
           ],
           "hydration": "Fresh water available; ensure hydration after play",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -7005,10 +5973,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -7036,11 +6001,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -7069,10 +6029,7 @@
             "fat": "≥7% DM",
             "fiber": "3-5%",
             "calcium": "0.5-1.2% DM",
-            "phosphorus": "0.4-1.0% DM",
-            "protein_g_per_kg": 3.0,
-            "fat_g_per_kg": 2.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4-1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 25-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -7100,11 +6057,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER ≈1.6×RER (RER=70×BW^0.75)",
-          "macronutrient_profile": {
-            "protein": "High (≥18% DM)",
-            "fat": "Moderate (7–15% DM)",
-            "carbohydrates": "Remaining energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "3000–9000 IU/kg DM",
             "vitamin_D": "500–3000 IU/kg DM",
@@ -7126,10 +6078,7 @@
           "nutrition_targets": {
             "protein": "≥25% DM",
             "fat": "≈5-8% DM",
-            "fiber": "5-10%",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "fiber": "5-10%"
           },
           "feeding_amount_g_per_kg": "Approx 15-20 g/kg body weight/day",
           "meals_per_day": "2",
@@ -7157,11 +6106,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking",
           "energy_kcal": "MER for weight loss ≈1.2–1.4×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥25% DM)",
-            "fat": "Low (≤8% DM)",
-            "fiber": "High (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -7183,10 +6127,7 @@
           "nutrition_targets": {
             "protein": "≥22% DM",
             "fat": "≥15% DM",
-            "fiber": "3-5%",
-            "protein_g_per_kg": 4.5,
-            "fat_g_per_kg": 3.0,
-            "carbohydrates_g_per_kg": 6.5
+            "fiber": "3-5%"
           },
           "feeding_amount_g_per_kg": "Approx 30-35 g/kg body weight/day",
           "meals_per_day": "2",
@@ -7214,11 +6155,6 @@
           ],
           "hydration": "Fresh water ad lib (~50 mL/kg/day)",
           "energy_kcal": "MER for weight gain ≈1.8–2.0×RER",
-          "macronutrient_profile": {
-            "protein": "High (≥22% DM)",
-            "fat": "High (≥15% DM)",
-            "carbohydrates": "Moderate"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",
@@ -7242,10 +6178,7 @@
             "fat": "≥8.5% DM",
             "fiber": "3-5%",
             "calcium": "1.2–1.8% DM",
-            "phosphorus": "1.0–1.6% DM",
-            "protein_g_per_kg": 5.0,
-            "fat_g_per_kg": 3.5,
-            "carbohydrates_g_per_kg": 5.5
+            "phosphorus": "1.0–1.6% DM"
           },
           "feeding_amount_g_per_kg": "Approx 40-50 g/kg body weight/day",
           "meals_per_day": "3-4",
@@ -7273,11 +6206,6 @@
           ],
           "hydration": "Fresh water available; ensure hydration after play",
           "energy_kcal": "MER ≈2–3×RER (growth factor)",
-          "macronutrient_profile": {
-            "protein": "High (≥22.5% DM)",
-            "fat": "High (≥8.5% DM)",
-            "carbohydrates": "Balance of growth energy"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Higher end for growth",
             "vitamin_D": "Higher end for bone development",
@@ -7301,10 +6229,7 @@
             "fat": "5.5–10% DM",
             "fiber": "5-8%",
             "calcium": "0.5–1.0% DM",
-            "phosphorus": "0.4–1.0% DM",
-            "protein_g_per_kg": 2.5,
-            "fat_g_per_kg": 1.0,
-            "carbohydrates_g_per_kg": 5.0
+            "phosphorus": "0.4–1.0% DM"
           },
           "feeding_amount_g_per_kg": "Approx 18-25 g/kg body weight/day",
           "meals_per_day": "2",
@@ -7332,11 +6257,6 @@
           ],
           "hydration": "Fresh water ad lib; encourage drinking",
           "energy_kcal": "MER ≈1.2×RER (neutered adult)",
-          "macronutrient_profile": {
-            "protein": "Moderate (18–22% DM)",
-            "fat": "Moderate (5–10% DM)",
-            "fiber": "Increased (≥5% DM)"
-          },
           "micronutrient_profile": {
             "vitamin_A": "Maintain adult levels",
             "vitamin_D": "Maintain adult levels",

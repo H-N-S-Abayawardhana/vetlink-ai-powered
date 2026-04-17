@@ -539,10 +539,8 @@ export default function LimpingAnalysis({
     if (fileSizeMB > 30) {
       setIsCompressing(true);
       try {
-        console.log(`Compressing video from ${fileSizeMB.toFixed(2)} MB...`);
         videoToUpload = await compressVideoSimple(file, { maxSizeMB: 50 });
         const compressedSizeMB = videoToUpload.size / (1024 * 1024);
-        console.log(`Compressed to ${compressedSizeMB.toFixed(2)} MB`);
       } catch (compressionError) {
         console.warn(
           "Video compression failed, using original file:",
