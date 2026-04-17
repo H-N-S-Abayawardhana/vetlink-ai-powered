@@ -1,5 +1,6 @@
 import Navigation from "../components/website/Navigation";
 import Hero from "../components/website/Hero";
+import AIIntelligence from "../components/website/AIIntelligence";
 import PrimaryFeatures from "../components/website/PrimaryFeatures";
 import Features from "../components/website/Features";
 import About from "../components/website/About";
@@ -11,9 +12,10 @@ import BackToTop from "../components/website/BackToTop";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-gray-900 antialiased">
       <Navigation />
       <Hero />
+      <AIIntelligence />
       <PrimaryFeatures />
       <Features />
       <About />

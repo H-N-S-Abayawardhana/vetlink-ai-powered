@@ -1,0 +1,61 @@
+{
+  "sales": [
+    {
+      "id": 1,
+      "medication": "Amoxicillin",
+      "quantity": 3,
+      "price": 10.0,
+      "date": "2025-11-28T09:20:00Z",
+      "customer": "John Dalton"
+    },
+    {
+      "id": 2,
+      "medication": "Prednisone",
+      "quantity": 2,
+      "price": 12.5,
+      "date": "2025-11-29T13:30:00Z",
+      "customer": "Asha Perera"
+    },
+    {
+      "id": 3,
+      "medication": "Ivermectin",
+      "quantity": 1,
+      "price": 18.0,
+      "date": "2025-11-30T08:10:00Z",
+      "customer": "Walk-in"
+    },
+    {
+      "id": 4,
+      "medication": "Amoxicillin",
+      "quantity": 1,
+      "price": 10.0,
+      "date": "2025-11-30T10:40:00Z",
+      "customer": "Priya"
+    },
+    {
+      "id": 5,
+      "medication": "Amoxicillin",
+      "quantity": 2,
+      "price": 10.0,
+      "date": "2025-12-01T11:15:00Z",
+      "customer": "Kamal"
+    }
+  ],
+  "top": [
+    { "id": 1, "name": "Amoxicillin", "sold": 56, "revenue": 560 },
+    { "id": 2, "name": "Prednisone", "sold": 32, "revenue": 400 },
+    { "id": 3, "name": "Ivermectin", "sold": 20, "revenue": 360 }
+  ],
+  "chart": {
+    "labels": [
+      "25 Nov",
+      "26 Nov",
+      "27 Nov",
+      "28 Nov",
+      "29 Nov",
+      "30 Nov",
+      "01 Dec"
+    ],
+    "values": [120, 140, 90, 160, 130, 180, 200]
+  }
+}

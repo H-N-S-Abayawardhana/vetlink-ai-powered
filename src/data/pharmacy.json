@@ -1,0 +1,34 @@
+{
+  "medications": [
+    {
+      "id": 1,
+      "name": "Amoxicillin",
+      "form": "Capsule",
+      "strength": "250 mg",
+      "stock": 120,
+      "expiry": "2026-11-01",
+      "description": "Broad-spectrum antibiotic",
+      "price": 10.0
+    },
+    {
+      "id": 2,
+      "name": "Prednisone",
+      "form": "Tablet",
+      "strength": "5 mg",
+      "stock": 40,
+      "expiry": "2027-02-15",
+      "description": "Corticosteroid used for inflammation",
+      "price": 12.5
+    },
+    {
+      "id": 3,
+      "name": "Ivermectin",
+      "form": "Oral suspension",
+      "strength": "1%",
+      "stock": 18,
+      "expiry": "2026-07-28",
+      "description": "Antiparasitic medication",
+      "price": 18.0
+    }
+  ]
+}

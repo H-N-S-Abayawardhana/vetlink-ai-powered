@@ -14,7 +14,15 @@ type Props = {
   result: number | null;
 };
 
-export default function PetDetailsModal({ pet, updates, onChange, onClose, onCalculate, loading, result }: Props) {
+export default function PetDetailsModal({
+  pet,
+  updates,
+  onChange,
+  onClose,
+  onCalculate,
+  loading,
+  result,
+}: Props) {
   if (!pet) return null;
 
   return (
@@ -27,8 +35,12 @@ export default function PetDetailsModal({ pet, updates, onChange, onClose, onCal
         <div className="p-4 md:p-6">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{pet.name}</h3>
-              <p className="text-sm text-gray-500">Edit details and calculate BCS</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {pet.name}
+              </h3>
+              <p className="text-sm text-gray-500">
+                Edit details and calculate BCS
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -46,7 +58,13 @@ export default function PetDetailsModal({ pet, updates, onChange, onClose, onCal
                 type="number"
                 min={0}
                 value={updates.ageYears ?? ""}
-                onChange={(e) => onChange({ ageYears: e.target.value === "" ? null : Number(e.target.value), weightKg: updates.weightKg ?? null })}
+                onChange={(e) =>
+                  onChange({
+                    ageYears:
+                      e.target.value === "" ? null : Number(e.target.value),
+                    weightKg: updates.weightKg ?? null,
+                  })
+                }
                 className="w-full border rounded px-2 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                 placeholder="e.g. 3"
               />
@@ -58,7 +76,13 @@ export default function PetDetailsModal({ pet, updates, onChange, onClose, onCal
                 type="number"
                 min={0}
                 value={updates.weightKg ?? ""}
-                onChange={(e) => onChange({ weightKg: e.target.value === "" ? null : Number(e.target.value), ageYears: updates.ageYears ?? null })}
+                onChange={(e) =>
+                  onChange({
+                    weightKg:
+                      e.target.value === "" ? null : Number(e.target.value),
+                    ageYears: updates.ageYears ?? null,
+                  })
+                }
                 className="w-full border rounded px-2 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                 placeholder="e.g. 6.5"
               />
@@ -70,7 +94,9 @@ export default function PetDetailsModal({ pet, updates, onChange, onClose, onCal
               onClick={onCalculate}
               disabled={loading}
               className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${
-                !loading ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-400 cursor-not-allowed"
+                !loading
+                  ? "bg-indigo-600 hover:bg-indigo-700"
+                  : "bg-gray-400 cursor-not-allowed"
               }`}
             >
               {loading ? "Calculating…" : "Calculate BCS"}
@@ -86,7 +112,11 @@ export default function PetDetailsModal({ pet, updates, onChange, onClose, onCal
 
           {result != null && (
             <div className="mt-5">
-              <ResultsPanel score={result} petName={pet.name} lastCalculated={pet.bcsCalculatedAt ?? null} />
+              <ResultsPanel
+                score={result}
+                petName={pet.name}
+                lastCalculated={pet.bcsCalculatedAt ?? null}
+              />
             </div>
           )}
         </div>

@@ -5,7 +5,10 @@ import type { Pet } from "@/lib/pets";
 
 interface Props {
   pet: Pet | null;
-  onChange?: (updates: { ageYears?: number | null; weightKg?: number | null }) => void;
+  onChange?: (updates: {
+    ageYears?: number | null;
+    weightKg?: number | null;
+  }) => void;
 }
 
 export default function PetDetailsPanel({ pet, onChange }: Props) {
@@ -51,7 +54,9 @@ export default function PetDetailsPanel({ pet, onChange }: Props) {
     <div className="border rounded-md p-4 space-y-4 bg-white shadow-sm">
       <h3 className="text-lg font-semibold text-gray-900">Pet Details</h3>
       {!pet ? (
-        <div className="text-sm text-gray-700">Select a pet to view details.</div>
+        <div className="text-sm text-gray-700">
+          Select a pet to view details.
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {/* Name */}
@@ -74,7 +79,9 @@ export default function PetDetailsPanel({ pet, onChange }: Props) {
 
           {/* Age */}
           <div>
-            <label className="text-sm font-medium text-gray-700">Age (years)</label>
+            <label className="text-sm font-medium text-gray-700">
+              Age (years)
+            </label>
             <input
               value={age}
               onChange={(e) => setAge(e.target.value)}
@@ -82,12 +89,18 @@ export default function PetDetailsPanel({ pet, onChange }: Props) {
               inputMode="numeric"
               placeholder="e.g. 3"
             />
-            {ageErr && <div className="mt-1 text-sm font-semibold text-red-700">{ageErr}</div>}
+            {ageErr && (
+              <div className="mt-1 text-sm font-semibold text-red-700">
+                {ageErr}
+              </div>
+            )}
           </div>
 
           {/* Weight */}
           <div>
-            <label className="text-sm font-medium text-gray-700">Weight (kg)</label>
+            <label className="text-sm font-medium text-gray-700">
+              Weight (kg)
+            </label>
             <input
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
@@ -95,7 +108,11 @@ export default function PetDetailsPanel({ pet, onChange }: Props) {
               inputMode="decimal"
               placeholder="e.g. 12.5"
             />
-            {weightErr && <div className="mt-1 text-sm font-semibold text-red-700">{weightErr}</div>}
+            {weightErr && (
+              <div className="mt-1 text-sm font-semibold text-red-700">
+                {weightErr}
+              </div>
+            )}
           </div>
 
           {/* Info Note */}

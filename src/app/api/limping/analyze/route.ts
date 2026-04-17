@@ -1,0 +1,86 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import GaitApiService, { LimpingDetectionResult } from "@/services/gaitApi";
+import { getS3ObjectFileByUrl } from "@/lib/s3";
+
+// Configure route for longer execution time (video processing can take time)
+export const maxDuration = 300; // 5 minutes
+export const runtime = "nodejs"; // Use Node.js runtime for better file handling
+
+// POST /api/limping/analyze - Analyze video for limping detection
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const contentType = request.headers.get("content-type") || "";
+    let videoFile: File | null = null;
+
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
+      const videoUrl = String(body?.videoUrl || "").trim();
+
+      if (!videoUrl) {
+        return NextResponse.json(
+          { error: "Video URL is required" },
+          { status: 400 },
+        );
+      }
+
+      videoFile = await getS3ObjectFileByUrl(videoUrl);
+    } else {
+      const formData = await request.formData();
+      const uploadedVideo = formData.get("video");
+
+      if (!(uploadedVideo instanceof File)) {
+        return NextResponse.json(
+          { error: "Video file is required" },
+          { status: 400 },
+        );
+      }
+
+      videoFile = uploadedVideo;
+    }
+
+    if (!videoFile.type.startsWith("video/")) {
+      return NextResponse.json(
+        { error: "File must be a video" },
+        { status: 400 },
+      );
+    }
+
+    // Call Hugging Face limping detection API
+    const result: LimpingDetectionResult =
+      await GaitApiService.detectLimping(videoFile);
+
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+
+    // ✅ FIXED: Use correct field names matching the updated interface
+    return NextResponse.json({
+      success: true,
+      result: {
+        prediction: result.prediction,
+        confidence: result.confidence,
+        symmetry_indices: result.symmetry_indices,
+        leg_status: result.leg_status,
+        stride_measurements: result.stride_measurements,
+        frames_analyzed: result.frames_analyzed,
+      },
+    });
+  } catch (error) {
+    console.error("Error analyzing limping:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to analyze video",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
+}

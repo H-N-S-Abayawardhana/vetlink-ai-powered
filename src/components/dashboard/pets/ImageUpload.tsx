@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
+import { useRef, useState } from "react";
+import Image from "next/image";
 
 interface ImageUploadProps {
   value?: string | null;
@@ -13,7 +14,7 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
 
   const handleFile = (file?: File) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) return;
+    if (!file.type.startsWith("image/")) return;
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -38,34 +39,71 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
   return (
     <div className="space-y-2">
       <div
-        className={`relative border-2 border-dashed rounded-lg p-4 text-center transition-colors ${isDragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+        className={`relative border-2 border-dashed rounded-lg p-4 text-center transition-colors ${isDragOver ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}
         onDrop={handleDrop}
-        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-        onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragOver(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setIsDragOver(false);
+        }}
         onClick={() => inputRef.current?.click()}
       >
-        <input ref={inputRef} type="file" accept="image/*" onChange={handleInput} className="hidden" />
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleInput}
+          className="hidden"
+        />
         <div className="flex items-center justify-center flex-col">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2 overflow-hidden">
             {value ? (
               // Direct data URL img preview
-              <img src={value} alt="avatar" className="w-full h-full object-cover" />
+              <Image
+                src={value}
+                alt="avatar"
+                width={64}
+                height={64}
+                unoptimized
+                className="w-full h-full object-cover"
+              />
             ) : (
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              <svg
+                className="w-8 h-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
               </svg>
             )}
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-900">Pet Photo</h4>
-            <p className="text-xs text-gray-500">Click or drag to upload a photo (JPG/PNG)</p>
+            <p className="text-xs text-gray-500">
+              Click or drag to upload a photo (JPG/PNG)
+            </p>
           </div>
         </div>
       </div>
 
       {value && (
         <div className="flex items-center justify-between">
-          <button type="button" onClick={() => onChange(null)} className="text-sm text-red-600 hover:text-red-800">Remove photo</button>
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            className="text-sm text-red-600 hover:text-red-800"
+          >
+            Remove photo
+          </button>
         </div>
       )}
     </div>

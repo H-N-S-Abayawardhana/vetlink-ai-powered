@@ -1,8 +1,8 @@
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
-import pool from './db';
-import bcrypt from 'bcryptjs';
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import pool from "./db";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -11,10 +11,10 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     CredentialsProvider({
-      name: 'credentials',
+      name: "credentials",
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -23,8 +23,8 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const result = await pool.query(
-            'SELECT * FROM users WHERE email = $1 AND is_active = true',
-            [credentials.email]
+            "SELECT * FROM users WHERE email = $1 AND is_active = true",
+            [credentials.email],
           );
 
           if (result.rows.length === 0) {
@@ -32,7 +32,10 @@ export const authOptions: NextAuthOptions = {
           }
 
           const user = result.rows[0];
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password_hash);
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password_hash,
+          );
 
           if (!isPasswordValid) {
             return null;
@@ -40,8 +43,8 @@ export const authOptions: NextAuthOptions = {
 
           // Update last login
           await pool.query(
-            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-            [user.id]
+            "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1",
+            [user.id],
           );
 
           return {
@@ -52,17 +55,17 @@ export const authOptions: NextAuthOptions = {
             contactNumber: user.contact_number,
             createdAt: user.created_at,
             lastLogin: user.last_login,
-            userRole: user.user_role
+            userRole: user.user_role,
           };
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error("Auth error:", error);
           return null;
         }
-      }
-    })
+      },
+    }),
   ],
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24 hours
   },
   jwt: {
@@ -70,22 +73,25 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
+      if (account?.provider === "google") {
         try {
           // Check if user exists in database
           const existingUser = await pool.query(
-            'SELECT * FROM users WHERE email = $1',
-            [user.email]
+            "SELECT * FROM users WHERE email = $1",
+            [user.email],
           );
 
           if (existingUser.rows.length === 0) {
             // Create new user for Google OAuth
-            const username = user.name?.replace(/\s+/g, '').toLowerCase() || user.email?.split('@')[0] || 'user';
+            const username =
+              user.name?.replace(/\s+/g, "").toLowerCase() ||
+              user.email?.split("@")[0] ||
+              "user";
             const result = await pool.query(
               `INSERT INTO users (username, email, password_hash, user_role, is_active, created_at, updated_at)
                VALUES ($1, $2, $3, 'USER', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                RETURNING id, username, email, contact_number, user_role, created_at, last_login`,
-              [username, user.email, 'oauth_user'] // Special password hash for OAuth users
+              [username, user.email, "oauth_user"], // Special password hash for OAuth users
             );
 
             const newUser = result.rows[0];
@@ -99,8 +105,8 @@ export const authOptions: NextAuthOptions = {
             // Update existing user's last login
             const existingUserData = existingUser.rows[0];
             await pool.query(
-              'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-              [existingUserData.id]
+              "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1",
+              [existingUserData.id],
             );
 
             user.id = existingUserData.id.toString();
@@ -111,7 +117,7 @@ export const authOptions: NextAuthOptions = {
             (user as any).lastLogin = existingUserData.last_login;
           }
         } catch (error) {
-          console.error('Google OAuth sign in error:', error);
+          console.error("Google OAuth sign in error:", error);
           return false;
         }
       }
@@ -140,10 +146,10 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).provider = token.provider;
       }
       return session;
-    }
+    },
   },
   pages: {
-    signIn: '/signin',
+    signIn: "/signin",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
