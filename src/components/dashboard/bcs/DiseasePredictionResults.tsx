@@ -36,10 +36,7 @@ export default function DiseasePredictionResults({
   );
 
   const riskCount = result.predictions.filter(
-    (prediction) =>
-      prediction.disease !== "Healthy" &&
-      (prediction.risk_level === "High" ||
-        prediction.risk_level === "Moderate"),
+    (prediction) => prediction.risk_level !== "Low" || prediction.is_positive,
   ).length;
 
   const getRiskIcon = (riskLevel: RiskLevel) => {
@@ -181,8 +178,7 @@ export default function DiseasePredictionResults({
             {result.predictions.map((prediction) => {
               const diseaseInfo = DISEASE_INFO[prediction.disease];
               const isExpanded = expandedDisease === prediction.disease;
-              const isHealthy = prediction.disease === "Healthy";
-              const isPositive = prediction.is_positive && !isHealthy;
+              const isPositive = prediction.is_positive;
 
               return (
                 <div
@@ -190,9 +186,7 @@ export default function DiseasePredictionResults({
                   className={`rounded-lg border overflow-hidden transition-colors ${
                     isPositive
                       ? "border-red-200"
-                      : isHealthy
-                        ? "border-green-200"
-                        : "border-gray-200"
+                      : "border-gray-200"
                   }`}
                 >
                   <button
@@ -201,9 +195,7 @@ export default function DiseasePredictionResults({
                     className={`w-full px-4 py-4 text-left transition-colors ${
                       isPositive
                         ? "bg-red-50/60 hover:bg-red-50"
-                        : isHealthy
-                          ? "bg-green-50/60 hover:bg-green-50"
-                          : "bg-white hover:bg-gray-50"
+                        : "bg-white hover:bg-gray-50"
                     }`}
                   >
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -227,23 +219,16 @@ export default function DiseasePredictionResults({
                             {prediction.probability.toFixed(0)}%
                           </p>
                           <p className="text-xs text-gray-500">
-                            {isHealthy ? "wellness score" : "probability"}
+                            probability
                           </p>
                         </div>
 
-                        {isHealthy ? (
-                          <div className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700">
-                            <CheckCircle className="w-4 h-4" />
-                            Healthy
-                          </div>
-                        ) : (
-                          <div
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${getRiskBadgeClasses(prediction.risk_level)}`}
-                          >
-                            {getRiskIcon(prediction.risk_level)}
-                            {prediction.risk_level}
-                          </div>
-                        )}
+                        <div
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${getRiskBadgeClasses(prediction.risk_level)}`}
+                        >
+                          {getRiskIcon(prediction.risk_level)}
+                          {prediction.risk_level}
+                        </div>
 
                         {isPositive && (
                           <span className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700">
@@ -265,7 +250,7 @@ export default function DiseasePredictionResults({
                       <div className="mb-4">
                         <div className="mb-1 flex items-center justify-between text-sm">
                           <span className="text-gray-600">
-                            {isHealthy ? "Wellness score" : "Risk probability"}
+                            Risk probability
                           </span>
                           <span className="font-medium text-gray-900">
                             {prediction.probability.toFixed(1)}%
@@ -273,29 +258,21 @@ export default function DiseasePredictionResults({
                         </div>
                         <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
                           <div
-                            className={`h-full transition-all duration-500 ${
-                              isHealthy
-                                ? "bg-green-500"
-                                : getProgressBarColor(prediction.probability)
-                            }`}
+                            className={`h-full transition-all duration-500 ${getProgressBarColor(prediction.probability)}`}
                             style={{ width: `${prediction.probability}%` }}
                           />
                         </div>
-                        {!isHealthy && (
-                          <div className="mt-2 flex justify-between text-[11px] text-gray-500">
-                            <span>Low</span>
-                            <span>Moderate</span>
-                            <span>High</span>
-                          </div>
-                        )}
+                        <div className="mt-2 flex justify-between text-[11px] text-gray-500">
+                          <span>Low</span>
+                          <span>Moderate</span>
+                          <span>High</span>
+                        </div>
                       </div>
 
                       {prediction.key_indicators.length > 0 && (
                         <div>
                           <p className="mb-2 text-sm font-medium text-gray-800">
-                            {isHealthy
-                              ? "Positive health indicators"
-                              : "Key risk indicators"}
+                            Key risk indicators
                           </p>
                           <ul className="space-y-2">
                             {prediction.key_indicators.map((indicator, idx) => (

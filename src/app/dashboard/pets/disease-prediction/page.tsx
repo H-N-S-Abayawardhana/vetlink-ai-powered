@@ -16,12 +16,10 @@ import { formStateToApiInput } from "@/types/disease-prediction";
 import { Stethoscope, PawPrint, ChevronRight, Check, Info } from "lucide-react";
 
 const ANALYZED_CONDITIONS = [
-  "Tick-borne disease",
-  "Filariasis",
-  "Diabetes type 2",
-  "Obesity-related dysfunction",
+  "Diabetes",
+  "Pancreatitis",
+  "Hyperlipidemia",
   "Urolithiasis",
-  "Overall health status",
 ];
 
 const STEP_LABELS = ["Select pet", "Assessment", "Results"] as const;
@@ -134,12 +132,12 @@ export default function DiseasePredictionPage() {
               AI Health Screening
             </div>
             <h1 className="mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
-              Multi-Disease Risk Prediction
+              Metabolic Disease Risk Prediction
             </h1>
             <p className="mt-2 text-sm sm:text-base text-gray-600">
-              Review common risk indicators for six canine health conditions
-              using your pet&apos;s profile, body condition score, and symptom
-              history.
+              Predict obesity-related metabolic disease risk using your
+              pet&apos;s profile, body condition score, diet, activity, and
+              current symptoms.
             </p>
           </div>
 
@@ -426,7 +424,7 @@ export default function DiseasePredictionPage() {
       {loading && (
         <LoadingOverlay
           title="Analyzing disease risks"
-          description="Reviewing your pet's profile across six health conditions."
+          description="Evaluating metabolic disease risk across four conditions."
         />
       )}
 

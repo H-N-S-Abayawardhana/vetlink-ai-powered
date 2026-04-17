@@ -35,6 +35,24 @@ interface QuestionCardProps {
   children: React.ReactNode;
 }
 
+interface TextInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  type?: "text" | "number";
+  min?: number;
+  max?: number;
+  step?: number;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+interface SelectInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ label: string; value: string }>;
+  placeholder?: string;
+}
+
 function ChoiceButton({ label, selected, tone, onClick }: ChoiceButtonProps) {
   const selectedClasses =
     tone === "blue"
@@ -89,20 +107,70 @@ function QuestionCard({
   );
 }
 
+function TextInput({
+  value,
+  onChange,
+  type = "text",
+  min,
+  max,
+  step,
+  placeholder,
+  disabled,
+}: TextInputProps) {
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      type={type}
+      min={min}
+      max={max}
+      step={step}
+      placeholder={placeholder}
+      disabled={disabled}
+      className={`h-10 w-full rounded-lg border px-3 text-sm shadow-sm outline-none transition-colors focus:ring-2 focus:ring-blue-100 ${
+        disabled
+          ? "border-gray-200 bg-gray-50 text-gray-600"
+          : "border-gray-200 bg-white text-gray-800 focus:border-blue-300"
+      }`}
+    />
+  );
+}
+
+function SelectInput({
+  value,
+  onChange,
+  options,
+  placeholder = "Select...",
+}: SelectInputProps) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-colors focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+    >
+      <option value="" disabled>
+        {placeholder}
+      </option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export default function DiseasePredictionForm({
   onSubmit,
   onCancel,
   initialBCS,
   petName,
   petAge,
-  petGender,
   petBreed,
   petWeight,
   petActivityLevel,
-  petLivingEnvironment,
   petPreferredDiet,
   petSpayedNeutered,
-  petId,
 }: DiseasePredictionFormProps) {
   // BCS is required - if not available, show error
   const hasBCS = initialBCS !== null && initialBCS !== undefined;
@@ -117,13 +185,9 @@ export default function DiseasePredictionForm({
     if (petAge !== null && petAge !== undefined) {
       initial.age_years = String(petAge);
     }
-    if (petGender) {
-      const normalizedGender = petGender.toLowerCase();
-      if (normalizedGender === "male" || normalizedGender === "m") {
-        initial.sex = "Male";
-      } else if (normalizedGender === "female" || normalizedGender === "f") {
-        initial.sex = "Female";
-      }
+
+    if (petWeight !== null && petWeight !== undefined) {
+      initial.weight_kg = String(petWeight);
     }
 
     // Auto-detect breed size based on weight or breed name
@@ -187,66 +251,53 @@ export default function DiseasePredictionForm({
 
     // Auto-fill spayed/neutered status from pet profile
     if (petSpayedNeutered !== null && petSpayedNeutered !== undefined) {
-      initial.is_neutered = petSpayedNeutered ? "yes" : "no";
+      initial.neutered_status = petSpayedNeutered ? "Yes" : "No";
     }
 
-    // Auto-fill exercise level from activity level
+    // Auto-fill activity level from activity level
     if (petActivityLevel) {
       const activityLower = petActivityLevel.toLowerCase();
       if (activityLower === "low") {
-        initial.exercise_level = "Low";
+        initial.activity_level = "Low";
       } else if (activityLower === "medium" || activityLower === "moderate") {
-        initial.exercise_level = "Moderate";
+        initial.activity_level = "Moderate";
       } else if (activityLower === "high") {
-        initial.exercise_level = "High";
+        initial.activity_level = "High";
       }
     }
 
-    // Auto-fill environment from living environment
-    if (petLivingEnvironment) {
-      const envLower = petLivingEnvironment.toLowerCase();
-      // Map common living environment values to API expected values
-      if (
-        envLower.includes("urban") ||
-        envLower.includes("city") ||
-        envLower.includes("apartment")
-      ) {
-        initial.environment = "Urban";
-      } else if (envLower.includes("suburban") || envLower.includes("suburb")) {
-        initial.environment = "Suburban";
-      } else if (
-        envLower.includes("rural") ||
-        envLower.includes("farm") ||
-        envLower.includes("country")
-      ) {
-        initial.environment = "Rural";
-      } else if (envLower.includes("indoor")) {
-        initial.environment = "Urban"; // Map indoor to Urban
-      } else if (envLower.includes("outdoor")) {
-        initial.environment = "Rural"; // Map outdoor to Rural
-      } else if (envLower.includes("mixed")) {
-        initial.environment = "Suburban"; // Map mixed to Suburban
-      }
+    if (initial.activity_level && !initial.daily_exercise_minutes) {
+      initial.daily_exercise_minutes =
+        initial.activity_level === "Low"
+          ? "15"
+          : initial.activity_level === "Moderate"
+            ? "30"
+            : "60";
     }
 
     // Auto-fill diet type from preferred diet
     if (petPreferredDiet) {
       const dietLower = petPreferredDiet.toLowerCase();
       if (
-        dietLower.includes("commercial") ||
-        dietLower.includes("kibble") ||
         dietLower.includes("dry") ||
-        dietLower.includes("wet")
+        dietLower.includes("kibble")
       ) {
-        initial.diet_type = "Commercial";
+        initial.diet_type = "Dry";
       } else if (
-        dietLower.includes("homemade") ||
-        dietLower.includes("home") ||
-        dietLower.includes("raw")
+        dietLower.includes("wet") ||
+        dietLower.includes("canned")
       ) {
-        initial.diet_type = "Homemade";
+        initial.diet_type = "Wet";
       } else if (dietLower.includes("mixed") || dietLower.includes("both")) {
         initial.diet_type = "Mixed";
+      } else if (
+        dietLower.includes("home") ||
+        dietLower.includes("homemade") ||
+        dietLower.includes("home-made") ||
+        dietLower.includes("home cooked") ||
+        dietLower.includes("home-cooked")
+      ) {
+        initial.diet_type = "Homemade";
       }
     }
 
@@ -256,30 +307,29 @@ export default function DiseasePredictionForm({
   const formContainerRef = useRef<HTMLDivElement>(null);
 
   // Validation
-  const isStep1Valid = () => {
+  const canSubmit = () => {
     return (
       formData.age_years !== "" &&
-      parseInt(formData.age_years) > 0 &&
+      parseFloat(formData.age_years) > 0 &&
+      formData.weight_kg !== "" &&
+      parseFloat(formData.weight_kg) > 0 &&
       formData.breed_size !== "" &&
-      formData.sex !== "" &&
-      formData.is_neutered !== "" &&
+      formData.neutered_status !== "" &&
+      formData.body_condition_score !== null &&
+      formData.activity_level !== "" &&
+      formData.daily_exercise_minutes !== "" &&
+      parseInt(formData.daily_exercise_minutes, 10) >= 0 &&
       formData.diet_type !== "" &&
-      formData.exercise_level !== "" &&
-      formData.environment !== ""
+      formData.fatty_food_frequency !== "" &&
+      formData.treat_frequency !== "" &&
+      formData.water_intake !== "" &&
+      formData.urination !== "" &&
+      formData.appetite_change !== "" &&
+      formData.vomiting !== "" &&
+      formData.digestive_issues !== "" &&
+      formData.lethargy !== ""
     );
   };
-
-  const isStep2Valid = () => {
-    return (
-      formData.pale_gums !== "" &&
-      formData.skin_lesions !== "" &&
-      formData.polyuria !== "" &&
-      formData.tick_prevention !== "" &&
-      formData.heartworm_prevention !== ""
-    );
-  };
-
-  const canSubmit = () => isStep1Valid() && isStep2Valid();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,8 +405,8 @@ export default function DiseasePredictionForm({
               <div className="flex gap-3">
                 <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-amber-800">
-                  Provide your pet&apos;s current symptoms and prevention
-                  details before running the screening.
+                  Provide accurate diet, activity, and symptom details before
+                  running the screening.
                 </div>
               </div>
             </div>
@@ -364,87 +414,108 @@ export default function DiseasePredictionForm({
             <section className="space-y-4">
               <div>
                 <h3 className="text-base font-semibold text-gray-900">
-                  Clinical signs
+                  Basic profile
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Mark the symptoms that best match what you are seeing now.
+                  Review and adjust your pet&apos;s key health details.
                 </p>
               </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <QuestionCard
-                  label="Pale gums"
-                  hint="Lift the lip to check. Healthy gums are pink. Concerning gums may look white, gray, or yellow."
+                  label="Age (years)"
+                  hint="Use your pet's current age in years."
+                  hintTone="green"
+                >
+                  <TextInput
+                    value={formData.age_years}
+                    onChange={(value) =>
+                      setFormData({ ...formData, age_years: value })
+                    }
+                    type="number"
+                    min={0}
+                    max={30}
+                    step={1}
+                    placeholder="e.g., 9"
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Weight (kg)"
+                  hint="Enter the most recent weight measurement."
+                  hintTone="cyan"
+                >
+                  <TextInput
+                    value={formData.weight_kg}
+                    onChange={(value) =>
+                      setFormData({ ...formData, weight_kg: value })
+                    }
+                    type="number"
+                    min={0}
+                    max={120}
+                    step={0.1}
+                    placeholder="e.g., 35.0"
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Breed size"
+                  hint="Select the breed size category."
+                  hintTone="amber"
+                >
+                  <SelectInput
+                    value={formData.breed_size}
+                    onChange={(value) =>
+                      setFormData({ ...formData, breed_size: value as any })
+                    }
+                    options={[
+                      { label: "Small", value: "Small" },
+                      { label: "Medium", value: "Medium" },
+                      { label: "Large", value: "Large" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Neutered status"
+                  hint="Is your pet spayed/neutered?"
                   hintTone="rose"
                 >
                   <div className="grid grid-cols-2 gap-2">
                     <ChoiceButton
                       label="Yes"
-                      selected={formData.pale_gums === "yes"}
+                      selected={formData.neutered_status === "Yes"}
                       tone="blue"
                       onClick={() =>
-                        setFormData({ ...formData, pale_gums: "yes" })
+                        setFormData({ ...formData, neutered_status: "Yes" })
                       }
                     />
                     <ChoiceButton
                       label="No"
-                      selected={formData.pale_gums === "no"}
+                      selected={formData.neutered_status === "No"}
                       tone="red"
                       onClick={() =>
-                        setFormData({ ...formData, pale_gums: "no" })
+                        setFormData({ ...formData, neutered_status: "No" })
                       }
                     />
                   </div>
                 </QuestionCard>
 
                 <QuestionCard
-                  label="Skin lesions"
-                  hint="Any lumps, bumps, red patches, scabs, rashes, or bald spots?"
+                  label="Body Condition Score (BCS)"
+                  hint="This comes from your BCS assessment (1–9 scale)."
                   hintTone="amber"
                 >
-                  <div className="grid grid-cols-2 gap-2">
-                    <ChoiceButton
-                      label="Yes"
-                      selected={formData.skin_lesions === "yes"}
-                      tone="blue"
-                      onClick={() =>
-                        setFormData({ ...formData, skin_lesions: "yes" })
-                      }
-                    />
-                    <ChoiceButton
-                      label="No"
-                      selected={formData.skin_lesions === "no"}
-                      tone="red"
-                      onClick={() =>
-                        setFormData({ ...formData, skin_lesions: "no" })
-                      }
-                    />
-                  </div>
-                </QuestionCard>
-
-                <QuestionCard
-                  label="Increased thirst and urination"
-                  hint="Drinking more water than usual or needing to go outside more often?"
-                  hintTone="cyan"
-                >
-                  <div className="grid grid-cols-2 gap-2">
-                    <ChoiceButton
-                      label="Yes"
-                      selected={formData.polyuria === "yes"}
-                      tone="blue"
-                      onClick={() =>
-                        setFormData({ ...formData, polyuria: "yes" })
-                      }
-                    />
-                    <ChoiceButton
-                      label="No"
-                      selected={formData.polyuria === "no"}
-                      tone="red"
-                      onClick={() =>
-                        setFormData({ ...formData, polyuria: "no" })
-                      }
-                    />
-                  </div>
+                  <TextInput
+                    value={formData.body_condition_score?.toString() ?? ""}
+                    onChange={() => {}}
+                    type="number"
+                    min={1}
+                    max={9}
+                    step={1}
+                    placeholder="BCS"
+                    disabled
+                  />
                 </QuestionCard>
               </div>
             </section>
@@ -452,72 +523,259 @@ export default function DiseasePredictionForm({
             <section className="space-y-4 border-t border-gray-200 pt-6">
               <div>
                 <h3 className="text-base font-semibold text-gray-900">
-                  Preventive care
+                  Lifestyle and diet
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Record whether your pet is regularly protected against common
-                  parasites.
+                  These factors strongly influence metabolic risk.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <QuestionCard
-                  label="Tick prevention"
-                  hint="Uses flea or tick prevention products such as chews, spot-on drops, or a collar?"
+                  label="Activity level"
+                  hint="How active is your pet on most days?"
+                  hintTone="cyan"
+                >
+                  <SelectInput
+                    value={formData.activity_level}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        activity_level: value as any,
+                      })
+                    }
+                    options={[
+                      { label: "Low", value: "Low" },
+                      { label: "Moderate", value: "Moderate" },
+                      { label: "High", value: "High" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Daily exercise (minutes)"
+                  hint="Approximate total exercise time per day."
                   hintTone="green"
+                >
+                  <TextInput
+                    value={formData.daily_exercise_minutes}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        daily_exercise_minutes: value,
+                      })
+                    }
+                    type="number"
+                    min={0}
+                    max={600}
+                    step={1}
+                    placeholder="e.g., 30"
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Diet type"
+                  hint="Primary diet type today."
+                  hintTone="amber"
+                >
+                  <SelectInput
+                    value={formData.diet_type}
+                    onChange={(value) =>
+                      setFormData({ ...formData, diet_type: value as any })
+                    }
+                    options={[
+                      { label: "Dry", value: "Dry" },
+                      { label: "Wet", value: "Wet" },
+                      { label: "Mixed", value: "Mixed" },
+                      { label: "Homemade", value: "Homemade" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Fatty food frequency"
+                  hint="How often does your pet eat fatty foods?"
+                  hintTone="rose"
+                >
+                  <SelectInput
+                    value={formData.fatty_food_frequency}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        fatty_food_frequency: value as any,
+                      })
+                    }
+                    options={[
+                      { label: "Low", value: "Low" },
+                      { label: "Moderate", value: "Moderate" },
+                      { label: "High", value: "High" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Treat frequency"
+                  hint="How often does your pet get treats?"
+                  hintTone="green"
+                >
+                  <SelectInput
+                    value={formData.treat_frequency}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        treat_frequency: value as any,
+                      })
+                    }
+                    options={[
+                      { label: "Rare", value: "Rare" },
+                      { label: "Moderate", value: "Moderate" },
+                      { label: "Frequent", value: "Frequent" },
+                    ]}
+                  />
+                </QuestionCard>
+              </div>
+            </section>
+
+            <section className="space-y-4 border-t border-gray-200 pt-6">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Symptoms and clinical signs
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Choose the options that best match your pet currently.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <QuestionCard
+                  label="Water intake"
+                  hint="Is your pet drinking less, normal, or more than usual?"
+                  hintTone="cyan"
+                >
+                  <SelectInput
+                    value={formData.water_intake}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        water_intake: value as any,
+                      })
+                    }
+                    options={[
+                      { label: "Low", value: "Low" },
+                      { label: "Normal", value: "Normal" },
+                      { label: "High", value: "High" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Urination"
+                  hint="Any changes in urination pattern?"
+                  hintTone="amber"
+                >
+                  <SelectInput
+                    value={formData.urination}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        urination: value as any,
+                      })
+                    }
+                    options={[
+                      { label: "Normal", value: "Normal" },
+                      { label: "Frequent", value: "Frequent" },
+                      { label: "Difficult", value: "Difficult" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Appetite change"
+                  hint="Has appetite decreased, stayed normal, or increased?"
+                  hintTone="green"
+                >
+                  <SelectInput
+                    value={formData.appetite_change}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        appetite_change: value as any,
+                      })
+                    }
+                    options={[
+                      { label: "Decreased", value: "Decreased" },
+                      { label: "Normal", value: "Normal" },
+                      { label: "Increased", value: "Increased" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Vomiting"
+                  hint="Has your pet vomited recently?"
+                  hintTone="rose"
                 >
                   <div className="grid grid-cols-2 gap-2">
                     <ChoiceButton
                       label="Yes"
-                      selected={formData.tick_prevention === "Regular"}
+                      selected={formData.vomiting === "Yes"}
                       tone="blue"
                       onClick={() =>
-                        setFormData({
-                          ...formData,
-                          tick_prevention: "Regular",
-                        })
+                        setFormData({ ...formData, vomiting: "Yes" })
                       }
                     />
                     <ChoiceButton
                       label="No"
-                      selected={
-                        formData.tick_prevention === "None" ||
-                        formData.tick_prevention === "Irregular"
-                      }
+                      selected={formData.vomiting === "No"}
                       tone="red"
                       onClick={() =>
-                        setFormData({ ...formData, tick_prevention: "None" })
+                        setFormData({ ...formData, vomiting: "No" })
                       }
                     />
                   </div>
                 </QuestionCard>
 
                 <QuestionCard
-                  label="Heartworm prevention"
-                  hint="Monthly heartworm tablets or a yearly injection from your veterinarian?"
-                  hintTone="rose"
+                  label="Digestive issues"
+                  hint="Any diarrhea/abdominal discomfort?"
+                  hintTone="amber"
+                >
+                  <SelectInput
+                    value={formData.digestive_issues}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        digestive_issues: value as any,
+                      })
+                    }
+                    options={[
+                      { label: "None", value: "None" },
+                      { label: "Mild", value: "Mild" },
+                      { label: "Severe", value: "Severe" },
+                    ]}
+                  />
+                </QuestionCard>
+
+                <QuestionCard
+                  label="Lethargy"
+                  hint="Is your pet more tired or less active than usual?"
+                  hintTone="cyan"
                 >
                   <div className="grid grid-cols-2 gap-2">
                     <ChoiceButton
                       label="Yes"
-                      selected={formData.heartworm_prevention === "yes"}
+                      selected={formData.lethargy === "Yes"}
                       tone="blue"
                       onClick={() =>
-                        setFormData({
-                          ...formData,
-                          heartworm_prevention: "yes",
-                        })
+                        setFormData({ ...formData, lethargy: "Yes" })
                       }
                     />
                     <ChoiceButton
                       label="No"
-                      selected={formData.heartworm_prevention === "no"}
+                      selected={formData.lethargy === "No"}
                       tone="red"
                       onClick={() =>
-                        setFormData({
-                          ...formData,
-                          heartworm_prevention: "no",
-                        })
+                        setFormData({ ...formData, lethargy: "No" })
                       }
                     />
                   </div>
