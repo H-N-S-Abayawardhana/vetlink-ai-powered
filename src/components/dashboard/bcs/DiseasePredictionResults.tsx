@@ -10,10 +10,10 @@ import {
   ChevronUp,
   Stethoscope,
   Heart,
-  Shield,
 } from "lucide-react";
 import type {
   DiseasePredictionResult,
+  DiseaseType,
   RiskLevel,
 } from "@/types/disease-prediction";
 import { DISEASE_INFO } from "@/types/disease-prediction";
@@ -61,14 +61,99 @@ export default function DiseasePredictionResults({
     }
   };
 
-  const getProgressBarColor = (probability: number) => {
-    if (probability >= 60) return "bg-red-500";
-    if (probability >= 30) return "bg-yellow-500";
-    return "bg-green-500";
-  };
-
   const toggleExpand = (disease: string) => {
     setExpandedDisease(expandedDisease === disease ? null : disease);
+  };
+
+  const getDiseaseBadge = (disease: string) => {
+    switch (disease) {
+      case "Diabetes":
+        return "DB";
+      case "Pancreatitis":
+        return "PN";
+      case "Hyperlipidemia":
+        return "HL";
+      case "Urolithiasis":
+        return "UR";
+      default:
+        return "AI";
+    }
+  };
+
+  const getDiseaseDetails = (disease: DiseaseType) => {
+    switch (disease) {
+      case "Diabetes":
+        return {
+          description:
+            "Diabetes mellitus affects how the body regulates blood sugar. In dogs, risk can increase with obesity, low activity, and older age.",
+          symptoms: [
+            "Increased thirst and frequent urination",
+            "Increased appetite with weight loss",
+            "Low energy/lethargy",
+            "Recurrent infections (e.g., urinary tract)",
+            "Cloudy eyes/cataracts (sometimes)",
+          ],
+          whatToDo: [
+            "Contact a veterinarian for confirmation (blood glucose and urine tests)",
+            "Follow a vet-guided feeding plan and weight management",
+            "If diagnosed: follow prescribed insulin and home monitoring plan",
+            "Seek urgent care if vomiting, severe lethargy, or dehydration occurs",
+          ],
+        };
+      case "Pancreatitis":
+        return {
+          description:
+            "Pancreatitis is inflammation of the pancreas and can range from mild to life-threatening. It is often associated with high-fat meals and obesity.",
+          symptoms: [
+            "Vomiting and nausea",
+            "Abdominal pain (hunched posture, discomfort when touched)",
+            "Loss of appetite",
+            "Diarrhea",
+            "Lethargy and dehydration",
+          ],
+          whatToDo: [
+            "Avoid fatty foods and table scraps; use vet-approved diets",
+            "See a veterinarian for evaluation (exam and blood tests)",
+            "If severe vomiting, pain, or weakness: seek urgent care",
+            "Only give medications as prescribed (some drugs can worsen GI issues)",
+          ],
+        };
+      case "Hyperlipidemia":
+        return {
+          description:
+            "Hyperlipidemia means elevated fats (lipids) in the blood. It can be influenced by diet and weight, and may be associated with other conditions.",
+          symptoms: [
+            "Often no obvious signs (found on blood tests)",
+            "Digestive upset (vomiting/diarrhea) in some cases",
+            "Lethargy",
+            "Possible pancreatitis episodes (related)",
+          ],
+          whatToDo: [
+            "Discuss a fasting lipid profile with your veterinarian",
+            "Start a vet-guided weight management and low-fat feeding plan",
+            "Check for underlying causes (e.g., endocrine disease) if recommended",
+            "Re-test lipids to track response to diet and lifestyle changes",
+          ],
+        };
+      case "Urolithiasis":
+        return {
+          description:
+            "Urolithiasis refers to urinary stones, which can irritate the urinary tract or cause blockage. Hydration and urinary habits can affect risk.",
+          symptoms: [
+            "Frequent urination or straining",
+            "Blood in urine",
+            "Accidents in the house",
+            "Pain or discomfort while urinating",
+            "Inability to urinate (emergency)",
+          ],
+          whatToDo: [
+            "Encourage water intake; follow vet advice on diet and urinary health",
+            "See a veterinarian for urinalysis and imaging if symptoms appear",
+            "Treat urinary blockage as an emergency (immediate vet care)",
+            "Follow prevention plans if stones were diagnosed previously",
+          ],
+        };
+    }
   };
 
   return (
@@ -93,9 +178,6 @@ export default function DiseasePredictionResults({
               </p>
             </div>
           </div>
-          <p className="text-sm text-gray-500">
-            {new Date(result.analyzed_at).toLocaleString()}
-          </p>
         </div>
       </div>
 
@@ -107,9 +189,17 @@ export default function DiseasePredictionResults({
               : "border-green-200 bg-green-50/70"
           }`}
         >
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+            <div
+              className={`space-y-2 ${
+                result.has_risk ? "" : "flex flex-col items-center text-center"
+              }`}
+            >
+              <div
+                className={`flex items-center gap-2 ${
+                  result.has_risk ? "" : "justify-center"
+                }`}
+              >
                 {result.has_risk ? (
                   <AlertTriangle className="w-5 h-5 text-red-600" />
                 ) : (
@@ -132,7 +222,7 @@ export default function DiseasePredictionResults({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:min-w-[320px]">
-              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 flex flex-col items-center justify-center text-center">
                 <p className="text-[11px] uppercase tracking-wide text-gray-500">
                   Age group
                 </p>
@@ -140,7 +230,7 @@ export default function DiseasePredictionResults({
                   {result.pet_profile.age_group}
                 </p>
               </div>
-              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 flex flex-col items-center justify-center text-center">
                 <p className="text-[11px] uppercase tracking-wide text-gray-500">
                   Weight status
                 </p>
@@ -148,7 +238,7 @@ export default function DiseasePredictionResults({
                   {result.pet_profile.weight_status}
                 </p>
               </div>
-              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 col-span-2 sm:col-span-1">
+              <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 col-span-2 sm:col-span-1 flex flex-col items-center justify-center text-center">
                 <p className="text-[11px] uppercase tracking-wide text-gray-500">
                   {result.has_risk ? "Diseases at risk" : "Status"}
                 </p>
@@ -200,9 +290,19 @@ export default function DiseasePredictionResults({
                   >
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       <div className="flex items-start gap-3">
-                        <span className="text-2xl leading-none">
-                          {diseaseInfo?.icon || "🔬"}
-                        </span>
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-lg border ${
+                            diseaseInfo?.color?.bg ?? "bg-gray-50"
+                          } ${diseaseInfo?.color?.border ?? "border-gray-200"}`}
+                        >
+                          <span
+                            className={`text-sm font-semibold ${
+                              diseaseInfo?.color?.text ?? "text-gray-700"
+                            }`}
+                          >
+                            {getDiseaseBadge(prediction.disease)}
+                          </span>
+                        </div>
                         <div>
                           <p className="font-semibold text-gray-900">
                             {prediction.disease}
@@ -236,6 +336,9 @@ export default function DiseasePredictionResults({
                           </span>
                         )}
 
+                        <span className="text-xs text-gray-500">
+                          {isExpanded ? "Hide details" : "View details"}
+                        </span>
                         {isExpanded ? (
                           <ChevronUp className="w-4 h-4 text-gray-500" />
                         ) : (
@@ -247,70 +350,61 @@ export default function DiseasePredictionResults({
 
                   {isExpanded && (
                     <div className="border-t border-gray-200 bg-white p-4">
-                      <div className="mb-4">
-                        <div className="mb-1 flex items-center justify-between text-sm">
-                          <span className="text-gray-600">
-                            Risk probability
-                          </span>
-                          <span className="font-medium text-gray-900">
-                            {prediction.probability.toFixed(1)}%
-                          </span>
-                        </div>
-                        <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
-                          <div
-                            className={`h-full transition-all duration-500 ${getProgressBarColor(prediction.probability)}`}
-                            style={{ width: `${prediction.probability}%` }}
-                          />
-                        </div>
-                        <div className="mt-2 flex justify-between text-[11px] text-gray-500">
-                          <span>Low</span>
-                          <span>Moderate</span>
-                          <span>High</span>
-                        </div>
-                      </div>
+                      {(() => {
+                        const details = getDiseaseDetails(prediction.disease);
+                        return (
+                          <div className="space-y-4">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                About {prediction.disease}
+                              </p>
+                              <p className="mt-2 text-sm text-gray-600">
+                                {details.description}
+                              </p>
+                            </div>
 
-                      {prediction.key_indicators.length > 0 && (
-                        <div>
-                          <p className="mb-2 text-sm font-medium text-gray-800">
-                            Key risk indicators
-                          </p>
-                          <ul className="space-y-2">
-                            {prediction.key_indicators.map((indicator, idx) => (
-                              <li
-                                key={idx}
-                                className="flex items-start gap-2 text-sm text-gray-600"
-                              >
-                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-gray-400" />
-                                <span>{indicator}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                Common symptoms
+                              </p>
+                              <ul className="mt-2 space-y-2">
+                                {details.symptoms.map((s, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="flex items-start gap-2 text-sm text-gray-600"
+                                  >
+                                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-gray-400" />
+                                    <span>{s}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                What to do if suspected/affected
+                              </p>
+                              <ul className="mt-2 space-y-2">
+                                {details.whatToDo.map((a, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="flex items-start gap-2 text-sm text-gray-600"
+                                  >
+                                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-gray-400" />
+                                    <span>{a}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
-        </div>
-
-        <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-5">
-          <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900">
-            <Shield className="w-4 h-4 text-blue-600" />
-            Veterinary recommendations
-          </h3>
-          <ul className="space-y-2.5">
-            {result.recommendations.map((rec, idx) => (
-              <li
-                key={idx}
-                className="flex items-start gap-3 text-sm text-gray-700"
-              >
-                <CheckCircle className="mt-0.5 w-4 h-4 text-blue-600 flex-shrink-0" />
-                <span>{rec}</span>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4">

@@ -276,15 +276,6 @@ export default function DiseasePredictionForm({
       }
     }
 
-    if (initial.activity_level && !initial.daily_exercise_minutes) {
-      initial.daily_exercise_minutes =
-        initial.activity_level === "Low"
-          ? "15"
-          : initial.activity_level === "Moderate"
-            ? "30"
-            : "60";
-    }
-
     // Auto-fill diet type from preferred diet
     if (petPreferredDiet) {
       const dietLower = petPreferredDiet.toLowerCase();

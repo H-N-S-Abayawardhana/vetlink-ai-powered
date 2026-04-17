@@ -13,7 +13,7 @@ import type {
   DiseasePredictionResult,
 } from "@/types/disease-prediction";
 import { formStateToApiInput } from "@/types/disease-prediction";
-import { Stethoscope, PawPrint, ChevronRight, Check, Info } from "lucide-react";
+import { Stethoscope, PawPrint, ChevronRight, Check } from "lucide-react";
 
 const ANALYZED_CONDITIONS = [
   "Diabetes",
@@ -125,7 +125,7 @@ export default function DiseasePredictionPage() {
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
               <Stethoscope className="w-3.5 h-3.5" />
@@ -141,42 +141,24 @@ export default function DiseasePredictionPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
-            {ANALYZED_CONDITIONS.map((condition) => (
-              <div
-                key={condition}
-                className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-700"
-              >
-                {condition}
-              </div>
-            ))}
+          <div className="flex justify-center lg:justify-end lg:shrink-0 w-full lg:w-auto">
+            <div className="grid w-full max-w-md grid-cols-2 gap-2 text-sm">
+              {ANALYZED_CONDITIONS.map((condition) => (
+                <div
+                  key={condition}
+                  title={condition}
+                  className="flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-3 text-center font-medium text-gray-700 truncate"
+                >
+                  {condition}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-              Before you start
-            </h2>
-            <p className="mt-1 text-sm text-gray-600">
-              This assessment requires a saved pet profile with a completed body
-              condition score.
-            </p>
-          </div>
-          <div className="flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800 md:max-w-xl">
-            <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <p>
-              Use this tool as a screening aid only. Always confirm concerning
-              results with a veterinarian.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           {STEP_LABELS.map((label, idx) => {
             const stepMap = ["select", "form", "result"];
             const currentIdx = stepMap.indexOf(step);
