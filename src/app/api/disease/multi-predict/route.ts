@@ -220,6 +220,25 @@ export async function POST(request: NextRequest) {
     let analysisId = null;
     if (pet_id && session.user.id) {
       try {
+        const userRole = (session.user as any)?.userRole;
+
+        // Verify the user can write to this pet
+        const petAccess = await pool.query(
+          "SELECT owner_id FROM pets WHERE id = $1",
+          [pet_id],
+        );
+
+        const ownerIdStr = petAccess.rows?.[0]?.owner_id
+          ? String(petAccess.rows[0].owner_id)
+          : null;
+        const userIdStr = session.user.id ? String(session.user.id) : null;
+        const canWritePet =
+          !!ownerIdStr &&
+          !!userIdStr &&
+          (ownerIdStr === userIdStr ||
+            userRole === "SUPER_ADMIN" ||
+            userRole === "VETERINARIAN");
+
         // Create table if it doesn't exist
         await pool.query(`
           CREATE TABLE IF NOT EXISTS metabolic_risk_analyses (
@@ -311,6 +330,30 @@ export async function POST(request: NextRequest) {
         );
 
         analysisId = dbResult.rows[0]?.id;
+
+        // Persist into the pet record (store history for every scan)
+        // so re-scans that show no risk still update the pet's latest status.
+        if (canWritePet) {
+          await pool.query(
+            "ALTER TABLE pets ADD COLUMN IF NOT EXISTS metabolic_risk_history JSONB DEFAULT '[]'::jsonb",
+          );
+
+          const recordPayload = {
+            id: analysisId ? String(analysisId) : `${Date.now()}`,
+            analyzedAt: result.analyzed_at,
+            hasRisk: result.has_risk,
+            highestRiskDisease: result.highest_risk_disease,
+            predictions: result.predictions,
+          };
+
+          await pool.query(
+            `UPDATE pets
+             SET metabolic_risk_history = COALESCE(metabolic_risk_history, '[]'::jsonb) || $1::jsonb,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $2`,
+            [JSON.stringify([recordPayload]), pet_id],
+          );
+        }
       } catch (dbError) {
         console.error("Failed to save disease analysis to database:", dbError);
         // Continue without saving - don't fail the request
