@@ -408,6 +408,7 @@ export default function DiseasePredictionPage() {
           petLivingEnvironment={selected.livingEnvironment}
           petPreferredDiet={selected.preferredDiet}
           petSpayedNeutered={selected.spayedNeutered}
+          petDigestiveSensitivity={selected.digestiveSensitivity}
           petId={selected.id}
         />
       )}
