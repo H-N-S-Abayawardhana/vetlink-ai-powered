@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -895,3 +896,511 @@ export default function DietPage() {
     </div>
   );
 }
+=======
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Download,
+  Sparkles,
+  PawPrint,
+  AlertCircle,
+  TrendingUp,
+  CheckCircle,
+} from "lucide-react";
+import { listPets, type Pet } from "@/lib/pets";
+import { generateDietPlanPdf } from "@/lib/diet-plan-pdf";
+import Image from "next/image";
+
+function getPetAvatar(pet: any): string | null {
+  return pet?.avatarDataUrl || pet?.avatarUrl || null;
+}
+
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-5">
+      <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+      <div className="mt-4">{children}</div>
+    </div>
+  );
+}
+
+export default function DietPage() {
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+  const [pets, setPets] = useState<any[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pet, setPet] = useState<any | null>(null);
+  const [plan, setPlan] = useState<any | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState(false);
+  const [loadingPets, setLoadingPets] = useState(true);
+
+  useEffect(() => {
+    if (!selectedId) return setPet(null);
+    const selectedPet = pets.find((item: any) => item.id === selectedId);
+    setPet(selectedPet || null);
+    setPlan(null);
+  }, [selectedId, pets]);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      setLoadingPets(true);
+      try {
+        const all = await listPets();
+        if (!mounted) return;
+        const dogs = Array.isArray(all) ? (all as Pet[]) : [];
+        setPets(dogs);
+        setSelectedId((prev) => prev ?? (dogs.length > 0 ? dogs[0].id : null));
+      } catch (err) {
+        console.error("Error loading pets", err);
+      } finally {
+        if (mounted) {
+          setLoadingPets(false);
+        }
+      }
+    };
+    void load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const loadPlan = async () => {
+    if (!selectedId) return;
+    setLoadingPlan(true);
+    try {
+      const res = await fetch(`/api/pets/${selectedId}/diet`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Failed to generate plan");
+      }
+      const json = await res.json();
+      setPlan(json.plan || null);
+    } catch (err) {
+      console.error("Error generating diet plan", err);
+      alert(
+        "Failed to generate diet plan. Please ensure the pet profile is complete (age, weight, BCS, activity level, gender, meals per day, dietary preferences) and you are signed in.",
+      );
+    } finally {
+      setLoadingPlan(false);
+    }
+  };
+
+  useEffect(() => {
+    if (plan && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [plan]);
+
+  const downloadPdf = () => {
+    if (!plan) return alert("No plan to download");
+    try {
+      generateDietPlanPdf({ plan, pet });
+    } catch (err) {
+      console.error("PDF generation failed", err);
+      alert("Failed to generate PDF.");
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+              <Sparkles className="w-3.5 h-3.5" />
+              Nutrition planning
+            </div>
+            <h1 className="mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+              Diet Recommendations
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
+              Generate a simple nutrition and feeding plan based on your
+              pet&apos;s profile, body condition score, and lifestyle details.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 lg:max-w-sm">
+            For the best recommendation, keep your pet&apos;s age, weight,
+            activity level, diet preference, and BCS up to date.
+          </div>
+        </div>
+      </div>
+
+      {!plan && (
+        <div
+          id="pet-selection-section"
+          className="bg-white rounded-lg shadow-md p-4 sm:p-6 space-y-5"
+        >
+          <div>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <PawPrint className="w-4 h-4 text-blue-600" />
+              Select your pet
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Choose a pet to generate a personalized diet recommendation.
+            </p>
+          </div>
+
+          {loadingPets ? (
+            <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto" />
+              <p className="mt-3 text-sm text-gray-700">Loading your pets...</p>
+            </div>
+          ) : pets.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center">
+              <p className="text-sm font-medium text-gray-900">
+                No pets found.
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                Add a pet profile first to generate a diet plan.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {pets.map((p: any) => {
+                const selected = selectedId === p.id;
+                const avatar = getPetAvatar(p);
+
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedId(p.id)}
+                    className={`rounded-xl border p-4 text-left transition-colors ${
+                      selected
+                        ? "border-blue-300 bg-blue-50/70"
+                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        {avatar ? (
+                          <Image
+                            src={avatar}
+                            alt={`${p.name} avatar`}
+                            width={48}
+                            height={48}
+                            unoptimized
+                            className="w-12 h-12 object-cover"
+                          />
+                        ) : (
+                          <PawPrint className="w-5 h-5 text-gray-500" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-semibold text-gray-900 truncate">
+                            {p.name}
+                          </p>
+                          {selected && (
+                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                              Selected
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-gray-600 truncate">
+                          {p.breed || "Breed: -"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      <div className="rounded-lg bg-gray-50 px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                          Age
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {p.ageYears ?? "-"}
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-gray-50 px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                          Weight
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {p.weightKg ?? "-"} {p.weightKg ? "kg" : ""}
+                        </p>
+                      </div>
+                      <div
+                        className={`rounded-lg px-3 py-2 ${
+                          p.bcs ? "bg-purple-50" : "bg-amber-50"
+                        }`}
+                      >
+                        <p
+                          className={`text-[11px] uppercase tracking-wide ${
+                            p.bcs ? "text-purple-600" : "text-amber-600"
+                          }`}
+                        >
+                          BCS
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {p.bcs ?? "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {!pet?.bcs && pet && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    Body Condition Score required
+                  </p>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Calculate BCS for this pet before generating a diet plan.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() =>
+                  router.push(`/dashboard/pets/bcs?petId=${pet.id}`)
+                }
+                className="inline-flex items-center justify-center rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors"
+              >
+                Calculate BCS
+              </button>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              onClick={loadPlan}
+              disabled={!pet || loadingPlan || !pet.bcs}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4" />
+              {loadingPlan ? "Generating..." : "Generate diet recommendation"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {plan && (
+        <div ref={resultsRef} className="space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  Generated plan
+                </div>
+                <h2 className="mt-3 text-xl sm:text-2xl font-semibold text-gray-900">
+                  {plan.petName}&apos;s Diet Plan
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Generated on {new Date(plan.generatedAt).toLocaleDateString()}
+                </p>
+              </div>
+
+              {pet && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                  <p>
+                    <span className="font-medium text-gray-900">
+                      {pet.name}
+                    </span>
+                    {pet.breed ? ` • ${pet.breed}` : ""}
+                  </p>
+                  <p className="mt-1">
+                    Weight: {pet.weightKg ?? "-"} kg • BCS: {pet.bcs ?? "-"}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {plan.Diet_Type && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-lg shadow-md p-5 sm:p-6">
+                <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+                  Diet type: {plan.Diet_Type}
+                </div>
+
+                {plan.Nutrition_Profile && (
+                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {plan.Nutrition_Profile.Protein_Level && (
+                      <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wide text-red-600">
+                          Protein
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {plan.Nutrition_Profile.Protein_Level}
+                        </p>
+                      </div>
+                    )}
+                    {plan.Nutrition_Profile.Fat_Level && (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wide text-amber-600">
+                          Fat
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {plan.Nutrition_Profile.Fat_Level}
+                        </p>
+                      </div>
+                    )}
+                    {plan.Nutrition_Profile.Carb_Level && (
+                      <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wide text-green-600">
+                          Carbs
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {plan.Nutrition_Profile.Carb_Level}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {plan.Feeding_Guidelines && (
+                <SectionCard title="Feeding Guidelines">
+                  <div className="space-y-3">
+                    {plan.Feeding_Guidelines.Meals_Per_Day && (
+                      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+                        <p className="text-sm font-medium text-gray-900">
+                          Meals per day
+                        </p>
+                        <p className="mt-1 text-sm text-gray-700">
+                          Feed {plan.Feeding_Guidelines.Meals_Per_Day} times
+                          daily.
+                        </p>
+                      </div>
+                    )}
+                    {plan.Feeding_Guidelines.Portion_Control_Advice && (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                        <p className="text-sm font-medium text-gray-900">
+                          Portion control advice
+                        </p>
+                        <p className="mt-1 text-sm text-gray-700">
+                          {plan.Feeding_Guidelines.Portion_Control_Advice}
+                        </p>
+                      </div>
+                    )}
+                    {plan.Feeding_Guidelines.Treat_Allowance && (
+                      <div className="rounded-lg border border-pink-200 bg-pink-50 px-4 py-3">
+                        <p className="text-sm font-medium text-gray-900">
+                          Treat allowance
+                        </p>
+                        <p className="mt-1 text-sm text-gray-700">
+                          {plan.Feeding_Guidelines.Treat_Allowance}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.Recommended_Foods && plan.Recommended_Foods.length > 0 && (
+                <SectionCard title="Recommended Foods">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {plan.Recommended_Foods.map((food: string, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-gray-700"
+                      >
+                        <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <span>{food}</span>
+                      </div>
+                    ))}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.Foods_to_Avoid && plan.Foods_to_Avoid.length > 0 && (
+                <SectionCard title="Foods to Avoid">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {plan.Foods_to_Avoid.map((food: string, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-gray-700"
+                      >
+                        <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>{food}</span>
+                      </div>
+                    ))}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.Exercise_Recommendation && (
+                <SectionCard title="Exercise Recommendation">
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
+                    {plan.Exercise_Recommendation}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.Notes && (
+                <SectionCard title="Important Notes">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-gray-700">
+                    {plan.Notes}
+                  </div>
+                </SectionCard>
+              )}
+            </div>
+          )}
+
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3">
+              <button
+                onClick={() => {
+                  const petSelect = document.getElementById(
+                    "pet-selection-section",
+                  );
+                  if (petSelect) {
+                    petSelect.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }
+                  setPlan(null);
+                }}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Select another pet
+              </button>
+
+              <button
+                onClick={downloadPdf}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Download PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loadingPlan && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 shadow-2xl text-center max-w-md mx-4">
+            <div className="w-14 h-14 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-5" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Generating diet recommendation
+            </h3>
+            <p className="text-sm text-gray-600">
+              Preparing a personalized nutrition and feeding plan for your pet.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+>>>>>>> d95edf6d3d05d354033436e12422e274d5577f55
