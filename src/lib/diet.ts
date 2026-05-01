@@ -46,19 +46,51 @@ export interface DietPlan {
   // Knowledge Base (new schema)
   kbBreed?: string | null;
   kbDietType?: string | null;
+  breed_size_category?: string | null;
+  breed_specific_considerations?: string[] | null;
+
+  diet_goal?: string | null;
+  life_stage_or_goal?: string | null;
   dietary_recommendations?: string | null;
-  nutrition_targets?: Record<string, string> | null;
+  nutrition_targets?: Record<string, string | number> | null;
   meals_per_day?: string | null;
   feeding_plan?: Array<{
     food_item?: string | null;
     amount_g?: number | null;
     calories?: number | null;
+    role?: string | null;
   }> | null;
   hydration?: string | null;
   energy_kcal?: string | null;
   micronutrient_profile?: Record<string, string> | null;
   commercial_food_options?: string[] | null;
   homemade_food_options?: string[] | null;
+
+  portion_and_calorie_guidance?: {
+    calorie_adjustment?: Record<string, string> | null;
+    portion_rule?: string | null;
+    review_interval?: string | null;
+  } | null;
+  meal_timing_guidance?: {
+    feeding_frequency?: string | number | null;
+    meal_spacing?: string | null;
+    bloat_precaution?: string | null;
+  } | null;
+  food_safety?: {
+    avoid_toxic_foods?: string[] | null;
+    preparation_rules?: string[] | null;
+    treat_limit?: string | null;
+  } | null;
+  allergy_and_sensitivity_rules?: Record<string, string> | null;
+  supplement_guidance?: Record<string, string> | null;
+  transition_plan?: Record<string, string> | null;
+  monitoring_metrics?: {
+    body_condition_score?: string | null;
+    weight_tracking?: string | null;
+    stool_score?: string | null;
+    clinical_flags?: string[] | null;
+  } | null;
+  veterinary_review_required_for?: string[] | null;
 }
 
 export const TOXIC_FOODS: string[] = [];
@@ -219,6 +251,16 @@ export function generateDietPlan(
   if (matched?.diet) {
     plan.kbBreed = matched.breedData?.breed || null;
     plan.kbDietType = matched.dietType || null;
+
+    plan.breed_size_category =
+      matched.diet.breed_size_category || matched.breedData?.breed_size_category || null;
+    plan.breed_specific_considerations =
+      matched.diet.breed_specific_considerations ||
+      matched.breedData?.breed_specific_considerations ||
+      null;
+
+    plan.diet_goal = matched.diet.diet_goal || null;
+    plan.life_stage_or_goal = matched.diet.life_stage_or_goal || null;
     plan.dietary_recommendations = matched.diet.dietary_recommendations || null;
     plan.nutrition_targets = matched.diet.nutrition_targets || null;
     plan.meals_per_day = matched.diet.meals_per_day || null;
@@ -228,6 +270,18 @@ export function generateDietPlan(
     plan.micronutrient_profile = matched.diet.micronutrient_profile || null;
     plan.commercial_food_options = matched.diet.commercial_food_options || null;
     plan.homemade_food_options = matched.diet.homemade_food_options || null;
+
+    plan.portion_and_calorie_guidance =
+      matched.diet.portion_and_calorie_guidance || null;
+    plan.meal_timing_guidance = matched.diet.meal_timing_guidance || null;
+    plan.food_safety = matched.diet.food_safety || null;
+    plan.allergy_and_sensitivity_rules =
+      matched.diet.allergy_and_sensitivity_rules || null;
+    plan.supplement_guidance = matched.diet.supplement_guidance || null;
+    plan.transition_plan = matched.diet.transition_plan || null;
+    plan.monitoring_metrics = matched.diet.monitoring_metrics || null;
+    plan.veterinary_review_required_for =
+      matched.diet.veterinary_review_required_for || null;
   }
 
   return plan;
