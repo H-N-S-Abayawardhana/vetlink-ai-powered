@@ -235,6 +235,7 @@ export default function Contact() {
                     <div className="relative">
                       <User className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                       <input
+                        suppressHydrationWarning
                         type="text"
                         id="name"
                         name="name"
@@ -257,6 +258,7 @@ export default function Contact() {
                     <div className="relative">
                       <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                       <input
+                        suppressHydrationWarning
                         type="email"
                         id="email"
                         name="email"
@@ -280,6 +282,7 @@ export default function Contact() {
                   <div className="relative">
                     <MessageSquareText className="pointer-events-none absolute left-4 top-4 h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                     <textarea
+                      suppressHydrationWarning
                       id="message"
                       name="message"
                       value={formData.message}
@@ -321,6 +324,7 @@ export default function Contact() {
                 )}
 
                 <motion.button
+                  suppressHydrationWarning
                   type="submit"
                   disabled={isSubmitting}
                   className="cursor-pointer w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-4 px-6 font-semibold shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"

@@ -5,6 +5,23 @@ type DietPlanPdfInput = {
   pet: any;
 };
 
+function humanizeKey(key: string) {
+  const normalized = String(key).toLowerCase().trim();
+  const dayRange = normalized.match(/^day_(\d+)_(\d+)$/);
+  if (dayRange) {
+    return `Day ${dayRange[1]}-${dayRange[2]}`;
+  }
+  const dayPlus = normalized.match(/^day_(\d+)_plus$/);
+  if (dayPlus) {
+    return `Day ${dayPlus[1]}+`;
+  }
+
+  return String(key)
+    .replace(/_/g, " ")
+    .replace(/\b([a-z])/g, (m) => m.toUpperCase())
+    .trim();
+}
+
 export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   if (!plan) {
     throw new Error("No plan provided for PDF generation");
@@ -133,6 +150,29 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     y += 6;
   };
 
+  const drawKeyValueObject = (title: string, obj: unknown) => {
+    if (!obj || typeof obj !== "object") return;
+    const entries = Object.entries(obj as Record<string, unknown>).filter(
+      ([, value]) => value !== null && value !== undefined && String(value).trim() !== "",
+    );
+    if (entries.length === 0) return;
+    drawSectionHeader(title);
+    for (const [key, value] of entries) {
+      drawField(humanizeKey(key), String(value));
+    }
+    y += 2;
+  };
+
+  const drawStringListSection = (title: string, items: unknown, marker = "-") => {
+    if (!Array.isArray(items) || items.length === 0) return;
+    const safeItems = items
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+    if (safeItems.length === 0) return;
+    drawSectionHeader(title);
+    drawBulletList(safeItems, marker);
+  };
+
   drawPageHeader(true);
 
   drawSectionHeader("Pet Overview");
@@ -143,66 +183,189 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   drawField("Body Condition Score", pet?.bcs ? `${pet.bcs}/9` : "-");
   y += 2;
 
-  drawSectionHeader("Plan Summary");
-  drawField("Diet Type", plan.Diet_Type);
-  drawField("Meals Per Day", plan.Feeding_Guidelines?.Meals_Per_Day);
-  drawField("Treat Allowance", plan.Feeding_Guidelines?.Treat_Allowance);
+  // 1. Plan Overview
+  drawSectionHeader("Plan Overview");
+  drawField("Diet Type", plan.kbDietType || plan.Diet_Type);
+  drawField(
+    "Meals Per Day",
+    plan.meals_per_day || plan.Feeding_Guidelines?.Meals_Per_Day,
+  );
+  drawField("Hydration", plan.hydration);
+  drawField("Energy", plan.energy_kcal);
+  if (plan.breed_size_category) {
+    drawField("Breed Size Category", plan.breed_size_category);
+  }
   y += 2;
 
+  // 2. Goal
+  if (plan.life_stage_or_goal || plan.diet_goal) {
+    drawSectionHeader("Goal");
+    drawField("Life Stage / Goal", plan.life_stage_or_goal);
+    drawField("Diet Goal", plan.diet_goal);
+    y += 2;
+  }
+
+  // 3. Dietary Recommendations
+  if (plan.dietary_recommendations) {
+    drawSectionHeader("Dietary Recommendations");
+    doc.setTextColor(...mutedText);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    drawWrappedText(plan.dietary_recommendations, margin + 10, maxWidth - 16, 20);
+    y += 2;
+  }
+
+  // 4. Nutrition Targets
+  if (plan.nutrition_targets && typeof plan.nutrition_targets === "object") {
+    const entries = Object.entries(plan.nutrition_targets).filter(
+      ([, value]) => value !== null && value !== undefined && String(value).trim() !== "",
+    );
+    if (entries.length > 0) {
+      drawSectionHeader("Nutrition Targets");
+      for (const [key, value] of entries) {
+        drawField(humanizeKey(key), String(value));
+      }
+      y += 2;
+    }
+  }
+
+  // 5. Feeding Plan
+  if (Array.isArray(plan.feeding_plan) && plan.feeding_plan.length > 0) {
+    drawSectionHeader("Feeding Plan");
+    const items = plan.feeding_plan
+      .map((item: any) => {
+        const name = item?.food_item ? String(item.food_item) : "-";
+        const amount = item?.amount_g != null ? `${item.amount_g} g` : "-";
+        const calories = item?.calories != null ? `${item.calories} kcal` : "-";
+        return [name, amount, calories].filter(Boolean).join(" • ");
+      })
+      .filter(Boolean);
+    if (items.length > 0) {
+      drawBulletList(items, "-");
+    }
+    y += 2;
+  }
+
+  // 6. Food Options
+  if (
+    (Array.isArray(plan.commercial_food_options) && plan.commercial_food_options.length > 0) ||
+    (Array.isArray(plan.homemade_food_options) && plan.homemade_food_options.length > 0)
+  ) {
+    drawSectionHeader("Food Options");
+    if (Array.isArray(plan.commercial_food_options) && plan.commercial_food_options.length > 0) {
+      drawSectionHeader("Commercial");
+      drawBulletList(plan.commercial_food_options, "+");
+    }
+    if (Array.isArray(plan.homemade_food_options) && plan.homemade_food_options.length > 0) {
+      drawSectionHeader("Homemade");
+      drawBulletList(plan.homemade_food_options, "+");
+    }
+  }
+
+  // 7. Micronutrient Profile
+  if (
+    plan.micronutrient_profile &&
+    typeof plan.micronutrient_profile === "object" &&
+    Object.keys(plan.micronutrient_profile).length > 0
+  ) {
+    drawSectionHeader("Micronutrient Profile");
+    for (const [key, value] of Object.entries(plan.micronutrient_profile)) {
+      if (value === null || value === undefined || String(value).trim() === "") continue;
+      drawField(humanizeKey(key), String(value));
+    }
+    y += 2;
+  }
+
+  // 8. Breed Considerations
+  drawStringListSection(
+    "Breed Considerations",
+    plan.breed_specific_considerations,
+    "-",
+  );
+
+  // 9. Meal Timing
+  if (plan.meal_timing_guidance) {
+    drawSectionHeader("Meal Timing");
+    drawField("Feeding Frequency", plan.meal_timing_guidance?.feeding_frequency);
+    drawField("Meal Spacing", plan.meal_timing_guidance?.meal_spacing);
+    drawField("Bloat Precaution", plan.meal_timing_guidance?.bloat_precaution);
+  }
+
+  // 10. Portion & Calorie Guidance
+  if (plan.portion_and_calorie_guidance) {
+    drawSectionHeader("Portion & Calorie Guidance");
+    drawField("Portion Rule", plan.portion_and_calorie_guidance?.portion_rule);
+    drawField("Review Interval", plan.portion_and_calorie_guidance?.review_interval);
+    if (plan.portion_and_calorie_guidance?.calorie_adjustment) {
+      const items = Object.entries(
+        plan.portion_and_calorie_guidance.calorie_adjustment as Record<string, unknown>,
+      )
+        .map(([key, value]) => {
+          if (value === null || value === undefined || String(value).trim() === "") return null;
+          return `${humanizeKey(key)}: ${String(value)}`;
+        })
+        .filter(Boolean) as string[];
+      if (items.length > 0) {
+        drawSectionHeader("Calorie Adjustment");
+        drawBulletList(items, "-");
+      }
+    }
+  }
+
+  // 11. Supplement Guidance
+  drawKeyValueObject("Supplement Guidance", plan.supplement_guidance);
+
+  // 12. Food Safety
+  if (plan.food_safety) {
+    drawSectionHeader("Food Safety");
+    drawField("Treat Limit", plan.food_safety?.treat_limit);
+    drawStringListSection("Avoid Toxic Foods", plan.food_safety?.avoid_toxic_foods, "-");
+    drawStringListSection(
+      "Preparation Rules",
+      plan.food_safety?.preparation_rules,
+      "-",
+    );
+  }
+
+  // 13. Allergy & Sensitivity
+  drawKeyValueObject("Allergy & Sensitivity", plan.allergy_and_sensitivity_rules);
+
+  // 14. Transition Plan
+  drawKeyValueObject("Transition Plan", plan.transition_plan);
+
+  // 15. Monitoring
+  if (plan.monitoring_metrics) {
+    drawSectionHeader("Monitoring");
+    drawField("Body Condition Score", plan.monitoring_metrics?.body_condition_score);
+    drawField("Weight Tracking", plan.monitoring_metrics?.weight_tracking);
+    drawField("Stool Score", plan.monitoring_metrics?.stool_score);
+    drawStringListSection(
+      "Clinical Flags",
+      plan.monitoring_metrics?.clinical_flags,
+      "-",
+    );
+  }
+
+  // Glossary (for common abbreviations used in targets/guidance)
+  drawSectionHeader("Glossary");
+  drawBulletList(
+    [
+      "RER: Resting Energy Requirement (baseline calories needed at rest).",
+      "MER: Maintenance Energy Requirement (estimated daily calories to maintain body weight).",
+      "MER ~= 1.6 x RER means MER is estimated as 1.6 times RER (a common general multiplier; it may vary by age/activity/neuter status).",
+      "DM: Dry Matter (nutrition values expressed with water removed, used to compare foods with different moisture levels).",
+      "IU/kg DM: International Units per kilogram of dry matter.",
+      "EPA + DHA: Omega-3 fatty acids (eicosapentaenoic acid + docosahexaenoic acid). ~0.1-0.2% DM means the combined EPA + DHA target is about 0.1-0.2% of the diet on a dry-matter basis.",
+    ],
+    "-",
+  );
+
+  // Legacy fields (if present) for backward compatibility
   if (plan.Nutrition_Profile) {
-    drawSectionHeader("Nutrition Profile");
+    drawSectionHeader("Legacy Nutrition Profile");
     drawField("Protein Level", plan.Nutrition_Profile.Protein_Level);
     drawField("Fat Level", plan.Nutrition_Profile.Fat_Level);
     drawField("Carbohydrate Level", plan.Nutrition_Profile.Carb_Level);
-  }
-
-  if (plan.Feeding_Guidelines?.Portion_Control_Advice) {
-    drawSectionHeader("Feeding Guidelines");
-    doc.setTextColor(...mutedText);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    drawWrappedText(
-      plan.Feeding_Guidelines.Portion_Control_Advice,
-      margin + 10,
-      maxWidth - 16,
-      20,
-    );
-    y += 2;
-  }
-
-  if (
-    Array.isArray(plan.Recommended_Foods) &&
-    plan.Recommended_Foods.length > 0
-  ) {
-    drawSectionHeader("Recommended Foods");
-    drawBulletList(plan.Recommended_Foods, "+");
-  }
-
-  if (Array.isArray(plan.Foods_to_Avoid) && plan.Foods_to_Avoid.length > 0) {
-    drawSectionHeader("Foods to Avoid");
-    drawBulletList(plan.Foods_to_Avoid, "x");
-  }
-
-  if (plan.Exercise_Recommendation) {
-    drawSectionHeader("Exercise Recommendation");
-    doc.setTextColor(...mutedText);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    drawWrappedText(
-      plan.Exercise_Recommendation,
-      margin + 10,
-      maxWidth - 16,
-      20,
-    );
-    y += 2;
-  }
-
-  if (plan.Notes) {
-    drawSectionHeader("Important Notes");
-    doc.setTextColor(...mutedText);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    drawWrappedText(plan.Notes, margin + 10, maxWidth - 16, 20);
   }
 
   const totalPages = doc.getNumberOfPages();
