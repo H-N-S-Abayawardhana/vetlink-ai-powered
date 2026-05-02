@@ -69,6 +69,8 @@ function FindFromPrescriptionModule() {
       delivery_available: boolean;
       delivery_fee: number;
       matched_via_generic?: boolean;
+      matched_via_alternative?: boolean;
+      alternative_for?: string;
     }>
   >([]);
   const [loadingPharmacies, setLoadingPharmacies] = useState(false);
@@ -287,10 +289,15 @@ function FindFromPrescriptionModule() {
         const genericCount = products.filter(
           (p: { matched_via_generic?: boolean }) => p.matched_via_generic,
         ).length;
+        const alternativeCount = products.filter(
+          (p: { matched_via_alternative?: boolean }) => p.matched_via_alternative,
+        ).length;
         setSuccess(
-          genericCount > 0
-            ? `Found ${products.length} product${products.length > 1 ? "s" : ""} (${genericCount} matched via generic name lookup).`
-            : `Found ${products.length} matching product${products.length > 1 ? "s" : ""}.`,
+          alternativeCount > 0
+            ? `Found ${products.length} product${products.length > 1 ? "s" : ""} (${alternativeCount} alternative suggestion${alternativeCount > 1 ? "s" : ""}, ${genericCount} generic match${genericCount === 1 ? "" : "es"}).`
+            : genericCount > 0
+              ? `Found ${products.length} product${products.length > 1 ? "s" : ""} (${genericCount} matched via generic name lookup).`
+              : `Found ${products.length} matching product${products.length > 1 ? "s" : ""}.`,
         );
       }
     } catch (err) {
@@ -644,6 +651,11 @@ function FindFromPrescriptionModule() {
                                 Matched via generic lookup
                               </span>
                             )}
+                            {product.matched_via_alternative && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                                Alternative suggestion
+                              </span>
+                            )}
                           </div>
                           {product.generic_name ? (
                             <p className="text-xs text-gray-500 mt-0.5">
@@ -866,6 +878,11 @@ function FindFromPrescriptionModule() {
                                   {product.matched_via_generic && (
                                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-100 text-violet-800">
                                       Matched via generic lookup
+                                    </span>
+                                  )}
+                                  {product.matched_via_alternative && (
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                                      Alternative suggestion
                                     </span>
                                   )}
                                 </div>
