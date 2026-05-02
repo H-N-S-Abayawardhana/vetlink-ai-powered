@@ -27,6 +27,8 @@ interface InventoryItem {
   expiry?: string | null;
   price: number;
   image_url?: string | null;
+  /** INN / generic name for prescription matching */
+  generic_name?: string;
 }
 
 export default function PharmacyInventoryPage() {
@@ -118,7 +120,8 @@ export default function PharmacyInventoryPage() {
           (item) =>
             item.name.toLowerCase().includes(query) ||
             item.form.toLowerCase().includes(query) ||
-            (item.strength || "").toLowerCase().includes(query),
+            (item.strength || "").toLowerCase().includes(query) ||
+            (item.generic_name || "").toLowerCase().includes(query),
         ),
       );
     }
@@ -298,7 +301,7 @@ export default function PharmacyInventoryPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by name, form, or strength..."
+                  placeholder="Search by name, generic, form, or strength..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
@@ -334,6 +337,9 @@ export default function PharmacyInventoryPage() {
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Item Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Generic name
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Form & Strength
@@ -373,6 +379,11 @@ export default function PharmacyInventoryPage() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="font-semibold text-gray-900">
                               {item.name}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap max-w-[140px]">
+                            <div className="text-sm text-gray-600 truncate" title={item.generic_name || ""}>
+                              {item.generic_name?.trim() || "—"}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -481,6 +492,7 @@ function InventoryItemModal({
 }) {
   const [formData, setFormData] = useState({
     name: "",
+    generic_name: "",
     form: "",
     strength: "",
     stock: 0,
@@ -496,6 +508,7 @@ function InventoryItemModal({
     if (item) {
       setFormData({
         name: item.name,
+        generic_name: item.generic_name || "",
         form: item.form,
         strength: item.strength || "",
         stock: item.stock,
@@ -507,6 +520,7 @@ function InventoryItemModal({
     } else {
       setFormData({
         name: "",
+        generic_name: "",
         form: "",
         strength: "",
         stock: 0,
@@ -567,6 +581,7 @@ function InventoryItemModal({
         method = "PUT";
         const payload = {
           name: formData.name,
+          generic_name: formData.generic_name.trim() || null,
           form: formData.form,
           strength: formData.strength || null,
           stock: Number(formData.stock),
@@ -590,6 +605,9 @@ function InventoryItemModal({
       // Add new item: use FormData so we can send image to S3
       const form = new FormData();
       form.append("name", formData.name);
+      if (formData.generic_name.trim()) {
+        form.append("generic_name", formData.generic_name.trim());
+      }
       form.append("form", formData.form);
       form.append("strength", formData.strength);
       form.append("stock", String(formData.stock));
@@ -657,6 +675,26 @@ function InventoryItemModal({
               className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
               placeholder="e.g., Amoxicillin"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Generic name (INN){" "}
+              <span className="text-gray-400 font-normal">optional</span>
+            </label>
+            <input
+              type="text"
+              value={formData.generic_name}
+              onChange={(e) =>
+                setFormData({ ...formData, generic_name: e.target.value })
+              }
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-50/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white"
+              placeholder="Leave blank to auto-fill when saving (uses OpenAI / Google if configured)"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Used to match prescriptions written with the generic or a brand
+              name. New items auto-resolve if left empty and OpenAI is configured.
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
