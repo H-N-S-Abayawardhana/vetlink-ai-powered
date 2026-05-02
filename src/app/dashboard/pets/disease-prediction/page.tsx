@@ -5,8 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { listPets, type Pet } from "@/lib/pets";
-import DiseasePredictionForm from "@/components/dashboard/bcs/DiseasePredictionForm";
-import DiseasePredictionResults from "@/components/dashboard/bcs/DiseasePredictionResults";
+import DiseasePredictionForm from "@/components/dashboard/disease-predict/DiseasePredictionForm";
+import DiseasePredictionResults from "@/components/dashboard/disease-predict/DiseasePredictionResults";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import type {
   DiseasePredictionFormState,
