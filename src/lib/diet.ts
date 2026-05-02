@@ -136,30 +136,43 @@ export function estimateLifeStage(ageYears?: number | null): LifeStage {
 }
 
 /**
- * Maps prediction values to knowledge base diet categories
+ * Maps model diet-type-like values to knowledge base diet keys.
+ *
+ * Note: `calorie_level` predictions are typically "Low/Medium/High" and should
+ * not be used to select the knowledge-base diet plan.
  */
-function mapCalorieLevel(calorieLevel: string | null): string | null {
-  if (!calorieLevel) return null;
-  const normalized = calorieLevel.toLowerCase().trim();
+function mapDietTypeToKbKey(value: string | null): string | null {
+  if (!value) return null;
+  const normalized = value.toLowerCase().trim();
 
-  // Map variations to standard Diet_Type categories in knowledge base
-  if (normalized.includes("maintenance") || normalized.includes("normal")) {
-    return "Maintenance";
-  }
-  if (normalized.includes("weight loss") || normalized.includes("loss")) {
+  if (
+    (normalized.includes("weight") && normalized.includes("loss")) ||
+    normalized.includes("lose weight") ||
+    normalized.includes("reduce") ||
+    normalized.includes("slim")
+  ) {
     return "Weight Loss";
   }
-  if (normalized.includes("weight gain") || normalized.includes("gain")) {
+  if (
+    (normalized.includes("weight") && normalized.includes("gain")) ||
+    normalized.includes("gain weight") ||
+    normalized.includes("bulking") ||
+    normalized.includes("muscle")
+  ) {
     return "Weight Gain";
   }
   if (normalized.includes("puppy") || normalized.includes("growth")) {
     return "Puppy Diet";
   }
-  if (normalized.includes("senior") || normalized.includes("elderly")) {
+  if (normalized.includes("senior") || normalized.includes("elder")) {
     return "Senior Diet";
   }
+  if (normalized.includes("maintenance") || normalized.includes("normal")) {
+    return "Maintenance";
+  }
 
-  return calorieLevel; // Return as-is if no mapping found
+  // If the model already returns a KB key, keep it as-is.
+  return value;
 }
 
 /**
@@ -189,16 +202,14 @@ function findMatchingDiet(
   const diets = breedData?.diets;
   if (!breedData || !diets || typeof diets !== "object") return null;
 
-  const mappedCalorieLevel = mapCalorieLevel(
-    predictions?.calorie_level || null,
-  );
+  const mappedDietType = mapDietTypeToKbKey(predictions?.diet_type || null);
 
   const inferredLifeStage =
     input.lifeStage || estimateLifeStage(input.ageYears);
   const bcsCategory = bcsCategoryFromScore(input.bcs);
 
   const inferredDietType =
-    mappedCalorieLevel ||
+    mappedDietType ||
     (inferredLifeStage === "puppy"
       ? "Puppy Diet"
       : inferredLifeStage === "senior"

@@ -572,17 +572,29 @@ export default function DietPage() {
           {(plan.kbDietType || plan.Diet_Type) && (
             <div className="space-y-4 sm:space-y-6">
               <SectionCard title="Plan Overview">
+                {(() => {
+                  const dietType = String(
+                    plan.kbDietType || plan.Diet_Type || "",
+                  ).toLowerCase();
+                  const showBwNote =
+                    dietType.includes("weight loss") ||
+                    dietType.includes("weight gain");
+
+                  return (
+                    <>
                 <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
                   Diet type: {plan.kbDietType || plan.Diet_Type}
                 </div>
 
+                      {showBwNote && (
+                        <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                          Note: In the energy/calorie formulas, <span className="font-semibold">BW</span> refers to the <span className="font-semibold">target body weight</span>.
+                        </div>
+                      )}
+
                 {(plan.meals_per_day ||
                   plan.energy_kcal ||
-                  plan.hydration ||
-                  plan.breed_size_category ||
-                  plan.reference_body_weight_kg ||
-                  plan.total_daily_amount_g ||
-                  plan.total_daily_amount_g_per_kg_body_weight) && (
+                  plan.hydration) && (
                   <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {plan.meals_per_day && (
                       <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
@@ -592,18 +604,6 @@ export default function DietPage() {
 
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.meals_per_day}
-                        </p>
-                      </div>
-                    )}
-
-                    {plan.breed_size_category && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          Breed size
-                        </p>
-
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.breed_size_category}
                         </p>
                       </div>
                     )}
@@ -659,81 +659,11 @@ export default function DietPage() {
                         </p>
                       </div>
                     )}
-
-                    {plan.reference_body_weight_kg != null && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <p
-                          className="text-[11px] font-semibold uppercase tracking-wide text-gray-500"
-                          title="Pet’s current weight from the database used to scale g/kg amounts into grams."
-                        >
-                          Weight used
-                        </p>
-
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.reference_body_weight_kg} kg
-                        </p>
-                      </div>
-                    )}
-
-                    {plan.total_daily_amount_g != null && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                            Total / day
-                          </p>
-
-                          {tooltipForPlanOverview("total_daily_amount_g") && (
-                            <InfoTooltipButton
-                              id="plan-total-day"
-                              text={
-                                tooltipForPlanOverview(
-                                  "total_daily_amount_g",
-                                ) as string
-                              }
-                              openId={openTooltipId}
-                              setOpenId={setOpenTooltipId}
-                              tone="gray"
-                            />
-                          )}
-                        </div>
-
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.total_daily_amount_g} g
-                        </p>
-                      </div>
-                    )}
-
-                    {plan.total_daily_amount_g_per_kg_body_weight != null && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                            Total / day (g/kg)
-                          </p>
-
-                          {tooltipForPlanOverview(
-                            "total_daily_amount_g_per_kg_body_weight",
-                          ) && (
-                            <InfoTooltipButton
-                              id="plan-total-day-perkg"
-                              text={
-                                tooltipForPlanOverview(
-                                  "total_daily_amount_g_per_kg_body_weight",
-                                ) as string
-                              }
-                              openId={openTooltipId}
-                              setOpenId={setOpenTooltipId}
-                              tone="gray"
-                            />
-                          )}
-                        </div>
-
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.total_daily_amount_g_per_kg_body_weight}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 )}
+                    </>
+                  );
+                })()}
               </SectionCard>
 
               {(plan.diet_goal || plan.life_stage_or_goal) && (
@@ -824,10 +754,6 @@ export default function DietPage() {
                             </th>
 
                             <th className="px-4 py-3 text-left font-medium">
-                              Role
-                            </th>
-
-                            <th className="px-4 py-3 text-left font-medium">
                               Amount (g)
                             </th>
 
@@ -847,10 +773,6 @@ export default function DietPage() {
                             <tr key={idx} className="bg-white">
                               <td className="px-4 py-3 text-gray-900">
                                 {item?.food_item || "-"}
-                              </td>
-
-                              <td className="px-4 py-3 text-gray-700">
-                                {item?.role || "-"}
                               </td>
 
                               <td className="px-4 py-3 text-gray-700">
