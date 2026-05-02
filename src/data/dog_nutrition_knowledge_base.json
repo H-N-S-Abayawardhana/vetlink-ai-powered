@@ -2124,9 +2124,7 @@
     {
       "breed": "Poodle",
       "breed_size_category": "medium",
-      "breed_specific_considerations": [
-        "skin/GI sensitivity possible"
-      ],
+      "breed_specific_considerations": ["skin/GI sensitivity possible"],
       "diets": {
         "Maintenance": {
           "dietary_recommendations": "Medium-sized maintenance diet rich in high-quality protein. Poodles often have sensitive skin/gastrointestinal issues, so novel or hydrolyzed proteins may be beneficial for intolerances. Maintain lean body weight through controlled feeding.",
@@ -2190,9 +2188,7 @@
           "diet_goal": "maintain ideal body condition and stable energy",
           "life_stage_or_goal": "Maintenance",
           "breed_size_category": "medium",
-          "breed_specific_considerations": [
-            "skin/GI sensitivity possible"
-          ],
+          "breed_specific_considerations": ["skin/GI sensitivity possible"],
           "portion_and_calorie_guidance": {
             "calorie_adjustment": {
               "low": "Use smaller food portions and lower-fat ingredients.",
@@ -2325,9 +2321,7 @@
           "diet_goal": "reduce body fat while preserving lean muscle",
           "life_stage_or_goal": "Weight Loss",
           "breed_size_category": "medium",
-          "breed_specific_considerations": [
-            "skin/GI sensitivity possible"
-          ],
+          "breed_specific_considerations": ["skin/GI sensitivity possible"],
           "portion_and_calorie_guidance": {
             "calorie_adjustment": {
               "low": "Use smaller food portions and lower-fat ingredients.",
@@ -2460,9 +2454,7 @@
           "diet_goal": "increase weight gradually with lean mass focus",
           "life_stage_or_goal": "Weight Gain",
           "breed_size_category": "medium",
-          "breed_specific_considerations": [
-            "skin/GI sensitivity possible"
-          ],
+          "breed_specific_considerations": ["skin/GI sensitivity possible"],
           "portion_and_calorie_guidance": {
             "calorie_adjustment": {
               "low": "Use smaller food portions and lower-fat ingredients.",
@@ -2598,9 +2590,7 @@
           "diet_goal": "support safe growth and development",
           "life_stage_or_goal": "Puppy Diet",
           "breed_size_category": "medium",
-          "breed_specific_considerations": [
-            "skin/GI sensitivity possible"
-          ],
+          "breed_specific_considerations": ["skin/GI sensitivity possible"],
           "portion_and_calorie_guidance": {
             "calorie_adjustment": {
               "low": "Use smaller food portions and lower-fat ingredients.",
@@ -2736,9 +2726,7 @@
           "diet_goal": "support aging, digestion, and joint health",
           "life_stage_or_goal": "Senior Diet",
           "breed_size_category": "medium",
-          "breed_specific_considerations": [
-            "skin/GI sensitivity possible"
-          ],
+          "breed_specific_considerations": ["skin/GI sensitivity possible"],
           "portion_and_calorie_guidance": {
             "calorie_adjustment": {
               "low": "Use smaller food portions and lower-fat ingredients.",
@@ -4206,9 +4194,7 @@
     {
       "breed": "Dachshund",
       "breed_size_category": "small",
-      "breed_specific_considerations": [
-        "spine/back stress from excess weight"
-      ],
+      "breed_specific_considerations": ["spine/back stress from excess weight"],
       "diets": {
         "Maintenance": {
           "dietary_recommendations": "Small-breed maintenance diet focusing on lean muscle and spine health. Dachshunds have low tolerance for excess weight due to back concerns; emphasize lean protein and fiber.",
@@ -11868,9 +11854,7 @@
     {
       "breed": "Rhodesian Ridgeback",
       "breed_size_category": "large",
-      "breed_specific_considerations": [
-        "athletic breed; monitor energy needs"
-      ],
+      "breed_specific_considerations": ["athletic breed; monitor energy needs"],
       "diets": {
         "Maintenance": {
           "dietary_recommendations": "Large, athletic breed; needs protein-rich diet (novel or lean proteins) to maintain muscle, moderate fat, joint-supporting nutrients (glucosamine, omega-3).",

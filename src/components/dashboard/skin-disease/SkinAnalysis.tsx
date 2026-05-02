@@ -12,7 +12,7 @@ import CameraCapture from "./CameraCapture";
 import AnalyzingPopup from "./AnalyzingPopup";
 import AIGuidanceCards, { AIGuidanceCardsRef } from "./AIGuidanceCards";
 import HealthySkinCard, { HealthySkinCardRef } from "./HealthySkinCard";
-import jsPDF from "jspdf";
+import { generateSkinDiseaseReportPdf } from "@/lib/skin-disease-report-pdf";
 
 interface SkinAnalysisProps {
   selectedPet?: Pet | null;
@@ -270,296 +270,62 @@ export default function SkinAnalysis({
     if (!prediction?.prediction || !selectedImage) return;
 
     try {
-      const doc = new jsPDF();
-      let yPos = 20;
-
-      try {
-        const logoResponse = await fetch("/vetlink_logo.png", {
-          cache: "no-cache",
-        });
-        if (logoResponse.ok) {
-          const logoBlob = await logoResponse.blob();
-          const logoUrl = URL.createObjectURL(logoBlob);
-          const img = new Image();
-          img.src = logoUrl;
-          await new Promise((resolve) => {
-            img.onload = () => {
-              doc.addImage(img, "PNG", 14, yPos, 30, 10);
-              resolve(null);
-            };
-            img.onerror = () => resolve(null);
-          });
-          URL.revokeObjectURL(logoUrl);
-        }
-      } catch (e) {
-        console.error("Error loading logo:", e);
-      }
-
-      doc.setFontSize(18);
-      doc.setTextColor(37, 99, 235);
-      doc.text("VETLINK - Smart Pet Health Care", 50, yPos + 6);
-      yPos += 20;
-
-      doc.setFontSize(16);
-      doc.setTextColor(0, 0, 0);
-      doc.text("Skin Disease Detection Report", 14, yPos);
-      yPos += 10;
-
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      const scanDate = new Date().toLocaleString();
-      doc.text(`Scan Date & Time: ${scanDate}`, 14, yPos);
-      yPos += 8;
-
-      // Pet details (if available)
-      if (selectedPet) {
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text("Pet Details:", 14, yPos);
-        yPos += 6;
-        doc.setFontSize(10);
-        doc.text(`Name: ${selectedPet.name}`, 20, yPos);
-        yPos += 5;
-        if (selectedPet.breed) {
-          doc.text(`Breed: ${selectedPet.breed}`, 20, yPos);
-          yPos += 5;
-        }
-        if (selectedPet.ageYears != null) {
-          doc.text(
-            `Age: ${selectedPet.ageYears} ${selectedPet.ageYears === 1 ? "year" : "years"}`,
-            20,
-            yPos,
-          );
-          yPos += 5;
-        }
-        yPos += 3;
-      }
-
-      // Detection Results
-      doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0);
-      doc.text("Detection Results:", 14, yPos);
-      yPos += 6;
-
-      doc.setFontSize(11);
-      doc.setTextColor(37, 99, 235); // Blue
-      const diseaseName =
+      const diseaseDisplay =
         prediction.prediction.parsed?.disease ||
         formatDiseaseName(prediction.prediction.disease);
-      doc.text(`Detected Condition: ${diseaseName}`, 20, yPos);
-      yPos += 6;
 
-      // Severity
-      if (prediction.prediction.parsed?.severity) {
-        const severity = prediction.prediction.parsed.severity;
-        const isSevere = severity === "severe";
-        if (isSevere) {
-          doc.setTextColor(220, 38, 38);
-        } else {
-          doc.setTextColor(202, 138, 4);
-        }
-        doc.text(
-          `Severity Level: ${severity.charAt(0).toUpperCase() + severity.slice(1)}`,
-          20,
-          yPos,
-        );
-        yPos += 6;
-      }
+      const severityLabel = prediction.prediction.parsed?.severity
+        ? prediction.prediction.parsed.severity.charAt(0).toUpperCase() +
+          prediction.prediction.parsed.severity.slice(1)
+        : null;
 
-      // Confidence
-      doc.setTextColor(0, 0, 0);
-      doc.text(
-        `Confidence Level: ${(prediction.prediction.confidence * 100).toFixed(1)}%`,
-        20,
-        yPos,
-      );
-      yPos += 10;
+      const cardTitles: Record<string, string> = {
+        disease_info: "What is this disease?",
+        stage_meaning: `What does ${prediction.prediction.parsed?.severity || "this stage"} mean?`,
+        care_tips: "Basic care tips",
+      };
 
-      // XAI: Why the AI said this
-      if (xaiExplanation && xaiExplanation.trim()) {
-        if (yPos > 250) {
-          doc.addPage();
-          yPos = 20;
-        }
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text("Why the AI said this:", 14, yPos);
-        yPos += 6;
-        doc.setFontSize(9);
-        doc.setTextColor(60, 60, 60);
-        const xaiLines = doc.splitTextToSize(xaiExplanation.trim(), 180);
-        xaiLines.forEach((line: string) => {
-          if (yPos > 280) {
-            doc.addPage();
-            yPos = 20;
-          }
-          doc.text(line, 20, yPos);
-          yPos += 5;
-        });
-        yPos += 6;
-      }
-
-      // Affected Image
-      if (selectedImage) {
-        try {
-          const img = new Image();
-          img.src = selectedImage;
-          await new Promise((resolve) => {
-            img.onload = () => {
-              const imgWidth = 80;
-              const imgHeight = (img.height * imgWidth) / img.width;
-              if (yPos + imgHeight > 250) {
-                doc.addPage();
-                yPos = 20;
-              }
-              doc.setFontSize(10);
-              doc.setTextColor(0, 0, 0);
-              doc.text("Affected Image:", 14, yPos);
-              yPos += 5;
-              doc.addImage(img, "JPEG", 14, yPos, imgWidth, imgHeight);
-              yPos += imgHeight + 10;
-              resolve(null);
-            };
-            img.onerror = () => resolve(null);
-          });
-        } catch (e) {
-          console.error("Error adding image:", e);
-        }
-      }
-
-      // Saliency (XAI) heatmap when available
-      const xaiHeatmapUrl = prediction.xaiHeatmapDataUrl;
-      if (xaiHeatmapUrl) {
-        try {
-          const heatmapImg = new Image();
-          heatmapImg.src = xaiHeatmapUrl;
-          await new Promise((resolve) => {
-            heatmapImg.onload = () => {
-              const imgWidth = 80;
-              const imgHeight =
-                (heatmapImg.height * imgWidth) / heatmapImg.width;
-              if (yPos + imgHeight > 250) {
-                doc.addPage();
-                yPos = 20;
-              }
-              doc.setFontSize(10);
-              doc.setTextColor(0, 0, 0);
-              doc.text("Saliency (XAI) – where the model looked:", 14, yPos);
-              yPos += 5;
-              const fmt = xaiHeatmapUrl.startsWith("data:image/png")
-                ? "PNG"
-                : "JPEG";
-              doc.addImage(heatmapImg, fmt, 14, yPos, imgWidth, imgHeight);
-              yPos += imgHeight + 10;
-              resolve(null);
-            };
-            heatmapImg.onerror = () => resolve(null);
-          });
-        } catch (e) {
-          console.error("Error adding saliency image:", e);
-        }
-      }
-
-      // AI Health Assistant
+      const guidanceSections: { title: string; body: string }[] = [];
       if (guidanceCardsRef.current) {
         const cardContents = guidanceCardsRef.current.getCardContents();
-        const hasGuidance = Object.values(cardContents).some(
-          (content) => content.fullText,
-        );
-
-        if (hasGuidance) {
-          if (yPos > 250) {
-            doc.addPage();
-            yPos = 20;
+        Object.entries(cardContents).forEach(([cardType, content]) => {
+          if (content.fullText?.trim()) {
+            guidanceSections.push({
+              title: cardTitles[cardType] || cardType.replace(/_/g, " "),
+              body: content.fullText.trim(),
+            });
           }
-
-          doc.setFontSize(12);
-          doc.setTextColor(0, 0, 0);
-          doc.text("AI Health Assistant:", 14, yPos);
-          yPos += 8;
-
-          doc.setFontSize(10);
-          const cardTitles: Record<string, string> = {
-            disease_info: "What is this disease?",
-            stage_meaning: `What does ${prediction.prediction.parsed?.severity || "Mild"} mean?`,
-            care_tips: "Basic care tips",
-          };
-
-          Object.entries(cardContents).forEach(([cardType, content]) => {
-            if (content.fullText) {
-              if (yPos > 250) {
-                doc.addPage();
-                yPos = 20;
-              }
-
-              doc.setFontSize(11);
-              doc.setTextColor(37, 99, 235);
-              doc.text(cardTitles[cardType] || cardType, 20, yPos);
-              yPos += 6;
-
-              doc.setFontSize(9);
-              doc.setTextColor(0, 0, 0);
-              const lines = doc.splitTextToSize(content.fullText, 180);
-              lines.forEach((line: string) => {
-                if (yPos > 280) {
-                  doc.addPage();
-                  yPos = 20;
-                }
-                doc.text(line, 20, yPos);
-                yPos += 5;
-              });
-              yPos += 3;
-            }
-          });
-        }
+        });
       }
 
-      // Healthy Skin Care Card
+      let healthySkinSection: { title: string; body: string } | null = null;
       if (healthySkinCardRef.current) {
         const healthyContent = healthySkinCardRef.current.getContent();
-        if (healthyContent.fullText) {
-          if (yPos > 250) {
-            doc.addPage();
-            yPos = 20;
-          }
-
-          doc.setFontSize(12);
-          doc.setTextColor(0, 0, 0);
-          doc.text("AI Health Assistant:", 14, yPos);
-          yPos += 8;
-
-          doc.setFontSize(11);
-          doc.setTextColor(37, 99, 235);
-          doc.text("How to Keep Your Dog's Skin Healthy", 20, yPos);
-          yPos += 6;
-
-          doc.setFontSize(9);
-          doc.setTextColor(0, 0, 0);
-          const lines = doc.splitTextToSize(healthyContent.fullText, 180);
-          lines.forEach((line: string) => {
-            if (yPos > 280) {
-              doc.addPage();
-              yPos = 20;
-            }
-            doc.text(line, 20, yPos);
-            yPos += 5;
-          });
-          yPos += 3;
+        if (healthyContent.fullText?.trim()) {
+          healthySkinSection = {
+            title: "Keeping your dog's skin healthy",
+            body: healthyContent.fullText.trim(),
+          };
         }
       }
 
-      // Footer
-      const pageCount = doc.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: "center" });
-      }
-
-      // Download the report as a PDF file
-      const fileName = `Skin_Disease_Report_${new Date().toISOString().split("T")[0]}.pdf`;
-      doc.save(fileName);
+      await generateSkinDiseaseReportPdf({
+        pet: selectedPet
+          ? {
+              name: selectedPet.name,
+              breed: selectedPet.breed,
+              ageYears: selectedPet.ageYears,
+            }
+          : null,
+        diseaseDisplay,
+        severityLabel,
+        confidence: prediction.prediction.confidence,
+        xaiExplanation: xaiExplanation?.trim() ?? null,
+        clinicalImageDataUrl: selectedImage,
+        saliencyImageDataUrl: prediction.xaiHeatmapDataUrl ?? null,
+        guidanceSections,
+        healthySkinSection,
+      });
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Failed to generate report. Please try again.");

@@ -74,10 +74,14 @@ function tooltipForText(text: string): string | undefined {
     );
   }
   if (/\bkcal\b/i.test(t)) {
-    parts.push("kcal = kilocalories (unit used to measure energy/calories in food).");
+    parts.push(
+      "kcal = kilocalories (unit used to measure energy/calories in food).",
+    );
   }
   if (/\bad\s*lib\b/i.test(t)) {
-    parts.push("ad lib (ad libitum) means freely available; dog can drink/eat anytime.");
+    parts.push(
+      "ad lib (ad libitum) means freely available; dog can drink/eat anytime.",
+    );
   }
   if (/mL\s*\/\s*kg\s*\/\s*day/i.test(t)) {
     parts.push("mL/kg/day means milliliters per kg body weight per day.");
@@ -88,7 +92,7 @@ function tooltipForText(text: string): string | undefined {
     );
   }
   if (/kcal\s*\/\s*100\s*g/i.test(t)) {
-    parts.push("kcal/100 g is energy density (kilocalories per 100 grams)." );
+    parts.push("kcal/100 g is energy density (kilocalories per 100 grams).");
   }
 
   return parts.length > 0 ? parts.join(" ") : undefined;
@@ -159,7 +163,8 @@ function InfoTooltipButton({
 }) {
   const isOpen = openId === id;
   const iconClass = tone === "purple" ? "text-purple-400" : "text-gray-400";
-  const ringClass = tone === "purple" ? "focus:ring-purple-200" : "focus:ring-blue-200";
+  const ringClass =
+    tone === "purple" ? "focus:ring-purple-200" : "focus:ring-blue-200";
 
   return (
     <span data-tooltip-root className="relative inline-flex items-center">
@@ -300,28 +305,29 @@ export default function DietPage() {
 
   const hasKbDetails = Boolean(
     plan?.dietary_recommendations ||
-      (plan?.nutrition_targets && Object.keys(plan.nutrition_targets).length > 0) ||
-      (Array.isArray(plan?.feeding_plan) && plan.feeding_plan.length > 0) ||
-      (plan?.micronutrient_profile &&
-        Object.keys(plan.micronutrient_profile).length > 0) ||
-      (Array.isArray(plan?.commercial_food_options) &&
-        plan.commercial_food_options.length > 0) ||
-      (Array.isArray(plan?.homemade_food_options) &&
-        plan.homemade_food_options.length > 0) ||
-      (Array.isArray(plan?.breed_specific_considerations) &&
-        plan.breed_specific_considerations.length > 0) ||
-      plan?.portion_and_calorie_guidance ||
-      plan?.meal_timing_guidance ||
-      plan?.food_safety ||
-      plan?.allergy_and_sensitivity_rules ||
-      plan?.supplement_guidance ||
-      plan?.transition_plan ||
-      plan?.monitoring_metrics ||
-      plan?.reference_body_weight_kg ||
-      plan?.total_daily_amount_g ||
-      plan?.total_daily_amount_g_per_kg_body_weight ||
-      (Array.isArray(plan?.veterinary_review_required_for) &&
-        plan.veterinary_review_required_for.length > 0),
+    (plan?.nutrition_targets &&
+      Object.keys(plan.nutrition_targets).length > 0) ||
+    (Array.isArray(plan?.feeding_plan) && plan.feeding_plan.length > 0) ||
+    (plan?.micronutrient_profile &&
+      Object.keys(plan.micronutrient_profile).length > 0) ||
+    (Array.isArray(plan?.commercial_food_options) &&
+      plan.commercial_food_options.length > 0) ||
+    (Array.isArray(plan?.homemade_food_options) &&
+      plan.homemade_food_options.length > 0) ||
+    (Array.isArray(plan?.breed_specific_considerations) &&
+      plan.breed_specific_considerations.length > 0) ||
+    plan?.portion_and_calorie_guidance ||
+    plan?.meal_timing_guidance ||
+    plan?.food_safety ||
+    plan?.allergy_and_sensitivity_rules ||
+    plan?.supplement_guidance ||
+    plan?.transition_plan ||
+    plan?.monitoring_metrics ||
+    plan?.reference_body_weight_kg ||
+    plan?.total_daily_amount_g ||
+    plan?.total_daily_amount_g_per_kg_body_weight ||
+    (Array.isArray(plan?.veterinary_review_required_for) &&
+      plan.veterinary_review_required_for.length > 0),
   );
 
   return (
@@ -564,7 +570,9 @@ export default function DietPage() {
                           {tooltipForPlanOverview("energy_kcal") && (
                             <InfoTooltipButton
                               id="plan-energy"
-                              text={tooltipForPlanOverview("energy_kcal") as string}
+                              text={
+                                tooltipForPlanOverview("energy_kcal") as string
+                              }
                               openId={openTooltipId}
                               setOpenId={setOpenTooltipId}
                               tone="gray"
@@ -585,7 +593,9 @@ export default function DietPage() {
                           {tooltipForPlanOverview("hydration") && (
                             <InfoTooltipButton
                               id="plan-hydration"
-                              text={tooltipForPlanOverview("hydration") as string}
+                              text={
+                                tooltipForPlanOverview("hydration") as string
+                              }
                               openId={openTooltipId}
                               setOpenId={setOpenTooltipId}
                               tone="gray"
@@ -619,7 +629,11 @@ export default function DietPage() {
                           {tooltipForPlanOverview("total_daily_amount_g") && (
                             <InfoTooltipButton
                               id="plan-total-day"
-                              text={tooltipForPlanOverview("total_daily_amount_g") as string}
+                              text={
+                                tooltipForPlanOverview(
+                                  "total_daily_amount_g",
+                                ) as string
+                              }
                               openId={openTooltipId}
                               setOpenId={setOpenTooltipId}
                               tone="gray"
@@ -737,59 +751,60 @@ export default function DietPage() {
               )}
 
               {/* 5. Feeding Plan */}
-              {Array.isArray(plan.feeding_plan) && plan.feeding_plan.length > 0 && (
-                <SectionCard title="Feeding Plan">
-                  <div className="overflow-x-auto rounded-lg border border-gray-200">
-                    <table className="min-w-full text-sm">
-                      <thead className="bg-gray-50 text-gray-600">
-                        <tr>
-                          <th className="px-4 py-3 text-left font-medium">
-                            Food
-                          </th>
-                          <th className="px-4 py-3 text-left font-medium">
-                            Role
-                          </th>
-                          <th className="px-4 py-3 text-left font-medium">
-                            Amount (g)
-                          </th>
-                          <th
-                            className="px-4 py-3 text-left font-medium"
-                            title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight)."
-                          >
-                            g/kg BW
-                          </th>
-                          <th className="px-4 py-3 text-left font-medium">
-                            Calories
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {(plan.feeding_plan as any[]).map((item, idx) => (
-                          <tr key={idx} className="bg-white">
-                            <td className="px-4 py-3 text-gray-900">
-                              {item?.food_item || "-"}
-                            </td>
-                            <td className="px-4 py-3 text-gray-700">
-                              {item?.role || "-"}
-                            </td>
-                            <td className="px-4 py-3 text-gray-700">
-                              {item?.amount_g ?? "-"}
-                            </td>
-                            <td className="px-4 py-3 text-gray-700">
-                              <span title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight).">
-                                {item?.amount_g_per_kg_body_weight ?? "-"}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-gray-700">
-                              {item?.calories ?? "-"}
-                            </td>
+              {Array.isArray(plan.feeding_plan) &&
+                plan.feeding_plan.length > 0 && (
+                  <SectionCard title="Feeding Plan">
+                    <div className="overflow-x-auto rounded-lg border border-gray-200">
+                      <table className="min-w-full text-sm">
+                        <thead className="bg-gray-50 text-gray-600">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-medium">
+                              Food
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium">
+                              Role
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium">
+                              Amount (g)
+                            </th>
+                            <th
+                              className="px-4 py-3 text-left font-medium"
+                              title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight)."
+                            >
+                              g/kg BW
+                            </th>
+                            <th className="px-4 py-3 text-left font-medium">
+                              Calories
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </SectionCard>
-              )}
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {(plan.feeding_plan as any[]).map((item, idx) => (
+                            <tr key={idx} className="bg-white">
+                              <td className="px-4 py-3 text-gray-900">
+                                {item?.food_item || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-700">
+                                {item?.role || "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-700">
+                                {item?.amount_g ?? "-"}
+                              </td>
+                              <td className="px-4 py-3 text-gray-700">
+                                <span title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight).">
+                                  {item?.amount_g_per_kg_body_weight ?? "-"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-gray-700">
+                                {item?.calories ?? "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </SectionCard>
+                )}
 
               {/* 6. Food Options */}
               {(Array.isArray(plan.commercial_food_options) &&
@@ -943,7 +958,10 @@ export default function DietPage() {
                               Review interval
                             </p>
                             <p className="mt-1">
-                              {plan.portion_and_calorie_guidance.review_interval}
+                              {
+                                plan.portion_and_calorie_guidance
+                                  .review_interval
+                              }
                             </p>
                           </div>
                         )}
@@ -967,9 +985,7 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-900">
                           {humanizeKey(key)}
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {value}
-                        </p>
+                        <p className="mt-1 text-sm text-gray-900">{value}</p>
                       </div>
                     ))}
                   </div>
@@ -1040,7 +1056,10 @@ export default function DietPage() {
                 <SectionCard title="Allergy & Sensitivity">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {Object.entries(
-                      plan.allergy_and_sensitivity_rules as Record<string, string>,
+                      plan.allergy_and_sensitivity_rules as Record<
+                        string,
+                        string
+                      >,
                     ).map(([key, value]) => (
                       <div
                         key={key}
@@ -1049,9 +1068,7 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           {humanizeKey(key)}
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {value}
-                        </p>
+                        <p className="mt-1 text-sm text-gray-900">{value}</p>
                       </div>
                     ))}
                   </div>
@@ -1062,19 +1079,19 @@ export default function DietPage() {
               {plan.transition_plan && (
                 <SectionCard title="Transition Plan">
                   <div className="space-y-2">
-                    {Object.entries(plan.transition_plan as Record<string, string>).map(
-                      ([key, value]) => (
-                        <div
-                          key={key}
-                          className="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700"
-                        >
-                          <span className="text-xs font-semibold text-gray-900">
-                            {humanizeKey(key)}:
-                          </span>
-                          <span>{value}</span>
-                        </div>
-                      ),
-                    )}
+                    {Object.entries(
+                      plan.transition_plan as Record<string, string>,
+                    ).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700"
+                      >
+                        <span className="text-xs font-semibold text-gray-900">
+                          {humanizeKey(key)}:
+                        </span>
+                        <span>{value}</span>
+                      </div>
+                    ))}
                   </div>
                 </SectionCard>
               )}
@@ -1161,16 +1178,16 @@ export default function DietPage() {
                 )}
 
               {!hasKbDetails && (
-                  <div className="rounded-lg border border-dashed border-gray-300 bg-white p-6 text-center">
-                    <p className="text-sm font-medium text-gray-900">
-                      No detailed knowledge base entry found.
-                    </p>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Update the pet&apos;s breed to match the nutrition
-                      knowledge base and try again.
-                    </p>
-                  </div>
-                )}
+                <div className="rounded-lg border border-dashed border-gray-300 bg-white p-6 text-center">
+                  <p className="text-sm font-medium text-gray-900">
+                    No detailed knowledge base entry found.
+                  </p>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Update the pet&apos;s breed to match the nutrition knowledge
+                    base and try again.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

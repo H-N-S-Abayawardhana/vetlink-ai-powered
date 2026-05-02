@@ -274,9 +274,7 @@ export default function DiseasePredictionResults({
                 <div
                   key={prediction.disease}
                   className={`rounded-lg border overflow-hidden transition-colors ${
-                    isPositive
-                      ? "border-red-200"
-                      : "border-gray-200"
+                    isPositive ? "border-red-200" : "border-gray-200"
                   }`}
                 >
                   <button
@@ -318,9 +316,7 @@ export default function DiseasePredictionResults({
                           <p className="text-2xl font-semibold text-gray-900">
                             {prediction.probability.toFixed(0)}%
                           </p>
-                          <p className="text-xs text-gray-500">
-                            probability
-                          </p>
+                          <p className="text-xs text-gray-500">probability</p>
                         </div>
 
                         <div

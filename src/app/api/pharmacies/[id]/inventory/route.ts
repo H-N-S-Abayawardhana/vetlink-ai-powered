@@ -73,7 +73,9 @@ export async function GET(
         : null,
       price: row.price ? Number(row.price) : 0,
       image_url: row.image_url || null,
-      generic_name: String((row as { generic_name?: string }).generic_name ?? ""),
+      generic_name: String(
+        (row as { generic_name?: string }).generic_name ?? "",
+      ),
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
@@ -145,7 +147,8 @@ export async function POST(
       stock = Number(body.stock) || 0;
       expiry = body.expiry?.trim() || null;
       price = Number(body.price) || 0;
-      const g = typeof body.generic_name === "string" ? body.generic_name.trim() : "";
+      const g =
+        typeof body.generic_name === "string" ? body.generic_name.trim() : "";
       genericName = g || null;
     }
 
@@ -228,7 +231,8 @@ export async function POST(
         : null,
       price: itemRow.price ? Number(itemRow.price) : 0,
       image_url: itemRow.image_url || null,
-      generic_name: (itemRow as { generic_name?: string | null }).generic_name || "",
+      generic_name:
+        (itemRow as { generic_name?: string | null }).generic_name || "",
     };
 
     return NextResponse.json({ success: true, item: newItem }, { status: 201 });
