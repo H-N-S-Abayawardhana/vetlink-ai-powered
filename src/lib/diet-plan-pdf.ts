@@ -612,31 +612,23 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
       background: [240, 253, 244],
       border: COLORS.greenBorder,
     },
-    {
-      label: "Breed Size",
-      value: plan.breed_size_category,
-    },
-    {
-      label: "Weight Used",
-      value:
-        plan.reference_body_weight_kg !== null &&
-        plan.reference_body_weight_kg !== undefined
-          ? `${plan.reference_body_weight_kg} kg`
-          : undefined,
-    },
-    {
-      label: "Total / Day",
-      value:
-        plan.total_daily_amount_g !== null &&
-        plan.total_daily_amount_g !== undefined
-          ? `${plan.total_daily_amount_g} g`
-          : undefined,
-    },
-    {
-      label: "Total / Day (g/kg)",
-      value: plan.total_daily_amount_g_per_kg_body_weight,
-    },
   ]);
+
+  {
+    const dietTypeValue = String(plan.kbDietType || plan.Diet_Type || "")
+      .toLowerCase()
+      .trim();
+    const showBwNote =
+      dietTypeValue.includes("weight loss") ||
+      dietTypeValue.includes("weight gain");
+
+    if (showBwNote) {
+      drawParagraph(
+        "Note: In the energy/calorie formulas, BW refers to the target body weight.",
+        { indent: 4 },
+      );
+    }
+  }
 
   if (plan.life_stage_or_goal || plan.diet_goal) {
     drawSectionHeader("Goal");
@@ -676,7 +668,6 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
 
     const rows = plan.feeding_plan.map((item: any) => [
       safeText(item?.food_item),
-      safeText(item?.role),
       item?.amount_g !== null && item?.amount_g !== undefined
         ? `${item.amount_g} g`
         : "-",
@@ -690,9 +681,9 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     ]);
 
     drawSimpleTable(
-      ["Food", "Role", "Amount", "g/kg BW", "Calories"],
+      ["Food", "Amount", "g/kg BW", "Calories"],
       rows,
-      [150, 115, 82, 82, maxWidth - 150 - 115 - 82 - 82],
+      [180, 90, 90, maxWidth - 180 - 90 - 90],
     );
   }
 
