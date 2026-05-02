@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Alert from "@/components/ui/Alert";
+import { VetLinkLogo } from "@/components/brand/VetLinkLogo";
 import Link from "next/link";
 
 export default function SignupForm() {
@@ -148,12 +148,10 @@ export default function SignupForm() {
             <div className="flex items-center justify-center sm:justify-start mb-8">
               <div className="flex-shrink-0">
                 <Link href="/" passHref>
-                  <Image
-                    src="/vetlink_logo.png"
-                    alt="VetLink Logo"
-                    width={120}
-                    height={40}
-                    className="h-8 w-auto cursor-pointer"
+                  <VetLinkLogo
+                    variant="light"
+                    size="md"
+                    className="cursor-pointer"
                     priority
                   />
                 </Link>

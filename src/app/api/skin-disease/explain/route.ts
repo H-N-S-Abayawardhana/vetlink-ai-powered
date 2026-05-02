@@ -17,9 +17,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) {
+    if (
+      !process.env.OPENAI_API_KEY?.trim() &&
+      !process.env.GEMINI_API_KEY?.trim()
+    ) {
       return NextResponse.json(
-        { error: "Neither Gemini nor OpenAI API key is configured" },
+        {
+          error:
+            "Set OPENAI_API_KEY (recommended) or GEMINI_API_KEY for LLM explanations.",
+        },
         { status: 500 },
       );
     }

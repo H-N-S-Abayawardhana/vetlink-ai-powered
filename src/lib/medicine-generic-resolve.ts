@@ -126,7 +126,11 @@ export async function extractMedicineNamesFromPrescription(
   try {
     const parsed = JSON.parse(raw.replace(/```json\s*|\s*```/g, "").trim());
     if (!Array.isArray(parsed)) return [];
-    return [...new Set(parsed.map((x) => String(x).trim()).filter((s) => s.length >= 2))];
+    return [
+      ...new Set(
+        parsed.map((x) => String(x).trim()).filter((s) => s.length >= 2),
+      ),
+    ];
   } catch {
     return [];
   }
