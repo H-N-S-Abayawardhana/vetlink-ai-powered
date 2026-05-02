@@ -33,21 +33,82 @@ function SectionCard({
   );
 }
 
-function humanizeKey(key: string) {
-  const normalized = String(key).toLowerCase().trim();
-  const dayRange = normalized.match(/^day_(\d+)_(\d+)$/);
-  if (dayRange) {
-    return `Day ${dayRange[1]}-${dayRange[2]}`;
+function formatKeyLabel(key: string) {
+  return key
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function safeDisplayValue(value: unknown): string {
+  if (value === null || value === undefined) return "-";
+  if (typeof value === "string") return value.trim() || "-";
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "-";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
   }
-  const dayPlus = normalized.match(/^day_(\d+)_plus$/);
-  if (dayPlus) {
-    return `Day ${dayPlus[1]}+`;
+}
+
+function parseFeedingAmountKb(text: string) {
+  const source = (text || "").toLowerCase();
+
+  // Examples:
+  // - "Approx 20-30 g/kg body weight/day (2-3% BW)"
+  // - "Approx 25-30 g/kg body weight/day"
+  // - "Approx 20 g/kg body weight/day"
+  const gPerKgRange = source.match(
+    /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*g\s*\/\s*kg/,
+  );
+  const gPerKgSingle = source.match(/(\d+(?:\.\d+)?)\s*g\s*\/\s*kg/);
+
+  const percentRange = source.match(
+    /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*%\s*bw/,
+  );
+  const percentSingle = source.match(/(\d+(?:\.\d+)?)\s*%\s*bw/);
+
+  if (gPerKgRange) {
+    return {
+      mode: "g_per_kg" as const,
+      min: Number.parseFloat(gPerKgRange[1]),
+      max: Number.parseFloat(gPerKgRange[2]),
+    };
   }
 
-  return String(key)
-    .replace(/_/g, " ")
-    .replace(/\b([a-z])/g, (m) => m.toUpperCase())
-    .trim();
+  if (gPerKgSingle) {
+    const value = Number.parseFloat(gPerKgSingle[1]);
+    return { mode: "g_per_kg" as const, min: value, max: value };
+  }
+
+  if (percentRange) {
+    return {
+      mode: "percent_bw" as const,
+      min: Number.parseFloat(percentRange[1]),
+      max: Number.parseFloat(percentRange[2]),
+    };
+  }
+
+  if (percentSingle) {
+    const value = Number.parseFloat(percentSingle[1]);
+    return { mode: "percent_bw" as const, min: value, max: value };
+  }
+
+  return null;
+}
+
+function cleanKbText(value?: string | null) {
+  if (!value) return value || "";
+  return value
+    .replace(/â\u20ac\u201c/g, "-")
+    .replace(/â\u20ac\u201d/g, "-")
+    .replace(/â\u20ac\u2019/g, "'")
+    .replace(/â\u20ac\u2018/g, "'")
+    .replace(/â\u20ac\u0153/g, '"')
+    .replace(/â\u20ac\u009d/g, '"')
+    .replace(/â\u20ac\u00a6/g, "...");
 }
 
 export default function DietPage() {
@@ -95,7 +156,9 @@ export default function DietPage() {
     if (!selectedId) return;
     setLoadingPlan(true);
     try {
-      const res = await fetch(`/api/pets/${selectedId}/diet`);
+      const res = await fetch(`/api/pets/${selectedId}/diet?t=${Date.now()}`, {
+        cache: "no-store",
+      });
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Failed to generate plan");
@@ -128,29 +191,6 @@ export default function DietPage() {
     }
   };
 
-  const hasKbDetails = Boolean(
-    plan?.dietary_recommendations ||
-      (plan?.nutrition_targets && Object.keys(plan.nutrition_targets).length > 0) ||
-      (Array.isArray(plan?.feeding_plan) && plan.feeding_plan.length > 0) ||
-      (plan?.micronutrient_profile &&
-        Object.keys(plan.micronutrient_profile).length > 0) ||
-      (Array.isArray(plan?.commercial_food_options) &&
-        plan.commercial_food_options.length > 0) ||
-      (Array.isArray(plan?.homemade_food_options) &&
-        plan.homemade_food_options.length > 0) ||
-      (Array.isArray(plan?.breed_specific_considerations) &&
-        plan.breed_specific_considerations.length > 0) ||
-      plan?.portion_and_calorie_guidance ||
-      plan?.meal_timing_guidance ||
-      plan?.food_safety ||
-      plan?.allergy_and_sensitivity_rules ||
-      plan?.supplement_guidance ||
-      plan?.transition_plan ||
-      plan?.monitoring_metrics ||
-      (Array.isArray(plan?.veterinary_review_required_for) &&
-        plan.veterinary_review_required_for.length > 0),
-  );
-
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
@@ -167,6 +207,11 @@ export default function DietPage() {
               Generate a simple nutrition and feeding plan based on your
               pet&apos;s profile, body condition score, and lifestyle details.
             </p>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 lg:max-w-sm">
+            For the best recommendation, keep your pet&apos;s age, weight,
+            activity level, diet preference, and BCS up to date.
           </div>
         </div>
       </div>
@@ -252,18 +297,18 @@ export default function DietPage() {
 
                     <div className="mt-4 grid grid-cols-3 gap-2">
                       <div className="rounded-lg bg-gray-50 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                        <p className="text-[11px] uppercase tracking-wide text-gray-500">
                           Age
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
                           {p.ageYears ?? "-"}
                         </p>
                       </div>
                       <div className="rounded-lg bg-gray-50 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                        <p className="text-[11px] uppercase tracking-wide text-gray-500">
                           Weight
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
                           {p.weightKg ?? "-"} {p.weightKg ? "kg" : ""}
                         </p>
                       </div>
@@ -273,13 +318,13 @@ export default function DietPage() {
                         }`}
                       >
                         <p
-                          className={`text-[11px] font-semibold uppercase tracking-wide ${
+                          className={`text-[11px] uppercase tracking-wide ${
                             p.bcs ? "text-purple-600" : "text-amber-600"
                           }`}
                         >
                           BCS
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
                           {p.bcs ?? "-"}
                         </p>
                       </div>
@@ -343,278 +388,222 @@ export default function DietPage() {
                   Generated on {new Date(plan.generatedAt).toLocaleDateString()}
                 </p>
               </div>
+
+              {pet && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                  <p>
+                    <span className="font-medium text-gray-900">
+                      {pet.name}
+                    </span>
+                    {pet.breed ? ` • ${pet.breed}` : ""}
+                  </p>
+                  <p className="mt-1">
+                    Weight: {pet.weightKg ?? "-"} kg • BCS: {pet.bcs ?? "-"}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          {(plan.kbDietType || plan.Diet_Type) && (
+          {plan.Diet_Type && (
             <div className="space-y-4 sm:space-y-6">
-              {/* 1. Plan Overview */}
-              <SectionCard title="Plan Overview">
+              <div className="bg-white rounded-lg shadow-md p-5 sm:p-6">
                 <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-                  Diet type: {plan.kbDietType || plan.Diet_Type}
+                  Diet type: {plan.Diet_Type}
                 </div>
 
-                {(plan.meals_per_day || plan.energy_kcal || plan.hydration) && (
-                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {plan.meals_per_day && (
+                {plan.kb?.dietary_recommendations && (
+                  <div className="mt-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
+                    {cleanKbText(plan.kb.dietary_recommendations)}
+                  </div>
+                )}
+              </div>
+
+              {plan.Feeding_Guidelines && (
+                <SectionCard title="Feeding Guidelines">
+                  <div className="space-y-3">
+                    {(plan.kb?.meals_per_day || plan.Feeding_Guidelines.Meals_Per_Day) && (
                       <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">
+                        <p className="text-sm font-medium text-gray-900">
                           Meals per day
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.meals_per_day}
+                        <p className="mt-1 text-sm text-gray-700">
+                          Feed {cleanKbText(safeDisplayValue(plan.kb?.meals_per_day ?? plan.Feeding_Guidelines.Meals_Per_Day))} times daily.
                         </p>
                       </div>
                     )}
-                    {plan.energy_kcal && (
+                    {!plan.kb?.dietary_recommendations &&
+                      plan.Feeding_Guidelines.Portion_Control_Advice && (
                       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
-                          Energy
+                        <p className="text-sm font-medium text-gray-900">
+                          Portion control advice
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.energy_kcal}
+                        <p className="mt-1 text-sm text-gray-700">
+                          {cleanKbText(
+                            plan.Feeding_Guidelines.Portion_Control_Advice,
+                          )}
                         </p>
                       </div>
                     )}
-                    {plan.hydration && (
-                      <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
+                    {plan.Feeding_Guidelines.Treat_Allowance && (
+                      <div className="rounded-lg border border-pink-200 bg-pink-50 px-4 py-3">
+                        <p className="text-sm font-medium text-gray-900">
+                          Treat allowance
+                        </p>
+                        <p className="mt-1 text-sm text-gray-700">
+                          {plan.Feeding_Guidelines.Treat_Allowance}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.kb?.nutrition_targets &&
+                Object.keys(plan.kb.nutrition_targets).length > 0 && (
+                  <SectionCard title="Nutrition Targets">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {Object.entries(plan.kb.nutrition_targets)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([key, value]: [string, any]) => (
+                          <div
+                            key={key}
+                            className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3"
+                          >
+                            <p className="text-[11px] uppercase tracking-wide text-sky-700">
+                              {formatKeyLabel(key)}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                              {cleanKbText(safeDisplayValue(value))}
+                            </p>
+                          </div>
+                        ))}
+                    </div>
+                  </SectionCard>
+                )}
+
+              {plan.kb?.feeding_amount_g_per_kg && (
+                <SectionCard title="Feeding Amount (KB)">
+                  <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-gray-700 space-y-2">
+                    <div>{cleanKbText(plan.kb.feeding_amount_g_per_kg)}</div>
+
+                    {(() => {
+                      const weightFromPet =
+                        typeof pet?.weightKg === "number"
+                          ? pet.weightKg
+                          : typeof pet?.weightKg === "string"
+                            ? Number.parseFloat(pet.weightKg)
+                            : undefined;
+                      const weightFromPlan =
+                        typeof plan.weightKg === "number" ? plan.weightKg : undefined;
+                      const actualWeightKg =
+                        typeof weightFromPet === "number" &&
+                        Number.isFinite(weightFromPet) &&
+                        weightFromPet > 0
+                          ? weightFromPet
+                          : typeof weightFromPlan === "number" &&
+                              Number.isFinite(weightFromPlan) &&
+                              weightFromPlan > 0
+                            ? weightFromPlan
+                            : null;
+
+                      if (!actualWeightKg) return null;
+
+                        const parsed = parseFeedingAmountKb(
+                          String(plan.kb?.feeding_amount_g_per_kg || ""),
+                        );
+                        if (!parsed) return null;
+
+                        let minG = 0;
+                        let maxG = 0;
+
+                        if (parsed.mode === "g_per_kg") {
+                          minG = actualWeightKg * parsed.min;
+                          maxG = actualWeightKg * parsed.max;
+                        } else {
+                          // percent of body weight per day
+                          minG = actualWeightKg * 1000 * (parsed.min / 100);
+                          maxG = actualWeightKg * 1000 * (parsed.max / 100);
+                        }
+
+                        const minRounded = Math.round(minG);
+                        const maxRounded = Math.round(maxG);
+                        const rangeText =
+                          minRounded === maxRounded
+                            ? `${minRounded} g/day`
+                            : `${minRounded}–${maxRounded} g/day`;
+
+                        return (
+                          <div className="text-xs text-indigo-800">
+                            For {actualWeightKg} kg: <span className="font-semibold">{rangeText}</span>
+                          </div>
+                        );
+                      })()}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.kb?.feeding_plan && plan.kb.feeding_plan.length > 0 && (
+                <SectionCard title="Feeding Plan">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {plan.kb.feeding_plan.map((item: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="rounded-lg border border-gray-200 bg-white px-4 py-3"
+                      >
+                        <p className="text-sm font-semibold text-gray-900">
+                          {cleanKbText(item?.food_item || "Food")}
+                        </p>
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                              Amount
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                              {typeof item?.amount_g === "number"
+                                ? `${item.amount_g} g`
+                                : typeof item?.quantity_g === "number"
+                                  ? `${item.quantity_g} g`
+                                  : "-"}
+                            </p>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 px-3 py-2">
+                            <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                              Calories
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                              {typeof item?.calories === "number"
+                                ? `${item.calories} kcal`
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </SectionCard>
+              )}
+
+              {(plan.kb?.hydration || plan.kb?.energy_kcal) && (
+                <SectionCard title="Hydration & Energy">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {plan.kb?.hydration && (
+                      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+                        <p className="text-sm font-medium text-gray-900">
                           Hydration
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.hydration}
+                        <p className="mt-1 text-sm text-gray-700">
+                          {cleanKbText(plan.kb.hydration)}
                         </p>
                       </div>
                     )}
-                  </div>
-                )}
-              </SectionCard>
-
-              {/* 2. Goal */}
-              {(plan.diet_goal || plan.life_stage_or_goal) && (
-                <SectionCard title="Goal">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {plan.life_stage_or_goal && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          Life stage / goal
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.life_stage_or_goal}
-                        </p>
-                      </div>
-                    )}
-                    {plan.diet_goal && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          Diet goal
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.diet_goal}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 3. Dietary Recommendations */}
-              {plan.dietary_recommendations && (
-                <SectionCard title="Dietary Recommendations">
-                  <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
-                    {plan.dietary_recommendations}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 4. Nutrition Targets */}
-              {plan.nutrition_targets && (
-                <SectionCard title="Nutrition Targets">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {Object.entries(
-                      plan.nutrition_targets as Record<string, string | number>,
-                    ).map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
-                      >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          {humanizeKey(key)}
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {String(value)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 5. Feeding Plan */}
-              {Array.isArray(plan.feeding_plan) && plan.feeding_plan.length > 0 && (
-                <SectionCard title="Feeding Plan">
-                  <div className="overflow-x-auto rounded-lg border border-gray-200">
-                    <table className="min-w-full text-sm">
-                      <thead className="bg-gray-50 text-gray-600">
-                        <tr>
-                          <th className="px-4 py-3 text-left font-medium">
-                            Food
-                          </th>
-                          <th className="px-4 py-3 text-left font-medium">
-                            Amount (g)
-                          </th>
-                          <th className="px-4 py-3 text-left font-medium">
-                            Calories
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {(plan.feeding_plan as any[]).map((item, idx) => (
-                          <tr key={idx} className="bg-white">
-                            <td className="px-4 py-3 text-gray-900">
-                              {item?.food_item || "-"}
-                            </td>
-                            <td className="px-4 py-3 text-gray-700">
-                              {item?.amount_g ?? "-"}
-                            </td>
-                            <td className="px-4 py-3 text-gray-700">
-                              {item?.calories ?? "-"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 6. Food Options */}
-              {(Array.isArray(plan.commercial_food_options) &&
-                plan.commercial_food_options.length > 0) ||
-              (Array.isArray(plan.homemade_food_options) &&
-                plan.homemade_food_options.length > 0) ? (
-                <SectionCard title="Food Options">
-                  <div className="space-y-5">
-                    {Array.isArray(plan.commercial_food_options) &&
-                      plan.commercial_food_options.length > 0 && (
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">
-                            Commercial
-                          </p>
-                          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {plan.commercial_food_options.map(
-                              (food: string, i: number) => (
-                                <div
-                                  key={i}
-                                  className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-gray-700"
-                                >
-                                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                  <span>{food}</span>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                    {Array.isArray(plan.homemade_food_options) &&
-                      plan.homemade_food_options.length > 0 && (
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">
-                            Homemade
-                          </p>
-                          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {plan.homemade_food_options.map(
-                              (food: string, i: number) => (
-                                <div
-                                  key={i}
-                                  className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-gray-700"
-                                >
-                                  <CheckCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                                  <span>{food}</span>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                </SectionCard>
-              ) : null}
-
-              {/* 7. Micronutrient Profile */}
-              {plan.micronutrient_profile && (
-                <SectionCard title="Micronutrient Profile">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {Object.entries(
-                      plan.micronutrient_profile as Record<string, string>,
-                    ).map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="rounded-lg border border-purple-200 bg-purple-50 px-4 py-3"
-                      >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-purple-600">
-                          {humanizeKey(key)}
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {value}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 8. Breed Considerations */}
-              {Array.isArray(plan.breed_specific_considerations) &&
-                plan.breed_specific_considerations.length > 0 && (
-                  <SectionCard title="Breed Considerations">
-                    <div className="flex flex-wrap gap-2">
-                      {plan.breed_specific_considerations.map(
-                        (item: string, i: number) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700"
-                          >
-                            {item}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                  </SectionCard>
-                )}
-
-              {/* 9. Meal Timing */}
-              {plan.meal_timing_guidance && (
-                <SectionCard title="Meal Timing">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {plan.meal_timing_guidance?.feeding_frequency && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          Feeding frequency
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.meal_timing_guidance.feeding_frequency}
-                        </p>
-                      </div>
-                    )}
-                    {plan.meal_timing_guidance?.meal_spacing && (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          Meal spacing
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.meal_timing_guidance.meal_spacing}
-                        </p>
-                      </div>
-                    )}
-                    {plan.meal_timing_guidance?.bloat_precaution && (
+                    {plan.kb?.energy_kcal && (
                       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
-                          Bloat precaution
+                        <p className="text-sm font-medium text-gray-900">
+                          Energy
                         </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.meal_timing_guidance.bloat_precaution}
+                        <p className="mt-1 text-sm text-gray-700">
+                          {cleanKbText(plan.kb.energy_kcal)}
                         </p>
                       </div>
                     )}
@@ -622,298 +611,22 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 10. Portion & Calorie Guidance */}
-              {plan.portion_and_calorie_guidance && (
-                <SectionCard title="Portion & Calorie Guidance">
-                  <div className="space-y-4">
-                    {(plan.portion_and_calorie_guidance?.portion_rule ||
-                      plan.portion_and_calorie_guidance?.review_interval) && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {plan.portion_and_calorie_guidance?.portion_rule && (
-                          <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
-                            <p className="text-[11px] uppercase tracking-wide text-blue-700">
-                              Portion rule
-                            </p>
-                            <p className="mt-1">
-                              {plan.portion_and_calorie_guidance.portion_rule}
-                            </p>
-                          </div>
-                        )}
-                        {plan.portion_and_calorie_guidance?.review_interval && (
-                          <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
-                            <p className="text-[11px] uppercase tracking-wide text-blue-700">
-                              Review interval
-                            </p>
-                            <p className="mt-1">
-                              {plan.portion_and_calorie_guidance.review_interval}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {plan.portion_and_calorie_guidance?.calorie_adjustment && (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {Object.entries(
-                          plan.portion_and_calorie_guidance
-                            .calorie_adjustment as Record<string, string>,
-                        ).map(([level, text]) => (
+              {plan.kb?.macronutrient_profile &&
+                Object.keys(plan.kb.macronutrient_profile).length > 0 && (
+                  <SectionCard title="Macronutrient Profile">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {Object.entries(plan.kb.macronutrient_profile).map(
+                        ([key, value]: [string, any]) => (
                           <div
-                            key={level}
-                            className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700"
+                            key={key}
+                            className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3"
                           >
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                              {humanizeKey(level)}
+                            <p className="text-[11px] uppercase tracking-wide text-emerald-700">
+                              {formatKeyLabel(key)}
                             </p>
-                            <p className="mt-1">{text}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 11. Supplement Guidance */}
-              {plan.supplement_guidance && (
-                <SectionCard title="Supplement Guidance">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {Object.entries(
-                      plan.supplement_guidance as Record<string, string>,
-                    ).map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
-                      >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-900">
-                          {humanizeKey(key)}
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {value}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 12. Food Safety */}
-              {plan.food_safety && (
-                <SectionCard title="Food Safety">
-                  <div className="space-y-4">
-                    {Array.isArray(plan.food_safety?.avoid_toxic_foods) &&
-                      plan.food_safety.avoid_toxic_foods.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            Avoid toxic foods
-                          </p>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {plan.food_safety.avoid_toxic_foods.map(
-                              (food: string, i: number) => (
-                                <span
-                                  key={i}
-                                  className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800"
-                                >
-                                  {food}
-                                </span>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                    {Array.isArray(plan.food_safety?.preparation_rules) &&
-                      plan.food_safety.preparation_rules.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            Preparation rules
-                          </p>
-                          <div className="mt-2 space-y-2">
-                            {plan.food_safety.preparation_rules.map(
-                              (rule: string, i: number) => (
-                                <div
-                                  key={i}
-                                  className="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700"
-                                >
-                                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                  <span>{rule}</span>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                    {plan.food_safety?.treat_limit && (
-                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-gray-800">
-                        <p className="text-[11px] uppercase tracking-wide text-amber-700">
-                          Treat limit
-                        </p>
-                        <p className="mt-1">{plan.food_safety.treat_limit}</p>
-                      </div>
-                    )}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 13. Allergy & Sensitivity */}
-              {plan.allergy_and_sensitivity_rules && (
-                <SectionCard title="Allergy & Sensitivity">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {Object.entries(
-                      plan.allergy_and_sensitivity_rules as Record<string, string>,
-                    ).map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
-                      >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          {humanizeKey(key)}
-                        </p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {value}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 14. Transition Plan */}
-              {plan.transition_plan && (
-                <SectionCard title="Transition Plan">
-                  <div className="space-y-2">
-                    {Object.entries(plan.transition_plan as Record<string, string>).map(
-                      ([key, value]) => (
-                        <div
-                          key={key}
-                          className="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700"
-                        >
-                          <span className="text-xs font-semibold text-gray-900">
-                            {humanizeKey(key)}:
-                          </span>
-                          <span>{value}</span>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </SectionCard>
-              )}
-
-              {/* 15. Monitoring */}
-              {plan.monitoring_metrics && (
-                <SectionCard title="Monitoring">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {plan.monitoring_metrics?.body_condition_score && (
-                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                            Body condition score
-                          </p>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {plan.monitoring_metrics.body_condition_score}
-                          </p>
-                        </div>
-                      )}
-                      {plan.monitoring_metrics?.weight_tracking && (
-                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                            Weight tracking
-                          </p>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {plan.monitoring_metrics.weight_tracking}
-                          </p>
-                        </div>
-                      )}
-                      {plan.monitoring_metrics?.stool_score && (
-                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                            Stool score
-                          </p>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {plan.monitoring_metrics.stool_score}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {Array.isArray(plan.monitoring_metrics?.clinical_flags) &&
-                      plan.monitoring_metrics.clinical_flags.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            Watch for
-                          </p>
-                          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {plan.monitoring_metrics.clinical_flags.map(
-                              (flag: string, i: number) => (
-                                <div
-                                  key={i}
-                                  className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-gray-800"
-                                >
-                                  <AlertCircle className="w-4 h-4 text-amber-700 mt-0.5 flex-shrink-0" />
-                                  <span>{flag}</span>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                </SectionCard>
-              )}
-
-              <SectionCard title="Glossary">
-                <div className="space-y-3 text-sm text-gray-700">
-                  <p>
-                    <span className="font-semibold text-gray-900">RER</span> —
-                    Resting Energy Requirement: an estimate of the calories a dog
-                    needs at rest (baseline energy).
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">MER</span> —
-                    Maintenance Energy Requirement: an estimate of daily calories
-                    needed to maintain body weight.
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">
-                      MER ≈ 1.6×RER
-                    </span>
-                    means MER is being estimated as 1.6 times RER (a common
-                    general multiplier for many adult dogs; the right multiplier
-                    can vary with age, activity level, and neuter status).
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">DM</span> — Dry
-                    Matter: nutrition values expressed with water removed, used
-                    to compare foods with different moisture levels.
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">IU/kg DM</span>
-                    — International Units per kilogram of dry matter.
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">EPA + DHA</span>
-                    — Omega-3 fatty acids (eicosapentaenoic acid +
-                    docosahexaenoic acid).{" "}
-                    <span className="font-semibold text-gray-900">~0.1–0.2% DM</span>
-                    means the combined EPA + DHA target is about 0.1–0.2%
-                    of the diet on a dry-matter basis.
-                  </p>
-                </div>
-              </SectionCard>
-
-              {Array.isArray(plan.veterinary_review_required_for) &&
-                plan.veterinary_review_required_for.length > 0 && (
-                  <SectionCard title="Veterinary Review Recommended">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {plan.veterinary_review_required_for.map(
-                        (reason: string, i: number) => (
-                          <div
-                            key={i}
-                            className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-gray-800"
-                          >
-                            <AlertCircle className="w-4 h-4 text-amber-700 mt-0.5 flex-shrink-0" />
-                            <span>{reason}</span>
+                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                              {cleanKbText(safeDisplayValue(value))}
+                            </p>
                           </div>
                         ),
                       )}
@@ -921,18 +634,217 @@ export default function DietPage() {
                   </SectionCard>
                 )}
 
-              {!hasKbDetails && (
-                  <div className="rounded-lg border border-dashed border-gray-300 bg-white p-6 text-center">
-                    <p className="text-sm font-medium text-gray-900">
-                      No detailed knowledge base entry found.
-                    </p>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Update the pet&apos;s breed to match the nutrition
-                      knowledge base and try again.
-                    </p>
-                  </div>
+              {plan.kb?.micronutrient_profile &&
+                Object.keys(plan.kb.micronutrient_profile).length > 0 && (
+                  <SectionCard title="Micronutrient Profile">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {Object.entries(plan.kb.micronutrient_profile).map(
+                        ([key, value]: [string, any]) => (
+                          <div
+                            key={key}
+                            className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3"
+                          >
+                            <p className="text-[11px] uppercase tracking-wide text-violet-700">
+                              {formatKeyLabel(key)}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                              {cleanKbText(safeDisplayValue(value))}
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </SectionCard>
                 )}
+
+              {plan.kb?.commercial_food_options &&
+                plan.kb.commercial_food_options.length > 0 && (
+                  <SectionCard title="Commercial Food Options">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {plan.kb.commercial_food_options.map(
+                        (food: string, i: number) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-gray-700"
+                          >
+                            <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span>{cleanKbText(food)}</span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </SectionCard>
+                )}
+
+              {plan.kb?.homemade_food_options &&
+                plan.kb.homemade_food_options.length > 0 && (
+                  <SectionCard title="Homemade Food Options">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {plan.kb.homemade_food_options.map(
+                        (food: string, i: number) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-gray-700"
+                          >
+                            <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span>{cleanKbText(food)}</span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </SectionCard>
+                )}
+
+              {!plan.kb?.commercial_food_options &&
+                !plan.kb?.homemade_food_options &&
+                plan.Recommended_Foods &&
+                plan.Recommended_Foods.length > 0 && (
+                  <SectionCard title="Recommended Foods">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {plan.Recommended_Foods.map(
+                        (food: string, i: number) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-gray-700"
+                          >
+                            <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span>{cleanKbText(food)}</span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </SectionCard>
+                )}
+
+              {plan.Foods_to_Avoid && plan.Foods_to_Avoid.length > 0 && (
+                <SectionCard title="Foods to Avoid">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {plan.Foods_to_Avoid.map((food: string, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-gray-700"
+                      >
+                        <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>{cleanKbText(food)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.Nutrition_Profile_g_per_kg && (
+                <SectionCard title="Nutrition Profile (g per kg feed)">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {typeof plan.Nutrition_Profile_g_per_kg.Protein_g_per_kg ===
+                      "number" && (
+                      <div className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wide text-sky-700">
+                          Protein
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {plan.Nutrition_Profile_g_per_kg.Protein_g_per_kg} g/kg
+                        </p>
+                      </div>
+                    )}
+                    {typeof plan.Nutrition_Profile_g_per_kg.Fat_g_per_kg ===
+                      "number" && (
+                      <div className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wide text-orange-700">
+                          Fat
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {plan.Nutrition_Profile_g_per_kg.Fat_g_per_kg} g/kg
+                        </p>
+                      </div>
+                    )}
+                    {typeof plan.Nutrition_Profile_g_per_kg.Carb_g_per_kg ===
+                      "number" && (
+                      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wide text-emerald-700">
+                          Carbohydrate
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                          {plan.Nutrition_Profile_g_per_kg.Carb_g_per_kg} g/kg
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </SectionCard>
+              )}
+
+              {!plan.kb?.feeding_amount_g_per_kg &&
+                plan.Feeding_g_per_kg_bodyweight_day &&
+                Object.keys(plan.Feeding_g_per_kg_bodyweight_day).length > 0 && (
+                  <SectionCard title="Daily Feeding Amount (g per kg body weight)">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {Object.entries(plan.Feeding_g_per_kg_bodyweight_day).map(
+                        ([key, value]: [string, any]) => (
+                          <div
+                            key={key}
+                            className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3"
+                          >
+                            <p className="text-[11px] uppercase tracking-wide text-indigo-700">
+                              {formatKeyLabel(key)}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                              {value ?? "-"} g/kg/day
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </SectionCard>
+                )}
+
+              {plan.Mineral_spec_per_1000kcal &&
+                Object.keys(plan.Mineral_spec_per_1000kcal).length > 0 && (
+                  <SectionCard title="Mineral Specification (per 1000 kcal)">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {Object.entries(plan.Mineral_spec_per_1000kcal).map(
+                        ([key, value]: [string, any]) => (
+                          <div
+                            key={key}
+                            className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3"
+                          >
+                            <p className="text-[11px] uppercase tracking-wide text-violet-700">
+                              {formatKeyLabel(key)}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                              {cleanKbText(String(value ?? "-"))}
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </SectionCard>
+                )}
+
+              {plan.Exercise_Recommendation && (
+                <SectionCard title="Exercise Recommendation">
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
+                    {cleanKbText(plan.Exercise_Recommendation)}
+                  </div>
+                </SectionCard>
+              )}
+
+              {plan.Notes && (
+                <SectionCard title="Important Notes">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-gray-700">
+                    {cleanKbText(plan.Notes)}
+                  </div>
+                </SectionCard>
+              )}
             </div>
+          )}
+
+          {!plan.Diet_Type && (
+            <SectionCard title="Recommendation Summary">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-gray-700">
+                No exact knowledge base diet type was matched for this pet.
+                Please review the pet breed details and profile values, then
+                regenerate the recommendation.
+              </div>
+            </SectionCard>
           )}
 
           <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
