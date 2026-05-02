@@ -294,7 +294,7 @@ export default function BCSCalculator() {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           {["Select pet", "Results"].map((label, idx) => {
             const currentIdx = step === "result" ? 1 : 0;
             const isActive = idx === currentIdx;
