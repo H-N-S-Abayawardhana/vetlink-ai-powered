@@ -668,7 +668,7 @@ export default function BCSCalculator() {
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 p-4 md:col-span-2">
+                <div className="rounded-lg border border-gray-200 p-4">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Fat Deposits *
                   </label>

@@ -18,7 +18,7 @@ export default function PetCardBCS({ pet, selected, onSelect }: Props) {
   return (
     <button
       onClick={() => onSelect(pet)}
-      className={`group rounded-xl border p-4 text-left transition-colors ${
+      className={`group rounded-xl border p-4 text-left transition-colors cursor-pointer ${
         selected
           ? "border-blue-300 bg-blue-50/70"
           : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
