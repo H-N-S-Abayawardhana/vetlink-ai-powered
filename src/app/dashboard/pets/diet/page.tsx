@@ -9,6 +9,7 @@ import {
   AlertCircle,
   TrendingUp,
   CheckCircle,
+  Info,
 } from "lucide-react";
 import { listPets, type Pet } from "@/lib/pets";
 import { generateDietPlanPdf } from "@/lib/diet-plan-pdf";
@@ -50,15 +51,184 @@ function humanizeKey(key: string) {
     .trim();
 }
 
+function tooltipForText(text: string): string | undefined {
+  const t = String(text);
+  const parts: string[] = [];
+
+  if (/\bDM\b/.test(t)) {
+    parts.push(
+      "DM = Dry Matter (nutrition values expressed with water removed).",
+    );
+  }
+  if (/IU\s*\/\s*kg\s*DM/i.test(t) || /IU\s*\/\s*kg/i.test(t)) {
+    parts.push("IU/kg DM = International Units per kilogram of dry matter.");
+  }
+  if (/EPA\s*\+?\s*DHA/i.test(t)) {
+    parts.push(
+      "EPA + DHA are omega‑3 fatty acids (often listed as a % of DM).",
+    );
+  }
+  if (/\bRER\b/.test(t) || /\bMER\b/.test(t) || /\bBW\b/.test(t)) {
+    parts.push(
+      "RER = Resting Energy Requirement: calories a dog needs at rest (basic body functions). MER = Maintenance Energy Requirement: total daily calories needed including activity. BW = body weight (kg).",
+    );
+  }
+  if (/\bkcal\b/i.test(t)) {
+    parts.push("kcal = kilocalories (unit used to measure energy/calories in food).");
+  }
+  if (/\bad\s*lib\b/i.test(t)) {
+    parts.push("ad lib (ad libitum) means freely available; dog can drink/eat anytime.");
+  }
+  if (/mL\s*\/\s*kg\s*\/\s*day/i.test(t)) {
+    parts.push("mL/kg/day means milliliters per kg body weight per day.");
+  }
+  if (/mg\s*per\s*1000\s*kcal/i.test(t) || /mg\s*\/\s*1000\s*kcal/i.test(t)) {
+    parts.push(
+      "mg/1000 kcal expresses nutrient amount per 1000 kilocalories of diet.",
+    );
+  }
+  if (/kcal\s*\/\s*100\s*g/i.test(t)) {
+    parts.push("kcal/100 g is energy density (kilocalories per 100 grams)." );
+  }
+
+  return parts.length > 0 ? parts.join(" ") : undefined;
+}
+
+function tooltipForKey(key: string): string | undefined {
+  const normalized = String(key).toLowerCase().trim();
+  switch (normalized) {
+    case "protein":
+      return "Protein target. DM = Dry Matter basis (nutrient percentage excluding water).";
+    case "fat":
+      return "Fat target. DM = Dry Matter basis (nutrient percentage excluding water).";
+    case "fiber":
+      return "Fiber target (supports digestion; % depends on goal).";
+    case "calcium":
+      return "Calcium target (often expressed as % of DM).";
+    case "phosphorus":
+      return "Phosphorus target (often expressed as % of DM).";
+    case "carbohydrate_percentage":
+      return "Carbohydrate target as a percentage (as provided by the KB).";
+    case "moisture_percentage":
+      return "Moisture target as a percentage (as provided by the KB).";
+    case "sodium_mg_per_1000kcal":
+      return "Sodium expressed as mg per 1000 kcal (mg/1000 kcal). kcal = kilocalories (energy unit).";
+    case "energy_density_kcal_per_100g":
+      return "Energy density: kcal/100 g. kcal = kilocalories (energy unit).";
+    case "vitamin_a":
+    case "vitamin_d":
+      return "Often shown as IU/kg DM. IU/kg = International Units per kilogram (vitamin measurement). DM = Dry Matter basis.";
+    case "omega_3":
+      return "Omega‑3 guidance; EPA + DHA are omega‑3 fatty acids often referenced in diets.";
+    default:
+      return undefined;
+  }
+}
+
+function tooltipForPlanOverview(field: string): string | undefined {
+  switch (field) {
+    case "energy_kcal":
+      return "MER = Maintenance Energy Requirement (total daily calories including activity). RER = Resting Energy Requirement (calories needed at rest). kcal = kilocalories (energy unit).";
+    case "hydration":
+      return "ad lib (ad libitum) means freely available; dog can drink anytime.";
+    case "total_daily_amount_g":
+      return "Total / day: total amount of food the dog should eat per day.";
+    case "total_daily_amount_g_per_kg_body_weight":
+      return "Total / day (g/kg): daily food amount based on body weight (grams per kg BW).";
+    default:
+      return undefined;
+  }
+}
+
+function toTooltipId(prefix: string, key: string) {
+  return `${prefix}-${String(key).replace(/[^a-z0-9_-]/gi, "_")}`;
+}
+
+function InfoTooltipButton({
+  id,
+  text,
+  openId,
+  setOpenId,
+  tone,
+}: {
+  id: string;
+  text: string;
+  openId: string | null;
+  setOpenId: React.Dispatch<React.SetStateAction<string | null>>;
+  tone: "gray" | "purple";
+}) {
+  const isOpen = openId === id;
+  const iconClass = tone === "purple" ? "text-purple-400" : "text-gray-400";
+  const ringClass = tone === "purple" ? "focus:ring-purple-200" : "focus:ring-blue-200";
+
+  return (
+    <span data-tooltip-root className="relative inline-flex items-center">
+      <button
+        type="button"
+        aria-label="More info"
+        aria-expanded={isOpen}
+        aria-controls={`${id}-tooltip`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpenId((prev) => (prev === id ? null : id));
+        }}
+        className={`inline-flex items-center rounded focus:outline-none focus:ring-2 ${ringClass}`}
+      >
+        <Info className={`w-3.5 h-3.5 ${iconClass}`} />
+      </button>
+
+      {isOpen && (
+        <div
+          id={`${id}-tooltip`}
+          role="tooltip"
+          className="absolute left-0 top-full z-20 mt-2 w-72 max-w-[80vw] rounded-lg border border-gray-200 bg-white p-3 text-xs text-gray-700 shadow-md"
+        >
+          {text}
+        </div>
+      )}
+    </span>
+  );
+}
+
+function renderWithTooltip(value: unknown) {
+  const text = String(value);
+  const title = tooltipForText(text);
+  if (!title) return text;
+  return <span title={title}>{text}</span>;
+}
+
 export default function DietPage() {
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+  const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
   const [pets, setPets] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pet, setPet] = useState<any | null>(null);
   const [plan, setPlan] = useState<any | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [loadingPets, setLoadingPets] = useState(true);
+
+  useEffect(() => {
+    if (!openTooltipId) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenTooltipId(null);
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (target.closest("[data-tooltip-root]")) return;
+      setOpenTooltipId(null);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [openTooltipId]);
 
   useEffect(() => {
     if (!selectedId) return setPet(null);
@@ -147,6 +317,9 @@ export default function DietPage() {
       plan?.supplement_guidance ||
       plan?.transition_plan ||
       plan?.monitoring_metrics ||
+      plan?.reference_body_weight_kg ||
+      plan?.total_daily_amount_g ||
+      plan?.total_daily_amount_g_per_kg_body_weight ||
       (Array.isArray(plan?.veterinary_review_required_for) &&
         plan.veterinary_review_required_for.length > 0),
   );
@@ -354,7 +527,13 @@ export default function DietPage() {
                   Diet type: {plan.kbDietType || plan.Diet_Type}
                 </div>
 
-                {(plan.meals_per_day || plan.energy_kcal || plan.hydration) && (
+                {(plan.meals_per_day ||
+                  plan.energy_kcal ||
+                  plan.hydration ||
+                  plan.breed_size_category ||
+                  plan.reference_body_weight_kg ||
+                  plan.total_daily_amount_g ||
+                  plan.total_daily_amount_g_per_kg_body_weight) && (
                   <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {plan.meals_per_day && (
                       <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
@@ -366,23 +545,116 @@ export default function DietPage() {
                         </p>
                       </div>
                     )}
-                    {plan.energy_kcal && (
-                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
-                          Energy
+                    {plan.breed_size_category && (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          Breed size
                         </p>
                         <p className="mt-1 text-sm text-gray-900">
-                          {plan.energy_kcal}
+                          {plan.breed_size_category}
+                        </p>
+                      </div>
+                    )}
+                    {plan.energy_kcal && (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+                            Energy
+                          </p>
+                          {tooltipForPlanOverview("energy_kcal") && (
+                            <InfoTooltipButton
+                              id="plan-energy"
+                              text={tooltipForPlanOverview("energy_kcal") as string}
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                              tone="gray"
+                            />
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {renderWithTooltip(plan.energy_kcal)}
                         </p>
                       </div>
                     )}
                     {plan.hydration && (
                       <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
-                          Hydration
+                        <div className="flex items-center gap-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
+                            Hydration
+                          </p>
+                          {tooltipForPlanOverview("hydration") && (
+                            <InfoTooltipButton
+                              id="plan-hydration"
+                              text={tooltipForPlanOverview("hydration") as string}
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                              tone="gray"
+                            />
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {renderWithTooltip(plan.hydration)}
+                        </p>
+                      </div>
+                    )}
+                    {plan.reference_body_weight_kg != null && (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                        <p
+                          className="text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                          title="Pet’s current weight from the database used to scale g/kg amounts into grams."
+                        >
+                          Weight used
                         </p>
                         <p className="mt-1 text-sm text-gray-900">
-                          {plan.hydration}
+                          {plan.reference_body_weight_kg} kg
+                        </p>
+                      </div>
+                    )}
+                    {plan.total_daily_amount_g != null && (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                            Total / day
+                          </p>
+                          {tooltipForPlanOverview("total_daily_amount_g") && (
+                            <InfoTooltipButton
+                              id="plan-total-day"
+                              text={tooltipForPlanOverview("total_daily_amount_g") as string}
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                              tone="gray"
+                            />
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {plan.total_daily_amount_g} g
+                        </p>
+                      </div>
+                    )}
+                    {plan.total_daily_amount_g_per_kg_body_weight != null && (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                            Total / day (g/kg)
+                          </p>
+                          {tooltipForPlanOverview(
+                            "total_daily_amount_g_per_kg_body_weight",
+                          ) && (
+                            <InfoTooltipButton
+                              id="plan-total-day-perkg"
+                              text={
+                                tooltipForPlanOverview(
+                                  "total_daily_amount_g_per_kg_body_weight",
+                                ) as string
+                              }
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                              tone="gray"
+                            />
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {plan.total_daily_amount_g_per_kg_body_weight}
                         </p>
                       </div>
                     )}
@@ -438,11 +710,25 @@ export default function DietPage() {
                         key={key}
                         className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
                       >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          {humanizeKey(key)}
-                        </p>
+                        <div className="flex items-center gap-1">
+                          <p
+                            className="text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                            title={tooltipForKey(key)}
+                          >
+                            {humanizeKey(key)}
+                          </p>
+                          {tooltipForKey(key) && (
+                            <InfoTooltipButton
+                              id={toTooltipId("nutrition", key)}
+                              text={tooltipForKey(key) as string}
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                              tone="gray"
+                            />
+                          )}
+                        </div>
                         <p className="mt-1 text-sm text-gray-900">
-                          {String(value)}
+                          {renderWithTooltip(value)}
                         </p>
                       </div>
                     ))}
@@ -461,7 +747,16 @@ export default function DietPage() {
                             Food
                           </th>
                           <th className="px-4 py-3 text-left font-medium">
+                            Role
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium">
                             Amount (g)
+                          </th>
+                          <th
+                            className="px-4 py-3 text-left font-medium"
+                            title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight)."
+                          >
+                            g/kg BW
                           </th>
                           <th className="px-4 py-3 text-left font-medium">
                             Calories
@@ -475,7 +770,15 @@ export default function DietPage() {
                               {item?.food_item || "-"}
                             </td>
                             <td className="px-4 py-3 text-gray-700">
+                              {item?.role || "-"}
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">
                               {item?.amount_g ?? "-"}
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">
+                              <span title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight).">
+                                {item?.amount_g_per_kg_body_weight ?? "-"}
+                              </span>
                             </td>
                             <td className="px-4 py-3 text-gray-700">
                               {item?.calories ?? "-"}
@@ -553,36 +856,31 @@ export default function DietPage() {
                         key={key}
                         className="rounded-lg border border-purple-200 bg-purple-50 px-4 py-3"
                       >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-purple-600">
-                          {humanizeKey(key)}
-                        </p>
+                        <div className="flex items-center gap-1">
+                          <p
+                            className="text-[11px] font-semibold uppercase tracking-wide text-purple-600"
+                            title={tooltipForKey(key)}
+                          >
+                            {humanizeKey(key)}
+                          </p>
+                          {tooltipForKey(key) && (
+                            <InfoTooltipButton
+                              id={toTooltipId("micronutrient", key)}
+                              text={tooltipForKey(key) as string}
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                              tone="purple"
+                            />
+                          )}
+                        </div>
                         <p className="mt-1 text-sm text-gray-900">
-                          {value}
+                          {renderWithTooltip(value)}
                         </p>
                       </div>
                     ))}
                   </div>
                 </SectionCard>
               )}
-
-              {/* 8. Breed Considerations */}
-              {Array.isArray(plan.breed_specific_considerations) &&
-                plan.breed_specific_considerations.length > 0 && (
-                  <SectionCard title="Breed Considerations">
-                    <div className="flex flex-wrap gap-2">
-                      {plan.breed_specific_considerations.map(
-                        (item: string, i: number) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700"
-                          >
-                            {item}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                  </SectionCard>
-                )}
 
               {/* 9. Meal Timing */}
               {plan.meal_timing_guidance && (
@@ -649,25 +947,6 @@ export default function DietPage() {
                             </p>
                           </div>
                         )}
-                      </div>
-                    )}
-
-                    {plan.portion_and_calorie_guidance?.calorie_adjustment && (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {Object.entries(
-                          plan.portion_and_calorie_guidance
-                            .calorie_adjustment as Record<string, string>,
-                        ).map(([level, text]) => (
-                          <div
-                            key={level}
-                            className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700"
-                          >
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                              {humanizeKey(level)}
-                            </p>
-                            <p className="mt-1">{text}</p>
-                          </div>
-                        ))}
                       </div>
                     )}
                   </div>
@@ -861,46 +1140,6 @@ export default function DietPage() {
                   </div>
                 </SectionCard>
               )}
-
-              <SectionCard title="Glossary">
-                <div className="space-y-3 text-sm text-gray-700">
-                  <p>
-                    <span className="font-semibold text-gray-900">RER</span> —
-                    Resting Energy Requirement: an estimate of the calories a dog
-                    needs at rest (baseline energy).
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">MER</span> —
-                    Maintenance Energy Requirement: an estimate of daily calories
-                    needed to maintain body weight.
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">
-                      MER ≈ 1.6×RER
-                    </span>
-                    means MER is being estimated as 1.6 times RER (a common
-                    general multiplier for many adult dogs; the right multiplier
-                    can vary with age, activity level, and neuter status).
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">DM</span> — Dry
-                    Matter: nutrition values expressed with water removed, used
-                    to compare foods with different moisture levels.
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">IU/kg DM</span>
-                    — International Units per kilogram of dry matter.
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">EPA + DHA</span>
-                    — Omega-3 fatty acids (eicosapentaenoic acid +
-                    docosahexaenoic acid).{" "}
-                    <span className="font-semibold text-gray-900">~0.1–0.2% DM</span>
-                    means the combined EPA + DHA target is about 0.1–0.2%
-                    of the diet on a dry-matter basis.
-                  </p>
-                </div>
-              </SectionCard>
 
               {Array.isArray(plan.veterinary_review_required_for) &&
                 plan.veterinary_review_required_for.length > 0 && (
