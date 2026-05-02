@@ -11,9 +11,6 @@ import {
 
 export const runtime = "nodejs";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 function mapActivityLevel(value?: string | null) {
   const level = (value || "").toLowerCase();
   if (level === "high" || level === "active" || level === "working") {
@@ -115,14 +112,7 @@ export async function GET(
     }
 
     const plan = generateDietPlan(input, prediction);
-    return NextResponse.json(
-      { plan },
-      {
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      },
-    );
+    return NextResponse.json({ plan });
   } catch (error) {
     console.error("Error generating diet plan:", error);
     return NextResponse.json(
@@ -130,12 +120,7 @@ export async function GET(
         error: "Failed to generate diet plan",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      {
-        status: 500,
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      },
+      { status: 500 },
     );
   }
 }

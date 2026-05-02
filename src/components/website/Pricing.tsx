@@ -195,6 +195,7 @@ export default function Pricing() {
 
                 {/* CTA Button */}
                 <motion.button
+                  suppressHydrationWarning
                   onClick={() => handlePlanClick(plan.id)}
                   className={`w-full rounded-xl py-3.5 font-semibold transition-all duration-200 ${
                     plan.popular

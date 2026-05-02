@@ -15,6 +15,7 @@ import {
   CalculatorIcon,
   LightBulbIcon,
   EyeIcon,
+  UserIcon,
   CogIcon,
   BuildingStorefrontIcon,
   CubeIcon,
@@ -452,6 +453,29 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
             </div>
           )}
         </nav>
+
+        {/* User info at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-blue-600">
+                  {(session?.user as any)?.username?.charAt(0).toUpperCase() || 
+                   session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-900">
+                {(session?.user as any)?.username || session?.user?.name || 'User'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {userRole === 'SUPER_ADMIN' ? 'Super Admin' : 
+                 userRole === 'VETERINARIAN' ? 'Veterinarian' : 'User'}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
