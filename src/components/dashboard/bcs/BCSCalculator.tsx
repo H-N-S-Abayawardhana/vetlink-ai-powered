@@ -139,9 +139,7 @@ export default function BCSCalculator() {
       updates.waist &&
       updates.abdominalTuck &&
       updates.spineHips &&
-      updates.fatDeposits &&
-      updates.activityLevel &&
-      updates.gender
+      updates.fatDeposits
     );
   }, [updates]);
 
@@ -580,50 +578,6 @@ export default function BCSCalculator() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-lg border border-gray-200 p-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Gender *
-                  </label>
-                  <select
-                    value={updates.gender || ""}
-                    onChange={(e) => onDetailsChange("gender", e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  >
-                    <option value="">Select gender</option>
-                    {clinicalOptions.gender.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    Choose the pet&apos;s sex.
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-gray-200 p-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Activity Level *
-                  </label>
-                  <select
-                    value={updates.activityLevel || ""}
-                    onChange={(e) =>
-                      onDetailsChange("activityLevel", e.target.value)
-                    }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  >
-                    <option value="">Select activity level</option>
-                    {clinicalOptions.activity_level.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    How active is your pet on most days?
-                  </p>
-                </div>
-
                 <div className="rounded-lg border border-gray-200 p-4">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Rib Condition *

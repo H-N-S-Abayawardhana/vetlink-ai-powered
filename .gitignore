@@ -129,5 +129,5 @@ next-env.d.ts
 
 .vercel
 config.bat
-build.log
+build*.log
 .env.local
