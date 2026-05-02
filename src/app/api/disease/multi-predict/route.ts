@@ -17,36 +17,45 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       age_years,
+      weight_kg,
       breed_size,
-      sex,
-      is_neutered,
-      body_condition_score,
-      pale_gums,
-      skin_lesions,
-      polyuria,
-      tick_prevention,
-      heartworm_prevention,
+      neutered_status,
+
+      activity_level,
+      daily_exercise_minutes,
       diet_type,
-      exercise_level,
-      environment,
+      fatty_food_frequency,
+      treat_frequency,
+
+      body_condition_score,
+
+      water_intake,
+      urination,
+      appetite_change,
+      vomiting,
+      digestive_issues,
+      lethargy,
       pet_id,
     } = body;
 
     // Validate required fields
     if (
       age_years === undefined ||
+      weight_kg === undefined ||
       !breed_size ||
-      !sex ||
-      is_neutered === undefined ||
-      body_condition_score === undefined ||
-      pale_gums === undefined ||
-      skin_lesions === undefined ||
-      polyuria === undefined ||
-      !tick_prevention ||
-      heartworm_prevention === undefined ||
+      !neutered_status ||
+      !activity_level ||
+      daily_exercise_minutes === undefined ||
       !diet_type ||
-      !exercise_level ||
-      !environment
+      !fatty_food_frequency ||
+      !treat_frequency ||
+      body_condition_score === undefined ||
+      !water_intake ||
+      !urination ||
+      !appetite_change ||
+      !vomiting ||
+      !digestive_issues ||
+      !lethargy
     ) {
       return NextResponse.json(
         { error: "All required fields must be provided" },
@@ -58,6 +67,13 @@ export async function POST(request: NextRequest) {
     if (age_years < 0 || age_years > 30) {
       return NextResponse.json(
         { error: "Age must be between 0 and 30 years" },
+        { status: 400 },
+      );
+    }
+
+    if (weight_kg <= 0 || weight_kg > 120) {
+      return NextResponse.json(
+        { error: "Weight must be between 0 and 120 kg" },
         { status: 400 },
       );
     }
@@ -77,46 +93,85 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validSexes = ["Male", "Female"];
-    if (!validSexes.includes(sex)) {
+    const validYesNo = ["Yes", "No"];
+    if (!validYesNo.includes(neutered_status)) {
       return NextResponse.json(
-        { error: "Invalid sex. Must be Male or Female" },
+        { error: "Invalid neutered status. Must be Yes or No" },
         { status: 400 },
       );
     }
 
-    const validTickPrevention = ["None", "Irregular", "Regular"];
-    if (!validTickPrevention.includes(tick_prevention)) {
+    const validActivityLevels = ["Low", "Moderate", "High"];
+    if (!validActivityLevels.includes(activity_level)) {
       return NextResponse.json(
-        { error: "Invalid tick prevention value" },
+        { error: "Invalid activity level" },
         { status: 400 },
       );
     }
 
-    const validDietTypes = ["Commercial", "Homemade", "Mixed"];
+    if (daily_exercise_minutes < 0 || daily_exercise_minutes > 600) {
+      return NextResponse.json(
+        { error: "Daily exercise minutes must be between 0 and 600" },
+        { status: 400 },
+      );
+    }
+
+    const validDietTypes = ["Dry", "Wet", "Mixed", "Homemade"];
     if (!validDietTypes.includes(diet_type)) {
       return NextResponse.json({ error: "Invalid diet type" }, { status: 400 });
     }
 
-    const validExerciseLevels = ["Low", "Moderate", "High"];
-    if (!validExerciseLevels.includes(exercise_level)) {
+    const validFattyFood = ["Low", "Moderate", "High"];
+    if (!validFattyFood.includes(fatty_food_frequency)) {
       return NextResponse.json(
-        { error: "Invalid exercise level" },
+        { error: "Invalid fatty food frequency" },
         { status: 400 },
       );
     }
 
-    const validEnvironments = [
-      "Indoor",
-      "Outdoor",
-      "Mixed",
-      "Suburban",
-      "Rural",
-      "Urban",
-    ];
-    if (!validEnvironments.includes(environment)) {
+    const validTreatFrequency = ["Rare", "Moderate", "Frequent"];
+    if (!validTreatFrequency.includes(treat_frequency)) {
       return NextResponse.json(
-        { error: "Invalid environment type" },
+        { error: "Invalid treat frequency" },
+        { status: 400 },
+      );
+    }
+
+    const validWaterIntake = ["Low", "Normal", "High"];
+    if (!validWaterIntake.includes(water_intake)) {
+      return NextResponse.json(
+        { error: "Invalid water intake" },
+        { status: 400 },
+      );
+    }
+
+    const validUrination = ["Normal", "Frequent", "Difficult"];
+    if (!validUrination.includes(urination)) {
+      return NextResponse.json(
+        { error: "Invalid urination value" },
+        { status: 400 },
+      );
+    }
+
+    const validAppetite = ["Decreased", "Normal", "Increased"];
+    if (!validAppetite.includes(appetite_change)) {
+      return NextResponse.json(
+        { error: "Invalid appetite change value" },
+        { status: 400 },
+      );
+    }
+
+    if (!validYesNo.includes(vomiting) || !validYesNo.includes(lethargy)) {
+      return NextResponse.json(
+        { error: "Invalid vomiting/lethargy value. Must be Yes or No" },
+        { status: 400 },
+      );
+    }
+
+    const validDigestiveIssues = ["None", "Mild", "Severe"];
+    if (!validDigestiveIssues.includes(digestive_issues)) {
+      return NextResponse.json(
+        { error: "Invalid digestive issues value" },
         { status: 400 },
       );
     }
@@ -124,18 +179,21 @@ export async function POST(request: NextRequest) {
     // Prepare input for disease prediction API
     const input: DiseasePredictionInput = {
       age_years: parseInt(String(age_years), 10),
+      weight_kg: parseFloat(String(weight_kg)),
       breed_size,
-      sex,
-      is_neutered: Boolean(is_neutered),
-      body_condition_score: parseInt(String(body_condition_score), 10),
-      pale_gums: Boolean(pale_gums),
-      skin_lesions: Boolean(skin_lesions),
-      polyuria: Boolean(polyuria),
-      tick_prevention,
-      heartworm_prevention: Boolean(heartworm_prevention),
+      neutered_status,
+      activity_level,
+      daily_exercise_minutes: parseInt(String(daily_exercise_minutes), 10),
       diet_type,
-      exercise_level,
-      environment,
+      fatty_food_frequency,
+      treat_frequency,
+      body_condition_score: parseInt(String(body_condition_score), 10),
+      water_intake,
+      urination,
+      appetite_change,
+      vomiting,
+      digestive_issues,
+      lethargy,
       pet_id,
     };
 
@@ -162,25 +220,47 @@ export async function POST(request: NextRequest) {
     let analysisId = null;
     if (pet_id && session.user.id) {
       try {
+        const userRole = (session.user as any)?.userRole;
+
+        // Verify the user can write to this pet
+        const petAccess = await pool.query(
+          "SELECT owner_id FROM pets WHERE id = $1",
+          [pet_id],
+        );
+
+        const ownerIdStr = petAccess.rows?.[0]?.owner_id
+          ? String(petAccess.rows[0].owner_id)
+          : null;
+        const userIdStr = session.user.id ? String(session.user.id) : null;
+        const canWritePet =
+          !!ownerIdStr &&
+          !!userIdStr &&
+          (ownerIdStr === userIdStr ||
+            userRole === "SUPER_ADMIN" ||
+            userRole === "VETERINARIAN");
+
         // Create table if it doesn't exist
         await pool.query(`
-          CREATE TABLE IF NOT EXISTS multi_disease_analyses (
+          CREATE TABLE IF NOT EXISTS metabolic_risk_analyses (
             id SERIAL PRIMARY KEY,
             pet_id INTEGER NOT NULL,
             user_id UUID NOT NULL,
             age_years INTEGER NOT NULL,
+            weight_kg DOUBLE PRECISION NOT NULL,
             breed_size VARCHAR(20) NOT NULL,
-            sex VARCHAR(10) NOT NULL,
-            is_neutered BOOLEAN NOT NULL,
+            neutered_status VARCHAR(5) NOT NULL,
+            activity_level VARCHAR(20) NOT NULL,
+            daily_exercise_minutes INTEGER NOT NULL,
+            diet_type VARCHAR(10) NOT NULL,
+            fatty_food_frequency VARCHAR(20) NOT NULL,
+            treat_frequency VARCHAR(20) NOT NULL,
             body_condition_score INTEGER NOT NULL,
-            pale_gums BOOLEAN NOT NULL,
-            skin_lesions BOOLEAN NOT NULL,
-            polyuria BOOLEAN NOT NULL,
-            tick_prevention VARCHAR(20) NOT NULL,
-            heartworm_prevention BOOLEAN NOT NULL,
-            diet_type VARCHAR(20) NOT NULL,
-            exercise_level VARCHAR(20) NOT NULL,
-            environment VARCHAR(20) NOT NULL,
+            water_intake VARCHAR(20) NOT NULL,
+            urination VARCHAR(20) NOT NULL,
+            appetite_change VARCHAR(20) NOT NULL,
+            vomiting VARCHAR(5) NOT NULL,
+            digestive_issues VARCHAR(20) NOT NULL,
+            lethargy VARCHAR(5) NOT NULL,
             has_risk BOOLEAN NOT NULL,
             highest_risk_disease VARCHAR(100),
             predictions JSONB NOT NULL,
@@ -194,46 +274,52 @@ export async function POST(request: NextRequest) {
         `);
 
         const dbResult = await pool.query(
-          `INSERT INTO multi_disease_analyses (
+          `INSERT INTO metabolic_risk_analyses (
             pet_id,
             user_id,
             age_years,
+            weight_kg,
             breed_size,
-            sex,
-            is_neutered,
-            body_condition_score,
-            pale_gums,
-            skin_lesions,
-            polyuria,
-            tick_prevention,
-            heartworm_prevention,
+            neutered_status,
+            activity_level,
+            daily_exercise_minutes,
             diet_type,
-            exercise_level,
-            environment,
+            fatty_food_frequency,
+            treat_frequency,
+            body_condition_score,
+            water_intake,
+            urination,
+            appetite_change,
+            vomiting,
+            digestive_issues,
+            lethargy,
             has_risk,
             highest_risk_disease,
             predictions,
             recommendations,
             pet_profile,
             analyzed_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
           RETURNING id`,
           [
             pet_id,
             session.user.id,
             input.age_years,
+            input.weight_kg,
             input.breed_size,
-            input.sex,
-            input.is_neutered,
-            input.body_condition_score,
-            input.pale_gums,
-            input.skin_lesions,
-            input.polyuria,
-            input.tick_prevention,
-            input.heartworm_prevention,
+            input.neutered_status,
+            input.activity_level,
+            input.daily_exercise_minutes,
             input.diet_type,
-            input.exercise_level,
-            input.environment,
+            input.fatty_food_frequency,
+            input.treat_frequency,
+            input.body_condition_score,
+            input.water_intake,
+            input.urination,
+            input.appetite_change,
+            input.vomiting,
+            input.digestive_issues,
+            input.lethargy,
             result.has_risk,
             result.highest_risk_disease,
             JSON.stringify(result.predictions),
@@ -244,6 +330,30 @@ export async function POST(request: NextRequest) {
         );
 
         analysisId = dbResult.rows[0]?.id;
+
+        // Persist into the pet record (store history for every scan)
+        // so re-scans that show no risk still update the pet's latest status.
+        if (canWritePet) {
+          await pool.query(
+            "ALTER TABLE pets ADD COLUMN IF NOT EXISTS metabolic_risk_history JSONB DEFAULT '[]'::jsonb",
+          );
+
+          const recordPayload = {
+            id: analysisId ? String(analysisId) : `${Date.now()}`,
+            analyzedAt: result.analyzed_at,
+            hasRisk: result.has_risk,
+            highestRiskDisease: result.highest_risk_disease,
+            predictions: result.predictions,
+          };
+
+          await pool.query(
+            `UPDATE pets
+             SET metabolic_risk_history = COALESCE(metabolic_risk_history, '[]'::jsonb) || $1::jsonb,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $2`,
+            [JSON.stringify([recordPayload]), pet_id],
+          );
+        }
       } catch (dbError) {
         console.error("Failed to save disease analysis to database:", dbError);
         // Continue without saving - don't fail the request

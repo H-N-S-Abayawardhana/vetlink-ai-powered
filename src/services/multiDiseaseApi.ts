@@ -6,298 +6,280 @@ import type {
   RiskLevel,
 } from "@/types/disease-prediction";
 
-// Base URL for the multi-disease model space.
-const MULTI_DISEASE_API_URL = process.env.NEXT_PUBLIC_MULTI_DISEASE_API_URL;
+const DEFAULT_METABOLIC_RISK_API_URL =
+  "https://maleesha29-diseaseriskprediction.hf.space";
+
+const METABOLIC_RISK_API_URL =
+  process.env.METABOLIC_RISK_API_URL ??
+  process.env.NEXT_PUBLIC_METABOLIC_RISK_API_URL ??
+  DEFAULT_METABOLIC_RISK_API_URL;
 
 const API_REQUEST_TIMEOUT = 120000;
 
+type ModelLabelResult = { risk?: number | boolean; probability?: number };
+
+function normalizeProbability(probability: number | undefined): number {
+  if (probability === undefined || Number.isNaN(probability)) return 0;
+  if (probability > 1) return Math.max(0, Math.min(100, probability));
+  return Math.max(0, Math.min(100, probability * 100));
+}
+
+function normalizeRisk(risk: ModelLabelResult["risk"], probPct: number): 0 | 1 {
+  if (risk === true) return 1;
+  if (risk === false) return 0;
+  if (typeof risk === "number") return risk >= 1 ? 1 : 0;
+  return probPct >= 50 ? 1 : 0;
+}
+
 export class MultiDiseaseApiService {
-  // Returns the Gradio async endpoint for predictions.
-  private static getApiEndpoint(): string {
-    if (!MULTI_DISEASE_API_URL) {
-      throw new Error(
-        "NEXT_PUBLIC_MULTI_DISEASE_API_URL is not configured. Set it in your environment variables.",
-      );
-    }
-    return `${MULTI_DISEASE_API_URL}/gradio_api/call/predict_diseases`;
+  private static getApiBaseUrl(): string {
+    return METABOLIC_RISK_API_URL.replace(/\/$/, "");
   }
 
-  /**
-   * Predict disease risks using the Gradio event-based API.
-   */
+  private static getGradioCallEndpoint(): string {
+    return `${this.getApiBaseUrl()}/gradio_api/call/predict_disease_risk`;
+  }
+
+  private static async readGradioCompleteData(
+    eventUrl: string,
+    signal: AbortSignal,
+  ): Promise<unknown> {
+    const res = await fetch(eventUrl, {
+      method: "GET",
+      headers: { Accept: "text/event-stream" },
+      signal,
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(
+        `Prediction service error (${res.status}): ${text.slice(0, 200)}`,
+      );
+    }
+
+    const sse = await res.text();
+    const lines = sse.split(/\r?\n/);
+    let currentEvent: string | null = null;
+    const completeDataLines: string[] = [];
+    const errorDataLines: string[] = [];
+
+    for (const line of lines) {
+      if (line.startsWith("event:")) {
+        currentEvent = line.slice("event:".length).trim();
+        continue;
+      }
+      if (line.startsWith("data:")) {
+        const dataPart = line.slice("data:".length).trim();
+        if (currentEvent === "complete") completeDataLines.push(dataPart);
+        if (currentEvent === "error") errorDataLines.push(dataPart);
+      }
+    }
+
+    if (errorDataLines.length > 0) {
+      const msg = errorDataLines[errorDataLines.length - 1];
+      throw new Error(`Prediction service error: ${msg}`);
+    }
+
+    if (completeDataLines.length === 0) {
+      throw new Error("Prediction service did not return a completed result.");
+    }
+
+    const jsonText = completeDataLines.join("\n");
+    try {
+      return JSON.parse(jsonText) as unknown;
+    } catch {
+      throw new Error(
+        `Prediction service returned invalid JSON: ${jsonText.slice(0, 200)}`,
+      );
+    }
+  }
+
   static async predictDiseases(
     input: DiseasePredictionInput,
   ): Promise<DiseasePredictionResult> {
+    const endpoint = this.getGradioCallEndpoint();
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT);
+
     try {
-      const endpoint = this.getApiEndpoint();
-      console.log(`Calling Gradio disease prediction API: ${endpoint}`);
+      const gradioData = [
+        input.age_years,
+        input.weight_kg,
+        input.breed_size,
+        input.neutered_status,
+        input.activity_level,
+        input.daily_exercise_minutes,
+        input.diet_type,
+        input.fatty_food_frequency,
+        input.treat_frequency,
+        input.water_intake,
+        input.urination,
+        input.appetite_change,
+        input.vomiting,
+        input.digestive_issues,
+        input.lethargy,
+        input.body_condition_score,
+      ];
 
-      // Create AbortController for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(
-        () => controller.abort(),
-        API_REQUEST_TIMEOUT,
-      );
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: gradioData }),
+        signal: controller.signal,
+      });
 
-      try {
-        const gradioData = {
-          data: [
-            input.age_years,
-            input.breed_size,
-            input.sex,
-            input.is_neutered ? "Neutered" : "Intact",
-            input.body_condition_score,
-            input.pale_gums ? "Yes" : "No",
-            input.skin_lesions ? "Yes" : "No",
-            input.polyuria ? "Yes" : "No",
-            this.mapTickPrevention(input.tick_prevention),
-            input.heartworm_prevention ? "Yes" : "No",
-            this.mapDietType(input.diet_type),
-            input.exercise_level,
-            this.mapEnvironment(input.environment),
-          ],
-        };
-
-        // Submit prediction request and receive event_id.
-        const submitResponse = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(gradioData),
-          signal: controller.signal,
-        });
-
-        if (!submitResponse.ok) {
-          const errorText = await submitResponse.text();
-          console.error(
-            `Gradio API submit error - Status: ${submitResponse.status}`,
-          );
-          throw new Error(
-            `Failed to submit prediction: ${submitResponse.status} - ${errorText.substring(0, 200)}`,
-          );
-        }
-
-        const submitResult = await submitResponse.json();
-        const eventId = submitResult.event_id;
-
-        if (!eventId) {
-          throw new Error("No event_id received from Gradio API");
-        }
-
-        // Fetch generated result for the submitted event.
-        const resultResponse = await fetch(`${endpoint}/${eventId}`, {
-          method: "GET",
-          signal: controller.signal,
-        });
-
-        if (!resultResponse.ok) {
-          throw new Error(
-            `Failed to get prediction result: ${resultResponse.status}`,
-          );
-        }
-
-        const resultText = await resultResponse.text();
-        const htmlResponse = this.parseSSEResponse(resultText);
-        return this.transformHtmlResponse(htmlResponse, input);
-      } catch (fetchError: unknown) {
-        if (fetchError instanceof Error && fetchError.name === "AbortError") {
-          throw new Error(
-            `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. The Hugging Face Space might be starting up - please try again.`,
-          );
-        }
-        throw fetchError;
-      } finally {
-        clearTimeout(timeoutId);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(
+          `Prediction service error (${res.status}): ${text.slice(0, 200)}`,
+        );
       }
-    } catch (error) {
-      console.error("Error predicting diseases:", error);
+
+      const submit = (await res.json()) as { event_id?: string };
+      const eventId = submit?.event_id;
+      if (!eventId) {
+        throw new Error("Prediction service did not return an event_id.");
+      }
+
+      const eventUrl = `${endpoint}/${encodeURIComponent(eventId)}`;
+      const completePayload = await this.readGradioCompleteData(
+        eventUrl,
+        controller.signal,
+      );
+      return this.transformResponse(completePayload, input);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error(
+          `Request timeout after ${API_REQUEST_TIMEOUT / 1000} seconds. Please try again.`,
+        );
+      }
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
-  /**
-   * Map tick prevention from UI enum to API enum.
-   */
-  private static mapTickPrevention(tickPrevention: string): string {
-    return tickPrevention === "Regular" ? "Yes" : "No";
-  }
+  private static pickLabelResult(
+    payload: any,
+    label: DiseaseType,
+  ): ModelLabelResult {
+    const candidates = [
+      payload?.[label],
+      payload?.results?.[label],
+      payload?.predictions?.[label],
+      payload?.data?.[label],
+      payload?.[label.toLowerCase?.() ?? label],
+      payload?.results?.[label.toLowerCase?.() ?? label],
+      payload?.predictions?.[label.toLowerCase?.() ?? label],
+    ];
 
-  /**
-   * Map diet type from UI enum to API enum.
-   */
-  private static mapDietType(dietType: string): string {
-    const dietMap: Record<string, string> = {
-      Commercial: "Commercial",
-      Homemade: "Homemade",
-      Mixed: "Mixed",
-    };
-    return dietMap[dietType] || "Commercial";
-  }
-
-  /**
-   * Map environment from UI enum to API enum.
-   */
-  private static mapEnvironment(environment: string): string {
-    const envMap: Record<string, string> = {
-      Indoor: "Urban",
-      Outdoor: "Rural",
-      Mixed: "Suburban",
-      Suburban: "Suburban",
-      Rural: "Rural",
-      Urban: "Urban",
-    };
-    return envMap[environment] || "Suburban";
-  }
-
-  /**
-   * Extract the HTML payload from Gradio SSE response.
-   */
-  private static parseSSEResponse(sseText: string): string {
-    const lines = sseText.split("\n");
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const jsonStr = line.substring(6);
-        try {
-          const parsed = JSON.parse(jsonStr);
-          // Expected payload shape is either an array with HTML at index 0, or plain HTML.
-          if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-            return String(parsed[0]);
-          }
-          if (typeof parsed === "string") {
-            return parsed;
-          }
-        } catch {
-          continue;
-        }
-      }
-    }
-    throw new Error("No valid data found in SSE response");
-  }
-
-  /**
-   * Parse disease risk details from returned HTML.
-   */
-  private static parseHtmlResponse(
-    html: string,
-  ): Record<string, { riskLevel: string; probability: number }> {
-    const results: Record<string, { riskLevel: string; probability: number }> =
-      {};
-
-    const diseaseBlocks = html.split("<div style='margin: 15px 0;");
-
-    for (const block of diseaseBlocks) {
-      const nameMatch = block.match(/<h3[^>]*>([^<]+)<\/h3>/);
-      if (!nameMatch) continue;
-
-      const diseaseName = nameMatch[1].trim();
-
-      const riskMatch = block.match(/>([A-Z]+ RISK)<\/span>/);
-      const riskLevel = riskMatch ? riskMatch[1].replace(" RISK", "") : "LOW";
-
-      const probMatch = block.match(
-        /<strong>Probability:<\/strong>\s*([\d.]+)%/,
-      );
-      const probability = probMatch ? parseFloat(probMatch[1]) : 0;
-
-      const keyMap: Record<string, string> = {
-        "Tick Borne Disease": "Tick-Borne Disease",
-        "Tick-Borne Disease": "Tick-Borne Disease",
-        Filariasis: "Filariasis",
-        "Diabetes Mellitus Type2": "Diabetes Mellitus Type 2",
-        "Diabetes Mellitus Type 2": "Diabetes Mellitus Type 2",
-        "Obesity Related Metabolic Dysfunction":
-          "Obesity-Related Metabolic Dysfunction",
-        "Obesity-Related Metabolic Dysfunction":
-          "Obesity-Related Metabolic Dysfunction",
-        Urolithiasis: "Urolithiasis",
-      };
-
-      const normalizedName = keyMap[diseaseName] || diseaseName;
-
-      results[normalizedName] = {
-        riskLevel: riskLevel.charAt(0) + riskLevel.slice(1).toLowerCase(),
-        probability,
-      };
+    for (const c of candidates) {
+      if (c && typeof c === "object") return c as ModelLabelResult;
     }
 
-    return results;
+    return {};
   }
 
-  /**
-   * Convert parsed HTML content into domain output format.
-   */
-  private static transformHtmlResponse(
-    htmlResponse: string,
-    input: DiseasePredictionInput,
-  ): DiseasePredictionResult {
-    const predictions: SingleDiseasePrediction[] = [];
-    let highestRiskDisease: DiseaseType | null = null;
-    let highestProbability = 0;
-    let hasRisk = false;
-
-    const parsedData = this.parseHtmlResponse(htmlResponse);
+  private static pickGradioRowPredictions(payload: unknown):
+    | Array<{ disease: DiseaseType; probability: number; isPositive: boolean }>
+    | null {
+    if (!Array.isArray(payload) || payload.length < 1) return null;
+    const df = payload[0] as any;
+    if (!df || !Array.isArray(df.data)) return null;
 
     const diseases: DiseaseType[] = [
-      "Tick-Borne Disease",
-      "Filariasis",
-      "Diabetes Mellitus Type 2",
-      "Obesity-Related Metabolic Dysfunction",
+      "Diabetes",
+      "Pancreatitis",
+      "Hyperlipidemia",
       "Urolithiasis",
     ];
 
-    for (const diseaseName of diseases) {
-      const data = parsedData[diseaseName];
+    const out: Array<{
+      disease: DiseaseType;
+      probability: number;
+      isPositive: boolean;
+    }> = [];
 
-      if (data) {
-        const riskLevel = data.riskLevel as RiskLevel;
-        const probability = data.probability;
-
-        const prediction: SingleDiseasePrediction = {
-          disease: diseaseName,
-          probability,
-          risk_level: riskLevel,
-          is_positive:
-            riskLevel === "High" ||
-            (riskLevel === "Moderate" && probability >= 50),
-          key_indicators: this.getKeyIndicators(diseaseName, input),
-        };
-
-        predictions.push(prediction);
-
-        if (prediction.is_positive) hasRisk = true;
-        if (probability > highestProbability) {
-          highestProbability = probability;
-          highestRiskDisease = diseaseName;
-        }
-      }
+    for (const row of df.data as any[]) {
+      const name = row?.[0];
+      const prob = row?.[1];
+      const pred = row?.[3];
+      if (typeof name !== "string") continue;
+      if (!diseases.includes(name as DiseaseType)) continue;
+      const probability = typeof prob === "number" ? prob : Number(prob);
+      const isPositive = String(pred).toLowerCase().includes("at risk");
+      out.push({
+        disease: name as DiseaseType,
+        probability,
+        isPositive,
+      });
     }
 
-    const maxRisk = Math.max(...predictions.map((p) => p.probability), 0);
-    const healthyProb = Math.max(5, 100 - maxRisk);
-    predictions.push({
-      disease: "Healthy",
-      probability: healthyProb,
-      risk_level:
-        healthyProb >= 60 ? "Low" : healthyProb >= 30 ? "Moderate" : "High",
-      is_positive: healthyProb >= 50,
-      key_indicators: this.getKeyIndicators("Healthy", input),
-    });
+    if (out.length === 0) return null;
+    return out;
+  }
 
-    if (predictions.length <= 1) {
-      console.error("Failed to parse HTML response:", htmlResponse);
-      throw new Error("Failed to parse disease predictions from API response");
+  private static transformResponse(
+    payload: unknown,
+    input: DiseasePredictionInput,
+  ): DiseasePredictionResult {
+    const diseases: DiseaseType[] = [
+      "Diabetes",
+      "Pancreatitis",
+      "Hyperlipidemia",
+      "Urolithiasis",
+    ];
+
+    const predictions: SingleDiseasePrediction[] = [];
+    let hasRisk = false;
+    let highestRiskDisease: DiseaseType | null = null;
+    let highestProbability = -1;
+    let highestPositiveProbability = -1;
+
+    const gradioRows = this.pickGradioRowPredictions(payload);
+
+    for (const disease of diseases) {
+      const gradioRow = gradioRows?.find((r) => r.disease === disease);
+      const labelResult = gradioRow
+        ? ({
+            risk: gradioRow.isPositive ? 1 : 0,
+            probability: gradioRow.probability,
+          } as ModelLabelResult)
+        : this.pickLabelResult(payload as any, disease);
+
+      const probPct = normalizeProbability(labelResult.probability);
+      const risk = normalizeRisk(labelResult.risk, probPct);
+      const riskLevel: RiskLevel = risk === 1 ? "High" : "Low";
+      const isPositive = risk === 1;
+
+      const prediction: SingleDiseasePrediction = {
+        disease,
+        probability: probPct,
+        risk_level: riskLevel,
+        is_positive: isPositive,
+        key_indicators: this.getKeyIndicators(disease, input),
+      };
+
+      predictions.push(prediction);
+      if (isPositive) hasRisk = true;
+      if (isPositive && probPct > highestPositiveProbability) {
+        highestPositiveProbability = probPct;
+        highestRiskDisease = disease;
+      }
+      if (probPct > highestProbability) {
+        highestProbability = probPct;
+      }
     }
 
     const ageGroup = this.getAgeGroup(input.age_years);
     const weightStatus = this.getWeightStatus(input.body_condition_score);
     const riskFactorsCount = this.countRiskFactors(input);
-
     const recommendations = this.generateRecommendations(predictions, input);
 
     return {
       has_risk: hasRisk,
-      highest_risk_disease: highestRiskDisease,
+      highest_risk_disease: hasRisk ? highestRiskDisease : null,
       predictions: predictions.sort((a, b) => b.probability - a.probability),
       recommendations,
       pet_profile: {
@@ -309,117 +291,52 @@ export class MultiDiseaseApiService {
     };
   }
 
-  /**
-   * Build key indicators for each disease based on input signs.
-   */
   private static getKeyIndicators(
     disease: DiseaseType,
     input: DiseasePredictionInput,
   ): string[] {
     const indicators: string[] = [];
 
+    if (input.body_condition_score >= 7 &&
+        (input.activity_level === "Low" || input.activity_level === "Moderate")) {
+      indicators.push("Obesity + low/moderate activity");
+    }
+
     switch (disease) {
-      case "Tick-Borne Disease":
+      case "Diabetes":
+        if (input.age_years > 7) indicators.push("Senior age");
         if (
-          input.environment === "Rural" ||
-          input.environment === "Suburban" ||
-          input.environment === "Outdoor" ||
-          input.environment === "Mixed"
+          input.water_intake === "High" &&
+          input.urination === "Frequent" &&
+          input.appetite_change === "Increased"
         ) {
-          indicators.push("Outdoor/Rural environment exposure");
-        }
-        if (
-          input.tick_prevention === "None" ||
-          input.tick_prevention === "Irregular"
-        ) {
-          indicators.push("Inadequate tick prevention");
-        }
-        if (input.skin_lesions) {
-          indicators.push("Presence of skin lesions");
-        }
-        if (input.pale_gums) {
-          indicators.push("Pale gums (possible anemia)");
+          indicators.push("High thirst + frequent urination + increased appetite");
         }
         break;
-
-      case "Filariasis":
-        if (!input.heartworm_prevention) {
-          indicators.push("No heartworm prevention");
-        }
-        if (
-          input.environment === "Rural" ||
-          input.environment === "Suburban" ||
-          input.environment === "Outdoor" ||
-          input.environment === "Mixed"
-        ) {
-          indicators.push("Outdoor/Rural exposure");
-        }
-        if (input.pale_gums) {
-          indicators.push("Pale gums");
+      case "Pancreatitis":
+        if (input.fatty_food_frequency === "High") indicators.push("High fatty food intake");
+        if (input.vomiting === "Yes") indicators.push("Vomiting");
+        if (input.digestive_issues === "Mild" || input.digestive_issues === "Severe") {
+          indicators.push("Digestive issues");
         }
         break;
-
-      case "Diabetes Mellitus Type 2":
-        if (input.age_years >= 7) {
-          indicators.push("Senior/geriatric age");
-        }
-        if (input.body_condition_score >= 7) {
-          indicators.push("Overweight/obese");
-        }
-        if (input.polyuria) {
-          indicators.push("Excessive urination");
-        }
-        if (input.exercise_level === "Low") {
-          indicators.push("Low activity level");
-        }
+      case "Hyperlipidemia":
+        if (input.fatty_food_frequency === "High") indicators.push("High fatty food intake");
+        if (input.activity_level === "Low") indicators.push("Low activity");
+        if (input.body_condition_score >= 7) indicators.push("Overweight/obese BCS");
         break;
-
-      case "Obesity-Related Metabolic Dysfunction":
-        if (input.body_condition_score >= 6) {
-          indicators.push("Above ideal body condition");
-        }
-        if (input.exercise_level === "Low") {
-          indicators.push("Low exercise level");
-        }
-        if (input.diet_type === "Mixed" || input.diet_type === "Homemade") {
-          indicators.push("Diet type consideration");
-        }
-        break;
-
       case "Urolithiasis":
-        if (input.polyuria) {
-          indicators.push("Urinary symptoms");
-        }
-        if (input.diet_type !== "Commercial") {
-          indicators.push("Non-commercial diet");
-        }
-        if (input.sex === "Male") {
-          indicators.push("Male sex (higher risk)");
-        }
-        break;
-
-      case "Healthy":
-        if (
-          input.body_condition_score >= 4 &&
-          input.body_condition_score <= 5
-        ) {
-          indicators.push("Ideal body condition");
-        }
-        if (input.tick_prevention === "Regular" && input.heartworm_prevention) {
-          indicators.push("Good preventive care");
-        }
-        if (input.exercise_level !== "Low") {
-          indicators.push("Active lifestyle");
+        if (input.water_intake === "Low") indicators.push("Low water intake");
+        if (input.urination === "Frequent" || input.urination === "Difficult") {
+          indicators.push("Urination changes");
         }
         break;
     }
 
+    if (input.lethargy === "Yes") indicators.push("Lethargy");
     return indicators;
   }
 
-  /**
-   * Convert age in years to an age-group label.
-   */
   private static getAgeGroup(
     age: number,
   ): "Puppy" | "Adult" | "Senior" | "Geriatric" {
@@ -429,9 +346,6 @@ export class MultiDiseaseApiService {
     return "Geriatric";
   }
 
-  /**
-   * Convert body condition score to weight status.
-   */
   private static getWeightStatus(
     bcs: number,
   ): "Underweight" | "Ideal" | "Overweight" | "Obese" {
@@ -441,135 +355,71 @@ export class MultiDiseaseApiService {
     return "Obese";
   }
 
-  /**
-   * Count the number of present risk factors.
-   */
   private static countRiskFactors(input: DiseasePredictionInput): number {
     let count = 0;
 
     if (input.age_years >= 8) count++;
-    if (input.body_condition_score <= 3 || input.body_condition_score >= 7)
-      count++;
-    if (input.pale_gums) count++;
-    if (input.skin_lesions) count++;
-    if (input.polyuria) count++;
-    if (input.tick_prevention !== "Regular") count++;
-    if (!input.heartworm_prevention) count++;
-    if (input.exercise_level === "Low") count++;
-    if (input.environment === "Rural" || input.environment === "Outdoor")
-      count++;
+    if (input.body_condition_score >= 7) count++;
+    if (input.activity_level === "Low") count++;
+    if (input.daily_exercise_minutes < 20) count++;
+    if (input.fatty_food_frequency === "High") count++;
+    if (input.water_intake === "Low") count++;
+    if (input.urination !== "Normal") count++;
+    if (input.vomiting === "Yes") count++;
+    if (input.digestive_issues !== "None") count++;
+    if (input.lethargy === "Yes") count++;
 
     return count;
   }
 
-  /**
-   * Generate actionable recommendations from risk predictions.
-   */
   private static generateRecommendations(
     predictions: SingleDiseasePrediction[],
     input: DiseasePredictionInput,
   ): string[] {
     const recommendations: string[] = [];
 
-    const highRiskDiseases = predictions.filter(
-      (p) => p.risk_level === "High" && p.disease !== "Healthy",
-    );
-
-    if (highRiskDiseases.length > 0) {
+    const positive = predictions.filter((p) => p.is_positive);
+    if (positive.length > 0) {
       recommendations.push(
-        "🏥 Schedule an immediate veterinary consultation for comprehensive examination",
+        "🏥 Schedule a veterinary consultation for confirmation and next steps",
       );
     }
 
-    for (const prediction of predictions) {
-      if (prediction.risk_level === "High" || prediction.is_positive) {
-        switch (prediction.disease) {
-          case "Tick-Borne Disease":
-            recommendations.push(
-              "🔬 Request tick-borne disease panel blood test",
-            );
-            if (input.tick_prevention !== "Regular") {
-              recommendations.push(
-                "🛡️ Start regular tick prevention treatment",
-              );
-            }
-            break;
-          case "Filariasis":
-            recommendations.push("🔬 Request heartworm antigen test");
-            if (!input.heartworm_prevention) {
-              recommendations.push("💊 Begin heartworm prevention medication");
-            }
-            break;
-          case "Diabetes Mellitus Type 2":
-            recommendations.push(
-              "🩸 Request blood glucose and fructosamine tests",
-            );
-            recommendations.push(
-              "📊 Monitor water intake and urination patterns",
-            );
-            break;
-          case "Obesity-Related Metabolic Dysfunction":
-            recommendations.push("⚖️ Implement a weight management program");
-            recommendations.push("🏃 Increase daily exercise gradually");
-            break;
-          case "Urolithiasis":
-            recommendations.push("💧 Encourage increased water intake");
-            recommendations.push("🔬 Request urinalysis and possibly imaging");
-            break;
-        }
+    for (const prediction of positive) {
+      switch (prediction.disease) {
+        case "Diabetes":
+          recommendations.push("🩸 Request blood glucose evaluation");
+          recommendations.push("📊 Monitor water intake and urination");
+          break;
+        case "Pancreatitis":
+          recommendations.push("🥗 Avoid high-fat foods and treats");
+          recommendations.push("🔬 Discuss pancreatitis blood tests with your vet");
+          break;
+        case "Hyperlipidemia":
+          recommendations.push("🧪 Consider a lipid profile blood test");
+          recommendations.push("⚖️ Start a guided weight management plan");
+          break;
+        case "Urolithiasis":
+          recommendations.push("💧 Encourage increased water intake");
+          recommendations.push("🔬 Consider urinalysis and imaging if advised");
+          break;
       }
     }
 
-    if (input.body_condition_score >= 6) {
-      recommendations.push("🥗 Consider adjusting diet portions and quality");
+    if (input.body_condition_score >= 7) {
+      recommendations.push("⚖️ Reduce calories with vet-approved diet plan");
     }
 
-    if (input.exercise_level === "Low") {
-      recommendations.push("🚶 Gradually increase daily physical activity");
-    }
-
-    if (input.age_years >= 7) {
-      recommendations.push(
-        "📅 Schedule more frequent senior wellness checkups",
-      );
+    if (input.activity_level === "Low") {
+      recommendations.push("🚶 Increase daily exercise gradually");
     }
 
     if (recommendations.length === 0) {
-      recommendations.push("✅ Continue current preventive care routine");
-      recommendations.push("📅 Maintain regular veterinary checkups");
-      recommendations.push("🏃 Keep up the healthy lifestyle");
+      recommendations.push("✅ Maintain a balanced diet and regular exercise");
+      recommendations.push("📅 Keep routine wellness checks");
     }
 
     return [...new Set(recommendations)];
-  }
-
-  /**
-   * Check API availability.
-   */
-  static async healthCheck(): Promise<{ status: string }> {
-    try {
-      if (!MULTI_DISEASE_API_URL) {
-        throw new Error("NEXT_PUBLIC_MULTI_DISEASE_API_URL is not configured");
-      }
-      const response = await fetch(`${MULTI_DISEASE_API_URL}/`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Multi-disease API health check failed:", error);
-      return { status: "unhealthy" };
-    }
-  }
-
-  /**
-   * Simulate predictions for local development/testing.
-   */
-  static async mockPredict(
-    input: DiseasePredictionInput,
-  ): Promise<DiseasePredictionResult> {
-    return this.predictDiseases(input);
   }
 }
 
