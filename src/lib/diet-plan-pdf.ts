@@ -195,6 +195,18 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   if (plan.breed_size_category) {
     drawField("Breed Size Category", plan.breed_size_category);
   }
+  if (plan.reference_body_weight_kg != null) {
+    drawField("Weight Used", `${plan.reference_body_weight_kg} kg`);
+  }
+  if (plan.total_daily_amount_g != null) {
+    drawField("Total Daily Amount", `${plan.total_daily_amount_g} g`);
+  }
+  if (plan.total_daily_amount_g_per_kg_body_weight != null) {
+    drawField(
+      "Total Daily Amount (g/kg)",
+      String(plan.total_daily_amount_g_per_kg_body_weight),
+    );
+  }
   y += 2;
 
   // 2. Goal
@@ -235,9 +247,14 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     const items = plan.feeding_plan
       .map((item: any) => {
         const name = item?.food_item ? String(item.food_item) : "-";
+        const role = item?.role ? String(item.role) : null;
         const amount = item?.amount_g != null ? `${item.amount_g} g` : "-";
+        const perKg =
+          item?.amount_g_per_kg_body_weight != null
+            ? `${item.amount_g_per_kg_body_weight} g/kg`
+            : null;
         const calories = item?.calories != null ? `${item.calories} kcal` : "-";
-        return [name, amount, calories].filter(Boolean).join(" • ");
+        return [name, role, amount, perKg, calories].filter(Boolean).join(" • ");
       })
       .filter(Boolean);
     if (items.length > 0) {
@@ -296,20 +313,6 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     drawSectionHeader("Portion & Calorie Guidance");
     drawField("Portion Rule", plan.portion_and_calorie_guidance?.portion_rule);
     drawField("Review Interval", plan.portion_and_calorie_guidance?.review_interval);
-    if (plan.portion_and_calorie_guidance?.calorie_adjustment) {
-      const items = Object.entries(
-        plan.portion_and_calorie_guidance.calorie_adjustment as Record<string, unknown>,
-      )
-        .map(([key, value]) => {
-          if (value === null || value === undefined || String(value).trim() === "") return null;
-          return `${humanizeKey(key)}: ${String(value)}`;
-        })
-        .filter(Boolean) as string[];
-      if (items.length > 0) {
-        drawSectionHeader("Calorie Adjustment");
-        drawBulletList(items, "-");
-      }
-    }
   }
 
   // 11. Supplement Guidance
@@ -345,20 +348,6 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
       "-",
     );
   }
-
-  // Glossary (for common abbreviations used in targets/guidance)
-  drawSectionHeader("Glossary");
-  drawBulletList(
-    [
-      "RER: Resting Energy Requirement (baseline calories needed at rest).",
-      "MER: Maintenance Energy Requirement (estimated daily calories to maintain body weight).",
-      "MER ~= 1.6 x RER means MER is estimated as 1.6 times RER (a common general multiplier; it may vary by age/activity/neuter status).",
-      "DM: Dry Matter (nutrition values expressed with water removed, used to compare foods with different moisture levels).",
-      "IU/kg DM: International Units per kilogram of dry matter.",
-      "EPA + DHA: Omega-3 fatty acids (eicosapentaenoic acid + docosahexaenoic acid). ~0.1-0.2% DM means the combined EPA + DHA target is about 0.1-0.2% of the diet on a dry-matter basis.",
-    ],
-    "-",
-  );
 
   // Legacy fields (if present) for backward compatibility
   if (plan.Nutrition_Profile) {

@@ -57,6 +57,7 @@ export interface DietPlan {
   feeding_plan?: Array<{
     food_item?: string | null;
     amount_g?: number | null;
+    amount_g_per_kg_body_weight?: number | null;
     calories?: number | null;
     role?: string | null;
   }> | null;
@@ -91,6 +92,10 @@ export interface DietPlan {
     clinical_flags?: string[] | null;
   } | null;
   veterinary_review_required_for?: string[] | null;
+
+  reference_body_weight_kg?: number | null;
+  total_daily_amount_g?: number | null;
+  total_daily_amount_g_per_kg_body_weight?: number | null;
 }
 
 export const TOXIC_FOODS: string[] = [];
@@ -249,6 +254,8 @@ export function generateDietPlan(
 
   // Populate plan from matched diet (new KB schema)
   if (matched?.diet) {
+    const weightUsedKg = Number(input.weightKg);
+
     plan.kbBreed = matched.breedData?.breed || null;
     plan.kbDietType = matched.dietType || null;
 
@@ -264,7 +271,9 @@ export function generateDietPlan(
     plan.dietary_recommendations = matched.diet.dietary_recommendations || null;
     plan.nutrition_targets = matched.diet.nutrition_targets || null;
     plan.meals_per_day = matched.diet.meals_per_day || null;
-    plan.feeding_plan = matched.diet.feeding_plan || null;
+    plan.feeding_plan = Array.isArray(matched.diet.feeding_plan)
+      ? matched.diet.feeding_plan
+      : null;
     plan.hydration = matched.diet.hydration || null;
     plan.energy_kcal = matched.diet.energy_kcal || null;
     plan.micronutrient_profile = matched.diet.micronutrient_profile || null;
@@ -282,6 +291,70 @@ export function generateDietPlan(
     plan.monitoring_metrics = matched.diet.monitoring_metrics || null;
     plan.veterinary_review_required_for =
       matched.diet.veterinary_review_required_for || null;
+
+    // Use the pet's actual weight (from DB) as the weight used for plan amounts.
+    // The KB provides g/kg guidance; we scale grams and calories linearly.
+    plan.reference_body_weight_kg = Number.isFinite(weightUsedKg)
+      ? weightUsedKg
+      : null;
+
+    plan.total_daily_amount_g_per_kg_body_weight =
+      matched.diet.total_daily_amount_g_per_kg_body_weight ?? null;
+
+    if (
+      plan.reference_body_weight_kg != null &&
+      typeof plan.total_daily_amount_g_per_kg_body_weight === "number" &&
+      Number.isFinite(plan.total_daily_amount_g_per_kg_body_weight)
+    ) {
+      plan.total_daily_amount_g = Math.round(
+        plan.total_daily_amount_g_per_kg_body_weight *
+          plan.reference_body_weight_kg,
+      );
+    } else {
+      plan.total_daily_amount_g = matched.diet.total_daily_amount_g ?? null;
+    }
+
+    if (
+      plan.reference_body_weight_kg != null &&
+      Array.isArray(plan.feeding_plan) &&
+      plan.feeding_plan.length > 0
+    ) {
+      plan.feeding_plan = plan.feeding_plan.map((item: any) => {
+        const perKg = item?.amount_g_per_kg_body_weight;
+        if (typeof perKg !== "number" || !Number.isFinite(perKg)) return item;
+
+        const scaledAmount = Math.round(perKg * plan.reference_body_weight_kg!);
+
+        let scaledCalories = item?.calories ?? null;
+        const baseAmount = item?.amount_g;
+        const baseCalories = item?.calories;
+        if (
+          typeof baseAmount === "number" &&
+          Number.isFinite(baseAmount) &&
+          baseAmount > 0 &&
+          typeof baseCalories === "number" &&
+          Number.isFinite(baseCalories)
+        ) {
+          scaledCalories = Math.round(baseCalories * (scaledAmount / baseAmount));
+        }
+
+        return {
+          ...item,
+          amount_g: scaledAmount,
+          calories: scaledCalories,
+        };
+      });
+
+      // If total wasn't available via per-kg totals, fall back to sum of scaled items.
+      if (plan.total_daily_amount_g == null) {
+        const sum = plan.feeding_plan.reduce((acc: number, item: any) => {
+          const amt = item?.amount_g;
+          if (typeof amt === "number" && Number.isFinite(amt)) return acc + amt;
+          return acc;
+        }, 0);
+        plan.total_daily_amount_g = sum > 0 ? Math.round(sum) : null;
+      }
+    }
   }
 
   return plan;
