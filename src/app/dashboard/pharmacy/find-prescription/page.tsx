@@ -252,15 +252,16 @@ function FindFromPrescriptionModule() {
     setMatchedProducts([]);
 
     try {
-      const lines = validItems.map(
-        (i) => `${i.name.trim()} × ${i.quantity}`,
-      );
+      const lines = validItems.map((i) => `${i.name.trim()} × ${i.quantity}`);
       const combinedText = [extractedText?.trim(), ...lines]
         .filter(Boolean)
         .join("\n");
       const textPayload =
         combinedText ||
-        validItems.map((i) => i.name.trim()).filter(Boolean).join(", ");
+        validItems
+          .map((i) => i.name.trim())
+          .filter(Boolean)
+          .join(", ");
 
       const res = await fetch("/api/pharmacies/by-prescription", {
         method: "POST",
@@ -283,7 +284,9 @@ function FindFromPrescriptionModule() {
         );
       } else {
         setError(null);
-        const genericCount = products.filter((p: { matched_via_generic?: boolean }) => p.matched_via_generic).length;
+        const genericCount = products.filter(
+          (p: { matched_via_generic?: boolean }) => p.matched_via_generic,
+        ).length;
         setSuccess(
           genericCount > 0
             ? `Found ${products.length} product${products.length > 1 ? "s" : ""} (${genericCount} matched via generic name lookup).`
@@ -293,7 +296,9 @@ function FindFromPrescriptionModule() {
     } catch (err) {
       console.error("Error finding products:", err);
       setError(
-        err instanceof Error ? err.message : "Failed to find products. Please try again.",
+        err instanceof Error
+          ? err.message
+          : "Failed to find products. Please try again.",
       );
     } finally {
       setSearching(false);

@@ -153,7 +153,8 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   const drawKeyValueObject = (title: string, obj: unknown) => {
     if (!obj || typeof obj !== "object") return;
     const entries = Object.entries(obj as Record<string, unknown>).filter(
-      ([, value]) => value !== null && value !== undefined && String(value).trim() !== "",
+      ([, value]) =>
+        value !== null && value !== undefined && String(value).trim() !== "",
     );
     if (entries.length === 0) return;
     drawSectionHeader(title);
@@ -163,7 +164,11 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     y += 2;
   };
 
-  const drawStringListSection = (title: string, items: unknown, marker = "-") => {
+  const drawStringListSection = (
+    title: string,
+    items: unknown,
+    marker = "-",
+  ) => {
     if (!Array.isArray(items) || items.length === 0) return;
     const safeItems = items
       .map((item) => String(item || "").trim())
@@ -223,14 +228,20 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     doc.setTextColor(...mutedText);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    drawWrappedText(plan.dietary_recommendations, margin + 10, maxWidth - 16, 20);
+    drawWrappedText(
+      plan.dietary_recommendations,
+      margin + 10,
+      maxWidth - 16,
+      20,
+    );
     y += 2;
   }
 
   // 4. Nutrition Targets
   if (plan.nutrition_targets && typeof plan.nutrition_targets === "object") {
     const entries = Object.entries(plan.nutrition_targets).filter(
-      ([, value]) => value !== null && value !== undefined && String(value).trim() !== "",
+      ([, value]) =>
+        value !== null && value !== undefined && String(value).trim() !== "",
     );
     if (entries.length > 0) {
       drawSectionHeader("Nutrition Targets");
@@ -254,7 +265,9 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
             ? `${item.amount_g_per_kg_body_weight} g/kg`
             : null;
         const calories = item?.calories != null ? `${item.calories} kcal` : "-";
-        return [name, role, amount, perKg, calories].filter(Boolean).join(" • ");
+        return [name, role, amount, perKg, calories]
+          .filter(Boolean)
+          .join(" • ");
       })
       .filter(Boolean);
     if (items.length > 0) {
@@ -265,15 +278,23 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
 
   // 6. Food Options
   if (
-    (Array.isArray(plan.commercial_food_options) && plan.commercial_food_options.length > 0) ||
-    (Array.isArray(plan.homemade_food_options) && plan.homemade_food_options.length > 0)
+    (Array.isArray(plan.commercial_food_options) &&
+      plan.commercial_food_options.length > 0) ||
+    (Array.isArray(plan.homemade_food_options) &&
+      plan.homemade_food_options.length > 0)
   ) {
     drawSectionHeader("Food Options");
-    if (Array.isArray(plan.commercial_food_options) && plan.commercial_food_options.length > 0) {
+    if (
+      Array.isArray(plan.commercial_food_options) &&
+      plan.commercial_food_options.length > 0
+    ) {
       drawSectionHeader("Commercial");
       drawBulletList(plan.commercial_food_options, "+");
     }
-    if (Array.isArray(plan.homemade_food_options) && plan.homemade_food_options.length > 0) {
+    if (
+      Array.isArray(plan.homemade_food_options) &&
+      plan.homemade_food_options.length > 0
+    ) {
       drawSectionHeader("Homemade");
       drawBulletList(plan.homemade_food_options, "+");
     }
@@ -287,7 +308,8 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   ) {
     drawSectionHeader("Micronutrient Profile");
     for (const [key, value] of Object.entries(plan.micronutrient_profile)) {
-      if (value === null || value === undefined || String(value).trim() === "") continue;
+      if (value === null || value === undefined || String(value).trim() === "")
+        continue;
       drawField(humanizeKey(key), String(value));
     }
     y += 2;
@@ -303,7 +325,10 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   // 9. Meal Timing
   if (plan.meal_timing_guidance) {
     drawSectionHeader("Meal Timing");
-    drawField("Feeding Frequency", plan.meal_timing_guidance?.feeding_frequency);
+    drawField(
+      "Feeding Frequency",
+      plan.meal_timing_guidance?.feeding_frequency,
+    );
     drawField("Meal Spacing", plan.meal_timing_guidance?.meal_spacing);
     drawField("Bloat Precaution", plan.meal_timing_guidance?.bloat_precaution);
   }
@@ -312,7 +337,10 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   if (plan.portion_and_calorie_guidance) {
     drawSectionHeader("Portion & Calorie Guidance");
     drawField("Portion Rule", plan.portion_and_calorie_guidance?.portion_rule);
-    drawField("Review Interval", plan.portion_and_calorie_guidance?.review_interval);
+    drawField(
+      "Review Interval",
+      plan.portion_and_calorie_guidance?.review_interval,
+    );
   }
 
   // 11. Supplement Guidance
@@ -322,7 +350,11 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   if (plan.food_safety) {
     drawSectionHeader("Food Safety");
     drawField("Treat Limit", plan.food_safety?.treat_limit);
-    drawStringListSection("Avoid Toxic Foods", plan.food_safety?.avoid_toxic_foods, "-");
+    drawStringListSection(
+      "Avoid Toxic Foods",
+      plan.food_safety?.avoid_toxic_foods,
+      "-",
+    );
     drawStringListSection(
       "Preparation Rules",
       plan.food_safety?.preparation_rules,
@@ -331,7 +363,10 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   }
 
   // 13. Allergy & Sensitivity
-  drawKeyValueObject("Allergy & Sensitivity", plan.allergy_and_sensitivity_rules);
+  drawKeyValueObject(
+    "Allergy & Sensitivity",
+    plan.allergy_and_sensitivity_rules,
+  );
 
   // 14. Transition Plan
   drawKeyValueObject("Transition Plan", plan.transition_plan);
@@ -339,7 +374,10 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
   // 15. Monitoring
   if (plan.monitoring_metrics) {
     drawSectionHeader("Monitoring");
-    drawField("Body Condition Score", plan.monitoring_metrics?.body_condition_score);
+    drawField(
+      "Body Condition Score",
+      plan.monitoring_metrics?.body_condition_score,
+    );
     drawField("Weight Tracking", plan.monitoring_metrics?.weight_tracking);
     drawField("Stool Score", plan.monitoring_metrics?.stool_score);
     drawStringListSection(

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import { VetLinkLogo } from "@/components/brand/VetLinkLogo";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { LogIn, Menu, Sparkles, UserPlus, X, Brain } from "lucide-react";
 
@@ -58,7 +58,7 @@ export default function Navigation() {
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-18 lg:h-20">
+        <div className="flex justify-between items-center min-h-[5.25rem] sm:min-h-[5.75rem] lg:min-h-28 py-2">
           {/* Logo */}
           <motion.div
             className="flex items-center"
@@ -82,12 +82,10 @@ export default function Navigation() {
                     ease: "easeInOut",
                   }}
                 />
-                <Image
-                  src="/vetlink_logo.png"
-                  alt="VetLink Logo"
-                  width={160}
-                  height={56}
-                  className="relative h-10 sm:h-11 lg:h-12 w-auto opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                <VetLinkLogo
+                  variant="light"
+                  size="xl"
+                  className="relative opacity-95 group-hover:opacity-100 transition-opacity duration-300"
                   priority
                 />
               </div>

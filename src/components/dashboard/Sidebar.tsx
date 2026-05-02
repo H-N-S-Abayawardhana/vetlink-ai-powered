@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { VetLinkLogo } from "@/components/brand/VetLinkLogo";
 import { useSession } from "next-auth/react";
 import type { ComponentType, SVGProps } from "react";
 import type { UserRole } from "@/types/next-auth";
@@ -418,17 +418,10 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 flex-shrink-0">
+        <div className="flex items-center justify-between min-h-[5rem] py-2 px-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Image
-                src="/vetlink_logo.png"
-                alt="VetLink Logo"
-                width={100}
-                height={32}
-                className="h-8 w-auto"
-                priority
-              />
+              <VetLinkLogo variant="light" size="lg" priority />
             </div>
           </div>
           <button
@@ -460,18 +453,24 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-blue-600">
-                  {(session?.user as any)?.username?.charAt(0).toUpperCase() || 
-                   session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                  {(session?.user as any)?.username?.charAt(0).toUpperCase() ||
+                    session?.user?.name?.charAt(0).toUpperCase() ||
+                    "U"}
                 </span>
               </div>
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-900">
-                {(session?.user as any)?.username || session?.user?.name || 'User'}
+                {(session?.user as any)?.username ||
+                  session?.user?.name ||
+                  "User"}
               </p>
               <p className="text-xs text-gray-500">
-                {userRole === 'SUPER_ADMIN' ? 'Super Admin' : 
-                 userRole === 'VETERINARIAN' ? 'Veterinarian' : 'User'}
+                {userRole === "SUPER_ADMIN"
+                  ? "Super Admin"
+                  : userRole === "VETERINARIAN"
+                    ? "Veterinarian"
+                    : "User"}
               </p>
             </div>
           </div>

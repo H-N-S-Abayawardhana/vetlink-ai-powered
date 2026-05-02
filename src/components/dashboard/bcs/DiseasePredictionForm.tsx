@@ -279,15 +279,9 @@ export default function DiseasePredictionForm({
     // Auto-fill diet type from preferred diet
     if (petPreferredDiet) {
       const dietLower = petPreferredDiet.toLowerCase();
-      if (
-        dietLower.includes("dry") ||
-        dietLower.includes("kibble")
-      ) {
+      if (dietLower.includes("dry") || dietLower.includes("kibble")) {
         initial.diet_type = "Dry";
-      } else if (
-        dietLower.includes("wet") ||
-        dietLower.includes("canned")
-      ) {
+      } else if (dietLower.includes("wet") || dietLower.includes("canned")) {
         initial.diet_type = "Wet";
       } else if (dietLower.includes("mixed") || dietLower.includes("both")) {
         initial.diet_type = "Mixed";
@@ -401,8 +395,9 @@ export default function DiseasePredictionForm({
             Pet profile incomplete
           </h3>
           <p className="text-sm text-gray-600 mb-6">
-            Please ensure {petName || "your pet"} has age, weight, and spay/neuter
-            status saved in the pet profile before running the assessment.
+            Please ensure {petName || "your pet"} has age, weight, and
+            spay/neuter status saved in the pet profile before running the
+            assessment.
           </p>
           <button
             onClick={onCancel}

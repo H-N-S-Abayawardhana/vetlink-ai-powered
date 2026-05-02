@@ -189,9 +189,12 @@ function findMatchingDiet(
   const diets = breedData?.diets;
   if (!breedData || !diets || typeof diets !== "object") return null;
 
-  const mappedCalorieLevel = mapCalorieLevel(predictions?.calorie_level || null);
+  const mappedCalorieLevel = mapCalorieLevel(
+    predictions?.calorie_level || null,
+  );
 
-  const inferredLifeStage = input.lifeStage || estimateLifeStage(input.ageYears);
+  const inferredLifeStage =
+    input.lifeStage || estimateLifeStage(input.ageYears);
   const bcsCategory = bcsCategoryFromScore(input.bcs);
 
   const inferredDietType =
@@ -260,7 +263,9 @@ export function generateDietPlan(
     plan.kbDietType = matched.dietType || null;
 
     plan.breed_size_category =
-      matched.diet.breed_size_category || matched.breedData?.breed_size_category || null;
+      matched.diet.breed_size_category ||
+      matched.breedData?.breed_size_category ||
+      null;
     plan.breed_specific_considerations =
       matched.diet.breed_specific_considerations ||
       matched.breedData?.breed_specific_considerations ||
@@ -335,7 +340,9 @@ export function generateDietPlan(
           typeof baseCalories === "number" &&
           Number.isFinite(baseCalories)
         ) {
-          scaledCalories = Math.round(baseCalories * (scaledAmount / baseAmount));
+          scaledCalories = Math.round(
+            baseCalories * (scaledAmount / baseAmount),
+          );
         }
 
         return {

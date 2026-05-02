@@ -181,9 +181,13 @@ export class MultiDiseaseApiService {
     return {};
   }
 
-  private static pickGradioRowPredictions(payload: unknown):
-    | Array<{ disease: DiseaseType; probability: number; isPositive: boolean }>
-    | null {
+  private static pickGradioRowPredictions(
+    payload: unknown,
+  ): Array<{
+    disease: DiseaseType;
+    probability: number;
+    isPositive: boolean;
+  }> | null {
     if (!Array.isArray(payload) || payload.length < 1) return null;
     const df = payload[0] as any;
     if (!df || !Array.isArray(df.data)) return null;
@@ -297,8 +301,10 @@ export class MultiDiseaseApiService {
   ): string[] {
     const indicators: string[] = [];
 
-    if (input.body_condition_score >= 7 &&
-        (input.activity_level === "Low" || input.activity_level === "Moderate")) {
+    if (
+      input.body_condition_score >= 7 &&
+      (input.activity_level === "Low" || input.activity_level === "Moderate")
+    ) {
       indicators.push("Obesity + low/moderate activity");
     }
 
@@ -310,20 +316,28 @@ export class MultiDiseaseApiService {
           input.urination === "Frequent" &&
           input.appetite_change === "Increased"
         ) {
-          indicators.push("High thirst + frequent urination + increased appetite");
+          indicators.push(
+            "High thirst + frequent urination + increased appetite",
+          );
         }
         break;
       case "Pancreatitis":
-        if (input.fatty_food_frequency === "High") indicators.push("High fatty food intake");
+        if (input.fatty_food_frequency === "High")
+          indicators.push("High fatty food intake");
         if (input.vomiting === "Yes") indicators.push("Vomiting");
-        if (input.digestive_issues === "Mild" || input.digestive_issues === "Severe") {
+        if (
+          input.digestive_issues === "Mild" ||
+          input.digestive_issues === "Severe"
+        ) {
           indicators.push("Digestive issues");
         }
         break;
       case "Hyperlipidemia":
-        if (input.fatty_food_frequency === "High") indicators.push("High fatty food intake");
+        if (input.fatty_food_frequency === "High")
+          indicators.push("High fatty food intake");
         if (input.activity_level === "Low") indicators.push("Low activity");
-        if (input.body_condition_score >= 7) indicators.push("Overweight/obese BCS");
+        if (input.body_condition_score >= 7)
+          indicators.push("Overweight/obese BCS");
         break;
       case "Urolithiasis":
         if (input.water_intake === "Low") indicators.push("Low water intake");
@@ -393,7 +407,9 @@ export class MultiDiseaseApiService {
           break;
         case "Pancreatitis":
           recommendations.push("🥗 Avoid high-fat foods and treats");
-          recommendations.push("🔬 Discuss pancreatitis blood tests with your vet");
+          recommendations.push(
+            "🔬 Discuss pancreatitis blood tests with your vet",
+          );
           break;
         case "Hyperlipidemia":
           recommendations.push("🧪 Consider a lipid profile blood test");

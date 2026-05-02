@@ -382,7 +382,10 @@ export default function PharmacyInventoryPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap max-w-[140px]">
-                            <div className="text-sm text-gray-600 truncate" title={item.generic_name || ""}>
+                            <div
+                              className="text-sm text-gray-600 truncate"
+                              title={item.generic_name || ""}
+                            >
                               {item.generic_name?.trim() || "—"}
                             </div>
                           </td>
@@ -693,7 +696,8 @@ function InventoryItemModal({
             />
             <p className="text-xs text-gray-500 mt-1">
               Used to match prescriptions written with the generic or a brand
-              name. New items auto-resolve if left empty and OpenAI is configured.
+              name. New items auto-resolve if left empty and OpenAI is
+              configured.
             </p>
           </div>
 

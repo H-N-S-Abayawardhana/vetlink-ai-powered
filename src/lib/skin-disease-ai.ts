@@ -177,6 +177,7 @@ async function callOpenAi(
   prompt: string,
   maxOutputTokens: number,
 ): Promise<TextGenerationResult> {
+  const model = process.env.OPENAI_CHAT_MODEL?.trim() || "gpt-4o-mini";
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -184,7 +185,7 @@ async function callOpenAi(
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model,
       temperature: 0.7,
       max_tokens: maxOutputTokens,
       messages: [
@@ -231,47 +232,36 @@ export function parseProviderErrorMessage(
   return fallback;
 }
 
-function isGeminiQuotaError(error: unknown): boolean {
-  if (!(error instanceof AiProviderError) || error.provider !== "gemini") {
-    return false;
-  }
-
-  if (error.status === 429) {
-    return true;
-  }
-
-  return /(quota|resource_exhausted|rate limit|too many requests|exceeded)/i.test(
-    `${error.message}\n${error.raw}`,
-  );
-}
-
 export async function generateSkinDiseaseText(
   prompt: string,
   maxOutputTokens: number,
 ): Promise<TextGenerationResult> {
-  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
   const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
+  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 
-  if (!geminiApiKey && !openAiApiKey) {
-    throw new Error("Neither Gemini nor OpenAI API key is configured");
+  if (!openAiApiKey && !geminiApiKey) {
+    throw new Error(
+      "No LLM API key configured. Set OPENAI_API_KEY (recommended) or GEMINI_API_KEY.",
+    );
   }
 
-  if (geminiApiKey) {
+  /** Prefer OpenAI for skin disease guidance / care copy (Vetlink default). */
+  if (openAiApiKey) {
     try {
-      return await callGemini(geminiApiKey, prompt, maxOutputTokens);
+      return await callOpenAi(openAiApiKey, prompt, maxOutputTokens);
     } catch (error) {
-      if (openAiApiKey && isGeminiQuotaError(error)) {
+      if (geminiApiKey) {
         console.warn(
-          "Gemini quota exceeded for skin disease AI route. Falling back to OpenAI.",
+          "OpenAI failed for skin disease AI; falling back to Gemini.",
+          error,
         );
-        return callOpenAi(openAiApiKey, prompt, maxOutputTokens);
+        return callGemini(geminiApiKey, prompt, maxOutputTokens);
       }
-
       throw error;
     }
   }
 
-  return callOpenAi(openAiApiKey!, prompt, maxOutputTokens);
+  return callGemini(geminiApiKey!, prompt, maxOutputTokens);
 }
 
 export function formatSkinDiseaseAiError(
