@@ -55,6 +55,7 @@ function FindFromPrescriptionModule() {
     Array<{
       id: string;
       name: string;
+      generic_name?: string;
       form: string;
       strength: string;
       stock: number;
@@ -67,6 +68,7 @@ function FindFromPrescriptionModule() {
       pickup_available: boolean;
       delivery_available: boolean;
       delivery_fee: number;
+      matched_via_generic?: boolean;
     }>
   >([]);
   const [loadingPharmacies, setLoadingPharmacies] = useState(false);
@@ -189,6 +191,9 @@ function FindFromPrescriptionModule() {
           setAvailableProducts(pharmData.products);
         } else {
           setAvailableProducts([]);
+          if (!pharmRes.ok && pharmData?.error) {
+            setError(String(pharmData.error));
+          }
         }
       } catch {
         setAvailableProducts([]);
@@ -235,155 +240,6 @@ function FindFromPrescriptionModule() {
     setExtractedItems(extractedItems.filter((_, i) => i !== index));
   };
 
-  // Dummy pharmacies data
-  const dummyPharmacies = [
-    {
-      id: "11111111-1111-1111-1111-111111111111",
-      name: "HealthPlus Pharmacy",
-      address: "123 Main Street, Colombo 05",
-    },
-    {
-      id: "22222222-2222-2222-2222-222222222222",
-      name: "VetCare Pharmacy",
-      address: "456 Galle Road, Colombo 03",
-    },
-    {
-      id: "33333333-3333-3333-3333-333333333333",
-      name: "PetMed Express",
-      address: "789 Kandy Road, Kandy",
-    },
-  ];
-
-  // Dummy products data
-  const dummyProducts = [
-    {
-      id: "1",
-      uuid: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-      name: "Amoxicillin",
-      form: "Capsule",
-      strength: "250 mg",
-      stock: 120,
-      price: 450.0,
-      expiry: "2026-11-01",
-      image: "/uploads/pharmacy/Amoxicillin.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo 05",
-    },
-    {
-      id: "2",
-      uuid: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-      name: "Prednisone",
-      form: "Tablet",
-      strength: "5 mg",
-      stock: 40,
-      price: 650.0,
-      expiry: "2027-02-15",
-      image: "/uploads/pharmacy/Prednisone.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo 05",
-    },
-    {
-      id: "3",
-      uuid: "cccccccc-cccc-cccc-cccc-cccccccccccc",
-      name: "Ivermectin",
-      form: "Oral suspension",
-      strength: "1%",
-      stock: 25,
-      price: 850.0,
-      expiry: "2026-07-28",
-      image: "/uploads/pharmacy/Ivermectin.jpeg",
-      pharmacyId: "11111111-1111-1111-1111-111111111111",
-      pharmacyName: "HealthPlus Pharmacy",
-      pharmacyAddress: "123 Main Street, Colombo 05",
-    },
-    {
-      id: "4",
-      uuid: "dddddddd-dddd-dddd-dddd-dddddddddddd",
-      name: "Metronidazole",
-      form: "Tablet",
-      strength: "500 mg",
-      stock: 60,
-      price: 350.0,
-      expiry: "2026-09-10",
-      image: "/uploads/pharmacy/Metronidazole.jpeg",
-      pharmacyId: "22222222-2222-2222-2222-222222222222",
-      pharmacyName: "VetCare Pharmacy",
-      pharmacyAddress: "456 Galle Road, Colombo 03",
-    },
-    {
-      id: "5",
-      uuid: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
-      name: "Doxycycline",
-      form: "Capsule",
-      strength: "100 mg",
-      stock: 80,
-      price: 550.0,
-      expiry: "2027-01-20",
-      image: "/uploads/pharmacy/Doxycycline.jpeg",
-      pharmacyId: "22222222-2222-2222-2222-222222222222",
-      pharmacyName: "VetCare Pharmacy",
-      pharmacyAddress: "456 Galle Road, Colombo 03",
-    },
-    {
-      id: "6",
-      uuid: "ffffffff-ffff-ffff-ffff-ffffffffffff",
-      name: "Carprofen",
-      form: "Tablet",
-      strength: "75 mg",
-      stock: 35,
-      price: 750.0,
-      expiry: "2026-12-05",
-      image: "/uploads/pharmacy/Carprofen.jpeg",
-      pharmacyId: "22222222-2222-2222-2222-222222222222",
-      pharmacyName: "VetCare Pharmacy",
-      pharmacyAddress: "456 Galle Road, Colombo 03",
-    },
-    {
-      id: "7",
-      uuid: "gggggggg-gggg-gggg-gggg-gggggggggggg",
-      name: "Amoxicillin",
-      form: "Capsule",
-      strength: "500 mg",
-      stock: 90,
-      price: 520.0,
-      expiry: "2026-10-15",
-      image: "/uploads/pharmacy/Amoxicillin.jpeg",
-      pharmacyId: "33333333-3333-3333-3333-333333333333",
-      pharmacyName: "PetMed Express",
-      pharmacyAddress: "789 Kandy Road, Kandy",
-    },
-    {
-      id: "8",
-      uuid: "hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh",
-      name: "Prednisone",
-      form: "Tablet",
-      strength: "10 mg",
-      stock: 50,
-      price: 680.0,
-      expiry: "2027-03-20",
-      image: "/uploads/pharmacy/Prednisone.jpeg",
-      pharmacyId: "33333333-3333-3333-3333-333333333333",
-      pharmacyName: "PetMed Express",
-      pharmacyAddress: "789 Kandy Road, Kandy",
-    },
-    {
-      id: "9",
-      uuid: "iiiiiiii-iiii-iiii-iiii-iiiiiiiiiiii",
-      name: "Ivermectin",
-      form: "Injection",
-      strength: "1%",
-      stock: 20,
-      price: 920.0,
-      expiry: "2026-08-30",
-      image: "/uploads/pharmacy/Ivermectin.jpeg",
-      pharmacyId: "33333333-3333-3333-3333-333333333333",
-      pharmacyName: "PetMed Express",
-      pharmacyAddress: "789 Kandy Road, Kandy",
-    },
-  ];
-
   const handleFindProducts = async () => {
     const validItems = extractedItems.filter((item) => item.name.trim());
     if (validItems.length === 0) {
@@ -395,36 +251,50 @@ function FindFromPrescriptionModule() {
     setError(null);
     setMatchedProducts([]);
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     try {
-      // Use dummy data for now
-      const matches: any[] = [];
+      const lines = validItems.map(
+        (i) => `${i.name.trim()} × ${i.quantity}`,
+      );
+      const combinedText = [extractedText?.trim(), ...lines]
+        .filter(Boolean)
+        .join("\n");
+      const textPayload =
+        combinedText ||
+        validItems.map((i) => i.name.trim()).filter(Boolean).join(", ");
 
-      validItems.forEach((extractedItem) => {
-        const matched = dummyProducts.filter((product) =>
-          product.name.toLowerCase().includes(extractedItem.name.toLowerCase()),
-        );
-
-        if (matched.length > 0) {
-          matches.push(...matched);
-        }
+      const res = await fetch("/api/pharmacies/by-prescription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: textPayload,
+          medicineNames: validItems.map((i) => i.name.trim()).filter(Boolean),
+        }),
       });
-
-      // If no matches found, show some sample products anyway for demo
-      if (matches.length === 0) {
-        setMatchedProducts(dummyProducts.slice(0, 6));
-        setSuccess("Showing sample products from available pharmacies");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to find products");
+      }
+      const products = data.products || [];
+      setMatchedProducts(products);
+      if (products.length === 0) {
+        setSuccess(null);
+        setError(
+          "No products match these medications in our pharmacy network. Check spelling, or ask a pharmacy to list the product under its generic name.",
+        );
       } else {
-        setMatchedProducts(matches);
+        setError(null);
+        const genericCount = products.filter((p: { matched_via_generic?: boolean }) => p.matched_via_generic).length;
         setSuccess(
-          `Found ${matches.length} matching product${matches.length > 1 ? "s" : ""}!`,
+          genericCount > 0
+            ? `Found ${products.length} product${products.length > 1 ? "s" : ""} (${genericCount} matched via generic name lookup).`
+            : `Found ${products.length} matching product${products.length > 1 ? "s" : ""}.`,
         );
       }
     } catch (err) {
       console.error("Error finding products:", err);
-      setError("Failed to find products. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Failed to find products. Please try again.",
+      );
     } finally {
       setSearching(false);
     }
@@ -760,9 +630,21 @@ function FindFromPrescriptionModule() {
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col gap-3">
                         <div>
-                          <h3 className="font-bold text-gray-900">
-                            {product.name}
-                          </h3>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-bold text-gray-900">
+                              {product.name}
+                            </h3>
+                            {product.matched_via_generic && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-100 text-violet-800">
+                                Matched via generic lookup
+                              </span>
+                            )}
+                          </div>
+                          {product.generic_name ? (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Generic: {product.generic_name}
+                            </p>
+                          ) : null}
                           <p className="text-sm text-gray-600">
                             {product.form}
                             {product.strength && ` — ${product.strength}`}
@@ -972,9 +854,21 @@ function FindFromPrescriptionModule() {
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-bold text-gray-900 mb-1">
-                                  {product.name}
-                                </h4>
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                  <h4 className="font-bold text-gray-900">
+                                    {product.name}
+                                  </h4>
+                                  {product.matched_via_generic && (
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-100 text-violet-800">
+                                      Matched via generic lookup
+                                    </span>
+                                  )}
+                                </div>
+                                {product.generic_name ? (
+                                  <p className="text-xs text-gray-500 mb-1">
+                                    Generic: {product.generic_name}
+                                  </p>
+                                ) : null}
                                 <p className="text-sm text-gray-600 mb-2">
                                   {product.form}
                                   {product.strength && ` — ${product.strength}`}
