@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import pool from "@/lib/db";
 import { uploadInventoryImageToS3 } from "@/lib/s3";
+import { resolveMedicineGenericName } from "@/lib/medicine-generic-resolve";
 
 // GET - Fetch inventory items for a pharmacy
 export async function GET(
@@ -50,6 +51,7 @@ export async function GET(
         price,
         expiry_date,
         image_url,
+        COALESCE(generic_name, '') AS generic_name,
         created_at,
         updated_at
       FROM pharmacy_inventory_items
@@ -71,6 +73,7 @@ export async function GET(
         : null,
       price: row.price ? Number(row.price) : 0,
       image_url: row.image_url || null,
+      generic_name: String((row as { generic_name?: string }).generic_name ?? ""),
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
@@ -108,12 +111,15 @@ export async function POST(
     let expiry: string | null = null;
     let price = 0;
     let imageUrl: string | null = null;
+    let genericName: string | null = null;
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       name = (formData.get("name") as string)?.trim() || "";
       form = (formData.get("form") as string)?.trim() || "";
       strength = (formData.get("strength") as string)?.trim() || null;
+      const g = (formData.get("generic_name") as string)?.trim();
+      genericName = g || null;
       stock = Math.max(0, Number(formData.get("stock")) || 0);
       const expiryVal = formData.get("expiry");
       expiry =
@@ -139,6 +145,8 @@ export async function POST(
       stock = Number(body.stock) || 0;
       expiry = body.expiry?.trim() || null;
       price = Number(body.price) || 0;
+      const g = typeof body.generic_name === "string" ? body.generic_name.trim() : "";
+      genericName = g || null;
     }
 
     if (!name || !form) {
@@ -168,6 +176,15 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    let genericResolved = genericName;
+    if (!genericResolved && process.env.OPENAI_API_KEY) {
+      try {
+        genericResolved = await resolveMedicineGenericName(name);
+      } catch {
+        genericResolved = null;
+      }
+    }
+
     // Insert inventory item (image_url column: run ALTER TABLE pharmacy_inventory_items ADD COLUMN IF NOT EXISTS image_url TEXT; if needed)
     const result = await pool.query(
       `INSERT INTO pharmacy_inventory_items (
@@ -179,9 +196,10 @@ export async function POST(
         price,
         expiry_date,
         image_url,
+        generic_name,
         created_at,
         updated_at
-      ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *`,
       [
         paramId,
@@ -192,6 +210,7 @@ export async function POST(
         price,
         expiry || null,
         imageUrl || null,
+        genericResolved || null,
       ],
     );
 
@@ -209,6 +228,7 @@ export async function POST(
         : null,
       price: itemRow.price ? Number(itemRow.price) : 0,
       image_url: itemRow.image_url || null,
+      generic_name: (itemRow as { generic_name?: string | null }).generic_name || "",
     };
 
     return NextResponse.json({ success: true, item: newItem }, { status: 201 });
@@ -227,6 +247,18 @@ export async function POST(
           {
             error:
               "Database migration required. Run: ALTER TABLE pharmacy_inventory_items ADD COLUMN IF NOT EXISTS image_url TEXT;",
+          },
+          { status: 500 },
+        );
+      }
+      if (
+        error.message.includes("generic_name") &&
+        error.message.includes("does not exist")
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Database migration required: run scripts/add-pharmacy-inventory-generic-name.sql",
           },
           { status: 500 },
         );

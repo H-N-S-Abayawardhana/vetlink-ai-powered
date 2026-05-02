@@ -43,15 +43,23 @@ export interface DietPlan {
   dietType?: string | null;
   foodCategory?: string | null;
 
-  // Knowledge Base (2026-04) schema
-  dietCategory?: string | null;
+  // Knowledge Base (new schema)
+  kbBreed?: string | null;
+  kbDietType?: string | null;
+  breed_size_category?: string | null;
+  breed_specific_considerations?: string[] | null;
+
+  diet_goal?: string | null;
+  life_stage_or_goal?: string | null;
   dietary_recommendations?: string | null;
-  nutrition_targets?: Record<string, string> | null;
+  nutrition_targets?: Record<string, string | number> | null;
   meals_per_day?: string | null;
   feeding_plan?: Array<{
-    food_item: string;
+    food_item?: string | null;
     amount_g?: number | null;
+    amount_g_per_kg_body_weight?: number | null;
     calories?: number | null;
+    role?: string | null;
   }> | null;
   hydration?: string | null;
   energy_kcal?: string | null;
@@ -59,17 +67,35 @@ export interface DietPlan {
   commercial_food_options?: string[] | null;
   homemade_food_options?: string[] | null;
 
-  // Legacy aliases (kept for backwards compatibility with older UI/PDF)
-  Diet_Type?: string | null;
-  Feeding_Guidelines?: {
-    Meals_Per_Day?: number | null;
-    Portion_Control_Advice?: string | null;
-    Treat_Allowance?: string | null;
+  portion_and_calorie_guidance?: {
+    calorie_adjustment?: Record<string, string> | null;
+    portion_rule?: string | null;
+    review_interval?: string | null;
   } | null;
-  Recommended_Foods?: string[] | null;
-  Foods_to_Avoid?: string[] | null;
-  Exercise_Recommendation?: string | null;
-  Notes?: string | null;
+  meal_timing_guidance?: {
+    feeding_frequency?: string | number | null;
+    meal_spacing?: string | null;
+    bloat_precaution?: string | null;
+  } | null;
+  food_safety?: {
+    avoid_toxic_foods?: string[] | null;
+    preparation_rules?: string[] | null;
+    treat_limit?: string | null;
+  } | null;
+  allergy_and_sensitivity_rules?: Record<string, string> | null;
+  supplement_guidance?: Record<string, string> | null;
+  transition_plan?: Record<string, string> | null;
+  monitoring_metrics?: {
+    body_condition_score?: string | null;
+    weight_tracking?: string | null;
+    stool_score?: string | null;
+    clinical_flags?: string[] | null;
+  } | null;
+  veterinary_review_required_for?: string[] | null;
+
+  reference_body_weight_kg?: number | null;
+  total_daily_amount_g?: number | null;
+  total_daily_amount_g_per_kg_body_weight?: number | null;
 }
 
 export const TOXIC_FOODS: string[] = [];
@@ -141,56 +167,61 @@ function mapCalorieLevel(calorieLevel: string | null): string | null {
  */
 function findMatchingDiet(
   breed: string | null | undefined,
+
+  input: DietPlanInput,
   predictions: DietPredictionResult | null | undefined,
-): { dietCategory: string; diet: any } | null {
+): { breedData: any; dietType: string; diet: any } | null {
   if (!breed) return null;
 
+  const normalizedBreed = breed.toLowerCase();
+
   // Find breed in knowledge base
-  const breedData = (knowledgeBase as any).breeds.find(
-    (b: any) =>
-      b.breed.toLowerCase() === breed.toLowerCase() ||
-      breed.toLowerCase().includes(b.breed.toLowerCase()) ||
-      b.breed.toLowerCase().includes(breed.toLowerCase()),
-  );
-
-  if (!breedData || !breedData.diets) return null;
-
-  const dietsObj = breedData.diets as Record<string, any>;
-  const dietKeys = Object.keys(dietsObj);
-  if (dietKeys.length === 0) return null;
-
-  const pickDefault = () => {
-    const preferredDefault = dietKeys.find(
-      (key) => key.toLowerCase() === "maintenance",
+  const breedData = (knowledgeBase as any).breeds?.find((b: any) => {
+    const kbBreed = String(b?.breed || "").toLowerCase();
+    if (!kbBreed) return false;
+    return (
+      kbBreed === normalizedBreed ||
+      normalizedBreed.includes(kbBreed) ||
+      kbBreed.includes(normalizedBreed)
     );
-    const defaultKey = preferredDefault || dietKeys[0];
-    return { dietCategory: defaultKey, diet: dietsObj[defaultKey] };
-  };
+  });
 
-  if (!predictions) return pickDefault();
+  const diets = breedData?.diets;
+  if (!breedData || !diets || typeof diets !== "object") return null;
 
-  const mappedCalorieLevel = mapCalorieLevel(predictions.calorie_level);
-  if (mappedCalorieLevel && dietsObj[mappedCalorieLevel]) {
-    return { dietCategory: mappedCalorieLevel, diet: dietsObj[mappedCalorieLevel] };
+  const mappedCalorieLevel = mapCalorieLevel(predictions?.calorie_level || null);
+
+  const inferredLifeStage = input.lifeStage || estimateLifeStage(input.ageYears);
+  const bcsCategory = bcsCategoryFromScore(input.bcs);
+
+  const inferredDietType =
+    mappedCalorieLevel ||
+    (inferredLifeStage === "puppy"
+      ? "Puppy Diet"
+      : inferredLifeStage === "senior"
+        ? "Senior Diet"
+        : bcsCategory === "Underweight"
+          ? "Weight Gain"
+          : bcsCategory === "Overweight" || bcsCategory === "Obese"
+            ? "Weight Loss"
+            : "Maintenance");
+
+  const dietFromInference = diets[inferredDietType];
+  if (dietFromInference) {
+    return { breedData, dietType: inferredDietType, diet: dietFromInference };
   }
 
-  if (mappedCalorieLevel) {
-    const keyInsensitive = dietKeys.find(
-      (key) => key.toLowerCase() === mappedCalorieLevel.toLowerCase(),
-    );
-    if (keyInsensitive) {
-      return { dietCategory: keyInsensitive, diet: dietsObj[keyInsensitive] };
-    }
+  // Fallback to Maintenance then to first available diet
+  if (diets.Maintenance) {
+    return { breedData, dietType: "Maintenance", diet: diets.Maintenance };
   }
 
-  // If model returned something slightly different, try partial match.
-  const raw = (predictions.calorie_level || "").toLowerCase();
-  if (raw) {
-    const partial = dietKeys.find((key) => key.toLowerCase().includes(raw));
-    if (partial) return { dietCategory: partial, diet: dietsObj[partial] };
+  const firstDietType = Object.keys(diets)[0];
+  if (firstDietType) {
+    return { breedData, dietType: firstDietType, diet: diets[firstDietType] };
   }
 
-  return pickDefault();
+  return null;
 }
 
 export function generateDietPlan(
@@ -203,7 +234,7 @@ export function generateDietPlan(
   const foodCategory = prediction?.food_category || null;
 
   // Find matching diet from knowledge base
-  const matched = findMatchingDiet(input.breed, prediction);
+  const matched = findMatchingDiet(input.breed, input, prediction);
 
   const plan: DietPlan = {
     petId: input.id,
@@ -221,64 +252,109 @@ export function generateDietPlan(
     foodCategory,
   };
 
-  // Populate plan from matched diet (new KB structure)
+  // Populate plan from matched diet (new KB schema)
   if (matched?.diet) {
-    const matchedDiet = matched.diet;
-    plan.dietCategory = matched.dietCategory || null;
-    plan.dietary_recommendations =
-      typeof matchedDiet.dietary_recommendations === "string"
-        ? matchedDiet.dietary_recommendations
-        : null;
-    plan.nutrition_targets =
-      matchedDiet.nutrition_targets &&
-      typeof matchedDiet.nutrition_targets === "object" &&
-      !Array.isArray(matchedDiet.nutrition_targets)
-        ? matchedDiet.nutrition_targets
-        : null;
-    plan.meals_per_day =
-      matchedDiet.meals_per_day !== undefined && matchedDiet.meals_per_day !== null
-        ? String(matchedDiet.meals_per_day)
-        : null;
-    plan.feeding_plan = Array.isArray(matchedDiet.feeding_plan)
-      ? matchedDiet.feeding_plan
-          .filter((row: any) => row && typeof row.food_item === "string")
-          .map((row: any) => ({
-            food_item: row.food_item,
-            amount_g:
-              typeof row.amount_g === "number" ? row.amount_g : row.amount_g != null ? Number(row.amount_g) : null,
-            calories:
-              typeof row.calories === "number" ? row.calories : row.calories != null ? Number(row.calories) : null,
-          }))
+    const weightUsedKg = Number(input.weightKg);
+
+    plan.kbBreed = matched.breedData?.breed || null;
+    plan.kbDietType = matched.dietType || null;
+
+    plan.breed_size_category =
+      matched.diet.breed_size_category || matched.breedData?.breed_size_category || null;
+    plan.breed_specific_considerations =
+      matched.diet.breed_specific_considerations ||
+      matched.breedData?.breed_specific_considerations ||
+      null;
+
+    plan.diet_goal = matched.diet.diet_goal || null;
+    plan.life_stage_or_goal = matched.diet.life_stage_or_goal || null;
+    plan.dietary_recommendations = matched.diet.dietary_recommendations || null;
+    plan.nutrition_targets = matched.diet.nutrition_targets || null;
+    plan.meals_per_day = matched.diet.meals_per_day || null;
+    plan.feeding_plan = Array.isArray(matched.diet.feeding_plan)
+      ? matched.diet.feeding_plan
       : null;
-    plan.hydration = typeof matchedDiet.hydration === "string" ? matchedDiet.hydration : null;
-    plan.energy_kcal = typeof matchedDiet.energy_kcal === "string" ? matchedDiet.energy_kcal : null;
-    plan.micronutrient_profile =
-      matchedDiet.micronutrient_profile &&
-      typeof matchedDiet.micronutrient_profile === "object" &&
-      !Array.isArray(matchedDiet.micronutrient_profile)
-        ? matchedDiet.micronutrient_profile
-        : null;
-    plan.commercial_food_options = Array.isArray(matchedDiet.commercial_food_options)
-      ? matchedDiet.commercial_food_options.filter((x: any) => typeof x === "string")
-      : null;
-    plan.homemade_food_options = Array.isArray(matchedDiet.homemade_food_options)
-      ? matchedDiet.homemade_food_options.filter((x: any) => typeof x === "string")
+    plan.hydration = matched.diet.hydration || null;
+    plan.energy_kcal = matched.diet.energy_kcal || null;
+    plan.micronutrient_profile = matched.diet.micronutrient_profile || null;
+    plan.commercial_food_options = matched.diet.commercial_food_options || null;
+    plan.homemade_food_options = matched.diet.homemade_food_options || null;
+
+    plan.portion_and_calorie_guidance =
+      matched.diet.portion_and_calorie_guidance || null;
+    plan.meal_timing_guidance = matched.diet.meal_timing_guidance || null;
+    plan.food_safety = matched.diet.food_safety || null;
+    plan.allergy_and_sensitivity_rules =
+      matched.diet.allergy_and_sensitivity_rules || null;
+    plan.supplement_guidance = matched.diet.supplement_guidance || null;
+    plan.transition_plan = matched.diet.transition_plan || null;
+    plan.monitoring_metrics = matched.diet.monitoring_metrics || null;
+    plan.veterinary_review_required_for =
+      matched.diet.veterinary_review_required_for || null;
+
+    // Use the pet's actual weight (from DB) as the weight used for plan amounts.
+    // The KB provides g/kg guidance; we scale grams and calories linearly.
+    plan.reference_body_weight_kg = Number.isFinite(weightUsedKg)
+      ? weightUsedKg
       : null;
 
-    // Legacy aliases
-    plan.Diet_Type = plan.dietCategory;
-    const parsedMeals = plan.meals_per_day ? parseInt(plan.meals_per_day, 10) : NaN;
-    plan.Feeding_Guidelines = {
-      Meals_Per_Day: Number.isFinite(parsedMeals) ? parsedMeals : null,
-      Portion_Control_Advice: plan.dietary_recommendations,
-      Treat_Allowance: null,
-    };
-    plan.Recommended_Foods = Array.isArray(plan.commercial_food_options)
-      ? plan.commercial_food_options
-      : null;
-    plan.Foods_to_Avoid = null;
-    plan.Exercise_Recommendation = null;
-    plan.Notes = null;
+    plan.total_daily_amount_g_per_kg_body_weight =
+      matched.diet.total_daily_amount_g_per_kg_body_weight ?? null;
+
+    if (
+      plan.reference_body_weight_kg != null &&
+      typeof plan.total_daily_amount_g_per_kg_body_weight === "number" &&
+      Number.isFinite(plan.total_daily_amount_g_per_kg_body_weight)
+    ) {
+      plan.total_daily_amount_g = Math.round(
+        plan.total_daily_amount_g_per_kg_body_weight *
+          plan.reference_body_weight_kg,
+      );
+    } else {
+      plan.total_daily_amount_g = matched.diet.total_daily_amount_g ?? null;
+    }
+
+    if (
+      plan.reference_body_weight_kg != null &&
+      Array.isArray(plan.feeding_plan) &&
+      plan.feeding_plan.length > 0
+    ) {
+      plan.feeding_plan = plan.feeding_plan.map((item: any) => {
+        const perKg = item?.amount_g_per_kg_body_weight;
+        if (typeof perKg !== "number" || !Number.isFinite(perKg)) return item;
+
+        const scaledAmount = Math.round(perKg * plan.reference_body_weight_kg!);
+
+        let scaledCalories = item?.calories ?? null;
+        const baseAmount = item?.amount_g;
+        const baseCalories = item?.calories;
+        if (
+          typeof baseAmount === "number" &&
+          Number.isFinite(baseAmount) &&
+          baseAmount > 0 &&
+          typeof baseCalories === "number" &&
+          Number.isFinite(baseCalories)
+        ) {
+          scaledCalories = Math.round(baseCalories * (scaledAmount / baseAmount));
+        }
+
+        return {
+          ...item,
+          amount_g: scaledAmount,
+          calories: scaledCalories,
+        };
+      });
+
+      // If total wasn't available via per-kg totals, fall back to sum of scaled items.
+      if (plan.total_daily_amount_g == null) {
+        const sum = plan.feeding_plan.reduce((acc: number, item: any) => {
+          const amt = item?.amount_g;
+          if (typeof amt === "number" && Number.isFinite(amt)) return acc + amt;
+          return acc;
+        }, 0);
+        plan.total_daily_amount_g = sum > 0 ? Math.round(sum) : null;
+      }
+    }
   }
 
   return plan;
