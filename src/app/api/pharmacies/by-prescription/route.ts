@@ -6,6 +6,7 @@ import {
   extractMedicineNamesFromPrescription,
   resolveMedicineGenericName,
 } from "@/lib/medicine-generic-resolve";
+import { getAlternativeMedicines } from "@/lib/medicine-alternatives";
 
 type InventoryRow = {
   inventory_item_id: string;
@@ -25,7 +26,14 @@ type InventoryRow = {
   delivery_fee: unknown;
 };
 
-function mapProduct(row: InventoryRow, matchedViaGeneric: boolean) {
+function mapProduct(
+  row: InventoryRow,
+  flags: {
+    matchedViaGeneric?: boolean;
+    matchedViaAlternative?: boolean;
+    alternativeFor?: string;
+  },
+) {
   return {
     id: row.inventory_item_id,
     name: row.name,
@@ -44,7 +52,9 @@ function mapProduct(row: InventoryRow, matchedViaGeneric: boolean) {
     pickup_available: Boolean(row.pickup_available),
     delivery_available: Boolean(row.delivery_available),
     delivery_fee: row.delivery_fee != null ? Number(row.delivery_fee) : 0,
-    matched_via_generic: matchedViaGeneric,
+    matched_via_generic: Boolean(flags.matchedViaGeneric),
+    matched_via_alternative: Boolean(flags.matchedViaAlternative),
+    alternative_for: flags.alternativeFor || "",
   };
 }
 
@@ -97,16 +107,45 @@ export async function POST(request: NextRequest) {
 
     const merged = new Map<
       string,
-      { row: InventoryRow; viaGeneric: boolean }
+      {
+        row: InventoryRow;
+        viaGeneric: boolean;
+        viaAlternative: boolean;
+        alternativeFor?: string;
+      }
     >();
     const genericResolveCache = new Map<string, string | null>();
 
-    const addRows = (rows: InventoryRow[], viaGeneric: boolean) => {
+    const addRows = (
+      rows: InventoryRow[],
+      options: {
+        viaGeneric?: boolean;
+        viaAlternative?: boolean;
+        alternativeFor?: string;
+      },
+    ) => {
       for (const row of rows) {
         const id = row.inventory_item_id;
         const prev = merged.get(id);
-        if (!prev || (!prev.viaGeneric && viaGeneric)) {
-          merged.set(id, { row, viaGeneric: prev?.viaGeneric || viaGeneric });
+        const next = {
+          row,
+          viaGeneric: Boolean(prev?.viaGeneric || options.viaGeneric),
+          viaAlternative: Boolean(
+            prev?.viaAlternative || options.viaAlternative,
+          ),
+          alternativeFor: prev?.alternativeFor || options.alternativeFor || "",
+        };
+        if (!prev) {
+          merged.set(id, next);
+          continue;
+        }
+
+        // Keep the richer match metadata if we learn more about this row.
+        if (
+          next.viaAlternative !== prev.viaAlternative ||
+          next.viaGeneric !== prev.viaGeneric
+        ) {
+          merged.set(id, next);
         }
       }
     };
@@ -124,7 +163,7 @@ export async function POST(request: NextRequest) {
       ORDER BY i.name, p.name`,
       [text],
     );
-    addRows(primary.rows, false);
+    addRows(primary.rows, {});
 
     // 2) Per medicine: brand/synonym on Rx may not substring-match DB name — resolve generic
     const fromBody = medicineNamesRaw
@@ -154,7 +193,7 @@ export async function POST(request: NextRequest) {
         [n],
       );
       if (byLabel.rows.length > 0) {
-        addRows(byLabel.rows, false);
+        addRows(byLabel.rows, {});
         continue;
       }
 
@@ -177,12 +216,34 @@ export async function POST(request: NextRequest) {
         [resolved],
       );
       if (byGeneric.rows.length > 0) {
-        addRows(byGeneric.rows, true);
+        addRows(byGeneric.rows, { viaGeneric: true });
+        continue;
+      }
+
+      // 3) No direct/generic hit: fetch alternative brand names by generic
+      // and fuzzy-match against inventory as "alternative suggestions".
+      try {
+        const alternatives = await getAlternativeMedicines(resolved);
+        if (alternatives.length > 0) {
+          addRows(
+            alternatives.map((a) => a.row),
+            {
+              viaAlternative: true,
+              alternativeFor: n,
+            },
+          );
+        }
+      } catch (altError) {
+        console.warn("Alternative medicine lookup failed:", altError);
       }
     }
 
-    const products = [...merged.values()].map(({ row, viaGeneric }) =>
-      mapProduct(row, viaGeneric),
+    const products = [...merged.values()].map((entry) =>
+      mapProduct(entry.row, {
+        matchedViaGeneric: entry.viaGeneric,
+        matchedViaAlternative: entry.viaAlternative,
+        alternativeFor: entry.alternativeFor,
+      }),
     );
 
     products.sort((a, b) =>
