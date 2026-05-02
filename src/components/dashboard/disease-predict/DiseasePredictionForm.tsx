@@ -282,7 +282,6 @@ export default function DiseasePredictionForm({
 
     if (petPreferredDiet) {
       const dietLower = petPreferredDiet.toLowerCase();
-
       if (dietLower.includes("dry") || dietLower.includes("kibble")) {
         initial.diet_type = "Dry";
       } else if (dietLower.includes("wet") || dietLower.includes("canned")) {

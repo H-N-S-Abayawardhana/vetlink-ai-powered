@@ -95,7 +95,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const merged = new Map<string, { row: InventoryRow; viaGeneric: boolean }>();
+    const merged = new Map<
+      string,
+      { row: InventoryRow; viaGeneric: boolean }
+    >();
     const genericResolveCache = new Map<string, string | null>();
 
     const addRows = (rows: InventoryRow[], viaGeneric: boolean) => {
@@ -183,7 +186,9 @@ export async function POST(request: NextRequest) {
     );
 
     products.sort((a, b) =>
-      `${a.name} ${a.pharmacyName}`.localeCompare(`${b.name} ${b.pharmacyName}`),
+      `${a.name} ${a.pharmacyName}`.localeCompare(
+        `${b.name} ${b.pharmacyName}`,
+      ),
     );
 
     return NextResponse.json({

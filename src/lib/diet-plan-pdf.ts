@@ -445,7 +445,11 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
     y += 2;
   };
 
-  const drawStringListSection = (title: string, items: unknown, marker = "-") => {
+  const drawStringListSection = (
+    title: string,
+    items: unknown,
+    marker = "-",
+  ) => {
     if (!Array.isArray(items) || items.length === 0) return;
 
     const safeItems = items
@@ -699,7 +703,6 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
       plan.homemade_food_options.length > 0)
   ) {
     drawSectionHeader("Food Options");
-
     if (
       Array.isArray(plan.commercial_food_options) &&
       plan.commercial_food_options.length > 0

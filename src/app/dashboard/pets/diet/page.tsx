@@ -837,13 +837,11 @@ export default function DietPage() {
                             >
                               g/kg BW
                             </th>
-
                             <th className="px-4 py-3 text-left font-medium">
                               Calories
                             </th>
                           </tr>
                         </thead>
-
                         <tbody className="divide-y divide-gray-200">
                           {(plan.feeding_plan as any[]).map((item, idx) => (
                             <tr key={idx} className="bg-white">
@@ -864,7 +862,6 @@ export default function DietPage() {
                                   {item?.amount_g_per_kg_body_weight ?? "-"}
                                 </span>
                               </td>
-
                               <td className="px-4 py-3 text-gray-700">
                                 {item?.calories ?? "-"}
                               </td>
@@ -1063,7 +1060,6 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-900">
                           {humanizeKey(key)}
                         </p>
-
                         <p className="mt-1 text-sm text-gray-900">{value}</p>
                       </div>
                     ))}
@@ -1148,7 +1144,6 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           {humanizeKey(key)}
                         </p>
-
                         <p className="mt-1 text-sm text-gray-900">{value}</p>
                       </div>
                     ))}
@@ -1169,7 +1164,6 @@ export default function DietPage() {
                         <span className="text-xs font-semibold text-gray-900">
                           {humanizeKey(key)}:
                         </span>
-
                         <span>{value}</span>
                       </div>
                     ))}
@@ -1268,7 +1262,6 @@ export default function DietPage() {
                   <p className="text-sm font-medium text-gray-900">
                     No detailed knowledge base entry found.
                   </p>
-
                   <p className="mt-1 text-sm text-gray-600">
                     Update the pet&apos;s breed to match the nutrition knowledge
                     base and try again.

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { VetLinkLogo } from "@/components/brand/VetLinkLogo";
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
 
@@ -22,11 +22,11 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-b from-white to-gray-50/50 text-gray-900 py-16 sm:py-20 border-t border-gray-200/60">
+    <footer className="relative overflow-hidden bg-slate-900 text-gray-100 py-16 sm:py-20 border-t border-slate-800">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-0 left-0 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-100/10 to-transparent blur-3xl"
+          className="absolute top-0 left-0 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-500/15 to-transparent blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.2, 0.3, 0.2],
@@ -45,22 +45,20 @@ export default function Footer() {
           <div className="md:col-span-1">
             <Link href="/" className="inline-block mb-4 cursor-pointer">
               <div className="flex items-center gap-2">
-                <Image
-                  src="/vetlink_logo.png"
-                  alt="VetLink Logo"
-                  width={140}
-                  height={50}
-                  className="h-10 w-auto opacity-90 hover:opacity-100 transition-opacity"
+                <VetLinkLogo
+                  variant="dark"
+                  size="lg"
+                  className="opacity-95 hover:opacity-100 transition-opacity"
                 />
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-indigo-50 to-teal-50 border border-indigo-100/50">
-                  <Brain className="h-3 w-3 text-indigo-600" />
-                  <span className="text-xs font-semibold text-indigo-700">
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 border border-white/15">
+                  <Brain className="h-3 w-3 text-teal-400" />
+                  <span className="text-xs font-semibold text-teal-200">
                     AI
                   </span>
                 </div>
               </div>
             </Link>
-            <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+            <p className="text-gray-400 mb-6 text-sm leading-relaxed">
               AI-powered pet healthcare platform for skin disease detection,
               mobility analysis, pharmacy forecasting, and health assessment.
             </p>
@@ -68,9 +66,7 @@ export default function Footer() {
 
           {/* Modules */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              Modules
-            </h4>
+            <h4 className="text-lg font-semibold text-white mb-4">Modules</h4>
             <ul className="space-y-3">
               {footerLinks.modules.map((link, index) => (
                 <motion.li
@@ -81,14 +77,14 @@ export default function Footer() {
                   {link.href.startsWith("/") ? (
                     <Link
                       href={link.href}
-                      className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
+                      className="text-gray-400 hover:text-teal-400 transition-colors text-sm cursor-pointer"
                     >
                       {link.name}
                     </Link>
                   ) : (
                     <a
                       href={link.href}
-                      className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
+                      className="text-gray-400 hover:text-teal-400 transition-colors text-sm cursor-pointer"
                     >
                       {link.name}
                     </a>
@@ -100,9 +96,7 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              Support
-            </h4>
+            <h4 className="text-lg font-semibold text-white mb-4">Support</h4>
             <ul className="space-y-3">
               {footerLinks.support.map((link, index) => (
                 <motion.li
@@ -112,7 +106,7 @@ export default function Footer() {
                 >
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-indigo-600 transition-colors text-sm cursor-pointer"
+                    className="text-gray-400 hover:text-teal-400 transition-colors text-sm cursor-pointer"
                   >
                     {link.name}
                   </a>
@@ -123,10 +117,10 @@ export default function Footer() {
 
           {/* Get started */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+            <h4 className="text-lg font-semibold text-white mb-4">
               Get started
             </h4>
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">
+            <p className="text-gray-400 text-sm leading-relaxed mb-4">
               Try the platform, explore the deployments, or jump into the code.
             </p>
             <div className="flex flex-col gap-2">
@@ -141,7 +135,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-200/60 pt-8 text-center">
+        <div className="border-t border-slate-700 pt-8 text-center">
           <p className="text-gray-500 text-sm">
             &copy; {new Date().getFullYear()} VetLink. All rights reserved.
           </p>
