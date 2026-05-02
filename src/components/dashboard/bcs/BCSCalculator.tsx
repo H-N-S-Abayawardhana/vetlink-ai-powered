@@ -14,6 +14,40 @@ import {
   X,
 } from "lucide-react";
 
+interface TooltipLabelProps {
+  label: string;
+  hint: string;
+}
+
+function TooltipLabel({ label, hint }: TooltipLabelProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  return (
+    <div className="relative mb-2 flex items-center gap-2">
+      <label className="block text-sm font-semibold text-gray-700">
+        {label} <span className="text-red-500">*</span>
+      </label>
+
+      <button
+        type="button"
+        onClick={() => setShowTooltip((prev) => !prev)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className="inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-[11px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+        aria-label={`${label} help`}
+      >
+        ?
+      </button>
+
+      {showTooltip && (
+        <div className="absolute bottom-7 left-0 z-20 w-64 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 shadow-lg">
+          {hint}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function BCSCalculator() {
   const router = useRouter();
   const [pets, setPets] = useState<Pet[]>([]);
@@ -36,7 +70,6 @@ export default function BCSCalculator() {
   const [error, setError] = useState<string | null>(null);
   const [showClinicalModal, setShowClinicalModal] = useState(false);
 
-  // Clinical observation options from Hugging Face model
   const clinicalOptions = {
     activity_level: ["Low", "Medium", "High"],
     rib_condition: [
@@ -78,6 +111,7 @@ export default function BCSCalculator() {
         setLoadingPets(false);
       }
     }
+
     void load();
   }, []);
 
@@ -96,7 +130,6 @@ export default function BCSCalculator() {
     });
     setResult(null);
     setError(null);
-    // Auto-open clinical observations modal on pet selection page
     setShowClinicalModal(true);
   }
 
@@ -122,14 +155,14 @@ export default function BCSCalculator() {
   const ageValid = useMemo(() => {
     const a = updates.ageYears;
     if (a == null) return true;
-    const n = typeof a === "string" ? parseFloat(a as any) : a;
+    const n = typeof a === "string" ? parseFloat(a) : a;
     return typeof n === "number" && !Number.isNaN(n) && n > 0;
   }, [updates]);
 
   const weightValid = useMemo(() => {
     const w = updates.weightKg;
     if (w == null) return false;
-    const n = typeof w === "string" ? parseFloat(w as any) : w;
+    const n = typeof w === "string" ? parseFloat(w) : w;
     return typeof n === "number" && !Number.isNaN(n) && n > 0;
   }, [updates]);
 
@@ -147,20 +180,18 @@ export default function BCSCalculator() {
 
   async function handleCalculate() {
     if (!selected || !canCalculate) return;
+
     setLoading(true);
     setResult(null);
     setError(null);
 
     try {
-      // Get validated values
       const wRaw = updates.weightKg ?? selected.weightKg ?? 0;
       const aRaw = updates.ageYears ?? selected.ageYears ?? 0;
-      const w =
-        typeof wRaw === "string" ? parseFloat(wRaw as any) : (wRaw as number);
-      const a =
-        typeof aRaw === "string" ? parseFloat(aRaw as any) : (aRaw as number);
 
-      // Call the BCS prediction API with all clinical observations
+      const w = typeof wRaw === "string" ? parseFloat(wRaw) : wRaw;
+      const a = typeof aRaw === "string" ? parseFloat(aRaw) : aRaw;
+
       const response = await fetch("/api/bcs/predict", {
         method: "POST",
         headers: {
@@ -200,14 +231,13 @@ export default function BCSCalculator() {
 
       setResult(score);
 
-      // Persist calculated BCS and timestamp
       try {
         const when = new Date().toISOString();
         const updated = await updatePet(selected.id, {
           bcs: score,
           bcsCalculatedAt: when,
         });
-        // update local selected and pets list with returned pet when available
+
         if (updated) {
           setSelected(updated as any);
           setPets((prev) =>
@@ -236,7 +266,6 @@ export default function BCSCalculator() {
     setUpdates({});
   }
 
-  // Navigate to disease prediction page
   function handleNavigateToDiseasePrediction() {
     if (selected) {
       router.push(`/dashboard/pets/disease-prediction?petId=${selected.id}`);
@@ -244,27 +273,33 @@ export default function BCSCalculator() {
   }
 
   const getBCSDescription = (score: number) => {
-    if (score <= 3)
+    if (score <= 3) {
       return {
         text: "Underweight",
         color: "text-orange-600",
         bg: "bg-orange-50",
         border: "border-orange-200",
       };
-    if (score <= 5)
+    }
+
+    if (score <= 5) {
       return {
         text: "Ideal Weight",
         color: "text-green-600",
         bg: "bg-green-50",
         border: "border-green-200",
       };
-    if (score <= 7)
+    }
+
+    if (score <= 7) {
       return {
         text: "Overweight",
         color: "text-amber-600",
         bg: "bg-amber-50",
         border: "border-amber-200",
       };
+    }
+
     return {
       text: "Obese",
       color: "text-red-600",
@@ -282,9 +317,11 @@ export default function BCSCalculator() {
               <Scale className="w-3.5 h-3.5" />
               Health screening
             </div>
+
             <h1 className="mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
               Body Condition Score
             </h1>
+
             <p className="mt-2 text-sm sm:text-base text-gray-600">
               Calculate your pet&apos;s BCS using profile details and guided
               physical observations.
@@ -318,8 +355,10 @@ export default function BCSCalculator() {
                       {idx + 1}
                     </span>
                   )}
+
                   <span>{label}</span>
                 </div>
+
                 {idx < 1 && <ChevronRight className="w-4 h-4 text-gray-300" />}
               </React.Fragment>
             );
@@ -338,14 +377,19 @@ export default function BCSCalculator() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="text-sm text-gray-500">Selected pet</p>
+
               <h2 className="font-semibold text-gray-900">{selected.name}</h2>
+
               <p className="text-sm text-gray-600">
                 {selected.breed || "Breed: -"}
                 {selected.ageYears != null
-                  ? ` • ${selected.ageYears} ${selected.ageYears === 1 ? "year" : "years"}`
+                  ? ` • ${selected.ageYears} ${
+                      selected.ageYears === 1 ? "year" : "years"
+                    }`
                   : ""}
               </p>
             </div>
+
             <button
               type="button"
               onClick={resetCalculator}
@@ -364,6 +408,7 @@ export default function BCSCalculator() {
               <PawPrint className="w-4 h-4 text-blue-600" />
               Select your pet
             </h2>
+
             <p className="mt-1 text-sm text-gray-500">
               Choose a pet to start the body condition score assessment.
             </p>
@@ -379,6 +424,7 @@ export default function BCSCalculator() {
               <p className="text-sm font-medium text-gray-900">
                 No pets found.
               </p>
+
               <p className="mt-1 text-sm text-gray-600">
                 Add a pet profile first to calculate BCS.
               </p>
@@ -404,19 +450,26 @@ export default function BCSCalculator() {
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
               <div>
                 <div
-                  className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium border ${getBCSDescription(result).bg} ${getBCSDescription(result).border} ${getBCSDescription(result).color}`}
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium border ${
+                    getBCSDescription(result).bg
+                  } ${getBCSDescription(result).border} ${
+                    getBCSDescription(result).color
+                  }`}
                 >
                   {getBCSDescription(result).text}
                 </div>
+
                 <h2 className="mt-3 text-xl sm:text-2xl font-semibold text-gray-900">
                   {selected.name}&apos;s Body Condition Score
                 </h2>
+
                 {selected.bcsCalculatedAt && (
                   <p className="mt-1 text-sm text-gray-500">
                     Last calculated:{" "}
                     {formatBCSTimestamp(selected.bcsCalculatedAt)}
                   </p>
                 )}
+
                 <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl">
                   Based on the weight of {updates.weightKg} kg and age of{" "}
                   {updates.ageYears ?? "unknown"} years,
@@ -434,10 +487,14 @@ export default function BCSCalculator() {
               </div>
 
               <div
-                className={`flex h-28 w-28 items-center justify-center rounded-full border-4 ${getBCSDescription(result).bg} ${getBCSDescription(result).border}`}
+                className={`flex h-28 w-28 items-center justify-center rounded-full border-4 ${
+                  getBCSDescription(result).bg
+                } ${getBCSDescription(result).border}`}
               >
                 <span
-                  className={`text-4xl font-bold ${getBCSDescription(result).color}`}
+                  className={`text-4xl font-bold ${
+                    getBCSDescription(result).color
+                  }`}
                 >
                   {result}
                 </span>
@@ -449,19 +506,23 @@ export default function BCSCalculator() {
             <h3 className="text-base font-semibold text-gray-900">
               BCS scale reference
             </h3>
+
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
               <div className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
                 <p className="font-semibold text-orange-700">1-3</p>
                 <p className="mt-1 text-gray-700">Underweight</p>
               </div>
+
               <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
                 <p className="font-semibold text-green-700">4-5</p>
                 <p className="mt-1 text-gray-700">Ideal</p>
               </div>
+
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                 <p className="font-semibold text-amber-700">6-7</p>
                 <p className="mt-1 text-gray-700">Overweight</p>
               </div>
+
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
                 <p className="font-semibold text-red-700">8-9</p>
                 <p className="mt-1 text-gray-700">Obese</p>
@@ -471,11 +532,13 @@ export default function BCSCalculator() {
             <div className="mt-5">
               <div className="relative h-2 rounded-full bg-gray-200 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-green-400 via-amber-400 to-red-400" />
+
                 <div
                   className="absolute top-0 bottom-0 w-1 bg-gray-900"
                   style={{ left: `${((result - 1) / 8) * 100}%` }}
                 />
               </div>
+
               <p className="mt-2 text-xs text-gray-500">
                 Score shown on a 1-9 scale.
               </p>
@@ -488,16 +551,19 @@ export default function BCSCalculator() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                   <Stethoscope className="w-5 h-5" />
                 </div>
+
                 <div>
                   <h3 className="text-base font-semibold text-gray-900">
                     Multi-disease risk assessment
                   </h3>
+
                   <p className="mt-1 text-sm text-gray-600">
                     Continue to analyze your pet across six common health
                     conditions.
                   </p>
                 </div>
               </div>
+
               <button
                 onClick={handleNavigateToDiseasePrediction}
                 className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors cursor-pointer"
@@ -523,13 +589,16 @@ export default function BCSCalculator() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                     <Stethoscope className="w-5 h-5" />
                   </div>
+
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-blue-700">
                       Physical observations
                     </p>
+
                     <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                       Clinical Observations
                     </h2>
+
                     <p className="text-sm text-gray-500">
                       {selected?.name
                         ? `For ${selected.name}`
@@ -537,6 +606,7 @@ export default function BCSCalculator() {
                     </p>
                   </div>
                 </div>
+
                 <button
                   onClick={() => {
                     setShowClinicalModal(false);
@@ -563,6 +633,7 @@ export default function BCSCalculator() {
                       Weight is required to calculate BCS.
                     </div>
                   )}
+
                   {!ageValid && (
                     <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                       Age looks invalid. Update your pet profile before
@@ -574,9 +645,11 @@ export default function BCSCalculator() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-lg border border-gray-200 p-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Rib Condition *
-                  </label>
+                  <TooltipLabel
+                    label="Rib Condition"
+                    hint="How easily can you feel the ribs?"
+                  />
+
                   <select
                     value={updates.ribCondition || ""}
                     onChange={(e) =>
@@ -591,15 +664,14 @@ export default function BCSCalculator() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    How easily can you feel the ribs?
-                  </p>
                 </div>
 
                 <div className="rounded-lg border border-gray-200 p-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Waist *
-                  </label>
+                  <TooltipLabel
+                    label="Waist"
+                    hint="How prominent is the waist?"
+                  />
+
                   <select
                     value={updates.waist || ""}
                     onChange={(e) => onDetailsChange("waist", e.target.value)}
@@ -612,15 +684,14 @@ export default function BCSCalculator() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    How prominent is the waist?
-                  </p>
                 </div>
 
                 <div className="rounded-lg border border-gray-200 p-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Abdominal Tuck *
-                  </label>
+                  <TooltipLabel
+                    label="Abdominal Tuck"
+                    hint="How much abdominal tuck is present?"
+                  />
+
                   <select
                     value={updates.abdominalTuck || ""}
                     onChange={(e) =>
@@ -635,15 +706,14 @@ export default function BCSCalculator() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    How much abdominal tuck is present?
-                  </p>
                 </div>
 
                 <div className="rounded-lg border border-gray-200 p-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Spine & Hips *
-                  </label>
+                  <TooltipLabel
+                    label="Spine & Hips"
+                    hint="How prominent are spine and hip bones?"
+                  />
+
                   <select
                     value={updates.spineHips || ""}
                     onChange={(e) =>
@@ -658,15 +728,14 @@ export default function BCSCalculator() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    How prominent are spine and hip bones?
-                  </p>
                 </div>
 
                 <div className="rounded-lg border border-gray-200 p-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Fat Deposits *
-                  </label>
+                  <TooltipLabel
+                    label="Fat Deposits"
+                    hint="How much fat is deposited on the body?"
+                  />
+
                   <select
                     value={updates.fatDeposits || ""}
                     onChange={(e) =>
@@ -681,9 +750,6 @@ export default function BCSCalculator() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-gray-500">
-                    How much fat is deposited on the body?
-                  </p>
                 </div>
               </div>
 
@@ -697,16 +763,17 @@ export default function BCSCalculator() {
                 >
                   Cancel
                 </button>
+
                 <button
                   onClick={() => {
                     setShowClinicalModal(false);
                     void handleCalculate();
                   }}
                   disabled={!canCalculate || loading}
-                  className={`inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                  className={`inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                     canCalculate && !loading
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      ? "cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
+                      : "cursor-not-allowed bg-gray-200 text-gray-500"
                   }`}
                 >
                   {loading ? "Calculating BCS..." : "Calculate BCS"}
@@ -721,9 +788,11 @@ export default function BCSCalculator() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 shadow-2xl text-center max-w-md mx-4">
             <div className="w-14 h-14 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-5" />
+
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Calculating BCS
             </h3>
+
             <p className="text-sm text-gray-600">
               Reviewing your pet&apos;s body condition across multiple physical
               indicators.
