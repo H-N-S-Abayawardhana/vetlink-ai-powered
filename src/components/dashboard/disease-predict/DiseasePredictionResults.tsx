@@ -280,7 +280,7 @@ export default function DiseasePredictionResults({
                   <button
                     type="button"
                     onClick={() => toggleExpand(prediction.disease)}
-                    className={`w-full px-4 py-4 text-left transition-colors ${
+                    className={`w-full px-4 py-4 text-left transition-colors cursor-pointer ${
                       isPositive
                         ? "bg-red-50/60 hover:bg-red-50"
                         : "bg-white hover:bg-gray-50"
@@ -418,13 +418,13 @@ export default function DiseasePredictionResults({
         <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 border-t border-gray-200 pt-5">
           <button
             onClick={onClose}
-            className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Back to pet selection
           </button>
           <button
             onClick={onNewAnalysis}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             New analysis

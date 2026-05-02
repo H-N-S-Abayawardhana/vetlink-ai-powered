@@ -37,10 +37,13 @@ function SectionCard({
 function humanizeKey(key: string) {
   const normalized = String(key).toLowerCase().trim();
   const dayRange = normalized.match(/^day_(\d+)_(\d+)$/);
+
   if (dayRange) {
     return `Day ${dayRange[1]}-${dayRange[2]}`;
   }
+
   const dayPlus = normalized.match(/^day_(\d+)_plus$/);
+
   if (dayPlus) {
     return `Day ${dayPlus[1]}+`;
   }
@@ -60,37 +63,45 @@ function tooltipForText(text: string): string | undefined {
       "DM = Dry Matter (nutrition values expressed with water removed).",
     );
   }
+
   if (/IU\s*\/\s*kg\s*DM/i.test(t) || /IU\s*\/\s*kg/i.test(t)) {
     parts.push("IU/kg DM = International Units per kilogram of dry matter.");
   }
+
   if (/EPA\s*\+?\s*DHA/i.test(t)) {
     parts.push(
-      "EPA + DHA are omega‑3 fatty acids (often listed as a % of DM).",
+      "EPA + DHA are omega-3 fatty acids (often listed as a % of DM).",
     );
   }
+
   if (/\bRER\b/.test(t) || /\bMER\b/.test(t) || /\bBW\b/.test(t)) {
     parts.push(
       "RER = Resting Energy Requirement: calories a dog needs at rest (basic body functions). MER = Maintenance Energy Requirement: total daily calories needed including activity. BW = body weight (kg).",
     );
   }
+
   if (/\bkcal\b/i.test(t)) {
     parts.push(
       "kcal = kilocalories (unit used to measure energy/calories in food).",
     );
   }
+
   if (/\bad\s*lib\b/i.test(t)) {
     parts.push(
       "ad lib (ad libitum) means freely available; dog can drink/eat anytime.",
     );
   }
+
   if (/mL\s*\/\s*kg\s*\/\s*day/i.test(t)) {
     parts.push("mL/kg/day means milliliters per kg body weight per day.");
   }
+
   if (/mg\s*per\s*1000\s*kcal/i.test(t) || /mg\s*\/\s*1000\s*kcal/i.test(t)) {
     parts.push(
       "mg/1000 kcal expresses nutrient amount per 1000 kilocalories of diet.",
     );
   }
+
   if (/kcal\s*\/\s*100\s*g/i.test(t)) {
     parts.push("kcal/100 g is energy density (kilocalories per 100 grams).");
   }
@@ -100,6 +111,7 @@ function tooltipForText(text: string): string | undefined {
 
 function tooltipForKey(key: string): string | undefined {
   const normalized = String(key).toLowerCase().trim();
+
   switch (normalized) {
     case "protein":
       return "Protein target. DM = Dry Matter basis (nutrient percentage excluding water).";
@@ -123,7 +135,7 @@ function tooltipForKey(key: string): string | undefined {
     case "vitamin_d":
       return "Often shown as IU/kg DM. IU/kg = International Units per kilogram (vitamin measurement). DM = Dry Matter basis.";
     case "omega_3":
-      return "Omega‑3 guidance; EPA + DHA are omega‑3 fatty acids often referenced in diets.";
+      return "Omega-3 guidance; EPA + DHA are omega-3 fatty acids often referenced in diets.";
     default:
       return undefined;
   }
@@ -177,7 +189,7 @@ function InfoTooltipButton({
           e.stopPropagation();
           setOpenId((prev) => (prev === id ? null : id));
         }}
-        className={`inline-flex items-center rounded focus:outline-none focus:ring-2 ${ringClass}`}
+        className={`inline-flex cursor-pointer items-center rounded focus:outline-none focus:ring-2 ${ringClass}`}
       >
         <Info className={`w-3.5 h-3.5 ${iconClass}`} />
       </button>
@@ -186,7 +198,7 @@ function InfoTooltipButton({
         <div
           id={`${id}-tooltip`}
           role="tooltip"
-          className="absolute left-0 top-full z-20 mt-2 w-72 max-w-[80vw] rounded-lg border border-gray-200 bg-white p-3 text-xs text-gray-700 shadow-md"
+          className="absolute left-0 bottom-full z-20 mt-2 w-72 max-w-[80vw] rounded-lg border border-gray-200 bg-white p-3 text-xs text-gray-700 shadow-md"
         >
           {text}
         </div>
@@ -198,7 +210,9 @@ function InfoTooltipButton({
 function renderWithTooltip(value: unknown) {
   const text = String(value);
   const title = tooltipForText(text);
+
   if (!title) return text;
+
   return <span title={title}>{text}</span>;
 }
 
@@ -229,6 +243,7 @@ export default function DietPage() {
 
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("pointerdown", onPointerDown);
+
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown);
@@ -237,6 +252,7 @@ export default function DietPage() {
 
   useEffect(() => {
     if (!selectedId) return setPet(null);
+
     const selectedPet = pets.find((item: any) => item.id === selectedId);
     setPet(selectedPet || null);
     setPlan(null);
@@ -244,11 +260,15 @@ export default function DietPage() {
 
   useEffect(() => {
     let mounted = true;
+
     const load = async () => {
       setLoadingPets(true);
+
       try {
         const all = await listPets();
+
         if (!mounted) return;
+
         const dogs = Array.isArray(all) ? (all as Pet[]) : [];
         setPets(dogs);
         setSelectedId((prev) => prev ?? (dogs.length > 0 ? dogs[0].id : null));
@@ -260,7 +280,9 @@ export default function DietPage() {
         }
       }
     };
+
     void load();
+
     return () => {
       mounted = false;
     };
@@ -268,13 +290,17 @@ export default function DietPage() {
 
   const loadPlan = async () => {
     if (!selectedId) return;
+
     setLoadingPlan(true);
+
     try {
       const res = await fetch(`/api/pets/${selectedId}/diet`);
+
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Failed to generate plan");
       }
+
       const json = await res.json();
       setPlan(json.plan || null);
     } catch (err) {
@@ -295,6 +321,7 @@ export default function DietPage() {
 
   const downloadPdf = () => {
     if (!plan) return alert("No plan to download");
+
     try {
       generateDietPlanPdf({ plan, pet });
     } catch (err) {
@@ -305,29 +332,29 @@ export default function DietPage() {
 
   const hasKbDetails = Boolean(
     plan?.dietary_recommendations ||
-    (plan?.nutrition_targets &&
-      Object.keys(plan.nutrition_targets).length > 0) ||
-    (Array.isArray(plan?.feeding_plan) && plan.feeding_plan.length > 0) ||
-    (plan?.micronutrient_profile &&
-      Object.keys(plan.micronutrient_profile).length > 0) ||
-    (Array.isArray(plan?.commercial_food_options) &&
-      plan.commercial_food_options.length > 0) ||
-    (Array.isArray(plan?.homemade_food_options) &&
-      plan.homemade_food_options.length > 0) ||
-    (Array.isArray(plan?.breed_specific_considerations) &&
-      plan.breed_specific_considerations.length > 0) ||
-    plan?.portion_and_calorie_guidance ||
-    plan?.meal_timing_guidance ||
-    plan?.food_safety ||
-    plan?.allergy_and_sensitivity_rules ||
-    plan?.supplement_guidance ||
-    plan?.transition_plan ||
-    plan?.monitoring_metrics ||
-    plan?.reference_body_weight_kg ||
-    plan?.total_daily_amount_g ||
-    plan?.total_daily_amount_g_per_kg_body_weight ||
-    (Array.isArray(plan?.veterinary_review_required_for) &&
-      plan.veterinary_review_required_for.length > 0),
+      (plan?.nutrition_targets &&
+        Object.keys(plan.nutrition_targets).length > 0) ||
+      (Array.isArray(plan?.feeding_plan) && plan.feeding_plan.length > 0) ||
+      (plan?.micronutrient_profile &&
+        Object.keys(plan.micronutrient_profile).length > 0) ||
+      (Array.isArray(plan?.commercial_food_options) &&
+        plan.commercial_food_options.length > 0) ||
+      (Array.isArray(plan?.homemade_food_options) &&
+        plan.homemade_food_options.length > 0) ||
+      (Array.isArray(plan?.breed_specific_considerations) &&
+        plan.breed_specific_considerations.length > 0) ||
+      plan?.portion_and_calorie_guidance ||
+      plan?.meal_timing_guidance ||
+      plan?.food_safety ||
+      plan?.allergy_and_sensitivity_rules ||
+      plan?.supplement_guidance ||
+      plan?.transition_plan ||
+      plan?.monitoring_metrics ||
+      plan?.reference_body_weight_kg ||
+      plan?.total_daily_amount_g ||
+      plan?.total_daily_amount_g_per_kg_body_weight ||
+      (Array.isArray(plan?.veterinary_review_required_for) &&
+        plan.veterinary_review_required_for.length > 0),
   );
 
   return (
@@ -339,9 +366,11 @@ export default function DietPage() {
               <Sparkles className="w-3.5 h-3.5" />
               Nutrition planning
             </div>
+
             <h1 className="mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
               Diet Recommendations
             </h1>
+
             <p className="mt-2 text-sm sm:text-base text-gray-600">
               Generate a simple nutrition and feeding plan based on your
               pet&apos;s profile, body condition score, and lifestyle details.
@@ -360,6 +389,7 @@ export default function DietPage() {
               <PawPrint className="w-4 h-4 text-blue-600" />
               Select your pet
             </h2>
+
             <p className="mt-1 text-sm text-gray-500">
               Choose a pet to generate a personalized diet recommendation.
             </p>
@@ -368,6 +398,7 @@ export default function DietPage() {
           {loadingPets ? (
             <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto" />
+
               <p className="mt-3 text-sm text-gray-700">Loading your pets...</p>
             </div>
           ) : pets.length === 0 ? (
@@ -375,6 +406,7 @@ export default function DietPage() {
               <p className="text-sm font-medium text-gray-900">
                 No pets found.
               </p>
+
               <p className="mt-1 text-sm text-gray-600">
                 Add a pet profile first to generate a diet plan.
               </p>
@@ -390,7 +422,7 @@ export default function DietPage() {
                     key={p.id}
                     type="button"
                     onClick={() => setSelectedId(p.id)}
-                    className={`rounded-xl border p-4 text-left transition-colors ${
+                    className={`cursor-pointer rounded-xl border p-4 text-left transition-colors ${
                       selected
                         ? "border-blue-300 bg-blue-50/70"
                         : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
@@ -417,12 +449,14 @@ export default function DietPage() {
                           <p className="font-semibold text-gray-900 truncate">
                             {p.name}
                           </p>
+
                           {selected && (
                             <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
                               Selected
                             </span>
                           )}
                         </div>
+
                         <p className="mt-1 text-sm text-gray-600 truncate">
                           {p.breed || "Breed: -"}
                         </p>
@@ -434,18 +468,22 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Age
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {p.ageYears ?? "-"}
                         </p>
                       </div>
+
                       <div className="rounded-lg bg-gray-50 px-3 py-2">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Weight
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {p.weightKg ?? "-"} {p.weightKg ? "kg" : ""}
                         </p>
                       </div>
+
                       <div
                         className={`rounded-lg px-3 py-2 ${
                           p.bcs ? "bg-purple-50" : "bg-amber-50"
@@ -458,6 +496,7 @@ export default function DietPage() {
                         >
                           BCS
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {p.bcs ?? "-"}
                         </p>
@@ -473,20 +512,23 @@ export default function DietPage() {
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+
                 <div>
                   <p className="text-sm font-medium text-gray-900">
                     Body Condition Score required
                   </p>
+
                   <p className="mt-1 text-sm text-gray-600">
                     Calculate BCS for this pet before generating a diet plan.
                   </p>
                 </div>
               </div>
+
               <button
                 onClick={() =>
                   router.push(`/dashboard/pets/bcs?petId=${pet.id}`)
                 }
-                className="inline-flex items-center justify-center rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors"
+                className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors"
               >
                 Calculate BCS
               </button>
@@ -497,7 +539,7 @@ export default function DietPage() {
             <button
               onClick={loadPlan}
               disabled={!pet || loadingPlan || !pet.bcs}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
             >
               <Download className="w-4 h-4" />
               {loadingPlan ? "Generating..." : "Generate diet recommendation"}
@@ -515,9 +557,11 @@ export default function DietPage() {
                   <TrendingUp className="w-3.5 h-3.5" />
                   Generated plan
                 </div>
+
                 <h2 className="mt-3 text-xl sm:text-2xl font-semibold text-gray-900">
                   {plan.petName}&apos;s Diet Plan
                 </h2>
+
                 <p className="mt-1 text-sm text-gray-500">
                   Generated on {new Date(plan.generatedAt).toLocaleDateString()}
                 </p>
@@ -527,7 +571,6 @@ export default function DietPage() {
 
           {(plan.kbDietType || plan.Diet_Type) && (
             <div className="space-y-4 sm:space-y-6">
-              {/* 1. Plan Overview */}
               <SectionCard title="Plan Overview">
                 <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
                   Diet type: {plan.kbDietType || plan.Diet_Type}
@@ -546,27 +589,32 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">
                           Meals per day
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.meals_per_day}
                         </p>
                       </div>
                     )}
+
                     {plan.breed_size_category && (
                       <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Breed size
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.breed_size_category}
                         </p>
                       </div>
                     )}
+
                     {plan.energy_kcal && (
                       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                         <div className="flex items-center gap-1">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
                             Energy
                           </p>
+
                           {tooltipForPlanOverview("energy_kcal") && (
                             <InfoTooltipButton
                               id="plan-energy"
@@ -579,17 +627,20 @@ export default function DietPage() {
                             />
                           )}
                         </div>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {renderWithTooltip(plan.energy_kcal)}
                         </p>
                       </div>
                     )}
+
                     {plan.hydration && (
                       <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
                         <div className="flex items-center gap-1">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
                             Hydration
                           </p>
+
                           {tooltipForPlanOverview("hydration") && (
                             <InfoTooltipButton
                               id="plan-hydration"
@@ -602,11 +653,13 @@ export default function DietPage() {
                             />
                           )}
                         </div>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {renderWithTooltip(plan.hydration)}
                         </p>
                       </div>
                     )}
+
                     {plan.reference_body_weight_kg != null && (
                       <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <p
@@ -615,17 +668,20 @@ export default function DietPage() {
                         >
                           Weight used
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.reference_body_weight_kg} kg
                         </p>
                       </div>
                     )}
+
                     {plan.total_daily_amount_g != null && (
                       <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <div className="flex items-center gap-1">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             Total / day
                           </p>
+
                           {tooltipForPlanOverview("total_daily_amount_g") && (
                             <InfoTooltipButton
                               id="plan-total-day"
@@ -640,17 +696,20 @@ export default function DietPage() {
                             />
                           )}
                         </div>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.total_daily_amount_g} g
                         </p>
                       </div>
                     )}
+
                     {plan.total_daily_amount_g_per_kg_body_weight != null && (
                       <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <div className="flex items-center gap-1">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             Total / day (g/kg)
                           </p>
+
                           {tooltipForPlanOverview(
                             "total_daily_amount_g_per_kg_body_weight",
                           ) && (
@@ -667,6 +726,7 @@ export default function DietPage() {
                             />
                           )}
                         </div>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.total_daily_amount_g_per_kg_body_weight}
                         </p>
@@ -676,7 +736,6 @@ export default function DietPage() {
                 )}
               </SectionCard>
 
-              {/* 2. Goal */}
               {(plan.diet_goal || plan.life_stage_or_goal) && (
                 <SectionCard title="Goal">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -685,16 +744,19 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Life stage / goal
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.life_stage_or_goal}
                         </p>
                       </div>
                     )}
+
                     {plan.diet_goal && (
                       <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Diet goal
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.diet_goal}
                         </p>
@@ -704,7 +766,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 3. Dietary Recommendations */}
               {plan.dietary_recommendations && (
                 <SectionCard title="Dietary Recommendations">
                   <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
@@ -713,7 +774,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 4. Nutrition Targets */}
               {plan.nutrition_targets && (
                 <SectionCard title="Nutrition Targets">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -731,6 +791,7 @@ export default function DietPage() {
                           >
                             {humanizeKey(key)}
                           </p>
+
                           {tooltipForKey(key) && (
                             <InfoTooltipButton
                               id={toTooltipId("nutrition", key)}
@@ -741,6 +802,7 @@ export default function DietPage() {
                             />
                           )}
                         </div>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {renderWithTooltip(value)}
                         </p>
@@ -750,7 +812,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 5. Feeding Plan */}
               {Array.isArray(plan.feeding_plan) &&
                 plan.feeding_plan.length > 0 && (
                   <SectionCard title="Feeding Plan">
@@ -761,12 +822,15 @@ export default function DietPage() {
                             <th className="px-4 py-3 text-left font-medium">
                               Food
                             </th>
+
                             <th className="px-4 py-3 text-left font-medium">
                               Role
                             </th>
+
                             <th className="px-4 py-3 text-left font-medium">
                               Amount (g)
                             </th>
+
                             <th
                               className="px-4 py-3 text-left font-medium"
                               title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight)."
@@ -784,12 +848,15 @@ export default function DietPage() {
                               <td className="px-4 py-3 text-gray-900">
                                 {item?.food_item || "-"}
                               </td>
+
                               <td className="px-4 py-3 text-gray-700">
                                 {item?.role || "-"}
                               </td>
+
                               <td className="px-4 py-3 text-gray-700">
                                 {item?.amount_g ?? "-"}
                               </td>
+
                               <td className="px-4 py-3 text-gray-700">
                                 <span title="Grams per kilogram of body weight (used to scale the plan to the pet’s weight).">
                                   {item?.amount_g_per_kg_body_weight ?? "-"}
@@ -806,7 +873,6 @@ export default function DietPage() {
                   </SectionCard>
                 )}
 
-              {/* 6. Food Options */}
               {(Array.isArray(plan.commercial_food_options) &&
                 plan.commercial_food_options.length > 0) ||
               (Array.isArray(plan.homemade_food_options) &&
@@ -819,6 +885,7 @@ export default function DietPage() {
                           <p className="text-sm font-semibold text-gray-900">
                             Commercial
                           </p>
+
                           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {plan.commercial_food_options.map(
                               (food: string, i: number) => (
@@ -841,6 +908,7 @@ export default function DietPage() {
                           <p className="text-sm font-semibold text-gray-900">
                             Homemade
                           </p>
+
                           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {plan.homemade_food_options.map(
                               (food: string, i: number) => (
@@ -860,7 +928,6 @@ export default function DietPage() {
                 </SectionCard>
               ) : null}
 
-              {/* 7. Micronutrient Profile */}
               {plan.micronutrient_profile && (
                 <SectionCard title="Micronutrient Profile">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -878,6 +945,7 @@ export default function DietPage() {
                           >
                             {humanizeKey(key)}
                           </p>
+
                           {tooltipForKey(key) && (
                             <InfoTooltipButton
                               id={toTooltipId("micronutrient", key)}
@@ -888,6 +956,7 @@ export default function DietPage() {
                             />
                           )}
                         </div>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {renderWithTooltip(value)}
                         </p>
@@ -897,7 +966,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 9. Meal Timing */}
               {plan.meal_timing_guidance && (
                 <SectionCard title="Meal Timing">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -906,26 +974,31 @@ export default function DietPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Feeding frequency
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.meal_timing_guidance.feeding_frequency}
                         </p>
                       </div>
                     )}
+
                     {plan.meal_timing_guidance?.meal_spacing && (
                       <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Meal spacing
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.meal_timing_guidance.meal_spacing}
                         </p>
                       </div>
                     )}
+
                     {plan.meal_timing_guidance?.bloat_precaution && (
                       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
                           Bloat precaution
                         </p>
+
                         <p className="mt-1 text-sm text-gray-900">
                           {plan.meal_timing_guidance.bloat_precaution}
                         </p>
@@ -935,7 +1008,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 10. Portion & Calorie Guidance */}
               {plan.portion_and_calorie_guidance && (
                 <SectionCard title="Portion & Calorie Guidance">
                   <div className="space-y-4">
@@ -947,16 +1019,20 @@ export default function DietPage() {
                             <p className="text-[11px] uppercase tracking-wide text-blue-700">
                               Portion rule
                             </p>
+
                             <p className="mt-1">
                               {plan.portion_and_calorie_guidance.portion_rule}
                             </p>
                           </div>
                         )}
-                        {plan.portion_and_calorie_guidance?.review_interval && (
+
+                        {plan.portion_and_calorie_guidance
+                          ?.review_interval && (
                           <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
                             <p className="text-[11px] uppercase tracking-wide text-blue-700">
                               Review interval
                             </p>
+
                             <p className="mt-1">
                               {
                                 plan.portion_and_calorie_guidance
@@ -971,7 +1047,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 11. Supplement Guidance */}
               {plan.supplement_guidance && (
                 <SectionCard title="Supplement Guidance">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -992,7 +1067,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 12. Food Safety */}
               {plan.food_safety && (
                 <SectionCard title="Food Safety">
                   <div className="space-y-4">
@@ -1002,6 +1076,7 @@ export default function DietPage() {
                           <p className="text-sm font-medium text-gray-900">
                             Avoid toxic foods
                           </p>
+
                           <div className="mt-2 flex flex-wrap gap-2">
                             {plan.food_safety.avoid_toxic_foods.map(
                               (food: string, i: number) => (
@@ -1023,6 +1098,7 @@ export default function DietPage() {
                           <p className="text-sm font-medium text-gray-900">
                             Preparation rules
                           </p>
+
                           <div className="mt-2 space-y-2">
                             {plan.food_safety.preparation_rules.map(
                               (rule: string, i: number) => (
@@ -1044,6 +1120,7 @@ export default function DietPage() {
                         <p className="text-[11px] uppercase tracking-wide text-amber-700">
                           Treat limit
                         </p>
+
                         <p className="mt-1">{plan.food_safety.treat_limit}</p>
                       </div>
                     )}
@@ -1051,7 +1128,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 13. Allergy & Sensitivity */}
               {plan.allergy_and_sensitivity_rules && (
                 <SectionCard title="Allergy & Sensitivity">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1075,7 +1151,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 14. Transition Plan */}
               {plan.transition_plan && (
                 <SectionCard title="Transition Plan">
                   <div className="space-y-2">
@@ -1096,7 +1171,6 @@ export default function DietPage() {
                 </SectionCard>
               )}
 
-              {/* 15. Monitoring */}
               {plan.monitoring_metrics && (
                 <SectionCard title="Monitoring">
                   <div className="space-y-4">
@@ -1106,26 +1180,31 @@ export default function DietPage() {
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             Body condition score
                           </p>
+
                           <p className="mt-1 text-sm text-gray-900">
                             {plan.monitoring_metrics.body_condition_score}
                           </p>
                         </div>
                       )}
+
                       {plan.monitoring_metrics?.weight_tracking && (
                         <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             Weight tracking
                           </p>
+
                           <p className="mt-1 text-sm text-gray-900">
                             {plan.monitoring_metrics.weight_tracking}
                           </p>
                         </div>
                       )}
+
                       {plan.monitoring_metrics?.stool_score && (
                         <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             Stool score
                           </p>
+
                           <p className="mt-1 text-sm text-gray-900">
                             {plan.monitoring_metrics.stool_score}
                           </p>
@@ -1139,6 +1218,7 @@ export default function DietPage() {
                           <p className="text-sm font-medium text-gray-900">
                             Watch for
                           </p>
+
                           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {plan.monitoring_metrics.clinical_flags.map(
                               (flag: string, i: number) => (
@@ -1198,22 +1278,24 @@ export default function DietPage() {
                   const petSelect = document.getElementById(
                     "pet-selection-section",
                   );
+
                   if (petSelect) {
                     petSelect.scrollIntoView({
                       behavior: "smooth",
                       block: "start",
                     });
                   }
+
                   setPlan(null);
                 }}
-                className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Select another pet
               </button>
 
               <button
                 onClick={downloadPdf}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Download PDF
@@ -1227,9 +1309,11 @@ export default function DietPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 shadow-2xl text-center max-w-md mx-4">
             <div className="w-14 h-14 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-5" />
+
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Generating diet recommendation
             </h3>
+
             <p className="text-sm text-gray-600">
               Preparing a personalized nutrition and feeding plan for your pet.
             </p>

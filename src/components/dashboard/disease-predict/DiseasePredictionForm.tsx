@@ -64,7 +64,7 @@ function ChoiceButton({ label, selected, tone, onClick }: ChoiceButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`h-10 rounded-lg border px-4 text-sm font-medium transition-colors ${
+      className={`h-10 cursor-pointer rounded-lg border px-4 text-sm font-medium transition-colors ${
         selected
           ? selectedClasses
           : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
@@ -78,31 +78,35 @@ function ChoiceButton({ label, selected, tone, onClick }: ChoiceButtonProps) {
 function QuestionCard({
   label,
   hint,
-  hintTone = "amber",
   children,
 }: QuestionCardProps) {
-  const toneClasses = {
-    rose: "bg-rose-50 text-rose-700",
-    amber: "bg-amber-50 text-amber-700",
-    cyan: "bg-cyan-50 text-cyan-700",
-    green: "bg-green-50 text-green-700",
-  };
+  const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <div className="rounded-lg border border-gray-200 p-4 space-y-3">
-      <div>
+      <div className="relative flex items-center gap-2">
         <label className="block text-sm font-semibold text-gray-800">
           {label} <span className="text-red-500">*</span>
         </label>
-        <p className="mt-1 text-xs text-gray-500 flex items-start gap-2">
-          <span
-            className={`inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${toneClasses[hintTone]}`}
-          >
-            ?
-          </span>
-          <span>{hint}</span>
-        </p>
+
+        <button
+          type="button"
+          onClick={() => setShowTooltip((prev) => !prev)}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          className="inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-[11px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+          aria-label={`${label} help`}
+        >
+          ?
+        </button>
+
+        {showTooltip && (
+          <div className="absolute bottom-7 left-0 z-20 w-64 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 shadow-lg">
+            {hint}
+          </div>
+        )}
       </div>
+
       {children}
     </div>
   );
@@ -130,8 +134,8 @@ function TextInput({
       disabled={disabled}
       className={`h-10 w-full rounded-lg border px-3 text-sm shadow-sm outline-none transition-colors focus:ring-2 focus:ring-blue-100 ${
         disabled
-          ? "border-gray-200 bg-gray-50 text-gray-600"
-          : "border-gray-200 bg-white text-gray-800 focus:border-blue-300"
+          ? "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-600"
+          : "cursor-pointer border-gray-200 bg-white text-gray-800 focus:border-blue-300"
       }`}
     />
   );
@@ -147,11 +151,12 @@ function SelectInput({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-colors focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+      className="h-10 w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-800 shadow-sm outline-none transition-colors focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
     >
       <option value="" disabled>
         {placeholder}
       </option>
+
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>
           {opt.label}
@@ -174,8 +179,8 @@ export default function DiseasePredictionForm({
   petSpayedNeutered,
   petDigestiveSensitivity,
 }: DiseasePredictionFormProps) {
-  // BCS is required - if not available, show error
   const hasBCS = initialBCS !== null && initialBCS !== undefined;
+
   const hasRequiredProfile =
     hasBCS &&
     petAge !== null &&
@@ -188,10 +193,10 @@ export default function DiseasePredictionForm({
   const [formData, setFormData] = useState<DiseasePredictionFormState>(() => {
     const initial = { ...initialFormState };
 
-    // Pre-fill from pet data if available
     if (hasBCS) {
       initial.body_condition_score = initialBCS;
     }
+
     if (petAge !== null && petAge !== undefined) {
       initial.age_years = String(petAge);
     }
@@ -200,7 +205,6 @@ export default function DiseasePredictionForm({
       initial.weight_kg = String(petWeight);
     }
 
-    // Auto-detect breed size based on weight or breed name
     if (petWeight !== null && petWeight !== undefined) {
       if (petWeight < 10) {
         initial.breed_size = "Small";
@@ -210,8 +214,8 @@ export default function DiseasePredictionForm({
         initial.breed_size = "Large";
       }
     } else if (petBreed) {
-      // Fallback: detect from breed name
       const breedLower = petBreed.toLowerCase();
+
       const smallBreeds = [
         "chihuahua",
         "pomeranian",
@@ -230,6 +234,7 @@ export default function DiseasePredictionForm({
         "terrier",
         "poodle",
       ];
+
       const largeBreeds = [
         "german shepherd",
         "labrador",
@@ -259,14 +264,13 @@ export default function DiseasePredictionForm({
       }
     }
 
-    // Auto-fill spayed/neutered status from pet profile
     if (petSpayedNeutered !== null && petSpayedNeutered !== undefined) {
       initial.neutered_status = petSpayedNeutered ? "Yes" : "No";
     }
 
-    // Auto-fill activity level from activity level
     if (petActivityLevel) {
       const activityLower = petActivityLevel.toLowerCase();
+
       if (activityLower === "low") {
         initial.activity_level = "Low";
       } else if (activityLower === "medium" || activityLower === "moderate") {
@@ -276,7 +280,6 @@ export default function DiseasePredictionForm({
       }
     }
 
-    // Auto-fill diet type from preferred diet
     if (petPreferredDiet) {
       const dietLower = petPreferredDiet.toLowerCase();
       if (dietLower.includes("dry") || dietLower.includes("kibble")) {
@@ -296,10 +299,9 @@ export default function DiseasePredictionForm({
       }
     }
 
-    // Map pet digestive sensitivity to the model's digestive issues scale
-    // (Space expects: None | Mild | Severe)
     if (petDigestiveSensitivity) {
       const ds = petDigestiveSensitivity.toLowerCase();
+
       if (ds.includes("none") || ds.includes("no")) {
         initial.digestive_issues = "None";
       } else if (
@@ -315,8 +317,6 @@ export default function DiseasePredictionForm({
       initial.digestive_issues = "None";
     }
 
-    // If some profile values are missing, choose a safe default for non-critical fields
-    // while still requiring the core profile fields to exist via `hasRequiredProfile`.
     if (!initial.activity_level) initial.activity_level = "Moderate";
     if (!initial.diet_type) initial.diet_type = "Mixed";
 
@@ -325,7 +325,6 @@ export default function DiseasePredictionForm({
 
   const formContainerRef = useRef<HTMLDivElement>(null);
 
-  // Validation
   const canSubmit = () => {
     return (
       formData.age_years !== "" &&
@@ -352,30 +351,34 @@ export default function DiseasePredictionForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (hasBCS && canSubmit()) {
       onSubmit(formData);
     }
   };
 
-  // If no BCS, show error state
   if (!hasBCS) {
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-md mx-auto p-6 text-center">
-          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-6 h-6 text-amber-600" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
+        <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 text-center shadow-2xl">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+            <AlertTriangle className="h-6 w-6 text-amber-600" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">
             BCS required
           </h3>
-          <p className="text-sm text-gray-600 mb-6">
+
+          <p className="mb-6 text-sm text-gray-600">
             Please calculate the Body Condition Score (BCS) for{" "}
             {petName || "your pet"} first before running the disease risk
             assessment.
           </p>
+
           <button
+            type="button"
             onClick={onCancel}
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
           >
             Go to BCS Calculator
           </button>
@@ -386,22 +389,26 @@ export default function DiseasePredictionForm({
 
   if (!hasRequiredProfile) {
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-md mx-auto p-6 text-center">
-          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-6 h-6 text-amber-600" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
+        <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 text-center shadow-2xl">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+            <AlertTriangle className="h-6 w-6 text-amber-600" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">
             Pet profile incomplete
           </h3>
-          <p className="text-sm text-gray-600 mb-6">
+
+          <p className="mb-6 text-sm text-gray-600">
             Please ensure {petName || "your pet"} has age, weight, and
             spay/neuter status saved in the pet profile before running the
             assessment.
           </p>
+
           <button
+            type="button"
             onClick={onCancel}
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
           >
             Go back
           </button>
@@ -411,35 +418,40 @@ export default function DiseasePredictionForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
       <div
         ref={formContainerRef}
-        className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-3xl mx-auto my-8 max-h-[90vh] overflow-y-auto"
+        className="mx-auto my-8 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-2xl"
       >
-        <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-5 sm:px-6 py-4">
+        <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 px-5 py-4 backdrop-blur sm:px-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                <Stethoscope className="w-5 h-5" />
+                <Stethoscope className="h-5 w-5" />
               </div>
+
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-blue-700">
                   Health screening
                 </p>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+
+                <h2 className="text-lg font-semibold text-gray-900 sm:text-xl">
                   Multi-Disease Risk Assessment
                 </h2>
+
                 <p className="text-sm text-gray-500">
                   {petName ? `For ${petName}` : "For your pet"}
                 </p>
               </div>
             </div>
+
             <button
+              type="button"
               onClick={onCancel}
-              className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+              className="cursor-pointer rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
               aria-label="Close assessment form"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -448,7 +460,8 @@ export default function DiseasePredictionForm({
           <div className="space-y-6">
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
               <div className="flex gap-3">
-                <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+
                 <div className="text-sm text-amber-800">
                   Provide accurate diet, activity, and symptom details before
                   running the screening.
@@ -461,12 +474,13 @@ export default function DiseasePredictionForm({
                 <h3 className="text-base font-semibold text-gray-900">
                   Lifestyle and symptoms
                 </h3>
+
                 <p className="mt-1 text-sm text-gray-500">
                   These questions help refine the risk prediction.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <QuestionCard
                   label="Daily exercise (minutes)"
                   hint="Approximate total exercise time per day."
@@ -490,7 +504,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Fatty food frequency"
-                  hint="How often does your pet eat fatty foods?"
+                  hint="How often your pet eats high-fat foods."
                   hintTone="rose"
                 >
                   <SelectInput
@@ -511,7 +525,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Treat frequency"
-                  hint="How often does your pet get treats?"
+                  hint="How often your pet receives treats."
                   hintTone="green"
                 >
                   <SelectInput
@@ -537,15 +551,16 @@ export default function DiseasePredictionForm({
                 <h3 className="text-base font-semibold text-gray-900">
                   Symptoms and clinical signs
                 </h3>
+
                 <p className="mt-1 text-sm text-gray-500">
                   Choose the options that best match your pet currently.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <QuestionCard
                   label="Water intake"
-                  hint="Is your pet drinking less, normal, or more than usual?"
+                  hint="Whether your pet drinks less, normal, or more than usual."
                   hintTone="cyan"
                 >
                   <SelectInput
@@ -566,7 +581,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Urination"
-                  hint="Any changes in urination pattern?"
+                  hint="Any noticeable changes in urination pattern."
                   hintTone="amber"
                 >
                   <SelectInput
@@ -587,7 +602,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Appetite change"
-                  hint="Has appetite decreased, stayed normal, or increased?"
+                  hint="Whether appetite decreased, stayed normal, or increased."
                   hintTone="green"
                 >
                   <SelectInput
@@ -608,7 +623,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Vomiting"
-                  hint="Has your pet vomited recently?"
+                  hint="Whether your pet has vomited recently."
                   hintTone="rose"
                 >
                   <div className="grid grid-cols-2 gap-2">
@@ -620,6 +635,7 @@ export default function DiseasePredictionForm({
                         setFormData({ ...formData, vomiting: "Yes" })
                       }
                     />
+
                     <ChoiceButton
                       label="No"
                       selected={formData.vomiting === "No"}
@@ -633,7 +649,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Lethargy"
-                  hint="Is your pet more tired or less active than usual?"
+                  hint="Whether your pet seems more tired than usual."
                   hintTone="cyan"
                 >
                   <div className="grid grid-cols-2 gap-2">
@@ -645,6 +661,7 @@ export default function DiseasePredictionForm({
                         setFormData({ ...formData, lethargy: "Yes" })
                       }
                     />
+
                     <ChoiceButton
                       label="No"
                       selected={formData.lethargy === "No"}
@@ -659,11 +676,11 @@ export default function DiseasePredictionForm({
             </section>
           </div>
 
-          <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3 border-t border-gray-200 pt-5">
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row">
             <button
               type="button"
               onClick={onCancel}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
             >
               Cancel
             </button>
@@ -673,8 +690,8 @@ export default function DiseasePredictionForm({
               disabled={!canSubmit()}
               className={`inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                 canSubmit()
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  ? "cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
+                  : "cursor-not-allowed bg-gray-200 text-gray-500"
               }`}
             >
               Analyze disease risks
