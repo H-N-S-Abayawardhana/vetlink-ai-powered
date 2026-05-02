@@ -78,31 +78,35 @@ function ChoiceButton({ label, selected, tone, onClick }: ChoiceButtonProps) {
 function QuestionCard({
   label,
   hint,
-  hintTone = "amber",
   children,
 }: QuestionCardProps) {
-  const toneClasses = {
-    rose: "bg-rose-50 text-rose-700",
-    amber: "bg-amber-50 text-amber-700",
-    cyan: "bg-cyan-50 text-cyan-700",
-    green: "bg-green-50 text-green-700",
-  };
+  const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className="cursor-pointer rounded-lg border border-gray-200 p-4 space-y-3">
-      <div>
-        <label className="block cursor-pointer text-sm font-semibold text-gray-800">
+    <div className="rounded-lg border border-gray-200 p-4 space-y-3">
+      <div className="relative flex items-center gap-2">
+        <label className="block text-sm font-semibold text-gray-800">
           {label} <span className="text-red-500">*</span>
         </label>
-        <p className="mt-1 flex cursor-pointer items-start gap-2 text-xs text-gray-500">
-          <span
-            className={`inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${toneClasses[hintTone]}`}
-          >
-            ?
-          </span>
-          <span>{hint}</span>
-        </p>
+
+        <button
+          type="button"
+          onClick={() => setShowTooltip((prev) => !prev)}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          className="inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-[11px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+          aria-label={`${label} help`}
+        >
+          ?
+        </button>
+
+        {showTooltip && (
+          <div className="absolute bottom-7 left-0 z-20 w-64 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 shadow-lg">
+            {hint}
+          </div>
+        )}
       </div>
+
       {children}
     </div>
   );
@@ -152,6 +156,7 @@ function SelectInput({
       <option value="" disabled>
         {placeholder}
       </option>
+
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>
           {opt.label}
@@ -500,7 +505,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Fatty food frequency"
-                  hint="How often does your pet eat fatty foods?"
+                  hint="How often your pet eats high-fat foods."
                   hintTone="rose"
                 >
                   <SelectInput
@@ -521,7 +526,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Treat frequency"
-                  hint="How often does your pet get treats?"
+                  hint="How often your pet receives treats."
                   hintTone="green"
                 >
                   <SelectInput
@@ -556,7 +561,7 @@ export default function DiseasePredictionForm({
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <QuestionCard
                   label="Water intake"
-                  hint="Is your pet drinking less, normal, or more than usual?"
+                  hint="Whether your pet drinks less, normal, or more than usual."
                   hintTone="cyan"
                 >
                   <SelectInput
@@ -577,7 +582,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Urination"
-                  hint="Any changes in urination pattern?"
+                  hint="Any noticeable changes in urination pattern."
                   hintTone="amber"
                 >
                   <SelectInput
@@ -598,7 +603,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Appetite change"
-                  hint="Has appetite decreased, stayed normal, or increased?"
+                  hint="Whether appetite decreased, stayed normal, or increased."
                   hintTone="green"
                 >
                   <SelectInput
@@ -619,7 +624,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Vomiting"
-                  hint="Has your pet vomited recently?"
+                  hint="Whether your pet has vomited recently."
                   hintTone="rose"
                 >
                   <div className="grid grid-cols-2 gap-2">
@@ -645,7 +650,7 @@ export default function DiseasePredictionForm({
 
                 <QuestionCard
                   label="Lethargy"
-                  hint="Is your pet more tired or less active than usual?"
+                  hint="Whether your pet seems more tired than usual."
                   hintTone="cyan"
                 >
                   <div className="grid grid-cols-2 gap-2">
