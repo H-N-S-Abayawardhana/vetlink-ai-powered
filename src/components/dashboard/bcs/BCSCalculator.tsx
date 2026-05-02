@@ -290,11 +290,6 @@ export default function BCSCalculator() {
               physical observations.
             </p>
           </div>
-
-          <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 lg:max-w-sm">
-            A BCS score helps you understand whether your pet is underweight,
-            ideal, overweight, or obese.
-          </div>
         </div>
       </div>
 
@@ -354,7 +349,7 @@ export default function BCSCalculator() {
             <button
               type="button"
               onClick={resetCalculator}
-              className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               Change pet
             </button>
@@ -505,7 +500,7 @@ export default function BCSCalculator() {
               </div>
               <button
                 onClick={handleNavigateToDiseasePrediction}
-                className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors cursor-pointer"
               >
                 Start assessment
               </button>
@@ -547,7 +542,7 @@ export default function BCSCalculator() {
                     setShowClinicalModal(false);
                     setSelected(null);
                   }}
-                  className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                  className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors cursor-pointer"
                   aria-label="Close observations modal"
                 >
                   <X className="w-5 h-5" />
@@ -587,7 +582,7 @@ export default function BCSCalculator() {
                     onChange={(e) =>
                       onDetailsChange("ribCondition", e.target.value)
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
                   >
                     <option value="">Select rib condition</option>
                     {clinicalOptions.rib_condition.map((opt) => (
@@ -608,7 +603,7 @@ export default function BCSCalculator() {
                   <select
                     value={updates.waist || ""}
                     onChange={(e) => onDetailsChange("waist", e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
                   >
                     <option value="">Select waist condition</option>
                     {clinicalOptions.waist.map((opt) => (
@@ -631,7 +626,7 @@ export default function BCSCalculator() {
                     onChange={(e) =>
                       onDetailsChange("abdominalTuck", e.target.value)
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
                   >
                     <option value="">Select abdominal tuck</option>
                     {clinicalOptions.abdominal_tuck.map((opt) => (
@@ -654,7 +649,7 @@ export default function BCSCalculator() {
                     onChange={(e) =>
                       onDetailsChange("spineHips", e.target.value)
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
                   >
                     <option value="">Select spine/hips condition</option>
                     {clinicalOptions.spine_hips.map((opt) => (
@@ -677,7 +672,7 @@ export default function BCSCalculator() {
                     onChange={(e) =>
                       onDetailsChange("fatDeposits", e.target.value)
                     }
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
                   >
                     <option value="">Select fat deposit level</option>
                     {clinicalOptions.fat_deposits.map((opt) => (
@@ -698,7 +693,7 @@ export default function BCSCalculator() {
                     setShowClinicalModal(false);
                     setSelected(null);
                   }}
-                  className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -708,7 +703,7 @@ export default function BCSCalculator() {
                     void handleCalculate();
                   }}
                   disabled={!canCalculate || loading}
-                  className={`inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
                     canCalculate && !loading
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
