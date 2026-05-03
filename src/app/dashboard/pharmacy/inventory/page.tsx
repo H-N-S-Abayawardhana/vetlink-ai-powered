@@ -20,6 +20,8 @@ import { AuthGuard } from "@/lib/auth-guard";
 
 interface InventoryItem {
   id: number;
+  /** Real DB id for PUT/DELETE (from GET `/api/pharmacies/.../inventory`) */
+  uuid?: string;
   name: string;
   form: string;
   strength?: string;
@@ -127,13 +129,20 @@ export default function PharmacyInventoryPage() {
     }
   }, [searchQuery, inventory]);
 
-  const handleDelete = async (itemId: number) => {
+  const handleDelete = async (item: InventoryItem) => {
     if (!pharmacyId) return;
+    if (!item.uuid) {
+      setMessage({
+        type: "error",
+        text: "This item cannot be deleted (missing id). Refresh the page.",
+      });
+      return;
+    }
     if (!confirm("Are you sure you want to delete this item?")) return;
 
     try {
       const res = await fetch(
-        `/api/pharmacies/${pharmacyId}/inventory/${itemId}`,
+        `/api/pharmacies/${pharmacyId}/inventory/${item.uuid}`,
         { method: "DELETE" },
       );
       const data = await res.json();
@@ -245,7 +254,7 @@ export default function PharmacyInventoryPage() {
 
           {/* Statistics Cards - same card style as skin disease */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 min-w-0">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Package className="w-6 h-6 text-blue-600" />
@@ -257,7 +266,7 @@ export default function PharmacyInventoryPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 min-w-0">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                   <AlertCircle className="w-6 h-6 text-red-600" />
@@ -269,19 +278,30 @@ export default function PharmacyInventoryPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 min-w-0 overflow-hidden">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
               </div>
               <div className="text-sm text-gray-600 mb-1">Total Value</div>
-              <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                {formatLKR(stats.totalValue)}
+              <div
+                className="min-w-0"
+                title={formatLKR(stats.totalValue)}
+              >
+                <div className="text-xs font-semibold uppercase tracking-wide text-green-700/90">
+                  LKR
+                </div>
+                <div className="text-xl sm:text-2xl md:text-xl lg:text-2xl xl:text-3xl font-bold text-green-600 tabular-nums leading-tight [overflow-wrap:anywhere]">
+                  {new Intl.NumberFormat("en-LK", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(stats.totalValue)}
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 min-w-0">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <Calendar className="w-6 h-6 text-orange-600" />
@@ -449,7 +469,7 @@ export default function PharmacyInventoryPage() {
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handleDelete(item.id)}
+                                onClick={() => handleDelete(item)}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                 title="Delete"
                               >
@@ -580,7 +600,12 @@ function InventoryItemModal({
       let method = "POST";
 
       if (item) {
-        url = `/api/pharmacies/${pharmacyId}/inventory/${item.id}`;
+        if (!item.uuid) {
+          setError("Missing item id — refresh the page and try again.");
+          setLoading(false);
+          return;
+        }
+        url = `/api/pharmacies/${pharmacyId}/inventory/${item.uuid}`;
         method = "PUT";
         const payload = {
           name: formData.name,
