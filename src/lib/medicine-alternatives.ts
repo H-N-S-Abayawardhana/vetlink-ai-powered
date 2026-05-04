@@ -271,6 +271,8 @@ export async function getAlternativeMedicines(
     }
   }
 
-  matches.sort((a, b) => b.score - a.score || a.row.name.localeCompare(b.row.name));
+  matches.sort(
+    (a, b) => b.score - a.score || a.row.name.localeCompare(b.row.name),
+  );
   return matches;
 }

@@ -75,11 +75,7 @@ function ChoiceButton({ label, selected, tone, onClick }: ChoiceButtonProps) {
   );
 }
 
-function QuestionCard({
-  label,
-  hint,
-  children,
-}: QuestionCardProps) {
+function QuestionCard({ label, hint, children }: QuestionCardProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (

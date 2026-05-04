@@ -332,29 +332,29 @@ export default function DietPage() {
 
   const hasKbDetails = Boolean(
     plan?.dietary_recommendations ||
-      (plan?.nutrition_targets &&
-        Object.keys(plan.nutrition_targets).length > 0) ||
-      (Array.isArray(plan?.feeding_plan) && plan.feeding_plan.length > 0) ||
-      (plan?.micronutrient_profile &&
-        Object.keys(plan.micronutrient_profile).length > 0) ||
-      (Array.isArray(plan?.commercial_food_options) &&
-        plan.commercial_food_options.length > 0) ||
-      (Array.isArray(plan?.homemade_food_options) &&
-        plan.homemade_food_options.length > 0) ||
-      (Array.isArray(plan?.breed_specific_considerations) &&
-        plan.breed_specific_considerations.length > 0) ||
-      plan?.portion_and_calorie_guidance ||
-      plan?.meal_timing_guidance ||
-      plan?.food_safety ||
-      plan?.allergy_and_sensitivity_rules ||
-      plan?.supplement_guidance ||
-      plan?.transition_plan ||
-      plan?.monitoring_metrics ||
-      plan?.reference_body_weight_kg ||
-      plan?.total_daily_amount_g ||
-      plan?.total_daily_amount_g_per_kg_body_weight ||
-      (Array.isArray(plan?.veterinary_review_required_for) &&
-        plan.veterinary_review_required_for.length > 0),
+    (plan?.nutrition_targets &&
+      Object.keys(plan.nutrition_targets).length > 0) ||
+    (Array.isArray(plan?.feeding_plan) && plan.feeding_plan.length > 0) ||
+    (plan?.micronutrient_profile &&
+      Object.keys(plan.micronutrient_profile).length > 0) ||
+    (Array.isArray(plan?.commercial_food_options) &&
+      plan.commercial_food_options.length > 0) ||
+    (Array.isArray(plan?.homemade_food_options) &&
+      plan.homemade_food_options.length > 0) ||
+    (Array.isArray(plan?.breed_specific_considerations) &&
+      plan.breed_specific_considerations.length > 0) ||
+    plan?.portion_and_calorie_guidance ||
+    plan?.meal_timing_guidance ||
+    plan?.food_safety ||
+    plan?.allergy_and_sensitivity_rules ||
+    plan?.supplement_guidance ||
+    plan?.transition_plan ||
+    plan?.monitoring_metrics ||
+    plan?.reference_body_weight_kg ||
+    plan?.total_daily_amount_g ||
+    plan?.total_daily_amount_g_per_kg_body_weight ||
+    (Array.isArray(plan?.veterinary_review_required_for) &&
+      plan.veterinary_review_required_for.length > 0),
   );
 
   return (
@@ -582,85 +582,95 @@ export default function DietPage() {
 
                   return (
                     <>
-                <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-                  Diet type: {plan.kbDietType || plan.Diet_Type}
-                </div>
+                      <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+                        Diet type: {plan.kbDietType || plan.Diet_Type}
+                      </div>
 
                       {showBwNote && (
                         <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                          Note: In the energy/calorie formulas, <span className="font-semibold">BW</span> refers to the <span className="font-semibold">target body weight</span>.
+                          Note: In the energy/calorie formulas,{" "}
+                          <span className="font-semibold">BW</span> refers to
+                          the{" "}
+                          <span className="font-semibold">
+                            target body weight
+                          </span>
+                          .
                         </div>
                       )}
 
-                {(plan.meals_per_day ||
-                  plan.energy_kcal ||
-                  plan.hydration) && (
-                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {plan.meals_per_day && (
-                      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">
-                          Meals per day
-                        </p>
+                      {(plan.meals_per_day ||
+                        plan.energy_kcal ||
+                        plan.hydration) && (
+                        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {plan.meals_per_day && (
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">
+                                Meals per day
+                              </p>
 
-                        <p className="mt-1 text-sm text-gray-900">
-                          {plan.meals_per_day}
-                        </p>
-                      </div>
-                    )}
+                              <p className="mt-1 text-sm text-gray-900">
+                                {plan.meals_per_day}
+                              </p>
+                            </div>
+                          )}
 
-                    {plan.energy_kcal && (
-                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
-                            Energy
-                          </p>
+                          {plan.energy_kcal && (
+                            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                              <div className="flex items-center gap-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+                                  Energy
+                                </p>
 
-                          {tooltipForPlanOverview("energy_kcal") && (
-                            <InfoTooltipButton
-                              id="plan-energy"
-                              text={
-                                tooltipForPlanOverview("energy_kcal") as string
-                              }
-                              openId={openTooltipId}
-                              setOpenId={setOpenTooltipId}
-                              tone="gray"
-                            />
+                                {tooltipForPlanOverview("energy_kcal") && (
+                                  <InfoTooltipButton
+                                    id="plan-energy"
+                                    text={
+                                      tooltipForPlanOverview(
+                                        "energy_kcal",
+                                      ) as string
+                                    }
+                                    openId={openTooltipId}
+                                    setOpenId={setOpenTooltipId}
+                                    tone="gray"
+                                  />
+                                )}
+                              </div>
+
+                              <p className="mt-1 text-sm text-gray-900">
+                                {renderWithTooltip(plan.energy_kcal)}
+                              </p>
+                            </div>
+                          )}
+
+                          {plan.hydration && (
+                            <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
+                              <div className="flex items-center gap-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
+                                  Hydration
+                                </p>
+
+                                {tooltipForPlanOverview("hydration") && (
+                                  <InfoTooltipButton
+                                    id="plan-hydration"
+                                    text={
+                                      tooltipForPlanOverview(
+                                        "hydration",
+                                      ) as string
+                                    }
+                                    openId={openTooltipId}
+                                    setOpenId={setOpenTooltipId}
+                                    tone="gray"
+                                  />
+                                )}
+                              </div>
+
+                              <p className="mt-1 text-sm text-gray-900">
+                                {renderWithTooltip(plan.hydration)}
+                              </p>
+                            </div>
                           )}
                         </div>
-
-                        <p className="mt-1 text-sm text-gray-900">
-                          {renderWithTooltip(plan.energy_kcal)}
-                        </p>
-                      </div>
-                    )}
-
-                    {plan.hydration && (
-                      <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
-                            Hydration
-                          </p>
-
-                          {tooltipForPlanOverview("hydration") && (
-                            <InfoTooltipButton
-                              id="plan-hydration"
-                              text={
-                                tooltipForPlanOverview("hydration") as string
-                              }
-                              openId={openTooltipId}
-                              setOpenId={setOpenTooltipId}
-                              tone="gray"
-                            />
-                          )}
-                        </div>
-
-                        <p className="mt-1 text-sm text-gray-900">
-                          {renderWithTooltip(plan.hydration)}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
                     </>
                   );
                 })()}
@@ -948,8 +958,7 @@ export default function DietPage() {
                           </div>
                         )}
 
-                        {plan.portion_and_calorie_guidance
-                          ?.review_interval && (
+                        {plan.portion_and_calorie_guidance?.review_interval && (
                           <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
                             <p className="text-[11px] uppercase tracking-wide text-blue-700">
                               Review interval

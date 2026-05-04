@@ -25,6 +25,13 @@ const RESOLVED_SPACE_URL =
 // Hugging Face API Token (optional, but recommended for private models)
 const HF_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || "";
 
+/**  OCR/prescription NER Space URL */
+const PRESCRIPTION_READ_MODEL_RAW =
+  process.env.PRESCRIPTION_READ_MODEL?.trim() ||
+  "https://malindaz-prescription-ner-model.hf.space";
+const PRESCRIPTION_READ_MODEL_RESOLVED =
+  normalizeSpaceUrl(PRESCRIPTION_READ_MODEL_RAW) || PRESCRIPTION_READ_MODEL_RAW;
+
 const API_REQUEST_TIMEOUT = 30000; // 30 seconds
 
 // Determine if we're using Inference API or Gradio Space
@@ -59,7 +66,38 @@ export interface PharmacyDemandResult {
   error?: string;
 }
 
+/** OCR Model types */
+export interface PrescriptionReadStubResult {
+  ok: true;
+  modelUrl: string;
+  entities: Array<{ text: string; label: string }>;
+}
+
 export class PharmacyDemandApiService {
+  static getPrescriptionReadModelUrl(): string {
+    return PRESCRIPTION_READ_MODEL_RESOLVED;
+  }
+
+  static isPrescriptionReadModelConfigured(): boolean {
+    return Boolean(PRESCRIPTION_READ_MODEL_RESOLVED);
+  }
+
+  static async readPrescriptionStub(
+    _input?: string | { base64?: string; mimeType?: string },
+  ): Promise<PrescriptionReadStubResult | { ok: false; error: string }> {
+    if (!PRESCRIPTION_READ_MODEL_RESOLVED) {
+      return {
+        ok: false,
+        error: "PRESCRIPTION_READ_MODEL is not configured",
+      };
+    }
+    return {
+      ok: true,
+      modelUrl: PRESCRIPTION_READ_MODEL_RESOLVED,
+      entities: [],
+    };
+  }
+
   static async predictDemand(
     input: PharmacyDemandInput,
   ): Promise<PharmacyDemandResult> {

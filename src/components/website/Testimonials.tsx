@@ -1,135 +1,135 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { Quote, Star } from "lucide-react";
+import { Quote, User } from "lucide-react";
+
+const AVATAR_GRADIENTS = [
+  "from-indigo-500 to-violet-600",
+  "from-teal-500 to-cyan-600",
+  "from-sky-500 to-indigo-600",
+  "from-emerald-500 to-teal-600",
+  "from-violet-500 to-purple-600",
+  "from-rose-500 to-pink-600",
+  "from-amber-500 to-orange-600",
+  "from-fuchsia-500 to-rose-600",
+  "from-blue-500 to-indigo-600",
+  "from-slate-600 to-slate-800",
+  "from-cyan-600 to-blue-700",
+] as const;
+
+function TestimonialAvatar({ avatarId }: { avatarId: number }) {
+  const gradient = AVATAR_GRADIENTS[avatarId % AVATAR_GRADIENTS.length];
+  return (
+    <div className="relative shrink-0">
+      <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-100 to-teal-100 blur-sm opacity-70" />
+      <div
+        className={`relative flex h-[50px] w-[50px] items-center justify-center rounded-full bg-gradient-to-br ${gradient} ring-2 ring-gray-200/60`}
+        aria-hidden
+      >
+        <User className="h-[22px] w-[22px] text-white" strokeWidth={2} />
+      </div>
+    </div>
+  );
+}
 
 export default function Testimonials() {
   const testimonials = [
     {
-      name: "Sarah Johnson",
-      role: "Dog Owner",
-      image:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Subodhi Nissanka",
+      role: "Pet Owner",
+      avatarId: 0,
       content:
         "VetLink's skin detection feature helped me catch my dog's early-stage dermatitis. The AI recommendations were spot-on and saved us a costly vet visit!",
-      rating: 5,
     },
     {
-      name: "Mike Chen",
-      role: "Cat Owner",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Shehan Sugathapala",
+      role: "Pet Owner",
+      avatarId: 1,
       content:
         "The anomaly detection system alerted me when my cat started limping. Early detection meant faster treatment and a quicker recovery.",
-      rating: 5,
     },
     {
-      name: "Emily Rodriguez",
-      role: "Multi-Pet Owner",
-      image:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Uditha Numwan",
+      role: "Pet Owner",
+      avatarId: 2,
       content:
         "The AI diet plans have been a game-changer for my pets' health. Each of my three pets has a personalized nutrition plan that works perfectly!",
-      rating: 5,
     },
     {
-      name: "David Thompson",
-      role: "Golden Retriever Owner",
-      image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Chathuranga Bandara",
+      role: "Pet Owner",
+      avatarId: 3,
       content:
         "The health monitoring dashboard gives me peace of mind. I can track my dog's activity levels, sleep patterns, and overall wellness trends all in one place.",
-      rating: 5,
     },
     {
-      name: "Lisa Park",
-      role: "Persian Cat Owner",
-      image:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Anupama Maheepala",
+      role: "Pet Owner",
+      avatarId: 4,
       content:
         "VetLink's grooming recommendations are fantastic! My Persian cat's coat has never looked better. The AI suggested the perfect grooming schedule and products.",
-      rating: 5,
     },
     {
-      name: "James Wilson",
-      role: "Senior Pet Owner",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Oshadha Dahanayaka",
+      role: "Pet Owner",
+      avatarId: 5,
       content:
         "As my dog ages, VetLink's senior care features have been invaluable. The medication reminders and health alerts help me provide the best care for my 12-year-old companion.",
-      rating: 5,
     },
     {
-      name: "Maria Garcia",
-      role: "Labrador Owner",
-      image:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Aloka Rathnayaka",
+      role: "Pet Owner",
+      avatarId: 6,
       content:
         "The pharmacy matching system is incredible! It found the exact medication my dog needed at a nearby pharmacy, saving me hours of searching.",
-      rating: 5,
     },
     {
-      name: "Robert Kim",
-      role: "Siamese Cat Owner",
-      image:
-        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Vanuja Fernando",
+      role: "Pet Owner",
+      avatarId: 7,
       content:
         "I love how VetLink learns from my cat's behavior patterns. The predictive alerts have helped me catch issues before they become serious problems.",
-      rating: 5,
     },
     {
-      name: "Jennifer Lee",
-      role: "Multiple Pet Owner",
-      image:
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Vihanga Denetha",
+      role: "Pet Owner",
+      avatarId: 8,
       content:
         "Managing health records for three pets used to be overwhelming. VetLink makes it so easy with its intuitive dashboard and AI-powered insights.",
-      rating: 5,
     },
     {
-      name: "Michael Brown",
-      role: "German Shepherd Owner",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Dr. Janaka Kumara",
+      role: "Veterinarian",
+      avatarId: 9,
       content:
         "The tele-vet consultation feature is a lifesaver! I can get professional advice instantly without leaving home, especially helpful for my anxious dog.",
-      rating: 5,
     },
     {
-      name: "Amanda White",
-      role: "Maine Coon Owner",
-      image:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      name: "Dr. Dilushan Rajapaksha",
+      role: "Veterinarian",
+      avatarId: 10,
       content:
         "VetLink's AI diet recommendations transformed my cat's health. The personalized meal plans based on breed and age are spot-on and easy to follow.",
-      rating: 5,
-    },
-    {
-      name: "Christopher Davis",
-      role: "Beagle Owner",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      content:
-        "The appointment scheduling is seamless, and the automated reminders ensure I never miss a checkup. The whole system is incredibly user-friendly!",
-      rating: 5,
     },
   ];
 
-  // Duplicate testimonials for seamless infinite scroll
-  const duplicatedTestimonials = [
-    ...testimonials,
-    ...testimonials,
-    ...testimonials,
-  ];
+  // Each person appears in exactly one column (round-robin); duplicate only within that column for seamless infinite scroll
+  const column1 = [0, 3, 6, 9].map((i) => testimonials[i]);
+  const column2 = [1, 4, 7, 10].map((i) => testimonials[i]);
+  const column3 = [2, 5, 8].map((i) => testimonials[i]);
+
+  const duplicatedCol1 = [...column1, ...column1];
+  const duplicatedCol2 = [...column2, ...column2];
+  const duplicatedCol3 = [...column3, ...column3];
 
   const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
 
   return (
     <section
       id="testimonials"
-      className="relative overflow-hidden py-24 sm:py-32 bg-white"
+      lang="en"
+      className="relative overflow-hidden py-24 sm:py-32 bg-white font-sans"
     >
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -169,13 +169,13 @@ export default function Testimonials() {
           className="text-center mb-16 sm:mb-20"
         >
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
-            What Pet Owners{" "}
+            What{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-teal-600 bg-clip-text text-transparent">
-              Say
+              People Say
             </span>
           </h2>
           <p className="text-lg sm:text-xl text-gray-600">
-            Real stories from pet owners who trust VetLink with their pets&apos;
+            Pet owners and veterinarians share how VetLink supports animal
             health
           </p>
         </motion.div>
@@ -199,7 +199,7 @@ export default function Testimonials() {
                   hoveredColumn === "col1" ? "paused" : ""
                 }`}
               >
-                {duplicatedTestimonials.map((testimonial, index) => (
+                {duplicatedCol1.map((testimonial, index) => (
                   <div
                     key={`col1-${index}`}
                     className="group relative rounded-2xl border border-gray-200/60 bg-white/80 backdrop-blur-sm p-6 sm:p-7 transition-all hover:border-indigo-200/60 hover:shadow-xl hover:shadow-indigo-500/5"
@@ -209,30 +209,12 @@ export default function Testimonials() {
                     <motion.div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     <div className="relative">
-                      <div className="flex items-center gap-1 mb-4">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-4 w-4 fill-amber-400 text-amber-400"
-                          />
-                        ))}
-                      </div>
-
                       <p className="text-gray-700 italic leading-relaxed mb-6 text-sm sm:text-base">
                         &quot;{testimonial.content}&quot;
                       </p>
 
                       <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-100 to-teal-100 blur-sm opacity-70" />
-                          <Image
-                            src={testimonial.image}
-                            alt={testimonial.name}
-                            width={50}
-                            height={50}
-                            className="relative rounded-full object-cover ring-2 ring-gray-200/60"
-                          />
-                        </div>
+                        <TestimonialAvatar avatarId={testimonial.avatarId} />
                         <div>
                           <h4 className="font-semibold text-gray-900">
                             {testimonial.name}
@@ -262,7 +244,7 @@ export default function Testimonials() {
                   animationDelay: "20s",
                 }}
               >
-                {duplicatedTestimonials.map((testimonial, index) => (
+                {duplicatedCol2.map((testimonial, index) => (
                   <div
                     key={`col2-${index}`}
                     className="group relative rounded-2xl border border-gray-200/60 bg-white/80 backdrop-blur-sm p-6 sm:p-7 transition-all hover:border-indigo-200/60 hover:shadow-xl hover:shadow-indigo-500/5"
@@ -272,30 +254,12 @@ export default function Testimonials() {
                     <motion.div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     <div className="relative">
-                      <div className="flex items-center gap-1 mb-4">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-4 w-4 fill-amber-400 text-amber-400"
-                          />
-                        ))}
-                      </div>
-
                       <p className="text-gray-700 italic leading-relaxed mb-6 text-sm sm:text-base">
                         &quot;{testimonial.content}&quot;
                       </p>
 
                       <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-100 to-teal-100 blur-sm opacity-70" />
-                          <Image
-                            src={testimonial.image}
-                            alt={testimonial.name}
-                            width={50}
-                            height={50}
-                            className="relative rounded-full object-cover ring-2 ring-gray-200/60"
-                          />
-                        </div>
+                        <TestimonialAvatar avatarId={testimonial.avatarId} />
                         <div>
                           <h4 className="font-semibold text-gray-900">
                             {testimonial.name}
@@ -325,7 +289,7 @@ export default function Testimonials() {
                   animationDelay: "40s",
                 }}
               >
-                {duplicatedTestimonials.map((testimonial, index) => (
+                {duplicatedCol3.map((testimonial, index) => (
                   <div
                     key={`col3-${index}`}
                     className="group relative rounded-2xl border border-gray-200/60 bg-white/80 backdrop-blur-sm p-6 sm:p-7 transition-all hover:border-indigo-200/60 hover:shadow-xl hover:shadow-indigo-500/5"
@@ -335,30 +299,12 @@ export default function Testimonials() {
                     <motion.div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     <div className="relative">
-                      <div className="flex items-center gap-1 mb-4">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-4 w-4 fill-amber-400 text-amber-400"
-                          />
-                        ))}
-                      </div>
-
                       <p className="text-gray-700 italic leading-relaxed mb-6 text-sm sm:text-base">
                         &quot;{testimonial.content}&quot;
                       </p>
 
                       <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-100 to-teal-100 blur-sm opacity-70" />
-                          <Image
-                            src={testimonial.image}
-                            alt={testimonial.name}
-                            width={50}
-                            height={50}
-                            className="relative rounded-full object-cover ring-2 ring-gray-200/60"
-                          />
-                        </div>
+                        <TestimonialAvatar avatarId={testimonial.avatarId} />
                         <div>
                           <h4 className="font-semibold text-gray-900">
                             {testimonial.name}
