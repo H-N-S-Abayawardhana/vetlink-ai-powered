@@ -151,6 +151,8 @@ function tooltipForPlanOverview(field: string): string | undefined {
       return "Total / day: total amount of food the dog should eat per day.";
     case "total_daily_amount_g_per_kg_body_weight":
       return "Total / day (g/kg): daily food amount based on body weight (grams per kg BW).";
+    case "reference_body_weight_kg":
+      return "Body weight used to scale the plan (kg).";
     default:
       return undefined;
   }
@@ -580,6 +582,12 @@ export default function DietPage() {
                     dietType.includes("weight loss") ||
                     dietType.includes("weight gain");
 
+                  const bodyWeight =
+                    plan.reference_body_weight_kg ??
+                    plan.weightKg ??
+                    pet?.weightKg ??
+                    null;
+
                   return (
                     <>
                       <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
@@ -600,8 +608,11 @@ export default function DietPage() {
 
                       {(plan.meals_per_day ||
                         plan.energy_kcal ||
-                        plan.hydration) && (
-                        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        plan.hydration ||
+                        bodyWeight != null ||
+                        plan.total_daily_amount_g ||
+                        plan.total_daily_amount_g_per_kg_body_weight) && (
+                        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                           {plan.meals_per_day && (
                             <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
                               <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-700">
@@ -666,6 +677,95 @@ export default function DietPage() {
 
                               <p className="mt-1 text-sm text-gray-900">
                                 {renderWithTooltip(plan.hydration)}
+                              </p>
+                            </div>
+                          )}
+
+                          {bodyWeight != null && (
+                            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                              <div className="flex items-center gap-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">
+                                  Body weight
+                                </p>
+
+                                {tooltipForPlanOverview(
+                                  "reference_body_weight_kg",
+                                ) && (
+                                  <InfoTooltipButton
+                                    id="plan-body-weight"
+                                    text={
+                                      tooltipForPlanOverview(
+                                        "reference_body_weight_kg",
+                                      ) as string
+                                    }
+                                    openId={openTooltipId}
+                                    setOpenId={setOpenTooltipId}
+                                    tone="gray"
+                                  />
+                                )}
+                              </div>
+
+                              <p className="mt-1 text-sm text-gray-900">
+                                {bodyWeight} kg
+                              </p>
+                            </div>
+                          )}
+
+                          {plan.total_daily_amount_g != null && (
+                            <div className="rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+                              <div className="flex items-center gap-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-purple-700">
+                                  Total / day
+                                </p>
+
+                                {tooltipForPlanOverview("total_daily_amount_g") && (
+                                  <InfoTooltipButton
+                                    id="plan-total-day"
+                                    text={
+                                      tooltipForPlanOverview(
+                                        "total_daily_amount_g",
+                                      ) as string
+                                    }
+                                    openId={openTooltipId}
+                                    setOpenId={setOpenTooltipId}
+                                    tone="purple"
+                                  />
+                                )}
+                              </div>
+
+                              <p className="mt-1 text-sm text-gray-900">
+                                {plan.total_daily_amount_g} g
+                              </p>
+                            </div>
+                          )}
+
+                          {plan.total_daily_amount_g_per_kg_body_weight !=
+                            null && (
+                            <div className="rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+                              <div className="flex items-center gap-1">
+                                <p className="text-[11px] font-semibold uppercase tracking-wide text-purple-700">
+                                  Total / day (g/kg)
+                                </p>
+
+                                {tooltipForPlanOverview(
+                                  "total_daily_amount_g_per_kg_body_weight",
+                                ) && (
+                                  <InfoTooltipButton
+                                    id="plan-total-day-per-kg"
+                                    text={
+                                      tooltipForPlanOverview(
+                                        "total_daily_amount_g_per_kg_body_weight",
+                                      ) as string
+                                    }
+                                    openId={openTooltipId}
+                                    setOpenId={setOpenTooltipId}
+                                    tone="purple"
+                                  />
+                                )}
+                              </div>
+
+                              <p className="mt-1 text-sm text-gray-900">
+                                {plan.total_daily_amount_g_per_kg_body_weight} g/kg
                               </p>
                             </div>
                           )}
