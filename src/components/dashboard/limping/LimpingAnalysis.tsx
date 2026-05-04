@@ -90,6 +90,11 @@ function getPetAvatarSrc(pet: Pet | null | undefined): string | null {
   return anyPet.avatarDataUrl || anyPet.avatarUrl || null;
 }
 
+/** Maps backend/API disease label "Normal" to user-facing "Others". */
+function limpingDiseaseDisplayName(disease: string): string {
+  return disease === "Normal" ? "Others" : disease;
+}
+
 const VideoUpload = ({
   onVideoSelect,
   onError,
@@ -1041,7 +1046,7 @@ export default function LimpingAnalysis({
       doc.setTextColor(29, 78, 216);
       doc.text("Primary Diagnosis:", margin + 5, yPos + 10);
       doc.text(
-        analysisResult.prediction.primary_disease,
+        limpingDiseaseDisplayName(analysisResult.prediction.primary_disease),
         margin + 60,
         yPos + 10,
       );
@@ -1056,11 +1061,6 @@ export default function LimpingAnalysis({
       doc.text(
         `Risk Level: ${analysisResult.prediction.risk_profile}`,
         margin + 80,
-        yPos + 20,
-      );
-      doc.text(
-        `Mobility Status: ${analysisResult.prediction.mobility_status}`,
-        margin + 130,
         yPos + 20,
       );
 
@@ -1133,7 +1133,11 @@ export default function LimpingAnalysis({
           isPrimary ? 78 : 65,
           isPrimary ? 216 : 81,
         );
-        doc.text(`${disease}: ${probability.toFixed(2)}%`, margin + 5, yPos);
+        doc.text(
+          `${limpingDiseaseDisplayName(disease)}: ${probability.toFixed(2)}%`,
+          margin + 5,
+          yPos,
+        );
         yPos += 8;
       });
 
@@ -1630,7 +1634,9 @@ export default function LimpingAnalysis({
                         Primary Diagnosis
                       </p>
                       <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                        {analysisResult.prediction.primary_disease}
+                        {limpingDiseaseDisplayName(
+                          analysisResult.prediction.primary_disease,
+                        )}
                       </h3>
                     </div>
                     <div className="text-right">
@@ -1669,7 +1675,7 @@ export default function LimpingAnalysis({
                                 }`}
                               >
                                 <span className="text-sm font-medium text-gray-900">
-                                  {disease}
+                                  {limpingDiseaseDisplayName(disease)}
                                 </span>
                                 <span
                                   className={`text-sm font-semibold ${
@@ -1707,7 +1713,7 @@ export default function LimpingAnalysis({
                               }`}
                             >
                               <span className="text-sm font-medium text-gray-900">
-                                {disease}
+                                {limpingDiseaseDisplayName(disease)}
                               </span>
                               <span
                                 className={`text-sm font-semibold ${
@@ -1720,19 +1726,6 @@ export default function LimpingAnalysis({
                           );
                         })}
                   </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Mobility Status</p>
-                  <p
-                    className={`text-base font-semibold ${
-                      analysisResult.prediction.mobility_status === "Impaired"
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {analysisResult.prediction.mobility_status}
-                  </p>
                 </div>
 
                 {analysisResult.prediction.recommendations &&

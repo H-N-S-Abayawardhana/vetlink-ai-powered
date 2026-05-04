@@ -14,9 +14,15 @@ import {
   XCircle,
   DollarSign,
   Calendar,
+  FileDown,
 } from "lucide-react";
 import { formatLKR } from "@/lib/currency";
 import { AuthGuard } from "@/lib/auth-guard";
+import {
+  downloadPharmacyInventoryCsv,
+  generatePharmacyInventoryReportPdf,
+  type PharmacyInventoryReportInput,
+} from "@/lib/pharmacy-inventory-report-pdf";
 
 interface InventoryItem {
   id: number;
@@ -36,6 +42,7 @@ interface InventoryItem {
 export default function PharmacyInventoryPage() {
   const { data: session } = useSession();
   const [pharmacyId, setPharmacyId] = useState<string | null>(null);
+  const [pharmacyName, setPharmacyName] = useState<string>("");
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>(
     [],
@@ -48,6 +55,7 @@ export default function PharmacyInventoryPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [reportBusy, setReportBusy] = useState(false);
 
   // Get user's pharmacy
   useEffect(() => {
@@ -62,6 +70,9 @@ export default function PharmacyInventoryPage() {
           );
           if (userPharmacy) {
             setPharmacyId(userPharmacy.id);
+            setPharmacyName(
+              typeof userPharmacy.name === "string" ? userPharmacy.name : "",
+            );
           } else {
             setMessage({
               type: "error",
@@ -200,6 +211,73 @@ export default function PharmacyInventoryPage() {
     }).length,
   };
 
+  const buildInventoryReport = (): PharmacyInventoryReportInput => ({
+    pharmacyName: pharmacyName.trim() || "Pharmacy",
+    generatedAt: new Date(),
+    rows: inventory.map((item) => ({
+      name: item.name,
+      generic_name: item.generic_name,
+      form: item.form,
+      strength: item.strength,
+      stock: item.stock,
+      expiry: item.expiry,
+      price: item.price,
+    })),
+    summary: {
+      totalItems: stats.totalItems,
+      lowStock: stats.lowStock,
+      expiringSoon: stats.expiringSoon,
+      totalValue: stats.totalValue,
+    },
+  });
+
+  const handleDownloadPdfReport = async () => {
+    if (!pharmacyId) {
+      setMessage({
+        type: "error",
+        text: "Load your pharmacy before exporting a report.",
+      });
+      return;
+    }
+    setReportBusy(true);
+    try {
+      await generatePharmacyInventoryReportPdf(buildInventoryReport());
+      setMessage({
+        type: "success",
+        text: "Stock & valuation PDF downloaded.",
+      });
+    } catch {
+      setMessage({
+        type: "error",
+        text: "Could not generate the PDF. Try again.",
+      });
+    } finally {
+      setReportBusy(false);
+    }
+  };
+
+  const handleDownloadCsv = () => {
+    if (!pharmacyId) {
+      setMessage({
+        type: "error",
+        text: "Load your pharmacy before exporting.",
+      });
+      return;
+    }
+    try {
+      downloadPharmacyInventoryCsv(buildInventoryReport());
+      setMessage({
+        type: "success",
+        text: "CSV export downloaded.",
+      });
+    } catch {
+      setMessage({
+        type: "error",
+        text: "Could not create the CSV file.",
+      });
+    }
+  };
+
   return (
     <AuthGuard
       allowedRoles={["SUPER_ADMIN", "VETERINARIAN", "USER", "PHARMACIST"]}
@@ -307,6 +385,52 @@ export default function PharmacyInventoryPage() {
               <div className="text-sm text-gray-600 mb-1">Expiring Soon</div>
               <div className="text-2xl sm:text-3xl font-bold text-orange-600">
                 {stats.expiringSoon}
+              </div>
+            </div>
+          </div>
+
+          {/* Stock & valuation report */}
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <FileDown className="w-5 h-5 text-blue-600 shrink-0" />
+                  Stock &amp; valuation report
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Export a snapshot for audits, reorder planning, and
+                  accounting. Includes summary totals, line-level stock, expiry
+                  flags, and LKR values.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleDownloadPdfReport}
+                  disabled={reportBusy || loading || !pharmacyId}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                >
+                  {reportBusy ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Preparing…
+                    </>
+                  ) : (
+                    <>
+                      <FileDown className="w-4 h-4" />
+                      Download PDF
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadCsv}
+                  disabled={loading || !pharmacyId}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 bg-white text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Download CSV
+                </button>
               </div>
             </div>
           </div>
