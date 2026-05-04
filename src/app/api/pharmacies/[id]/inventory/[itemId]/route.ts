@@ -68,7 +68,8 @@ export async function PUT(
     }
 
     const { id: pharmacyId, itemId } = await params;
-    const userRole = (session.user as { userRole?: string })?.userRole || "USER";
+    const userRole =
+      (session.user as { userRole?: string })?.userRole || "USER";
 
     if (!isUuid(pharmacyId) || !isUuid(itemId)) {
       return NextResponse.json(
@@ -172,7 +173,8 @@ export async function DELETE(
     }
 
     const { id: pharmacyId, itemId } = await params;
-    const userRole = (session.user as { userRole?: string })?.userRole || "USER";
+    const userRole =
+      (session.user as { userRole?: string })?.userRole || "USER";
 
     if (!isUuid(pharmacyId) || !isUuid(itemId)) {
       return NextResponse.json(

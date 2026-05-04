@@ -285,10 +285,7 @@ export default function PharmacyInventoryPage() {
                 </div>
               </div>
               <div className="text-sm text-gray-600 mb-1">Total Value</div>
-              <div
-                className="min-w-0"
-                title={formatLKR(stats.totalValue)}
-              >
+              <div className="min-w-0" title={formatLKR(stats.totalValue)}>
                 <div className="text-xs font-semibold uppercase tracking-wide text-green-700/90">
                   LKR
                 </div>

@@ -290,7 +290,8 @@ function FindFromPrescriptionModule() {
           (p: { matched_via_generic?: boolean }) => p.matched_via_generic,
         ).length;
         const alternativeCount = products.filter(
-          (p: { matched_via_alternative?: boolean }) => p.matched_via_alternative,
+          (p: { matched_via_alternative?: boolean }) =>
+            p.matched_via_alternative,
         ).length;
         setSuccess(
           alternativeCount > 0

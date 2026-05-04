@@ -181,9 +181,7 @@ export class MultiDiseaseApiService {
     return {};
   }
 
-  private static pickGradioRowPredictions(
-    payload: unknown,
-  ): Array<{
+  private static pickGradioRowPredictions(payload: unknown): Array<{
     disease: DiseaseType;
     probability: number;
     isPositive: boolean;

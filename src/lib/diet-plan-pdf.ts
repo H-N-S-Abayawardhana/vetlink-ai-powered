@@ -49,28 +49,30 @@ function isPresent(value: unknown) {
 function safeText(value: unknown) {
   if (!isPresent(value)) return "-";
 
-  return String(value)
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/[–—]/g, "-")
-    .replace(/\u00a0/g, " ")
+  return (
+    String(value)
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/[–—]/g, "-")
+      .replace(/\u00a0/g, " ")
 
-    // Normalize common Unicode symbols for jsPDF's default Helvetica font
-    .replace(/≥/g, ">=")
-    .replace(/≤/g, "<=")
-    .replace(/≈/g, "~")
-    .replace(/×/g, "x")
-    .replace(/÷/g, "/")
-    .replace(/±/g, "+/-")
+      // Normalize common Unicode symbols for jsPDF's default Helvetica font
+      .replace(/≥/g, ">=")
+      .replace(/≤/g, "<=")
+      .replace(/≈/g, "~")
+      .replace(/×/g, "x")
+      .replace(/÷/g, "/")
+      .replace(/±/g, "+/-")
 
-    // Fix already-broken symbol patterns that may appear from copied/encoded text
-    .replace(/"e/g, ">=")
-    .replace(/"d/g, "<=")
-    .replace(/"H/g, "~ ")
+      // Fix already-broken symbol patterns that may appear from copied/encoded text
+      .replace(/"e/g, ">=")
+      .replace(/"d/g, "<=")
+      .replace(/"H/g, "~ ")
 
-    // Clean extra spacing after replacements
-    .replace(/\s+/g, " ")
-    .trim();
+      // Clean extra spacing after replacements
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 function safeFilenamePart(value: unknown) {
@@ -680,11 +682,12 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
         : "-",
     ]);
 
-    drawSimpleTable(
-      ["Food", "Amount", "g/kg BW", "Calories"],
-      rows,
-      [180, 90, 90, maxWidth - 180 - 90 - 90],
-    );
+    drawSimpleTable(["Food", "Amount", "g/kg BW", "Calories"], rows, [
+      180,
+      90,
+      90,
+      maxWidth - 180 - 90 - 90,
+    ]);
   }
 
   if (
@@ -880,9 +883,14 @@ export function generateDietPlanPdf({ plan, pet }: DietPlanPdfInput) {
 
     doc.text("VetLink Smart Pet Healthcare", margin, pageHeight - 22);
 
-    doc.text(`Page ${page} of ${totalPages}`, pageWidth - margin, pageHeight - 22, {
-      align: "right",
-    });
+    doc.text(
+      `Page ${page} of ${totalPages}`,
+      pageWidth - margin,
+      pageHeight - 22,
+      {
+        align: "right",
+      },
+    );
   }
 
   const petName = safeFilenamePart(pet?.name || plan.petName || "pet");
